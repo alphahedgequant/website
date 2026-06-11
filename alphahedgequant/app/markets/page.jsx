@@ -93,7 +93,7 @@ export default function Markets() {
         {(indices ? Object.entries(indices) : []).map(([name, v]) => (
           <div key={name} className="card p-4">
             <p className="font-mono text-[11px] tracking-wider text-muted uppercase">{name}</p>
-            <p className="font-display text-xl mt-1">{fmt(v?.price ?? v?.last_price)}</p>
+            <p className="font-display text-xl mt-1">{fmt(v?.value ?? v?.price)}</p>
             <p className={`text-sm font-mono mt-0.5 ${(v?.changePct ?? v?.pct ?? 0) >= 0 ? "tick-up" : "tick-down"}`}>
               {fmt(v?.changePct ?? v?.pct)}%
             </p>
