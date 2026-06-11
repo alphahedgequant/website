@@ -50,8 +50,8 @@ export default function Home() {
             an education hub that teaches you the math behind every signal.
           </p>
           <div className="mt-9 flex flex-wrap gap-3">
-            <Link href="/markets" className="btn-primary">
-              Open live markets
+            <Link href="/screener" className="btn-primary">
+              Open the screener
             </Link>
             <Link href="/learn" className="btn-ghost">
               Start learning quant
@@ -68,16 +68,16 @@ export default function Home() {
         {[
           {
             tag: "AHQ:MKT",
-            title: "Market intelligence",
-            desc: "Live NSE screener across 50+ stocks with 30+ working filters, option chains with real Greeks, indices and market status — FINVIZ-grade, India-first.",
-            href: "/markets",
-            cta: "Explore markets",
+            title: "FINVIZ-grade screener",
+            desc: "Live NSE + US equity screener: 26 stackable filters, 5 view modes, signals, presets and CSV export across 200+ names — FINVIZ-grade, two markets.",
+            href: "/screener",
+            cta: "Open the screener",
           },
           {
             tag: "AHQ:SCAN",
             title: "10-strategy quant scanner",
             desc: "Cointegration pairs, Kalman filters, OU processes, HMM regime detection and Ledoit-Wolf optimization producing live BUY / SELL / HOLD signals with position sizing.",
-            href: "/scanner",
+            href: "/models",
             cta: "See the strategies",
           },
           {
@@ -130,9 +130,25 @@ export default function Home() {
           ) : (
             <form
               className="mt-7 flex flex-col sm:flex-row gap-3 justify-center"
-              onSubmit={(e) => {
+              onSubmit={async (e) => {
                 e.preventDefault();
-                if (email.includes("@")) setSent(true);
+                if (!email.includes("@")) return;
+                const id = process.env.NEXT_PUBLIC_FORMSPREE_ID;
+                if (!id) {
+                  window.location.href = `mailto:hello@alphahedgequant.com?subject=Waitlist%20signup&body=${encodeURIComponent(email)}`;
+                  return;
+                }
+                try {
+                  const res = await fetch(`https://formspree.io/f/${id}`, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json", Accept: "application/json" },
+                    body: JSON.stringify({ email }),
+                  });
+                  if (res.ok) setSent(true);
+                  else alert("Something went wrong — please email hello@alphahedgequant.com");
+                } catch {
+                  alert("Something went wrong — please email hello@alphahedgequant.com");
+                }
               }}
             >
               <input

@@ -20,8 +20,8 @@ export default function Footer() {
         <div className="grid grid-cols-2 gap-8 text-sm">
           <div className="flex flex-col gap-2.5">
             <span className="eyebrow !text-muted">Platform</span>
-            <Link href="/markets" className="text-muted hover:text-body">Markets</Link>
-            <Link href="/scanner" className="text-muted hover:text-body">Quant scanner</Link>
+            <Link href="/screener" className="text-muted hover:text-body">Screener</Link>
+            <Link href="/models" className="text-muted hover:text-body">Quant models</Link>
             <Link href="/backtest" className="text-muted hover:text-body">AI backtest</Link>
             <Link href="/research" className="text-muted hover:text-body">Research</Link>
             <Link href="/learn" className="text-muted hover:text-body">Learn</Link>
