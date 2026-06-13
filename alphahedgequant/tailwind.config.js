@@ -7,9 +7,9 @@ module.exports = {
   theme: {
     extend: {
       colors: {
-        ink: "#0A0F1E",
-        surface: "#101729",
-        raised: "#161F36",
+        ink: "#050506",
+        surface: "#0C0D11",
+        raised: "#13151B",
         line: "rgba(148,163,184,0.14)",
         body: "#E6EAF2",
         muted: "#8A94A8",

@@ -27,6 +27,11 @@ export default function RootLayout({ children }) {
         />
       </head>
       <body className="font-body min-h-screen flex flex-col">
+        <div className="bg-field" aria-hidden="true">
+          <span className="orb orb-a" /><span className="orb orb-b" /><span className="orb orb-c" /><span className="orb orb-d" />
+        </div>
+        <div className="grain" aria-hidden="true" />
+        <div className="vignette" aria-hidden="true" />
         <Nav />
         <main className="flex-1">{children}</main>
         <Footer />
