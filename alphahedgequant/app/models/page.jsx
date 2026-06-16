@@ -60,6 +60,7 @@ const MODELS = [
     ],
     params: ["Lookback: 3–12 months (skip most recent month to avoid reversal)", "Vol target: 10–15% annualised", "Rebalance: monthly"],
     when: "Works in trending, low-mean-reversion regimes. Suffers sharp 'momentum crashes' at market turning points (e.g. March 2009).",
+    refs: ["Jegadeesh & Titman (1993), \"Returns to Buying Winners and Selling Losers\" — Journal of Finance", "Moskowitz, Ooi & Pedersen (2012), \"Time Series Momentum\" — Journal of Financial Economics"],
   },
   {
     id: "G2", cat: "general", name: "HMM Regime Detection", tag: "Regime",
@@ -71,6 +72,7 @@ const MODELS = [
     ],
     params: ["States: typically 2–3 (bull / bear / neutral)", "Observations: returns, realised vol, or both", "Fit window: 2–5 years rolling"],
     when: "Use as a meta-layer: enable momentum in trending regimes, mean-reversion in choppy ones. Lags at regime transitions — it confirms, it doesn't predict.",
+    refs: ["Hamilton (1989), \"A New Approach to the Economic Analysis of Nonstationary Time Series\" — Econometrica", "Rabiner (1989), \"A Tutorial on Hidden Markov Models\" — Proc. IEEE"],
   },
   {
     id: "G3", cat: "general", name: "VRP Harvesting", tag: "Volatility",
@@ -82,6 +84,7 @@ const MODELS = [
     ],
     params: ["Instruments: straddles, variance swaps, VIX futures", "Hedge frequency: daily delta-hedge", "Tail hedge: hold cheap far-OTM puts"],
     when: "Profitable in calm/normalising vol. Catastrophic in vol spikes (Feb 2018 'Volmageddon'). Position sizing and tail hedges are non-negotiable.",
+    refs: ["Carr & Wu (2009), \"Variance Risk Premiums\" — Review of Financial Studies", "Bollerslev, Tauchen & Zhou (2009), \"Expected Stock Returns and Variance Risk Premia\" — RFS"],
   },
   {
     id: "G4", cat: "general", name: "Ledoit-Wolf Optimization", tag: "Portfolio",
@@ -93,6 +96,7 @@ const MODELS = [
     ],
     params: ["Target F: constant correlation or single-index", "δ estimated analytically (no tuning)", "Rebalance: monthly/quarterly"],
     when: "Whenever you optimize over many assets with limited history (N assets ≈ T observations). The fix for 'my optimizer keeps giving crazy weights'.",
+    refs: ["Ledoit & Wolf (2004), \"A Well-Conditioned Estimator for Large-Dimensional Covariance Matrices\" — J. Multivariate Analysis", "Markowitz (1952), \"Portfolio Selection\" — Journal of Finance"],
   },
 
   // ─────────────────────────── STAT ARB (headline) ───────────────────────────
@@ -107,6 +111,7 @@ const MODELS = [
     ],
     params: ["Lookback for z-score: 20–60 days", "Entry: ±2σ · Exit: ±0.5σ · Stop: ±3.5σ", "Re-test cointegration monthly (β drifts)"],
     when: "Within-sector pairs (bank vs bank). Breaks on structural change — re-test regularly and respect the hard stop.",
+    refs: ["Engle & Granger (1987), \"Co-integration and Error Correction\" — Econometrica", "Gatev, Goetzmann & Rouwenhorst (2006), \"Pairs Trading: Performance of a Relative-Value Arbitrage Rule\" — RFS"],
   },
   {
     id: "S2", cat: "statarb", name: "Johansen Basket", tag: "Cointegration",
@@ -118,6 +123,7 @@ const MODELS = [
     ],
     params: ["Universe: 3–6 related assets", "Need ≥ 2 years daily data (5× params rule)", "det_order & lag selection via AIC/BIC"],
     when: "Sector baskets, index-vs-constituents. Over-fits on small samples — keep baskets small and data deep.",
+    refs: ["Johansen (1991), \"Estimation and Hypothesis Testing of Cointegration Vectors in Gaussian VAR\" — Econometrica", "Krauss (2017), \"Statistical Arbitrage Pairs Trading Strategies: Review and Outlook\" — J. Economic Surveys"],
   },
   {
     id: "S3", cat: "statarb", name: "PCA Stat-Arb", tag: "Factor",
@@ -129,6 +135,7 @@ const MODELS = [
     ],
     params: ["Components: 5–15 (or by variance explained)", "Estimation window: 60–252 days", "Trade only liquid names (residuals noisy in illiquid)"],
     when: "Large liquid universes (Nifty 50/100, S&P 500). The institutional 'Avellaneda-Lee' approach to stat-arb.",
+    refs: ["Avellaneda & Lee (2010), \"Statistical Arbitrage in the US Equities Market\" — Quantitative Finance (SSRN 1153505)", "d'Aspremont (2011), \"Identifying Small Mean-Reverting Portfolios\" — Quantitative Finance"],
   },
   {
     id: "S4", cat: "statarb", name: "Kalman Filter Hedge", tag: "Adaptive",
@@ -140,6 +147,7 @@ const MODELS = [
     ],
     params: ["Q (state noise): controls adaptivity — higher = faster drift", "R (obs noise): measurement uncertainty", "Initialise β from a short OLS warm-up"],
     when: "Pairs whose relationship is known to drift (different growth rates, evolving fundamentals). Replaces fixed-β Engle-Granger.",
+    refs: ["Kalman (1960), \"A New Approach to Linear Filtering and Prediction Problems\" — J. Basic Engineering", "Chan, E. (2013), \"Algorithmic Trading: Winning Strategies and Their Rationale\" — Wiley (Kalman pairs ch.)"],
   },
   {
     id: "S5", cat: "statarb", name: "OU Mean Reversion", tag: "Stochastic",
@@ -151,6 +159,7 @@ const MODELS = [
     ],
     params: ["Fit window: 60–252 days", "Half-life filter: trade only 5–30 day reverters", "Bands: enter at ±1.5–2σ from θ"],
     when: "The rigorous foundation under every pairs/spread trade — quantifies whether mean reversion is fast enough to be worth the capital.",
+    refs: ["Uhlenbeck & Ornstein (1930), \"On the Theory of the Brownian Motion\" — Physical Review", "Bertram (2010), \"Analytic Solutions for Optimal Statistical Arbitrage Trading\" — Physica A"],
   },
   {
     id: "S6", cat: "statarb", name: "Multi-Pair Scanner", tag: "Discovery",
@@ -162,6 +171,7 @@ const MODELS = [
     ],
     params: ["Universe: sector-grouped to reduce spurious pairs", "Filters: p < 0.05, half-life 5–30d, |z| > 2", "Cap concurrent pairs (correlation risk)"],
     when: "Production stat-arb deployment — continuous discovery + diversification across many spreads rather than betting on one.",
+    refs: ["Krauss (2017), \"Statistical Arbitrage Pairs Trading: Review and Outlook\" — J. Economic Surveys", "Avellaneda & Lee (2010), \"Statistical Arbitrage in the US Equities Market\" — Quantitative Finance"],
   },
 
   // ─────────────────────────── VOLATILITY (ARCH/GARCH) ───────────────────────────
@@ -175,6 +185,7 @@ const MODELS = [
     ],
     params: ["q: number of lagged squared shocks", "Fit by Maximum Likelihood", "Test for ARCH effects: Engle's LM test"],
     when: "Conceptual foundation. Rarely used directly — needs too many lags for real persistence. GARCH is the practical version.",
+    refs: ["Engle (1982), \"Autoregressive Conditional Heteroscedasticity with Estimates of UK Inflation\" — Econometrica (Nobel 2003)"],
   },
   {
     id: "V2", cat: "vol", name: "GARCH(1,1)", tag: "Workhorse",
@@ -186,6 +197,7 @@ const MODELS = [
     ],
     params: ["Typical equities: α≈0.05–0.10, β≈0.85–0.92", "Fit by MLE (Gaussian or Student-t)", "Forecast feeds VaR & option pricing"],
     when: "The default volatility forecaster everywhere — risk, option pricing, vol targeting. If you use one vol model, it's this.",
+    refs: ["Bollerslev (1986), \"Generalized Autoregressive Conditional Heteroskedasticity\" — Journal of Econometrics"],
   },
   {
     id: "V3", cat: "vol", name: "EGARCH", tag: "Asymmetry",
@@ -197,6 +209,7 @@ const MODELS = [
     ],
     params: ["γ: asymmetry (typically negative for equities)", "No non-negativity constraints (log variance)", "Student-t errors for fat tails"],
     when: "Equity indices and anything with a pronounced leverage effect. Better tail/vol-spike capture than symmetric GARCH.",
+    refs: ["Nelson (1991), \"Conditional Heteroskedasticity in Asset Returns: A New Approach\" — Econometrica"],
   },
   {
     id: "V4", cat: "vol", name: "GJR-GARCH", tag: "Threshold",
@@ -208,6 +221,7 @@ const MODELS = [
     ],
     params: ["γ > 0 confirms leverage effect", "Indicator on negative shocks only", "Fit by MLE"],
     when: "When you want asymmetry but prefer GJR's interpretability over EGARCH's log form. Common in academic & risk work.",
+    refs: ["Glosten, Jagannathan & Runkle (1993), \"On the Relation between Expected Value and Volatility of Nominal Excess Return\" — J. Finance"],
   },
   {
     id: "V5", cat: "vol", name: "EWMA Volatility", tag: "Baseline",
@@ -219,6 +233,7 @@ const MODELS = [
     ],
     params: ["λ: 0.94 (daily), 0.97 (monthly) — RiskMetrics", "No estimation needed (λ fixed)", "Single-parameter, very fast"],
     when: "Quick vol estimates and the RiskMetrics VaR baseline. Use when you need speed/simplicity over GARCH's mean-reversion.",
+    refs: ["J.P. Morgan / Reuters (1996), \"RiskMetrics — Technical Document, 4th ed.\""],
   },
 
   // ─────────────────────────── RISK (VaR) ───────────────────────────
@@ -232,6 +247,7 @@ const MODELS = [
     ],
     params: ["Window: 250–500 trading days", "Confidence: 95% or 99%", "Horizon: scale by √t for multi-day"],
     when: "Quick, intuitive, assumption-free. Use when returns are non-normal (fat tails). Reacts slowly and can't see beyond the sample.",
+    refs: ["Jorion (2006), \"Value at Risk: The New Benchmark for Managing Financial Risk\" — McGraw-Hill (3rd ed.)"],
   },
   {
     id: "R2", cat: "risk", name: "Parametric VaR", tag: "VaR",
@@ -243,6 +259,7 @@ const MODELS = [
     ],
     params: ["z: 1.645 (95%), 2.326 (99%)", "Σ from EWMA or sample covariance", "Best for linear portfolios (no options)"],
     when: "Large linear portfolios needing fast computation. Breaks for option-heavy books (non-linear payoffs) and underestimates tail events.",
+    refs: ["J.P. Morgan (1996), \"RiskMetrics Technical Document\" — variance-covariance VaR"],
   },
   {
     id: "R3", cat: "risk", name: "Monte Carlo VaR", tag: "VaR",
@@ -254,6 +271,7 @@ const MODELS = [
     ],
     params: ["Simulations: 10,000+ for stable tails", "Correlation via Cholesky decomposition", "Process: GBM, jump-diffusion, or historical bootstrap"],
     when: "Option portfolios, path-dependent payoffs, complex correlations. The gold standard when accuracy matters more than speed.",
+    refs: ["Glasserman (2003), \"Monte Carlo Methods in Financial Engineering\" — Springer"],
   },
   {
     id: "R4", cat: "risk", name: "Expected Shortfall (CVaR)", tag: "Tail",
@@ -265,6 +283,7 @@ const MODELS = [
     ],
     params: ["Same confidence as VaR (97.5% under Basel FRTB)", "Needs enough tail observations", "More stable than VaR for optimization"],
     when: "Regulatory capital (Basel FRTB), tail-risk-aware optimization, anywhere the shape of the tail matters — which is everywhere that blows up.",
+    refs: ["Artzner, Delbaen, Eber & Heath (1999), \"Coherent Measures of Risk\" — Mathematical Finance", "Rockafellar & Uryasev (2000), \"Optimization of Conditional Value-at-Risk\" — J. Risk"],
   },
   {
     id: "R5", cat: "risk", name: "Stress Testing", tag: "Scenario",
@@ -276,6 +295,7 @@ const MODELS = [
     ],
     params: ["Historical: 2008, 2020, 2013 taper, etc.", "Hypothetical: regulator-defined or internal", "Reverse: solve for the scenario causing X% loss"],
     when: "Board reporting, regulatory submissions, and sanity-checking any VaR number. The 'what could actually kill us' question.",
+    refs: ["BCBS (2009), \"Principles for Sound Stress Testing Practices and Supervision\" — Basel Committee"],
   },
   {
     id: "R6", cat: "risk", name: "VaR Backtesting (Kupiec)", tag: "Validation",
@@ -287,6 +307,7 @@ const MODELS = [
     ],
     params: ["Test window: 250 days (Basel standard)", "Also test independence (breaches shouldn't cluster)", "Christoffersen test = POF + independence"],
     when: "Mandatory model validation. Every VaR model in a regulated entity must pass backtesting — it determines your capital multiplier.",
+    refs: ["Kupiec (1995), \"Techniques for Verifying the Accuracy of Risk Measurement Models\" — J. Derivatives", "Christoffersen (1998), \"Evaluating Interval Forecasts\" — International Economic Review"],
   },
 
   // ─────────────────────────── BANKING / REGULATORY ───────────────────────────
@@ -300,6 +321,7 @@ const MODELS = [
     ],
     params: ["Risk weights: 0% sovereign, 20% banks, 100% corporate, etc.", "RWA covers credit + market + operational risk", "India: RBI sets CAR min at 9% (above Basel 8%)"],
     when: "The headline solvency metric for any bank. Every lending decision consumes RWA and therefore capital.",
+    refs: ["BCBS (2011), \"Basel III: A Global Regulatory Framework for More Resilient Banks\" — Basel Committee", "RBI Master Circular on Basel III Capital Regulations"],
   },
   {
     id: "B2", cat: "banking", name: "Liquidity Coverage Ratio", tag: "Basel III",
@@ -311,6 +333,7 @@ const MODELS = [
     ],
     params: ["Minimum: 100%", "HQLA haircuts by asset quality", "Inflow cap: 75% of outflows"],
     when: "Short-term (30-day) liquidity resilience. Paired with NSFR for the long-term view.",
+    refs: ["BCBS (2013), \"Basel III: The Liquidity Coverage Ratio and Liquidity Risk Monitoring Tools\""],
   },
   {
     id: "B3", cat: "banking", name: "Net Stable Funding Ratio", tag: "Basel III",
@@ -322,6 +345,7 @@ const MODELS = [
     ],
     params: ["Minimum: 100%", "Horizon: 1 year", "Factors set by asset/liability type"],
     when: "Structural funding stability. Stops banks funding 5-year mortgages with overnight repo.",
+    refs: ["BCBS (2014), \"Basel III: The Net Stable Funding Ratio\""],
   },
   {
     id: "B4", cat: "banking", name: "SLR & CRR (RBI)", tag: "RBI",
@@ -333,6 +357,7 @@ const MODELS = [
     ],
     params: ["CRR: ~4–4.5% of NDTL (cash with RBI)", "SLR: ~18% of NDTL (G-secs/cash/gold)", "Computed fortnightly on NDTL"],
     when: "Core of Indian bank balance-sheet management and RBI monetary policy transmission. Directly constrains lendable funds.",
+    refs: ["RBI, \"Master Direction — Reserve Bank of India (Cash Reserve Ratio and Statutory Liquidity Ratio)\""],
   },
   {
     id: "B5", cat: "banking", name: "Leverage Ratio", tag: "Basel III",
@@ -344,6 +369,7 @@ const MODELS = [
     ],
     params: ["Minimum: 3% (Basel), 3.5–4% (RBI)", "No risk weighting — raw exposure", "Includes off-balance-sheet items"],
     when: "The backstop that catches what RWA optimization hides. Binds for low-risk-weight, high-volume banks.",
+    refs: ["BCBS (2014/2017), \"Basel III Leverage Ratio Framework and Disclosure Requirements\""],
   },
   {
     id: "B6", cat: "banking", name: "Credit Risk: PD · LGD · EAD", tag: "Credit Risk",
@@ -355,6 +381,7 @@ const MODELS = [
     ],
     params: ["PD: from rating models / logistic regression", "LGD: collateral & seniority dependent", "Stages: 1 / 2 / 3 by credit deterioration"],
     when: "Loan pricing, provisioning, and IRB capital. The quantitative core of every bank's credit function.",
+    refs: ["Basel II/III IRB Framework — PD/LGD/EAD; IFRS 9 / Ind AS 109 Expected Credit Loss", "Merton (1974), \"On the Pricing of Corporate Debt\" — J. Finance (structural PD)"],
   },
 
   // ─────────────────────────── MACHINE LEARNING ───────────────────────────
@@ -368,6 +395,7 @@ const MODELS = [
     ],
     params: ["Features: cross-sectional + time-series signals", "Regularise hard: depth, learning rate, early stopping", "Walk-forward CV — never random split (leakage)"],
     when: "Tabular feature-based prediction — the realistic entry point for ML alpha. Beware overfitting; financial signal-to-noise is brutal.",
+    refs: ["Krauss, Do & Huck (2017), \"Deep Neural Networks, Gradient-Boosted Trees, Random Forests: Statistical Arbitrage on the S&P 500\" — EJOR 259", "Breiman (2001), \"Random Forests\" — Machine Learning; Friedman (2001), \"Greedy Function Approximation: A Gradient Boosting Machine\""],
   },
   {
     id: "M2", cat: "ml", name: "Logistic Regression", tag: "Supervised",
@@ -379,6 +407,7 @@ const MODELS = [
     ],
     params: ["Regularisation: L1/L2 with λ via CV", "Calibrate probabilities (Platt/isotonic)", "Standardise features first"],
     when: "Default-probability models (PD), transparent direction signals, and a must-have baseline before reaching for anything fancier.",
+    refs: ["Cox (1958), \"The Regression Analysis of Binary Sequences\" — JRSS B", "Hosmer & Lemeshow (2000), \"Applied Logistic Regression\" — Wiley"],
   },
   {
     id: "M3", cat: "ml", name: "LSTM / GRU / Transformer", tag: "Deep Learning",
@@ -390,6 +419,7 @@ const MODELS = [
     ],
     params: ["Sequence length, hidden units, layers, dropout", "Huge regularisation + early stopping", "Walk-forward; expanding window; no shuffling"],
     when: "Rich multivariate sequences with lots of data (intraday/HFT, alt-data). Overkill and overfit-prone for small daily datasets.",
+    refs: ["Hochreiter & Schmidhuber (1997), \"Long Short-Term Memory\" — Neural Computation", "Vaswani et al. (2017), \"Attention Is All You Need\" — NeurIPS (arXiv:1706.03762)"],
   },
   {
     id: "M4", cat: "ml", name: "K-Means / GMM Clustering", tag: "Unsupervised",
@@ -401,6 +431,7 @@ const MODELS = [
     ],
     params: ["k: via elbow / silhouette / BIC (GMM)", "Features: returns, vol, correlation profile", "Standardise; beware regime instability"],
     when: "Regime labelling, pairs candidate grouping, portfolio diversification by behavioural cluster. The unsupervised companion to HMM.",
+    refs: ["MacQueen (1967), \"Some Methods for Classification and Analysis of Multivariate Observations\"", "Dempster, Laird & Rubin (1977), \"Maximum Likelihood from Incomplete Data via the EM Algorithm\" — JRSS B"],
   },
   {
     id: "M5", cat: "ml", name: "Reinforcement Learning", tag: "RL",
@@ -412,6 +443,7 @@ const MODELS = [
     ],
     params: ["State/action/reward design (hardest part)", "Reward: risk- & cost-adjusted P&L", "Backtest realism: slippage, impact, latency"],
     when: "Optimal execution, market making, dynamic hedging/sizing. Fragile and reward-hacking-prone — strongest where the task is truly sequential.",
+    refs: ["Sutton & Barto (2018), \"Reinforcement Learning: An Introduction\" — MIT Press (2nd ed.)", "Nevmyvaka, Feng & Kearns (2006), \"Reinforcement Learning for Optimized Trade Execution\" — ICML"],
   },
 ];
 
@@ -476,6 +508,20 @@ function ModelCard({ m, open, onToggle }) {
               <p className="text-xs text-muted leading-relaxed">{m.when}</p>
             </div>
           </div>
+
+          {m.refs && m.refs.length > 0 && (
+            <div className="mt-4 pt-4 border-t border-line">
+              <p className="font-mono text-[10px] text-amber tracking-wider mb-2">KEY RESEARCH</p>
+              <ul className="space-y-1.5">
+                {m.refs.map((r, i) => (
+                  <li key={i} className="text-xs text-muted leading-relaxed flex gap-2">
+                    <span className="text-amber shrink-0">§</span>
+                    <span>{r}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
         </div>
       )}
     </div>
