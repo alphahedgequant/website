@@ -1,17 +1,18 @@
 "use client";
-
 import { useState } from "react";
+import Link from "next/link";
 
+// slug present + published:true → card is a clickable link to /learn/[slug]
 const ARTICLES = [
   { title: "What is quantitative trading?", desc: "Systematic vs discretionary, where edges come from, and why process beats prediction.", level: "beginner", time: "8 min", cat: "Foundations" },
   { title: "Reading an option chain", desc: "Strikes, premiums, OI and IV — what each column actually tells you about positioning.", level: "beginner", time: "10 min", cat: "Derivatives" },
   { title: "Candlesticks without the mythology", desc: "What price action genuinely encodes — and which patterns are statistical noise.", level: "beginner", time: "9 min", cat: "Technical" },
-  { title: "Position sizing before everything", desc: "Why sizing decides survival: fixed fractional, volatility targeting and the Kelly criterion.", level: "intermediate", time: "14 min", cat: "Risk" },
+  { title: "Position sizing before everything", desc: "Why sizing decides survival: fixed fractional, volatility targeting and the Kelly criterion.", level: "intermediate", time: "14 min", cat: "Risk", slug: "position-sizing", published: true },
   { title: "Mean reversion vs momentum", desc: "The two families of edge, the regimes where each works, and how to detect which one you're in.", level: "intermediate", time: "15 min", cat: "Quant" },
-  { title: "Options Greeks in practice", desc: "Delta, Gamma, Theta, Vega — managed as a portfolio, not memorized as definitions.", level: "intermediate", time: "18 min", cat: "Derivatives" },
+  { title: "Options Greeks in practice", desc: "Delta, Gamma, Theta, Vega — managed as a portfolio, not memorized as definitions.", level: "intermediate", time: "18 min", cat: "Derivatives", slug: "options-greeks", published: true },
   { title: "DCF valuation that holds up", desc: "Building a discounted cash flow model with real company numbers and honest assumptions.", level: "intermediate", time: "20 min", cat: "Valuation" },
   { title: "Risk management frameworks", desc: "Stop losses, drawdown circuit breakers and exposure limits as a coherent system.", level: "intermediate", time: "14 min", cat: "Risk" },
-  { title: "Cointegration & pairs trading", desc: "Engle-Granger and Johansen tests, half-life of mean reversion, and z-score execution.", level: "advanced", time: "24 min", cat: "Quant" },
+  { title: "Cointegration & pairs trading", desc: "Engle-Granger and Johansen tests, half-life of mean reversion, and z-score execution.", level: "advanced", time: "24 min", cat: "Quant", slug: "cointegration-pairs-trading", published: true },
   { title: "The Black-Scholes model", desc: "The mathematics behind option pricing, its assumptions, and where they break in practice.", level: "advanced", time: "25 min", cat: "Quant" },
   { title: "Monte Carlo simulations", desc: "Random sampling for portfolio returns, VaR and stress testing — with code-level intuition.", level: "advanced", time: "22 min", cat: "Quant" },
   { title: "Factor investing & smart beta", desc: "Momentum, value, quality and low-volatility factors — building systematic exposure that works.", level: "advanced", time: "20 min", cat: "Quant" },
@@ -60,18 +61,44 @@ export default function Learn() {
       </div>
 
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 mt-8">
-        {list.map((a) => (
-          <article key={a.title} className="card p-5 hover:border-amber/40 transition-colors">
-            <span className={`font-mono text-[10px] tracking-wider uppercase border rounded px-2 py-0.5 ${levelColor[a.level]}`}>
-              {a.level}
-            </span>
-            <h2 className="font-display text-lg font-medium mt-3">{a.title}</h2>
-            <p className="text-sm text-muted leading-relaxed mt-1.5">{a.desc}</p>
-            <p className="font-mono text-[11px] text-muted mt-4">
-              {a.time} · {a.cat}
-            </p>
-          </article>
-        ))}
+        {list.map((a) => {
+          const inner = (
+            <>
+              <div className="flex items-center justify-between">
+                <span className={`font-mono text-[10px] tracking-wider uppercase border rounded px-2 py-0.5 ${levelColor[a.level]}`}>
+                  {a.level}
+                </span>
+                {a.published && (
+                  <span className="font-mono text-[10px] tracking-wider uppercase text-gain">● read now</span>
+                )}
+              </div>
+              <h2 className="font-display text-lg font-medium mt-3">{a.title}</h2>
+              <p className="text-sm text-muted leading-relaxed mt-1.5">{a.desc}</p>
+              <p className="font-mono text-[11px] text-muted mt-4">
+                {a.time} · {a.cat}
+              </p>
+            </>
+          );
+
+          // Published articles → clickable link card
+          if (a.published && a.slug) {
+            return (
+              <Link
+                key={a.title}
+                href={`/learn/${a.slug}`}
+                className="card p-5 hover:border-amber/60 transition-colors block cursor-pointer"
+              >
+                {inner}
+              </Link>
+            );
+          }
+          // Unpublished → static "coming soon" card
+          return (
+            <article key={a.title} className="card p-5 hover:border-amber/40 transition-colors opacity-90">
+              {inner}
+            </article>
+          );
+        })}
       </div>
     </div>
   );
