@@ -13,9 +13,9 @@ const MARKETS = {
 
 // ── formatting ──────────────────────────────────────────
 const fmt = (v, d = 2) => (v == null || isNaN(v) ? "-" : Number(v).toFixed(d));
-const fmtCap = (v, market) => {A
+const fmtCap = (v, mkt) => {
   if (v == null) return "-";
-  if (market === "US") {
+  if (mkt === "US") {
     if (v >= 1e12) return "$" + (v / 1e12).toFixed(2) + "T";
     if (v >= 1e9) return "$" + (v / 1e9).toFixed(2) + "B";
     return "$" + (v / 1e6).toFixed(0) + "M";
