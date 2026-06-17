@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
+import WaitlistForm from "@/components/WaitlistForm";
 
 const STRATS = [
   "Engle-Granger pairs", "Johansen basket", "PCA stat-arb", "Kalman filter",
@@ -10,8 +10,6 @@ const STRATS = [
 ];
 
 export default function Home() {
-  const [email, setEmail] = useState("");
-  const [sent, setSent] = useState(false);
 
   return (
     <>
@@ -123,47 +121,9 @@ export default function Home() {
             education library are rolling out in phases. Join the list — no
             spam, only launches.
           </p>
-          {sent ? (
-            <p className="mt-7 text-gain font-medium">
-              You&apos;re on the list. Talk soon.
-            </p>
-          ) : (
-            <form
-              className="mt-7 flex flex-col sm:flex-row gap-3 justify-center"
-              onSubmit={async (e) => {
-                e.preventDefault();
-                if (!email.includes("@")) return;
-                const id = process.env.NEXT_PUBLIC_FORMSPREE_ID;
-                if (!id) {
-                  window.location.href = `mailto:hello@alphahedgequant.com?subject=Waitlist%20signup&body=${encodeURIComponent(email)}`;
-                  return;
-                }
-                try {
-                  const res = await fetch(`https://formspree.io/f/${id}`, {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json", Accept: "application/json" },
-                    body: JSON.stringify({ email }),
-                  });
-                  if (res.ok) setSent(true);
-                  else alert("Something went wrong — please email hello@alphahedgequant.com");
-                } catch {
-                  alert("Something went wrong — please email hello@alphahedgequant.com");
-                }
-              }}
-            >
-              <input
-                type="email"
-                required
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="you@example.com"
-                className="bg-ink border border-line rounded-lg px-4 py-2.5 text-sm w-full sm:w-72 outline-none focus:border-amber/60"
-              />
-              <button type="submit" className="btn-primary justify-center">
-                Join waitlist
-              </button>
-            </form>
-          )}
+          <div className="mt-7 flex justify-center">
+            <WaitlistForm source="landing" />
+          </div>
         </div>
       </section>
     </>
