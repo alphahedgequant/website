@@ -17,7 +17,7 @@ export default function Footer() {
           </p>
         </div>
 
-        <div className="grid grid-cols-2 gap-8 text-sm">
+        <div className="grid grid-cols-3 gap-8 text-sm">
           <div className="flex flex-col gap-2.5">
             <span className="eyebrow !text-muted">Platform</span>
             <Link href="/screener" className="text-muted hover:text-body">Screener</Link>
@@ -30,6 +30,12 @@ export default function Footer() {
             <span className="eyebrow !text-muted">Company</span>
             <a href="mailto:hello@alphahedgequant.com" className="text-muted hover:text-body">Contact</a>
             <a href="https://github.com/ZerohedgeQuantbyShrey" target="_blank" rel="noreferrer" className="text-muted hover:text-body">GitHub</a>
+          </div>
+          <div className="flex flex-col gap-2.5">
+            <span className="eyebrow !text-muted">Legal</span>
+            <Link href="/disclaimer" className="text-muted hover:text-body">Disclaimer</Link>
+            <Link href="/privacy" className="text-muted hover:text-body">Privacy</Link>
+            <Link href="/terms" className="text-muted hover:text-body">Terms</Link>
           </div>
         </div>
 
