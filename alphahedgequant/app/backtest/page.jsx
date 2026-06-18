@@ -64,6 +64,27 @@ const METRIC_CARDS = [
   { key: "annualizedReturn", label: "Ann. Return",      suffix: "%", color: (v) => v >= 0 ? "text-gain" : "text-loss" },
 ];
 
+
+const INTERVALS = [
+  { id: "1m",  label: "1m"  },
+  { id: "5m",  label: "5m"  },
+  { id: "15m", label: "15m" },
+  { id: "30m", label: "30m" },
+  { id: "60m", label: "1h"  },
+  { id: "1d",  label: "1D"  },
+  { id: "1wk", label: "1W"  },
+];
+const INTRADAY = new Set(["1m", "5m", "15m", "30m", "60m"]);
+const INTERVAL_NOTE = {
+  "1m":  "1-minute data: last ~7 days only (Yahoo limit).",
+  "5m":  "5-minute data: last ~60 days (Yahoo limit).",
+  "15m": "15-minute data: last ~60 days (Yahoo limit).",
+  "30m": "30-minute data: last ~60 days (Yahoo limit).",
+  "60m": "1-hour data: last ~730 days (Yahoo limit).",
+  "1d":  "",
+  "1wk": "",
+};
+
 function CustomTooltip({ active, payload, label }) {
   if (!active || !payload?.length) return null;
   return (
@@ -84,6 +105,7 @@ export default function BacktestPage() {
   const [startDate, setStartDate] = useState("2023-01-01");
   const [endDate,   setEndDate]   = useState(new Date().toISOString().split("T")[0]);
   const [capital,   setCapital]   = useState(100000);
+  const [interval,  setInterval2]  = useState("1d");
   const [params,    setParams]    = useState({});
   const [result,    setResult]    = useState(null);
   const [loading,   setLoading]   = useState(false);
@@ -108,6 +130,7 @@ export default function BacktestPage() {
         startDate,
         endDate,
         initialCapital: Number(capital),
+        interval,
         params: Object.fromEntries(
           strategy.params.map(p => [p.key, getParam(p.key, p.default)])
         ),
@@ -215,6 +238,30 @@ export default function BacktestPage() {
             </div>
           </div>
 
+          {/* Timeframe */}
+          <div>
+            <label className="block font-mono text-xs text-muted tracking-wider mb-2">TIMEFRAME</label>
+            <div className="flex flex-wrap gap-1.5">
+              {INTERVALS.map(iv => (
+                <button
+                  key={iv.id}
+                  onClick={() => setInterval2(iv.id)}
+                  className={`font-mono text-xs px-2.5 py-1 rounded border transition-colors ${
+                    interval === iv.id ? "border-amber text-amber" : "border-line text-muted hover:text-body"
+                  }`}
+                >
+                  {iv.label}
+                </button>
+              ))}
+            </div>
+            {INTERVAL_NOTE[interval] && (
+              <p className="font-mono text-[10px] text-muted/70 mt-2 leading-relaxed">{INTERVAL_NOTE[interval]}</p>
+            )}
+            {INTRADAY.has(interval) && (
+              <p className="font-mono text-[10px] text-amber/70 mt-1 leading-relaxed">Date range ignored for intraday — uses Yahoo's available window.</p>
+            )}
+          </div>
+
           {/* Dates + Capital */}
           <div className="grid grid-cols-2 gap-3">
             <div>
@@ -223,7 +270,8 @@ export default function BacktestPage() {
                 type="date"
                 value={startDate}
                 onChange={e => setStartDate(e.target.value)}
-                className="w-full bg-raised/40 border border-line rounded px-3 py-2 font-mono text-xs text-body focus:outline-none focus:border-amber/40"
+                disabled={INTRADAY.has(interval)}
+                className="w-full bg-raised/40 border border-line rounded px-3 py-2 font-mono text-xs text-body focus:outline-none focus:border-amber/40 disabled:opacity-40"
               />
             </div>
             <div>
@@ -232,7 +280,8 @@ export default function BacktestPage() {
                 type="date"
                 value={endDate}
                 onChange={e => setEndDate(e.target.value)}
-                className="w-full bg-raised/40 border border-line rounded px-3 py-2 font-mono text-xs text-body focus:outline-none focus:border-amber/40"
+                disabled={INTRADAY.has(interval)}
+                className="w-full bg-raised/40 border border-line rounded px-3 py-2 font-mono text-xs text-body focus:outline-none focus:border-amber/40 disabled:opacity-40"
               />
             </div>
           </div>
@@ -294,7 +343,7 @@ export default function BacktestPage() {
                     {result.symbol} · {strategy.label}
                   </h2>
                   <p className="font-mono text-xs text-muted mt-0.5">
-                    {result.period.from} → {result.period.to} ({result.period.days} trading days)
+                    {result.period.from} → {result.period.to} ({result.period.bars ?? result.period.days} bars · {result.interval || "1d"})
                   </p>
                 </div>
                 {alpha !== null && (
