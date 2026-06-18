@@ -1,5 +1,6 @@
 "use client";
 import { useState } from "react";
+import Link from "next/link";
 import {
   LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip,
   Legend, ResponsiveContainer, ReferenceLine,
@@ -163,6 +164,9 @@ export default function BacktestPage() {
         Test 4 quantitative strategies on any NSE or US stock using 1-year+ of Yahoo Finance adjusted close data.
         Metrics include Sharpe, Sortino, max drawdown, win rate, and alpha vs buy-and-hold.
       </p>
+      <Link href="/backtest/custom" className="inline-flex items-center gap-2 mt-3 font-mono text-xs text-amber hover:underline">
+        🐍 Or write your own Python strategy →
+      </Link>
 
       <div className="mt-8 grid lg:grid-cols-[340px_1fr] gap-6">
         {/* ── CONTROL PANEL ── */}
