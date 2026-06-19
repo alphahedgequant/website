@@ -8,6 +8,7 @@ const links = [
   { href: "/screener", label: "Screener" },
   { href: "/models", label: "Quant Models" },
   { href: "/backtest", label: "AI Backtest" },
+  { href: "/options", label: "Options" },
   { href: "/research", label: "Research" },
   { href: "/learn", label: "Learn" },
 ];
