@@ -10,6 +10,7 @@ const links = [
   { href: "/backtest", label: "AI Backtest" },
   { href: "/options", label: "Options" },
   { href: "/research", label: "Research" },
+  { href: "/tracker", label: "Trust Tracker" },
   { href: "/learn", label: "Learn" },
 ];
 
@@ -29,7 +30,7 @@ export default function Nav() {
           </span>
         </Link>
 
-        <nav className="hidden md:flex items-center gap-7">
+        <nav className="hidden md:flex items-center gap-6">
           {links.map((l) => (
             <Link
               key={l.href}
