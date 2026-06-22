@@ -4,6 +4,23 @@ import { neon } from "@neondatabase/serverless";
 
 const PRICE_API = process.env.NEXT_PUBLIC_API_URL || "https://zerohedgequant-backend.onrender.com";
 
+async function ensureTable(sql) {
+  await sql`
+    CREATE TABLE IF NOT EXISTS analyst_calls (
+      id            SERIAL PRIMARY KEY,
+      house         TEXT NOT NULL,
+      symbol        TEXT NOT NULL,
+      rating        TEXT NOT NULL DEFAULT 'BUY',
+      target_price  NUMERIC NOT NULL,
+      price_at_call NUMERIC NOT NULL,
+      call_date     DATE NOT NULL,
+      horizon_days  INTEGER NOT NULL DEFAULT 365,
+      note          TEXT,
+      created_at    TIMESTAMPTZ DEFAULT now()
+    )
+  `;
+}
+
 async function latestClose(symbol) {
   try {
     const r = await fetch(`${PRICE_API}/api/prices?symbol=${encodeURIComponent(symbol)}&interval=1d`);
@@ -37,9 +54,8 @@ export async function GET() {
       return Response.json({ success: false, error: "Database not configured." }, { status: 500 });
     }
     const sql = neon(process.env.NEON_DATABASE_URL);
-    // table may not exist yet on a fresh DB — guard with a try
-    let rows = [];
-    try { rows = await sql`SELECT * FROM analyst_calls`; } catch { rows = []; }
+    await ensureTable(sql);
+    const rows = await sql`SELECT * FROM analyst_calls`;
 
     const symbols = [...new Set(rows.map((r) => r.symbol))];
     const priceCache = {};
