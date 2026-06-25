@@ -1,4 +1,3 @@
-
 // lib/fetchConsensus.js
 // Pulls analyst consensus price targets for a watchlist of NSE symbols from
 // IndianAPI (https://indianapi.in). Designed to run server-side from a cron.
@@ -38,18 +37,34 @@ function num(s) {
 // The 3 marked lines are the only place field names may need adjusting after
 // you see a real response.
 function mapResponse(symbol, json) {
-  // --- ADJUST THESE 3 LINES TO MATCH THE REAL RESPONSE ---
-  const target = num(json?.analystView?.targetPrice ?? json?.priceTarget?.mean ?? json?.targetPrice);
-  const current = num(json?.currentPrice?.NSE ?? json?.price ?? json?.lastPrice);
-  const reco = json?.analystView?.rating ?? json?.recommendation ?? null;
-  // -------------------------------------------------------
+  // IndianAPI /stock shape (confirmed from docs):
+  //   currentPrice: { NSE, BSE }
+  //   priceTarget:  { Mean, CurrencyCode }            (may be under analystView)
+  //   recommendation: { Mean }  where 1=Buy 2=Outperform 3=Hold 4=Underperform 5=Sell
+  const av = json?.analystView ?? json ?? {};
+  const target = num(
+    av?.priceTarget?.Mean ?? json?.priceTarget?.Mean ??
+    av?.priceTarget?.UnverifiedMean ?? json?.priceTarget?.UnverifiedMean
+  );
+  const current = num(json?.currentPrice?.NSE ?? json?.currentPrice?.BSE);
+  const recoMean = num(av?.recommendation?.Mean ?? json?.recommendation?.Mean);
 
   if (!(target > 0) || !(current > 0)) {
     return { ok: false, reason: "missing-target-or-price" };
   }
 
-  // Derive a directional rating from consensus vs current if no explicit reco
-  let rating = reco;
+  // Map IndianAPI's numeric recommendation Mean to a rating label.
+  function recoToRating(m) {
+    if (m == null) return null;
+    if (m < 1.5) return "Buy";
+    if (m < 2.5) return "Accumulate";   // Outperform
+    if (m < 3.5) return "Hold";
+    if (m < 4.5) return "Reduce";        // Underperform
+    return "Sell";
+  }
+
+  // Prefer the analyst recommendation; fall back to target-vs-price direction.
+  let rating = recoToRating(recoMean);
   if (!rating) rating = target > current ? "Buy" : (target < current ? "Sell" : "Hold");
   rating = String(rating).charAt(0).toUpperCase() + String(rating).slice(1).toLowerCase();
 
