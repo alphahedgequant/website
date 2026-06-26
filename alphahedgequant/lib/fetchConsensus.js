@@ -36,18 +36,16 @@ function num(s) {
 // Map ONE IndianAPI stock response to our analyst_calls row shape.
 // The 3 marked lines are the only place field names may need adjusting after
 // you see a real response.
-function mapResponse(symbol, json) {
-  // IndianAPI /stock shape (confirmed from docs):
-  //   currentPrice: { NSE, BSE }
-  //   priceTarget:  { Mean, CurrencyCode }            (may be under analystView)
-  //   recommendation: { Mean }  where 1=Buy 2=Outperform 3=Hold 4=Underperform 5=Sell
-  const av = json?.analystView ?? json ?? {};
-  const target = num(
-    av?.priceTarget?.Mean ?? json?.priceTarget?.Mean ??
-    av?.priceTarget?.UnverifiedMean ?? json?.priceTarget?.UnverifiedMean
-  );
-  const current = num(json?.currentPrice?.NSE ?? json?.currentPrice?.BSE);
-  const recoMean = num(av?.recommendation?.Mean ?? json?.recommendation?.Mean);
+// Takes the two confirmed IndianAPI responses:
+//   stockJson  = GET /stock?name=SYMBOL            -> currentPrice.NSE
+//   targetJson = GET /stock_target_price?stock_id=SYMBOL
+//                  -> priceTarget.UnverifiedMean / .PreliminaryMean (the target)
+//                  -> recommendation.Mean (1=Buy 2=Outperform 3=Hold 4=Underperform 5=Sell)
+function mapResponse(symbol, stockJson, targetJson) {
+  const pt = targetJson?.priceTarget ?? {};
+  const target = num(pt.UnverifiedMean ?? pt.PreliminaryMean ?? pt.Mean);
+  const current = num(stockJson?.currentPrice?.NSE ?? stockJson?.currentPrice?.BSE);
+  const recoMean = num(targetJson?.recommendation?.UnverifiedMean ?? targetJson?.recommendation?.Mean);
 
   if (!(target > 0) || !(current > 0)) {
     return { ok: false, reason: "missing-target-or-price" };
@@ -90,13 +88,19 @@ function mapResponse(symbol, json) {
 }
 
 async function fetchOne(symbol, apiKey) {
-  const url = `${BASE}/stock?name=${encodeURIComponent(symbol)}`; // confirm endpoint
-  const res = await fetch(url, {
-    headers: { "X-API-Key": apiKey, "Accept": "application/json" },
-  });
-  if (!res.ok) throw new Error(`${symbol}: HTTP ${res.status}`);
-  const json = await res.json();
-  return mapResponse(symbol, json);
+  const headers = { "X-API-Key": apiKey, "Accept": "application/json" };
+  // 1) current price
+  const sRes = await fetch(`${BASE}/stock?name=${encodeURIComponent(symbol)}`, { headers });
+  if (!sRes.ok) throw new Error(`${symbol}: /stock HTTP ${sRes.status}`);
+  const stockJson = await sRes.json();
+  // 2) analyst target + recommendation
+  const tRes = await fetch(`${BASE}/stock_target_price?stock_id=${encodeURIComponent(symbol)}`, { headers });
+  // target endpoint can 404/500 for stocks without coverage — treat as "no target"
+  let targetJson = {};
+  if (tRes.ok) {
+    try { targetJson = await tRes.json(); } catch { targetJson = {}; }
+  }
+  return mapResponse(symbol, stockJson, targetJson);
 }
 
 // Fetch consensus for the whole watchlist. Sequential with a small delay to be
@@ -115,7 +119,7 @@ async function fetchConsensus() {
     } catch (e) {
       report.push({ symbol, ok: false, reason: String(e.message || e) });
     }
-    await new Promise((r) => setTimeout(r, 300)); // 300ms between calls
+    await new Promise((r) => setTimeout(r, 500)); // 500ms between stocks (2 calls each)
   }
   return { valid, report };
 }
