@@ -31,8 +31,16 @@ function GainBadge({ value }) {
   );
 }
 
+function daysUntil(dateStr) {
+  if (!dateStr) return null;
+  const d = new Date(dateStr);
+  if (isNaN(d)) return null;
+  return Math.ceil((d - new Date()) / (1000 * 60 * 60 * 24));
+}
+
 function IpoCard({ ipo, showGain }) {
-  return (
+  const href = ipo.symbol ? `/ipo/${encodeURIComponent(ipo.symbol)}` : null;
+  const inner = (
     <div
       style={{
         background: "#14161c",
@@ -75,16 +83,18 @@ function IpoCard({ ipo, showGain }) {
       </div>
 
       {ipo.docLink && (
-        <a
-          href={ipo.docLink}
-          target="_blank"
-          rel="noopener noreferrer"
-          style={{ color: "#F0A93B", fontSize: 12, textDecoration: "none", marginTop: 2 }}
-        >
-          View prospectus →
-        </a>
+        <span style={{ color: "#F0A93B", fontSize: 12, marginTop: 2 }}>
+          View details →
+        </span>
       )}
     </div>
+  );
+
+  if (!href) return inner;
+  return (
+    <a href={href} style={{ textDecoration: "none", display: "block" }}>
+      {inner}
+    </a>
   );
 }
 
@@ -120,6 +130,14 @@ export default function IpoScreen() {
 
   const list = data ? (data[tab] || []) : [];
 
+  // IPOs listing within the next 4 days (across upcoming + open buckets)
+  const soon = data
+    ? [...(data.upcoming || []), ...(data.open || [])]
+        .map((ipo) => ({ ipo, d: daysUntil(ipo.listingDate) }))
+        .filter((x) => x.d !== null && x.d >= 0 && x.d <= 4)
+        .sort((a, b) => a.d - b.d)
+    : [];
+
   return (
     <section style={{ maxWidth: 1200, margin: "0 auto", padding: "48px 24px" }}>
       <div style={{ color: "#F0A93B", fontSize: 12, letterSpacing: 2, textTransform: "uppercase", marginBottom: 8 }}>
@@ -132,6 +150,25 @@ export default function IpoScreen() {
         Live IPO calendar for NSE & BSE — open, upcoming, and recently listed issues
         with price bands, lot sizes, subscription, and listing performance.
       </p>
+
+      {soon.length > 0 && (
+        <div style={{ background: "linear-gradient(135deg,#1a1305,#14161c)", border: "1px solid #3a2e10", borderRadius: 12, padding: "16px 18px", marginBottom: 24 }}>
+          <div style={{ color: "#F0A93B", fontSize: 11, letterSpacing: 1.5, textTransform: "uppercase", marginBottom: 10 }}>
+            ⚡ Listing in the next few days
+          </div>
+          <div style={{ display: "flex", flexWrap: "wrap", gap: 10 }}>
+            {soon.map(({ ipo, d }, i) => (
+              <a key={i} href={ipo.symbol ? `/ipo/${encodeURIComponent(ipo.symbol)}` : undefined}
+                 style={{ textDecoration: "none", background: "#14161c", border: "1px solid #232733", borderRadius: 8, padding: "8px 12px", display: "flex", flexDirection: "column", gap: 2 }}>
+                <span style={{ color: "#f5f5f5", fontSize: 13, fontWeight: 600 }}>{fmt(ipo.name)}</span>
+                <span style={{ color: "#F0A93B", fontSize: 11 }}>
+                  {d === 0 ? "Lists today" : d === 1 ? "Lists tomorrow" : `Lists in ${d} days`} · {ipo.listingDate}
+                </span>
+              </a>
+            ))}
+          </div>
+        </div>
+      )}
 
       <div style={{ display: "flex", gap: 8, marginBottom: 20 }}>
         {TABS.map((t) => (
