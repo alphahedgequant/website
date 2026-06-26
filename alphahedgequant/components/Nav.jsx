@@ -9,6 +9,7 @@ const links = [
   { href: "/models", label: "Quant Models" },
   { href: "/backtest", label: "AI Backtest" },
   { href: "/options", label: "Options" },
+  { href: "/ipo", label: "IPO" },
   { href: "/research", label: "Research" },
   { href: "/tracker", label: "Trust Tracker" },
   { href: "/learn", label: "Learn" },
