@@ -19,12 +19,32 @@
 const BASE = "https://stock.indianapi.in"; // confirm exact base from your dashboard
 const API_KEY_ENV = "INDIANAPI_KEY";
 
-// Your watchlist. Start with liquid large/mid caps that your /api/prices knows.
-// Extend freely — the cron loops over this list.
+// Watchlist — ~100 of the most liquid, most-analyst-covered NSE names.
+// RATE LIMIT: IndianAPI free tier = 300 calls/day. The cron makes 2 calls per
+// stock (price + target), so 100 stocks = 200 calls/day, leaving ~100 buffer
+// for the IPO endpoint, retries, and manual checks. Do NOT exceed ~140 stocks
+// on the free tier or the daily quota will 429 mid-run. Full Nifty 500 needs
+// a paid plan.
 const WATCHLIST = [
-  "RELIANCE", "TCS", "HDFCBANK", "ICICIBANK", "INFY", "SBIN",
-  "BHARTIARTL", "KOTAKBANK", "LT", "AXISBANK", "ITC", "HINDUNILVR",
-  "BAJFINANCE", "MARUTI", "TATAMOTORS", "SUNPHARMA", "TITAN", "NTPC",
+  // Nifty 50 core
+  "RELIANCE", "TCS", "HDFCBANK", "ICICIBANK", "INFY", "SBIN", "BHARTIARTL",
+  "KOTAKBANK", "LT", "AXISBANK", "ITC", "HINDUNILVR", "BAJFINANCE", "MARUTI",
+  "TATAMOTORS", "SUNPHARMA", "TITAN", "NTPC", "ASIANPAINT", "HCLTECH",
+  "WIPRO", "ULTRACEMCO", "ONGC", "NESTLEIND", "POWERGRID", "TATASTEEL",
+  "ADANIENT", "ADANIPORTS", "COALINDIA", "BAJAJFINSV", "JSWSTEEL", "GRASIM",
+  "HINDALCO", "TECHM", "INDUSINDBK", "DRREDDY", "CIPLA", "EICHERMOT",
+  "BRITANNIA", "DIVISLAB", "HEROMOTOCO", "BAJAJ-AUTO", "TATACONSUM",
+  "APOLLOHOSP", "BPCL", "SBILIFE", "HDFCLIFE", "M&M", "SHRIRAMFIN", "LTIM",
+  // High-coverage mid/large caps
+  "DMART", "PIDILITIND", "GODREJCP", "DABUR", "MARICO", "COLPAL", "BERGEPAINT",
+  "SIEMENS", "ABB", "HAVELLS", "BOSCHLTD", "BEL", "HAL", "BHEL", "SAIL",
+  "VEDL", "JINDALSTEL", "NMDC", "GAIL", "IOC", "PFC", "RECLTD", "IRFC",
+  "DLF", "GODREJPROP", "OBEROIRLTY", "LODHA", "ZOMATO", "PAYTM", "NYKAA",
+  "POLICYBZR", "IRCTC", "INDIGO", "TRENT", "DIXON", "PERSISTENT", "COFORGE",
+  "MPHASIS", "LTTS", "TVSMOTOR", "ASHOKLEY", "BHARATFORG", "MOTHERSON",
+  "TATAPOWER", "TORNTPHARM", "LUPIN", "AUROPHARMA", "ZYDUSLIFE", "BIOCON",
+  "MAXHEALTH", "FORTIS", "ICICIGI", "ICICIPRULI", "BANKBARODA", "PNB",
+  "CANBK", "IDFCFIRSTB", "FEDERALBNK", "AUBANK", "CHOLAFIN", "MUTHOOTFIN",
 ];
 
 function num(s) {
