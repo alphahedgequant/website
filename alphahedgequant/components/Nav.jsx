@@ -11,6 +11,7 @@ const links = [
   { href: "/options", label: "Options" },
   { href: "/ipo", label: "IPO" },
   { href: "/research", label: "Research" },
+  { href: "/reports", label: "Reports" },
   { href: "/tracker", label: "Trust Tracker" },
   { href: "/learn", label: "Learn" },
 ];
