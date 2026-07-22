@@ -21,19 +21,19 @@ const TAPE = [
 const ENGINES = [
   {
     tag: "AHQ:TRUST", title: "Analyst calls, scored", href: "/tracker", cta: "Open the Trust Tracker",
-    color: "#F0A93B", tint: "rgba(240,169,59,0.06)",
+    color: "#F0A93B", tint: "rgba(240,169,59,0.13)",
     icon: "M12 2l7 3v6c0 4.5-3 8-7 11-4-3-7-6.5-7-11V5l7-3z",
     desc: "Every brokerage target is logged with the price on the day it was made — then graded against what the market actually did. A credit score for the sell side, fed daily by street consensus.",
   },
   {
     tag: "AHQ:AI", title: "AI Quant Copilot", href: "/copilot", cta: "Try the copilot",
-    color: "#2DD482", tint: "rgba(45,212,130,0.06)",
+    color: "#2DD482", tint: "rgba(45,212,130,0.13)",
     icon: "M9 3h6v2h3a2 2 0 012 2v3h2v4h-2v3a2 2 0 01-2 2h-3v2H9v-2H6a2 2 0 01-2-2v-3H2v-4h2V7a2 2 0 012-2h3V3zm-.5 8a1.5 1.5 0 100 3 1.5 1.5 0 000-3zm7 0a1.5 1.5 0 100 3 1.5 1.5 0 000-3z",
     desc: "Describe a strategy in a sentence. The copilot converts it to a whitelisted rule spec — never code — and runs a deterministic backtest with real costs, ATR stops and honest next-bar fills.",
   },
   {
     tag: "AHQ:MACRO", title: "Primary-source reports", href: "/reports", cta: "Read the reports",
-    color: "#B79BFF", tint: "rgba(183,155,255,0.06)",
+    color: "#B79BFF", tint: "rgba(183,155,255,0.13)",
     icon: "M6 2h9l5 5v13a2 2 0 01-2 2H6a2 2 0 01-2-2V4a2 2 0 012-2zm8 1.5V8h4.5L14 3.5zM8 12h8v1.5H8V12zm0 3h8v1.5H8V15z",
     desc: "Macro research where every figure is verified against the primary release — MoSPI, GSTN, RBI, the Fed, BLS — before publication. No hot takes, no unverified numbers.",
   },
@@ -137,8 +137,8 @@ export default function Home() {
             <Link
               key={e.tag}
               href={e.href}
-              className="card p-6 transition-colors group"
-              style={{ background: `linear-gradient(160deg, ${e.tint}, transparent 60%)` }}
+              className="card feature-card p-6 group"
+              style={{ "--glow": e.color, background: `radial-gradient(130% 110% at 0% 0%, ${e.tint}, transparent 55%)` }}
             >
               <div className="flex items-center justify-between mb-6">
                 <span
