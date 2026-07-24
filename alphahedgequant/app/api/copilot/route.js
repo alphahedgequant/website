@@ -2,18 +2,22 @@
 // AI Quant Copilot: natural language → validated JSON strategy spec → deterministic backtest.
 //
 // SAFETY MODEL:
-//   - Claude Haiku ONLY translates the user's sentence into a JSON spec.
+//   - Google Gemini (free tier) ONLY translates the user's sentence into a JSON spec.
 //     It never produces executable code, and its output is validated against
 //     the strict whitelist in lib/quantEngine before anything runs.
 //   - Rate limits: 5 requests/hour per IP, 150/day globally (in-memory —
 //     resets on cold start, which is acceptable for an abuse brake).
-//   - Without ANTHROPIC_API_KEY the route returns 503 and the UI shows a
+//   - Without GEMINI_API_KEY the route returns 503 and the UI shows a
 //     "not configured yet" state instead of breaking.
+//
+// Env vars:
+//   GEMINI_API_KEY   (free key from https://aistudio.google.com/apikey)
+//   GEMINI_MODEL     (optional, defaults to "gemini-2.0-flash")
 
 const { validateSpec, runBacktest } = require("../../../lib/quantEngine");
 
 const API = process.env.NEXT_PUBLIC_API_URL || "https://zerohedgequant-backend.onrender.com";
-const MODEL = "claude-haiku-4-5";
+const MODEL = process.env.GEMINI_MODEL || "gemini-2.0-flash";
 
 const HOUR = 3600 * 1000;
 const ipHits = new Map(); // ip -> { count, resetAt }
@@ -52,7 +56,7 @@ Rules of thumb:
 Only JSON. Nothing else.`;
 
 export async function POST(request) {
-  const key = process.env.ANTHROPIC_API_KEY;
+  const key = process.env.GEMINI_API_KEY;
   if (!key) {
     return Response.json({ ok: false, code: "not-configured", error: "Copilot is not configured yet (missing API key)." }, { status: 503 });
   }
@@ -73,19 +77,22 @@ export async function POST(request) {
   }
 
   try {
-    // 1) NL → JSON spec via Haiku
-    const aiRes = await fetch("https://api.anthropic.com/v1/messages", {
+    // 1) NL → JSON spec via Gemini (free tier). responseMimeType forces clean JSON output.
+    const url = `https://generativelanguage.googleapis.com/v1beta/models/${MODEL}:generateContent`;
+    const aiRes = await fetch(url, {
       method: "POST",
       headers: {
-        "x-api-key": key,
-        "anthropic-version": "2023-06-01",
         "content-type": "application/json",
+        "x-goog-api-key": key,
       },
       body: JSON.stringify({
-        model: MODEL,
-        max_tokens: 500,
-        system: SYSTEM,
-        messages: [{ role: "user", content: prompt }],
+        system_instruction: { parts: [{ text: SYSTEM }] },
+        contents: [{ role: "user", parts: [{ text: prompt }] }],
+        generationConfig: {
+          temperature: 0,
+          maxOutputTokens: 600,
+          responseMimeType: "application/json",
+        },
       }),
     });
     if (!aiRes.ok) {
@@ -93,7 +100,7 @@ export async function POST(request) {
       return Response.json({ ok: false, error: `Model call failed (HTTP ${aiRes.status}).`, detail: detail.slice(0, 200) }, { status: 502 });
     }
     const aiJson = await aiRes.json();
-    const raw = (aiJson.content?.[0]?.text || "").replace(/```json|```/g, "").trim();
+    const raw = (aiJson.candidates?.[0]?.content?.parts?.[0]?.text || "").replace(/```json|```/g, "").trim();
 
     let spec;
     try { spec = JSON.parse(raw); } catch {
