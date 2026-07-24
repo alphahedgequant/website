@@ -13,9 +13,9 @@ module.exports = {
         line: "rgba(148,163,184,0.14)",
         body: "#E6EAF2",
         muted: "#8A94A8",
-        amber: "#d8b24a",       // AHQ gold (--gold-500)
-        amberdim: "#B97F22",
-        gold: "#d8b24a",
+        amber: "#E3BE4F",       // AHQ gold — yellow-gold (updated brand accent)
+        amberdim: "#C29A38",
+        gold: "#E3BE4F",
         cyan: "#22c3d6",         // AHQ systems/live-data accent (--cyan-500)
         gain: "#2DD482",
         loss: "#F0564F",
