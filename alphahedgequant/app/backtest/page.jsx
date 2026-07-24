@@ -1,10 +1,11 @@
 "use client";
-import { useState } from "react";
+import { useState, useMemo, useRef, useEffect } from "react";
 import Link from "next/link";
 import {
   LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip,
   Legend, ResponsiveContainer, ReferenceLine,
 } from "recharts";
+import { TICKERS, searchTickers } from "@/lib/tickers";
 
 const API = process.env.NEXT_PUBLIC_API_URL || "https://zerohedgequant-backend.onrender.com";
 
@@ -48,12 +49,6 @@ const STRATEGIES = [
   },
 ];
 
-const NSE_EXAMPLES = [
-  "RELIANCE", "TCS", "HDFCBANK", "INFY", "ICICIBANK",
-  "BHARTIARTL", "SBIN", "ITC", "KOTAKBANK", "LT",
-  "HINDUNILVR", "AXISBANK", "BAJFINANCE", "TATAMOTORS", "SUNPHARMA",
-];
-
 const METRIC_CARDS = [
   { key: "totalReturn",      label: "Total Return",     suffix: "%", color: (v) => v >= 0 ? "text-gain" : "text-loss" },
   { key: "benchmarkReturn",  label: "Buy & Hold",       suffix: "%", color: (v) => v >= 0 ? "text-gain" : "text-loss" },
@@ -64,7 +59,6 @@ const METRIC_CARDS = [
   { key: "trades",           label: "Trades",           suffix: "",  color: (_) => "text-body" },
   { key: "annualizedReturn", label: "Ann. Return",      suffix: "%", color: (v) => v >= 0 ? "text-gain" : "text-loss" },
 ];
-
 
 const INTERVALS = [
   { id: "1m",  label: "1m"  },
@@ -86,14 +80,14 @@ const INTERVAL_NOTE = {
   "1wk": "",
 };
 
-function CustomTooltip({ active, payload, label }) {
+function CustomTooltip({ active, payload, label, cur }) {
   if (!active || !payload?.length) return null;
   return (
     <div className="bg-ink border border-line rounded p-3 font-mono text-xs">
       <p className="text-muted mb-1">{label}</p>
       {payload.map(({ name, value, color }) => (
         <p key={name} style={{ color }}>
-          {name}: ₹{value?.toLocaleString("en-IN")}
+          {name}: {cur}{value?.toLocaleString("en-IN")}
         </p>
       ))}
     </div>
@@ -101,16 +95,33 @@ function CustomTooltip({ active, payload, label }) {
 }
 
 export default function BacktestPage() {
-  const [symbol,    setSymbol]    = useState("RELIANCE");
+  const [selected,  setSelected]  = useState({ symbol: "RELIANCE", name: "Reliance Industries", market: "NSE" });
+  const [query,     setQuery]     = useState("");
+  const [open,      setOpen]      = useState(false);
   const [strategy,  setStrategy]  = useState(STRATEGIES[0]);
   const [startDate, setStartDate] = useState("2023-01-01");
   const [endDate,   setEndDate]   = useState(new Date().toISOString().split("T")[0]);
   const [capital,   setCapital]   = useState(100000);
-  const [interval,  setInterval2]  = useState("1d");
+  const [interval,  setInterval2] = useState("1d");
   const [params,    setParams]    = useState({});
   const [result,    setResult]    = useState(null);
   const [loading,   setLoading]   = useState(false);
   const [error,     setError]     = useState(null);
+  const boxRef = useRef(null);
+
+  const market = selected.market;
+  const isUS = market === "US";
+  const cur = isUS ? "$" : "₹";
+
+  const matches = useMemo(() => searchTickers(query, 8), [query]);
+
+  useEffect(() => {
+    const onClick = (e) => { if (boxRef.current && !boxRef.current.contains(e.target)) setOpen(false); };
+    document.addEventListener("mousedown", onClick);
+    return () => document.removeEventListener("mousedown", onClick);
+  }, []);
+
+  const pick = (t) => { setSelected(t); setQuery(""); setOpen(false); setResult(null); setError(null); };
 
   const handleStrategyChange = (id) => {
     const s = STRATEGIES.find(s => s.id === id);
@@ -126,7 +137,8 @@ export default function BacktestPage() {
     setResult(null);
     try {
       const body = {
-        symbol: symbol.toUpperCase().trim(),
+        symbol: selected.symbol.toUpperCase().trim(),
+        market: selected.market,
         strategy: strategy.id,
         startDate,
         endDate,
@@ -171,27 +183,62 @@ export default function BacktestPage() {
       <div className="mt-8 grid lg:grid-cols-[340px_1fr] gap-6">
         {/* ── CONTROL PANEL ── */}
         <div className="space-y-5">
-          {/* Symbol */}
-          <div>
-            <label className="block font-mono text-xs text-muted tracking-wider mb-2">SYMBOL</label>
+          {/* Symbol search */}
+          <div ref={boxRef} className="relative">
+            <label className="block font-mono text-xs text-muted tracking-wider mb-2">SEARCH STOCK (NSE + US)</label>
             <input
-              value={symbol}
-              onChange={e => setSymbol(e.target.value.toUpperCase())}
-              placeholder="RELIANCE, TCS, AAPL..."
+              value={query}
+              onChange={(e) => { setQuery(e.target.value); setOpen(true); }}
+              onFocus={() => setOpen(true)}
+              placeholder="Type a name or ticker — e.g. Apple, RELIANCE, TSLA…"
               className="w-full bg-raised/40 border border-line rounded px-3 py-2.5 font-mono text-sm text-body focus:outline-none focus:border-amber/40"
             />
+            {open && matches.length > 0 && (
+              <ul className="absolute z-20 mt-1 w-full bg-ink border border-line rounded-lg shadow-xl max-h-72 overflow-auto">
+                {matches.map((t) => (
+                  <li key={`${t.market}:${t.symbol}`}>
+                    <button
+                      onMouseDown={(e) => { e.preventDefault(); pick(t); }}
+                      className="w-full text-left px-3 py-2 flex items-center justify-between hover:bg-amber/[0.08] transition-colors"
+                    >
+                      <span className="flex items-center gap-2 min-w-0">
+                        <span className="font-mono text-sm text-body">{t.symbol}</span>
+                        <span className="text-xs text-muted truncate">{t.name}</span>
+                      </span>
+                      <span className={`font-mono text-[10px] px-1.5 py-0.5 rounded border shrink-0 ${
+                        t.market === "US" ? "border-cyan/40 text-cyan" : "border-amber/40 text-amber"
+                      }`}>{t.market}</span>
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            )}
+
+            {/* Selected chip */}
+            <div className="mt-2 flex items-center gap-2 rounded-lg border border-amber/40 bg-amber/[0.06] px-3 py-2">
+              <span className="font-mono text-xs text-muted">SELECTED</span>
+              <span className="font-mono text-sm text-amber font-semibold">{selected.symbol}</span>
+              <span className="text-xs text-muted truncate">{selected.name}</span>
+              <span className={`ml-auto font-mono text-[10px] px-1.5 py-0.5 rounded border shrink-0 ${
+                isUS ? "border-cyan/40 text-cyan" : "border-amber/40 text-amber"
+              }`}>{market}</span>
+            </div>
+
+            {/* Quick picks */}
             <div className="flex flex-wrap gap-1.5 mt-2">
-              {NSE_EXAMPLES.slice(0, 8).map(s => (
-                <button
-                  key={s}
-                  onClick={() => setSymbol(s)}
-                  className={`font-mono text-[10px] px-2 py-0.5 rounded border transition-colors ${
-                    symbol === s ? "border-amber text-amber" : "border-line text-muted hover:text-body"
-                  }`}
-                >
-                  {s}
-                </button>
-              ))}
+              {["RELIANCE", "TCS", "HDFCBANK", "INFY", "AAPL", "MSFT", "TSLA", "NVDA"].map((s) => {
+                const t = TICKERS.find((x) => x.symbol === s);
+                if (!t) return null;
+                return (
+                  <button
+                    key={s}
+                    onClick={() => pick(t)}
+                    className={`font-mono text-[10px] px-2 py-0.5 rounded border transition-colors ${
+                      selected.symbol === s ? "border-amber text-amber" : "border-line text-muted hover:text-body"
+                    }`}
+                  >{s}</button>
+                );
+              })}
             </div>
           </div>
 
@@ -214,7 +261,7 @@ export default function BacktestPage() {
             ))}
           </div>
 
-          {/* Strategy params */}
+          {/* Params */}
           <div>
             <label className="block font-mono text-xs text-muted tracking-wider mb-2">PARAMETERS</label>
             <div className="space-y-3">
@@ -290,7 +337,7 @@ export default function BacktestPage() {
             </div>
           </div>
           <div>
-            <label className="block font-mono text-xs text-muted tracking-wider mb-1.5">INITIAL CAPITAL (₹)</label>
+            <label className="block font-mono text-xs text-muted tracking-wider mb-1.5">INITIAL CAPITAL ({cur})</label>
             <input
               type="number"
               value={capital}
@@ -299,19 +346,18 @@ export default function BacktestPage() {
             />
           </div>
 
-          {/* Run button */}
+          {/* Run */}
           <button
             onClick={run}
             disabled={loading}
             className="w-full py-3 rounded bg-amber text-ink font-display font-semibold text-sm hover:bg-amber/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            {loading ? "Running backtest..." : "▶ Run Backtest"}
+            {loading ? "Running backtest..." : `▶ Run Backtest · ${selected.symbol}`}
           </button>
         </div>
 
         {/* ── RESULTS PANEL ── */}
         <div>
-          {/* Idle state */}
           {!result && !loading && !error && (
             <div className="h-full min-h-[400px] rounded-lg border border-line bg-surface flex flex-col items-center justify-center text-muted">
               <div className="text-4xl mb-4 opacity-30">📈</div>
@@ -320,7 +366,6 @@ export default function BacktestPage() {
             </div>
           )}
 
-          {/* Loading */}
           {loading && (
             <div className="h-full min-h-[400px] rounded-lg border border-line bg-surface flex flex-col items-center justify-center text-muted">
               <div className="w-8 h-8 border-2 border-amber border-t-transparent rounded-full animate-spin mb-4" />
@@ -329,7 +374,6 @@ export default function BacktestPage() {
             </div>
           )}
 
-          {/* Error */}
           {error && (
             <div className="p-5 rounded-lg border border-loss/30 bg-loss/10">
               <p className="text-loss font-mono text-sm font-semibold mb-1">Backtest failed</p>
@@ -337,10 +381,8 @@ export default function BacktestPage() {
             </div>
           )}
 
-          {/* Results */}
           {result && (
             <div className="space-y-5">
-              {/* Header */}
               <div className="flex flex-wrap items-start justify-between gap-3">
                 <div>
                   <h2 className="font-display text-xl font-semibold">
@@ -352,9 +394,7 @@ export default function BacktestPage() {
                 </div>
                 {alpha !== null && (
                   <div className={`text-center px-4 py-2 rounded border ${
-                    parseFloat(alpha) >= 0
-                      ? "border-gain/30 bg-gain/10"
-                      : "border-loss/30 bg-loss/10"
+                    parseFloat(alpha) >= 0 ? "border-gain/30 bg-gain/10" : "border-loss/30 bg-loss/10"
                   }`}>
                     <p className="font-mono text-[10px] text-muted tracking-wider">ALPHA vs B&H</p>
                     <p className={`font-mono text-xl font-bold mt-0.5 ${parseFloat(alpha) >= 0 ? "text-gain" : "text-loss"}`}>
@@ -364,7 +404,6 @@ export default function BacktestPage() {
                 )}
               </div>
 
-              {/* Metric cards */}
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
                 {METRIC_CARDS.map(({ key, label, suffix, color }) => {
                   const val = result.metrics[key];
@@ -375,7 +414,7 @@ export default function BacktestPage() {
                         {typeof val === "number"
                           ? val.toLocaleString("en-IN")
                           : key === "finalValue"
-                          ? `₹${Number(val).toLocaleString("en-IN")}`
+                          ? `${cur}${Number(val).toLocaleString("en-IN")}`
                           : val}
                         {suffix}
                       </p>
@@ -384,7 +423,6 @@ export default function BacktestPage() {
                 })}
               </div>
 
-              {/* Equity Curve */}
               <div className="p-4 rounded-lg border border-line bg-surface">
                 <p className="font-mono text-xs text-muted tracking-wider mb-4">EQUITY CURVE</p>
                 <ResponsiveContainer width="100%" height={280}>
@@ -393,42 +431,23 @@ export default function BacktestPage() {
                     <XAxis
                       dataKey="date"
                       tick={{ fill: "#8a94a8", fontSize: 10, fontFamily: "monospace" }}
-                      tickFormatter={d => d.slice(2, 10)}
+                      tickFormatter={d => String(d).slice(2, 10)}
                       interval="preserveStartEnd"
                     />
                     <YAxis
                       tick={{ fill: "#8a94a8", fontSize: 10, fontFamily: "monospace" }}
-                      tickFormatter={v => `₹${(v / 1000).toFixed(0)}k`}
+                      tickFormatter={v => `${cur}${(v / 1000).toFixed(0)}k`}
                       width={55}
                     />
-                    <Tooltip content={<CustomTooltip />} />
-                    <Legend
-                      wrapperStyle={{ fontFamily: "monospace", fontSize: 11, color: "#8a94a8" }}
-                    />
+                    <Tooltip content={<CustomTooltip cur={cur} />} />
+                    <Legend wrapperStyle={{ fontFamily: "monospace", fontSize: 11, color: "#8a94a8" }} />
                     <ReferenceLine y={Number(capital)} stroke="rgba(255,255,255,0.15)" strokeDasharray="4 4" />
-                    <Line
-                      type="monotone"
-                      dataKey="strategy"
-                      name="Strategy"
-                      stroke="#F0A93B"
-                      strokeWidth={2}
-                      dot={false}
-                      activeDot={{ r: 3 }}
-                    />
-                    <Line
-                      type="monotone"
-                      dataKey="benchmark"
-                      name="Buy & Hold"
-                      stroke="#4f5b7a"
-                      strokeWidth={1.5}
-                      strokeDasharray="4 4"
-                      dot={false}
-                    />
+                    <Line type="monotone" dataKey="strategy" name="Strategy" stroke="#F0A93B" strokeWidth={2} dot={false} activeDot={{ r: 3 }} />
+                    <Line type="monotone" dataKey="benchmark" name="Buy & Hold" stroke="#4f5b7a" strokeWidth={1.5} strokeDasharray="4 4" dot={false} />
                   </LineChart>
                 </ResponsiveContainer>
               </div>
 
-              {/* Interpretation */}
               <div className="p-4 rounded-lg border border-line bg-surface/60">
                 <p className="font-mono text-xs text-muted tracking-wider mb-2">INTERPRETATION</p>
                 <div className="space-y-1.5 text-xs text-muted leading-relaxed font-mono">
