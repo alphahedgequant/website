@@ -13,7 +13,7 @@ export default function Footer() {
           </div>
           <p className="text-sm text-muted leading-relaxed max-w-xs">
             Quantitative research, live market intelligence and AI-assisted
-            backtesting — built for traders who think in distributions, not tips.
+            backtesting for NSE &amp; US markets.
           </p>
         </div>
 
