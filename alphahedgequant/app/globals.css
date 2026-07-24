@@ -147,3 +147,39 @@ body {
 .search-pop { background: rgba(16,23,41,0.92); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); border: 1px solid rgba(148,163,184,0.18); border-radius: 14px; box-shadow: 0 30px 70px -28px rgba(0,0,0,0.8); }
 .search-row { transition: background .12s ease; }
 .search-row:hover, .search-row[data-active="true"] { background: rgba(227,190,79,0.12); }
+
+/* ════════════════════════════════════════════════════════════
+   Auth (Clerk) — premium: dark buttons, thin gold border, and the
+   animated gold shimmer on the TEXT (not the background).
+   ════════════════════════════════════════════════════════════ */
+@keyframes ahqShine {
+  0%   { background-position: 200% center; }
+  100% { background-position: -200% center; }
+}
+/* Button frame: transparent with a thin gold border */
+.ahq-authbtn {
+  background: transparent !important;
+  border: 1px solid rgba(227,190,79,0.4) !important;
+  transition: border-color .15s ease, background-color .15s ease !important;
+}
+.ahq-authbtn:hover {
+  border-color: rgba(227,190,79,0.75) !important;
+  background: rgba(227,190,79,0.05) !important;
+}
+/* Gold shimmer clipped to the text glyphs */
+.ahq-goldtext {
+  background: linear-gradient(100deg, #C9A23A 16%, #FBF0BE 40%, #EBC85A 50%, #FBF0BE 60%, #C9A23A 84%) !important;
+  background-size: 200% auto !important;
+  -webkit-background-clip: text !important;
+  background-clip: text !important;
+  -webkit-text-fill-color: transparent !important;
+  color: transparent !important;
+  animation: ahqShine 7s linear infinite !important;
+  font-weight: 600 !important;
+  opacity: 0.8 !important;
+}
+/* Apple's logo ships dark → make it visible (light) on the dark button */
+.ahq-apple-icon { filter: brightness(0) invert(1) !important; }
+@media (prefers-reduced-motion: reduce) {
+  .ahq-goldtext { animation: none !important; background-position: 50% center !important; }
+}
