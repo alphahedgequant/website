@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
+import { SignedIn, SignedOut, UserButton } from "@clerk/nextjs";
 
 const links = [
   { href: "/screener", label: "Screener" },
@@ -45,9 +46,17 @@ export default function Nav() {
               {l.label}
             </Link>
           ))}
-          <Link href="/#waitlist" className="btn-primary !py-2 !px-4">
-            Join waitlist
-          </Link>
+          <SignedOut>
+            <Link href="/sign-in" className="text-sm text-muted hover:text-body">
+              Sign in
+            </Link>
+            <Link href="/sign-up" className="btn-primary !py-2 !px-4">
+              Sign up
+            </Link>
+          </SignedOut>
+          <SignedIn>
+            <UserButton afterSignOutUrl="/" />
+          </SignedIn>
         </nav>
 
         <button
@@ -77,9 +86,17 @@ export default function Nav() {
               {l.label}
             </Link>
           ))}
-          <Link href="/#waitlist" onClick={() => setOpen(false)} className="btn-primary w-fit">
-            Join waitlist
-          </Link>
+          <SignedOut>
+            <Link href="/sign-in" onClick={() => setOpen(false)} className="text-sm text-muted">
+              Sign in
+            </Link>
+            <Link href="/sign-up" onClick={() => setOpen(false)} className="btn-primary w-fit">
+              Sign up
+            </Link>
+          </SignedOut>
+          <SignedIn>
+            <div className="pt-1"><UserButton afterSignOutUrl="/" /></div>
+          </SignedIn>
         </nav>
       )}
     </header>
