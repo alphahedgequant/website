@@ -4,10 +4,6 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import WaitlistForm from "@/components/WaitlistForm";
 
-// Shiny antique-gold foil gradient for the single italic accent words
-// (light champagne at the top → deep antique gold at the bottom).
-const GOLD_GRAD = "linear-gradient(170deg, #FBEBB8 0%, #EACB72 34%, #D3A64A 60%, #B07C24 100%)";
-
 // Rotating consensus-scan terminal demo — real symbols, illustrative output.
 const SCANS = [
   ["$ ahq scan --consensus RELIANCE", "resolving NSE:RELIANCE · 14 brokerages · window 90d", "CONSENSUS        BUY 9 · HOLD 4 · SELL 1", "MEDIAN TARGET    ₹ 3,120 (+9.6%)", "TRUST SCORE      78 / 100 ▲ reliable", "REGIME (HMM)     low-vol · mean-revert", "✓ scan complete in 0.42s — not investment advice"],
@@ -80,34 +76,57 @@ function Terminal() {
   );
 }
 
-// Italic accent word rendered as a shiny gold-foil gradient (background-clipped text).
+// Italic emphasis word — soft yellow-gold shimmer, clipped to the text.
 function Accent({ children }) {
-  return (
-    <span
-      className="italic"
-      style={{
-        backgroundImage: GOLD_GRAD,
-        WebkitBackgroundClip: "text",
-        backgroundClip: "text",
-        WebkitTextFillColor: "transparent",
-        color: "transparent",
-      }}
-    >
-      {children}
-    </span>
-  );
+  return <span className="ahq-em-shine">{children}</span>;
 }
 
 export default function Home() {
   return (
     <>
+      {/* Homepage type + accent styling: thin Instrument Serif headlines + animated yellow-gold shimmer */}
+      <style>{`
+        @import url('https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&display=swap');
+
+        .ahq-serif {
+          font-family: 'Instrument Serif', 'Playfair Display', Georgia, serif;
+          font-weight: 400;
+          letter-spacing: -0.01em;
+        }
+
+        .ahq-em-shine {
+          font-style: italic;
+          background: linear-gradient(100deg,
+            #C9A23A 16%,
+            #FBF0BE 40%,
+            #EBC85A 50%,
+            #FBF0BE 60%,
+            #C9A23A 84%
+          );
+          background-size: 200% auto;
+          -webkit-background-clip: text;
+          background-clip: text;
+          color: transparent;
+          -webkit-text-fill-color: transparent;
+          animation: ahqShine 7s linear infinite;
+          opacity: 0.96;
+        }
+        @keyframes ahqShine {
+          0%   { background-position: 200% center; }
+          100% { background-position: -200% center; }
+        }
+        @media (prefers-reduced-motion: reduce) {
+          .ahq-em-shine { animation: none; background-position: 50% center; }
+        }
+      `}</style>
+
       {/* ── HERO ── */}
       <section className="relative overflow-hidden">
         <div className="max-w-shell mx-auto px-5 pt-20 pb-16 relative fade-up">
           <p className="eyebrow mb-6">[ AHQ : QUANT RESEARCH PLATFORM ]</p>
           <div className="grid gap-12 lg:grid-cols-2 lg:items-center">
             <div>
-              <h1 className="font-display text-5xl md:text-[5.2rem] font-medium tracking-tight leading-[1.02]">
+              <h1 className="ahq-serif text-6xl md:text-[6rem] tracking-tight leading-[1.0]">
                 Trade the<br />numbers,<br />not the <Accent>tips</Accent>.
               </h1>
               <p className="mt-7 text-muted text-lg max-w-md leading-relaxed">
@@ -144,7 +163,7 @@ export default function Home() {
       {/* ── THREE ENGINES ── */}
       <section className="max-w-shell mx-auto px-5 pt-24 pb-6">
         <p className="eyebrow mb-4">[ AHQ : WHAT YOU GET ]</p>
-        <h2 className="font-display text-4xl md:text-5xl font-medium tracking-tight">
+        <h2 className="ahq-serif text-5xl md:text-6xl tracking-tight">
           Three engines, one <Accent>honest</Accent> answer.
         </h2>
         <hr className="rule-grad mt-6 max-w-xs" />
@@ -165,7 +184,7 @@ export default function Home() {
                 </span>
                 <span className="font-mono text-[10px] tracking-[0.2em]" style={{ color: e.color }}>[ {e.tag} ]</span>
               </div>
-              <h3 className="font-display text-xl font-medium mb-2.5">{e.title}</h3>
+              <h3 className="ahq-serif text-2xl mb-2.5">{e.title}</h3>
               <p className="text-sm text-muted leading-relaxed">{e.desc}</p>
               <p className="mt-5 font-mono text-[13px] flex items-center gap-1.5" style={{ color: e.color }}>
                 {e.cta}
@@ -181,7 +200,7 @@ export default function Home() {
         <div className="grid gap-12 lg:grid-cols-2 lg:items-start">
           <div>
             <p className="eyebrow mb-4">[ AHQ : THE SCANNER ]</p>
-            <h2 className="font-display text-4xl md:text-5xl font-medium tracking-tight leading-[1.05]">
+            <h2 className="ahq-serif text-5xl md:text-6xl tracking-tight leading-[1.02]">
               Ten strategies,<br />run <Accent>every bar</Accent>.
             </h2>
             <hr className="rule-grad mt-6 max-w-[220px]" />
@@ -193,7 +212,7 @@ export default function Home() {
             <div className="flex gap-10 mt-10">
               {[["4,200", "SCANS / DAY"], ["10", "STRATEGIES"], ["99.9%", "DATA UPTIME"]].map(([n, l]) => (
                 <div key={l}>
-                  <p className="font-display text-3xl font-medium">{n}</p>
+                  <p className="ahq-serif text-4xl">{n}</p>
                   <p className="font-mono text-[10px] tracking-[0.15em] text-muted mt-1.5">{l}</p>
                 </div>
               ))}
@@ -217,7 +236,7 @@ export default function Home() {
       <section id="waitlist" className="max-w-shell mx-auto px-5 py-24">
         <div className="relative overflow-hidden card px-6 py-16 md:py-20 text-center">
           <p className="eyebrow mb-5">[ AHQ : EARLY ACCESS ]</p>
-          <h2 className="font-display text-4xl md:text-5xl font-medium tracking-tight leading-[1.05]">
+          <h2 className="ahq-serif text-5xl md:text-6xl tracking-tight leading-[1.02]">
             Be first when the<br />platform <Accent>ships</Accent>.
           </h2>
           <p className="text-muted mt-5 text-base max-w-lg mx-auto leading-relaxed">
