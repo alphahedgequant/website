@@ -16,7 +16,7 @@ export const metadata = {
   },
 };
 
-// Dark + gold theming so Clerk's sign-in / sign-up screens match the site.
+// Dark theming + premium gold-shimmer TEXT on the sign-in / sign-up buttons.
 const clerkAppearance = {
   variables: {
     colorPrimary: "#E3BE4F",
@@ -31,8 +31,12 @@ const clerkAppearance = {
   elements: {
     card: { backgroundColor: "#0C0D11", border: "1px solid rgba(148,163,184,0.14)" },
     headerTitle: { color: "#ECEAE0" },
-    socialButtonsBlockButton: { border: "1px solid rgba(148,163,184,0.2)" },
-    formButtonPrimary: { color: "#05070b", fontWeight: "600" },
+    // Social buttons (Apple / Google): dark frame + gold border + gold shimmer text.
+    socialButtonsBlockButton: "ahq-authbtn",
+    socialButtonsBlockButtonText: "ahq-goldtext",
+    socialButtonsProviderIcon__apple: "ahq-apple-icon",
+    // Primary "Continue" button: same premium gold-shimmer text treatment.
+    formButtonPrimary: "ahq-authbtn ahq-goldtext",
   },
 };
 
