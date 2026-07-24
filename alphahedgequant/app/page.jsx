@@ -4,7 +4,9 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import WaitlistForm from "@/components/WaitlistForm";
 
-const GOLD = "#C7A24E"; // muted antique gold used on the single italic accent words
+// Shiny antique-gold foil gradient for the single italic accent words
+// (light champagne at the top → deep antique gold at the bottom).
+const GOLD_GRAD = "linear-gradient(170deg, #FBEBB8 0%, #EACB72 34%, #D3A64A 60%, #B07C24 100%)";
 
 // Rotating consensus-scan terminal demo — real symbols, illustrative output.
 const SCANS = [
@@ -78,8 +80,22 @@ function Terminal() {
   );
 }
 
+// Italic accent word rendered as a shiny gold-foil gradient (background-clipped text).
 function Accent({ children }) {
-  return <span className="italic" style={{ color: GOLD }}>{children}</span>;
+  return (
+    <span
+      className="italic"
+      style={{
+        backgroundImage: GOLD_GRAD,
+        WebkitBackgroundClip: "text",
+        backgroundClip: "text",
+        WebkitTextFillColor: "transparent",
+        color: "transparent",
+      }}
+    >
+      {children}
+    </span>
+  );
 }
 
 export default function Home() {
