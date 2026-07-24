@@ -127,7 +127,7 @@ export default function Home() {
           <div className="grid gap-12 lg:grid-cols-2 lg:items-center">
             <div>
               <h1 className="ahq-serif text-6xl md:text-[6rem] tracking-tight leading-[1.0]">
-                Trade the<br />numbers,<br />not the <Accent>tips</Accent>.
+                Where alpha<br />becomes<br /><Accent>edge</Accent>.
               </h1>
               <p className="mt-7 text-muted text-lg max-w-md leading-relaxed">
                 Live NSE &amp; US screeners, a 10-strategy quant scanner, analyst
