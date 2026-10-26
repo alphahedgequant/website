@@ -5,7 +5,7 @@ import {
   ResponsiveContainer, ReferenceLine, Area, AreaChart,
 } from "recharts";
 
-const API = process.env.NEXT_PUBLIC_API_URL || "https://zerohedgequant-backend.onrender.com";
+const API = "/api/market";
 
 const INDICES = [
   { id: "NIFTY", label: "NIFTY 50", lot: 75 },
@@ -77,7 +77,7 @@ export default function OptionsPage() {
   const loadChain = useCallback(async (ul, exp, isRefresh = false) => {
     if (!isRefresh) setStatus("loading");
     try {
-      const url = `${API}/api/option-chain/${ul}${exp ? `?expiry=${exp}` : ""}`;
+      const url = `${API}/option-chain/${ul}${exp ? `?expiry=${exp}` : ""}`;
       const r = await fetch(url, { cache: "no-store" });
       const raw = await r.text();
       let j;
