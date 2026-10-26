@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import WaitlistForm from "@/components/WaitlistForm";
+import StockSearch from "@/components/StockSearch";
 
 // Rotating consensus-scan terminal demo — real symbols, illustrative output.
 const SCANS = [
@@ -158,6 +159,13 @@ export default function Home() {
             ))}
           </div>
         </div>
+      </section>
+
+      {/* Unified company discovery — data backed, not a mocked ticker demo. */}
+      <section className="max-w-shell mx-auto px-5 pt-16 pb-3">
+        <h2 className="font-display text-3xl md:text-4xl text-body mb-3">Know the company behind the price.</h2>
+        <p className="text-muted max-w-2xl mb-6">Find a company, then explore its financials, valuation, technical context and available research—all in one place.</p>
+        <StockSearch />
       </section>
 
       {/* ── THREE ENGINES ── */}
