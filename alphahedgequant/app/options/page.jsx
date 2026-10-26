@@ -187,7 +187,7 @@ export default function OptionsPage() {
           </button>
         )}
         {status === "expired" && (
-          <a href={`${API}/auth/login`} target="_blank" rel="noreferrer" className="font-mono text-[10px] px-2 py-0.5 rounded border border-amber/40 text-amber hover:bg-amber/10">
+          <a href="https://zerohedgequant-backend.onrender.com/auth/login" target="_blank" rel="noreferrer" className="font-mono text-[10px] px-2 py-0.5 rounded border border-amber/40 text-amber hover:bg-amber/10">
             RE-AUTH UPSTOX →
           </a>
         )}
