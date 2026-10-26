@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
 import { SignedIn, SignedOut, UserButton } from "@clerk/nextjs";
+import ThemeToggle from "./ThemeToggle";
 
 const links = [
   { href: "/screener", label: "Screener" },
@@ -46,6 +47,7 @@ export default function Nav() {
               {l.label}
             </Link>
           ))}
+          <ThemeToggle />
           <SignedOut>
             <Link href="/sign-in" className="text-sm text-muted hover:text-body">
               Sign in
@@ -59,8 +61,10 @@ export default function Nav() {
           </SignedIn>
         </nav>
 
+        <div className="flex items-center gap-2 md:hidden">
+        <ThemeToggle />
         <button
-          className="md:hidden text-muted"
+          className="text-muted"
           onClick={() => setOpen(!open)}
           aria-label="Toggle menu"
         >
@@ -72,6 +76,7 @@ export default function Nav() {
             )}
           </svg>
         </button>
+        </div>
       </div>
 
       {open && (
