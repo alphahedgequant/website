@@ -7,8 +7,8 @@ import { api } from "@/lib/config";
 
 // ── markets ─────────────────────────────────────────────
 const MARKETS = {
-  NSE: { scr: "/api/screener", idx: "/api/indices", cur: "₹", label: "NSE · India", delay: "live (Upstox) + Yahoo for extended names" },
-  US: { scr: "/api/us-screener", idx: "/api/us-indices", cur: "$", label: "US · NYSE/NASDAQ", delay: "~15 min delayed (Yahoo)" },
+  NSE: { scr: "/api/screener", idx: "/api/indices", cur: "₹", label: "NSE · India", delay: "provider feed · quote freshness not verified" },
+  US: { scr: "/api/us-screener", idx: "/api/us-indices", cur: "$", label: "US · NYSE/NASDAQ", delay: "Yahoo/provider feed · potentially delayed" },
 };
 
 // ── formatting ──────────────────────────────────────────
