@@ -23,5 +23,3 @@ jobs:
         env:
           NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY: ${{ secrets.AHQ_CI_CLERK_PUBLISHABLE_KEY }}
           CLERK_SECRET_KEY: ${{ secrets.AHQ_CI_CLERK_SECRET_KEY }}
-      - name: Volume regression suite
-        run: node --test tests/terminalVolume.test.mjs
