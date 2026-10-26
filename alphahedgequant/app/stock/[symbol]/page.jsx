@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useParams, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { fetchStock } from "@/lib/config";
+import StockResearchSections from "@/components/StockResearchSections";
 
 // ── formatting ───────────────────────────────────────────────
 const n2 = (v) => (v == null || isNaN(v) ? "—" : Number(v).toLocaleString("en-IN", { maximumFractionDigits: 2, minimumFractionDigits: 0 }));
@@ -128,6 +129,8 @@ export default function StockDetail() {
         </div>
       </div>
 
+      <StockResearchSections data={data} market={market} />
+
       {rangePos != null && (
         <div className="card p-5 mt-4">
           <div className="flex items-center justify-between text-xs font-mono text-muted mb-3">
@@ -224,7 +227,7 @@ export default function StockDetail() {
       )}
 
       <p className="font-mono text-[11px] text-muted mt-6">
-        DATA: YAHOO FINANCE{market === "US" ? " · ~15 MIN DELAYED" : ""} · RESEARCH &amp; EDUCATION ONLY · NOT INVESTMENT ADVICE
+        DATA: {data.dataSource?.price || "PROVIDER UNVERIFIED"} · QUOTE FRESHNESS NOT VERIFIED · RESEARCH &amp; EDUCATION ONLY · NOT INVESTMENT ADVICE
       </p>
     </Shell>
   );
