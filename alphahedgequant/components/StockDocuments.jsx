@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 const GROUPS = [
   { key:"announcements", name:"Announcements", caption:"Exchange disclosures and board-meeting notices", icon:"◉" },
@@ -23,8 +23,21 @@ const allowedSource = url => {
 };
 export default function StockDocuments({symbol,market="NSE",documents=[]}) {
   const [filter,setFilter]=useState("all");
+  const [feed,setFeed]=useState([]);
+  const [feedStatus,setFeedStatus]=useState("idle");
+  useEffect(()=>{
+    if(market!=="US"){setFeed([]);setFeedStatus("idle");return;}
+    let active=true;
+    setFeedStatus("loading");
+    fetch("/api/company-documents?symbol="+encodeURIComponent(symbol),{cache:"no-store"})
+      .then(r=>r.json())
+      .then(j=>{if(active){setFeed(Array.isArray(j.documents)?j.documents:[]);setFeedStatus(j.status||"unavailable");}})
+      .catch(()=>{if(active){setFeed([]);setFeedStatus("unavailable");}});
+    return ()=>{active=false;};
+  },[market,symbol]);
   // Only render validated, matching issuer documents from an explicit verified feed.
-  const clean=Array.isArray(documents)?documents.filter(d=>d && d.symbol===symbol && d.market===market && GROUPS.some(g=>g.key===d.category) && allowedSource(d.url) && d.verified===true):[];
+  const combined=[...(Array.isArray(documents)?documents:[]),...feed];
+  const clean=combined.filter(d=>d && d.symbol===symbol && d.market===market && GROUPS.some(g=>g.key===d.category) && allowedSource(d.url) && d.verified===true):[];
   const filtered=filter==="all"?clean:clean.filter(d=>d.category===filter);
   const byGroup=GROUPS.map(g=>({...g,items:filtered.filter(d=>d.category===g.key)}));
   return <section className="card mt-5 p-5 md:p-7" id="company-documents" aria-label="Company documents">
@@ -36,6 +49,9 @@ export default function StockDocuments({symbol,market="NSE",documents=[]}) {
       </div>
       <span className="rounded-full border border-line px-3 py-1.5 text-xs text-muted">{clean.length} verified documents indexed</span>
     </div>
+    {market==="US" && feedStatus==="loading" && <p role="status" className="mt-3 text-xs text-muted">Checking SEC EDGAR for issuer filings…</p>}
+    {market==="US" && feedStatus==="not_configured" && <p className="mt-3 text-xs text-muted">Automatic SEC lookup requires a configured SEC_USER_AGENT. Official links remain available below.</p>}
+    {market==="US" && feedStatus==="unavailable" && <p className="mt-3 text-xs text-muted">SEC filings could not be retrieved. The official SEC search link remains available.</p>}
     <div className="flex gap-2 flex-wrap my-5" aria-label="Filter document categories">
       {[{key:"all",name:"All documents"},...GROUPS].map(g=><button type="button" key={g.key}
         aria-pressed={filter===g.key} onClick={()=>setFilter(g.key)}
