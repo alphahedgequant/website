@@ -5,26 +5,42 @@
 :root {
   color-scheme: dark;
   --ahq-ink: #05070b;
+  --ahq-ink-rgb: 5 7 11;
   --ahq-surface: #0C0D11;
+  --ahq-surface-rgb: 12 13 17;
   --ahq-raised: #13151B;
+  --ahq-raised-rgb: 19 21 27;
   --ahq-line: rgba(148,163,184,0.14);
   --ahq-body: #E6EAF2;
+  --ahq-body-rgb: 230 234 242;
   --ahq-muted: #8A94A8;
+  --ahq-muted-rgb: 138 148 168;
   --ahq-amber: #E3BE4F;
+  --ahq-amber-rgb: 227 190 79;
   --ahq-amberdim: #C29A38;
+  --ahq-amberdim-rgb: 194 154 56;
   --ahq-gold: #E3BE4F;
+  --ahq-gold-rgb: 227 190 79;
 }
 html[data-theme="light"] {
   color-scheme: light;
   --ahq-ink: #f5f7fa;
+  --ahq-ink-rgb: 245 247 250;
   --ahq-surface: #ffffff;
+  --ahq-surface-rgb: 255 255 255;
   --ahq-raised: #edf0f4;
+  --ahq-raised-rgb: 237 240 244;
   --ahq-line: rgba(31,41,55,0.17);
   --ahq-body: #1e293b;
+  --ahq-body-rgb: 30 41 59;
   --ahq-muted: #526078;
+  --ahq-muted-rgb: 82 96 120;
   --ahq-amber: #84610e;
+  --ahq-amber-rgb: 132 97 14;
   --ahq-amberdim: #70500c;
+  --ahq-amberdim-rgb: 112 80 12;
   --ahq-gold: #84610e;
+  --ahq-gold-rgb: 132 97 14;
 }
 
 body {
