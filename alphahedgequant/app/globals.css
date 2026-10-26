@@ -47,6 +47,10 @@ body {
   background: var(--ahq-ink);
   color: var(--ahq-body);
   -webkit-font-smoothing: antialiased;
+  font-family: Archivo, system-ui, sans-serif;
+  font-size: 16px;
+  line-height: 1.55;
+  text-rendering: optimizeLegibility;
 }
 
 ::selection {
@@ -280,3 +284,15 @@ html[data-theme="light"] .grad-text { color: #74520B; }
 html[data-theme="light"] .ahq-authbtn { border-color: rgba(116,82,11,.55) !important; }
 html[data-theme="light"] .ahq-goldtext { background: none !important; -webkit-text-fill-color: #74520B !important; color: #74520B !important; animation: none !important; }
 html[data-theme="light"] .ahq-apple-icon { filter: none !important; }
+
+/* Both themes: clear text hierarchy with the existing brand font family. */
+.font-display { line-height: 1.17; }
+.font-mono, code, kbd, samp { font-variant-numeric: tabular-nums; }
+:where(button,input,select,textarea) { font: inherit; }
+:where(button,a,input,select,textarea):focus-visible {
+  outline: 2px solid var(--ahq-amber);
+  outline-offset: 3px;
+}
+@media (max-width: 640px) {
+  body { line-height: 1.6; }
+}
