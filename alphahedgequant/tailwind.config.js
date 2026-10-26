@@ -7,15 +7,15 @@ module.exports = {
   theme: {
     extend: {
       colors: {
-        ink: "var(--ahq-ink)",
-        surface: "var(--ahq-surface)",
-        raised: "var(--ahq-raised)",
+        ink: "rgb(var(--ahq-ink-rgb) / <alpha-value>)",
+        surface: "rgb(var(--ahq-surface-rgb) / <alpha-value>)",
+        raised: "rgb(var(--ahq-raised-rgb) / <alpha-value>)",
         line: "var(--ahq-line)",
-        body: "var(--ahq-body)",
-        muted: "var(--ahq-muted)",
-        amber: "var(--ahq-amber)",       // AHQ gold — yellow-gold (updated brand accent)
-        amberdim: "var(--ahq-amberdim)",
-        gold: "var(--ahq-gold)",
+        body: "rgb(var(--ahq-body-rgb) / <alpha-value>)",
+        muted: "rgb(var(--ahq-muted-rgb) / <alpha-value>)",
+        amber: "rgb(var(--ahq-amber-rgb) / <alpha-value>)",       // AHQ gold — yellow-gold (updated brand accent)
+        amberdim: "rgb(var(--ahq-amberdim-rgb) / <alpha-value>)",
+        gold: "rgb(var(--ahq-gold-rgb) / <alpha-value>)",
         cyan: "#22c3d6",         // AHQ systems/live-data accent (--cyan-500)
         gain: "#2DD482",
         loss: "#F0564F",
