@@ -33,11 +33,16 @@ export async function GET(request) {
     const today=new Date(),end=new Date(today);end.setUTCDate(end.getUTCDate()-1);
     const begin=new Date(today);begin.setUTCDate(begin.getUTCDate()-65);
     const ds=d=>d.toISOString().slice(0,10);
-    const [hist,current]=await Promise.all([
-      upstox("/v3/historical-candle/"+instrument+"/minutes/1/"+ds(end)+"/"+ds(begin),token),
+    // Upstox V3 minute candles enforce a 1-month maximum per request.
+    // Partition requests into <= 25-day windows to allow up to 30 sessions.
+    const ranges=[];let cursor=new Date(begin);
+    while(cursor<=end){const stop=new Date(cursor);stop.setUTCDate(stop.getUTCDate()+24);if(stop>end)stop.setTime(end.getTime());ranges.push([new Date(cursor),stop]);cursor=new Date(stop);cursor.setUTCDate(cursor.getUTCDate()+1);}
+    const [histories,current]=await Promise.all([
+      Promise.all(ranges.map(([from,to])=>upstox("/v3/historical-candle/"+instrument+"/minutes/1/"+ds(to)+"/"+ds(from),token))),
       upstox("/v3/historical-candle/intraday/"+instrument+"/minutes/1",token)
     ]);
-    const result=volumeSeries(hist.candles||[],current.candles||[],lookback);
+    const history=histories.flatMap(h=>h.candles||[]);
+    const result=volumeSeries(history,current.candles||[],lookback);
     return Response.json({...result,source:"Upstox",fetchedAt:new Date().toISOString(),note:"Minute candles are interval-updated, not tick-streamed. Partial or missing bars are not zero."},{headers:{"Cache-Control":"private, no-store"}});
   }catch(err){return Response.json({error:"Market data unavailable: "+err.message},{status:502});}
 }
