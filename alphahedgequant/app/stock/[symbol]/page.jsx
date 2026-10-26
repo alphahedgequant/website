@@ -5,6 +5,7 @@ import { useParams, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { fetchStock } from "@/lib/config";
 import StockResearchSections from "@/components/StockResearchSections";
+import StockDocuments from "@/components/StockDocuments";
 
 // ── formatting ───────────────────────────────────────────────
 const n2 = (v) => (v == null || isNaN(v) ? "—" : Number(v).toLocaleString("en-IN", { maximumFractionDigits: 2, minimumFractionDigits: 0 }));
@@ -130,6 +131,7 @@ export default function StockDetail() {
       </div>
 
       <StockResearchSections data={data} market={market} />
+      <StockDocuments symbol={data.symbol || sym} market={market} documents={data.documents || []} />
 
       {rangePos != null && (
         <div className="card p-5 mt-4">
