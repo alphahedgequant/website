@@ -1,5 +1,6 @@
 "use client";
 import { useEffect, useState } from "react";
+import { verifiedIndianDocuments } from "@/lib/verifiedIndianDocuments";
 
 const GROUPS = [
   { key:"announcements", name:"Announcements", caption:"Exchange disclosures and board-meeting notices", icon:"◉" },
@@ -36,9 +37,11 @@ export default function StockDocuments({symbol,market="NSE",documents=[]}) {
     return ()=>{active=false;};
   },[market,symbol]);
   // Only render validated, matching issuer documents from an explicit verified feed.
-  const combined=[...(Array.isArray(documents)?documents:[]),...feed];
+  const curated = market === "NSE" ? verifiedIndianDocuments.filter(d => d.symbol === String(symbol).toUpperCase()) : [];
+  const combined=[...(Array.isArray(documents)?documents:[]),...curated,...feed];
   const clean=combined.filter(d=>d && d.symbol===symbol && d.market===market && GROUPS.some(g=>g.key===d.category) && allowedSource(d.url) && d.verified===true);
-  const filtered=filter==="all"?clean:clean.filter(d=>d.category===filter);
+  const unique = clean.filter((d,i,a)=>a.findIndex(x=>x.url===d.url && x.category===d.category)===i);
+  const filtered=filter==="all"?unique:unique.filter(d=>d.category===filter);
   const byGroup=GROUPS.map(g=>({...g,items:filtered.filter(d=>d.category===g.key)}));
   return <section className="card mt-5 p-5 md:p-7" id="company-documents" aria-label="Company documents">
     <div className="flex flex-wrap justify-between gap-3 items-start">
@@ -47,7 +50,7 @@ export default function StockDocuments({symbol,market="NSE",documents=[]}) {
         <h2 className="font-display text-2xl md:text-3xl text-body">Documents &amp; Earnings Calls</h2>
         <p className="mt-2 text-sm leading-relaxed text-muted">Financial filings, rating actions, announcements and management commentary—linked to their original publishers.</p>
       </div>
-      <span className="rounded-full border border-line px-3 py-1.5 text-xs text-muted">{clean.length} verified documents indexed</span>
+      <span className="rounded-full border border-line px-3 py-1.5 text-xs text-muted">{unique.length} verified documents indexed</span>
     </div>
     {market==="US" && feedStatus==="loading" && <p role="status" className="mt-3 text-xs text-muted">Checking SEC EDGAR for issuer filings…</p>}
     {market==="US" && feedStatus==="not_configured" && <p className="mt-3 text-xs text-muted">Automatic SEC lookup requires a configured SEC_USER_AGENT. Official links remain available below.</p>}
