@@ -6,7 +6,8 @@ export function sessionParts(timestamp) {
 }
 export function median(xs) { const v=[...xs].sort((a,b)=>a-b); return v.length ? (v.length%2?v[(v.length-1)/2]:(v[v.length/2-1]+v[v.length/2])/2) : null; }
 export function volumeSeries(history, today, lookback=15) {
-  const dates=[...new Set(history.map(x=>sessionParts(x[0]).date))].sort().reverse().slice(0,lookback);
+  const currentDate=today.length ? sessionParts(today[0][0]).date : null;
+  const dates=[...new Set(history.map(x=>sessionParts(x[0]).date))].filter(d=>d!==currentDate).sort().reverse().slice(0,lookback);
   const timeSlots=Array.from({length:375},(_,i)=>555+i); // 09:15–15:29 NSE
   function cumulative(rows, date) {
     const m=new Map();
@@ -19,7 +20,7 @@ export function volumeSeries(history, today, lookback=15) {
     let c=0;return timeSlots.map(t=>{if(!m.has(t))return null;c+=m.get(t);return c;});
   }
   const refs=dates.map(d=>cumulative(history,d)).filter(Boolean);
-  const todayDate=today.length?sessionParts(today[0][0]).date:null;
+  const todayDate=currentDate;
   const current = todayDate ? new Map(today.filter(x=>sessionParts(x[0]).date===todayDate).map(x=>[sessionParts(x[0]).minute,Number(x[5])])) : new Map();
   let running=0, missing=false;
   return { eligibleSessions:refs.length, requestedSessions:lookback, points:timeSlots.map((slot,i)=>{
