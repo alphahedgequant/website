@@ -3,6 +3,10 @@
     {
       "path": "/api/cron/scrape-calls",
       "schedule": "0 18 * * *"
+    },
+    {
+      "path": "/api/cron/discover-nse-documents",
+      "schedule": "15 3 * * *"
     }
   ]
 }
