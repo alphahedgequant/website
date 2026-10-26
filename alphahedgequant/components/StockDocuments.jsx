@@ -26,6 +26,7 @@ export default function StockDocuments({symbol,market="NSE",documents=[]}) {
   const [filter,setFilter]=useState("all");
   const [feed,setFeed]=useState([]);
   const [feedStatus,setFeedStatus]=useState("idle");
+  const [indexed,setIndexed]=useState([]);
   useEffect(()=>{
     if(market!=="US"){setFeed([]);setFeedStatus("idle");return;}
     let active=true;
@@ -36,9 +37,16 @@ export default function StockDocuments({symbol,market="NSE",documents=[]}) {
       .catch(()=>{if(active){setFeed([]);setFeedStatus("unavailable");}});
     return ()=>{active=false;};
   },[market,symbol]);
+  useEffect(()=>{
+    let active=true;
+    fetch("/api/company-document-index?symbol="+encodeURIComponent(symbol)+"&market="+encodeURIComponent(market),{cache:"no-store"})
+      .then(r=>r.json()).then(j=>{if(active)setIndexed(Array.isArray(j.documents)?j.documents:[]);})
+      .catch(()=>{if(active)setIndexed([]);});
+    return ()=>{active=false;};
+  },[symbol,market]);
   // Only render validated, matching issuer documents from an explicit verified feed.
   const curated = market === "NSE" ? verifiedIndianDocuments.filter(d => d.symbol === String(symbol).toUpperCase()) : [];
-  const combined=[...(Array.isArray(documents)?documents:[]),...curated,...feed];
+  const combined=[...(Array.isArray(documents)?documents:[]),...curated,...feed,...indexed];
   const clean=combined.filter(d=>d && d.symbol===symbol && d.market===market && GROUPS.some(g=>g.key===d.category) && allowedSource(d.url) && d.verified===true);
   const unique = clean.filter((d,i,a)=>a.findIndex(x=>x.url===d.url && x.category===d.category)===i);
   const filtered=filter==="all"?unique:unique.filter(d=>d.category===filter);
