@@ -43,8 +43,9 @@ const clerkAppearance = {
 export default function RootLayout({ children }) {
   return (
     <ClerkProvider appearance={clerkAppearance}>
-      <html lang="en">
+      <html lang="en" suppressHydrationWarning>
         <head>
+          <script dangerouslySetInnerHTML={{ __html: `(function(){try{var theme=localStorage.getItem("ahq-theme");if(theme==="light"){document.documentElement.dataset.theme="light";document.documentElement.style.colorScheme="light";}}catch(e){}})();` }} />
           <link rel="preconnect" href="https://fonts.googleapis.com" />
           <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
           <link
