@@ -24,23 +24,23 @@
 }
 html[data-theme="light"] {
   color-scheme: light;
-  --ahq-ink: #f5f7fa;
-  --ahq-ink-rgb: 245 247 250;
+  --ahq-ink: #F6F7F9;
+  --ahq-ink-rgb: 246 247 249;
   --ahq-surface: #ffffff;
   --ahq-surface-rgb: 255 255 255;
-  --ahq-raised: #edf0f4;
-  --ahq-raised-rgb: 237 240 244;
+  --ahq-raised: #EEF1F5;
+  --ahq-raised-rgb: 238 241 245;
   --ahq-line: rgba(31,41,55,0.17);
-  --ahq-body: #1e293b;
-  --ahq-body-rgb: 30 41 59;
-  --ahq-muted: #526078;
-  --ahq-muted-rgb: 82 96 120;
-  --ahq-amber: #84610e;
-  --ahq-amber-rgb: 132 97 14;
-  --ahq-amberdim: #70500c;
-  --ahq-amberdim-rgb: 112 80 12;
-  --ahq-gold: #84610e;
-  --ahq-gold-rgb: 132 97 14;
+  --ahq-body: #182337;
+  --ahq-body-rgb: 24 35 55;
+  --ahq-muted: #475569;
+  --ahq-muted-rgb: 71 85 105;
+  --ahq-amber: #74520B;
+  --ahq-amber-rgb: 116 82 11;
+  --ahq-amberdim: #654706;
+  --ahq-amberdim-rgb: 101 71 6;
+  --ahq-gold: #74520B;
+  --ahq-gold-rgb: 116 82 11;
 }
 
 body {
@@ -223,7 +223,7 @@ body {
 
 /* AHQ LIGHT THEME: additive overrides; original dark theme remains unchanged.
    Avoid touching structure, spacing, trading gain/loss semantics or navigation. */
-html[data-theme="light"] .bg-field { background: #f5f7fa; }
+html[data-theme="light"] .bg-field { background: #F6F7F9; }
 html[data-theme="light"] .bg-field::after { background: radial-gradient(70vw 60vh at 78% 42%, rgba(132,97,14,.06), transparent 70%); }
 html[data-theme="light"] .vignette { background: radial-gradient(120vw 90vh at 50% 30%, transparent 45%, rgba(195,203,215,.12) 100%); }
 html[data-theme="light"] .grain { opacity: .025; }
@@ -245,6 +245,38 @@ html[data-theme="light"] .btn-primary:hover { background: #172033; }
 html[data-theme="light"] .btn-ghost:hover { background: rgba(15,23,42,.05); }
 html[data-theme="light"] .ahq-theme-toggle { background: #ffffff; }
 /* Surfaces hard-coded within some existing tools are kept readable in light mode. */
-html[data-theme="light"] .bg-\[\#05070b\] { background-color: #f5f7fa; }
+html[data-theme="light"] .bg-\[\#05070b\] { background-color: #F6F7F9; }
 html[data-theme="light"] .bg-\[\#0C0D11\] { background-color: #ffffff; }
-html[data-theme="light"] .bg-\[\#13151B\] { background-color: #edf0f4; }
+html[data-theme="light"] .bg-\[\#13151B\] { background-color: #EEF1F5; }
+
+/* Light-mode legibility pass (WCAG-oriented; isolated from the dark design).
+   Archivo remains the interface/body font; Playfair remains display-only;
+   JetBrains Mono remains for dense numerical/financial readouts. */
+html[data-theme="light"] body {
+  font-family: Archivo, system-ui, sans-serif;
+  font-weight: 400;
+  line-height: 1.55;
+  letter-spacing: 0;
+  -webkit-font-smoothing: auto;
+  text-rendering: optimizeLegibility;
+}
+html[data-theme="light"] :is(p,li) { line-height: 1.6; }
+html[data-theme="light"] :is(input,textarea,select) {
+  color: #182337;
+  background-color: #fff;
+  border-color: rgba(71,85,105,.28);
+}
+html[data-theme="light"] :is(input,textarea,select)::placeholder { color: #52627A; }
+html[data-theme="light"] :is(button,a,input,textarea,select):focus-visible {
+  outline: 2px solid #74520B;
+  outline-offset: 3px;
+}
+html[data-theme="light"] .tick-up { color: #087443; }
+html[data-theme="light"] .tick-down { color: #A52C31; }
+/* Semantic gain/loss tokens retain their direction while meeting light-surface readability. */
+html[data-theme="light"] .text-gain { color: #087443; }
+html[data-theme="light"] .text-loss { color: #A52C31; }
+html[data-theme="light"] .grad-text { color: #74520B; }
+html[data-theme="light"] .ahq-authbtn { border-color: rgba(116,82,11,.55) !important; }
+html[data-theme="light"] .ahq-goldtext { background: none !important; -webkit-text-fill-color: #74520B !important; color: #74520B !important; animation: none !important; }
+html[data-theme="light"] .ahq-apple-icon { filter: none !important; }
