@@ -1,11 +1,11 @@
 "use client";
 import { useEffect, useState } from "react";
 
-// Defaults to AHQ light theme; saved dark preference overrides it.
+// Defaults to the original AHQ dark theme; users can save light mode.
 export default function ThemeToggle() {
-  const [theme, setTheme] = useState("light");
+  const [theme, setTheme] = useState("dark");
   useEffect(() => {
-    const current = document.documentElement.dataset.theme === "dark" ? "dark" : "light";
+    const current = document.documentElement.dataset.theme === "light" ? "light" : "dark";
     setTheme(current);
   }, []);
   function toggle() {
