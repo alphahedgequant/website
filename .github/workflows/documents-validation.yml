@@ -1,0 +1,20 @@
+name: Document index validation
+on:
+  pull_request:
+    paths:
+      - 'alphahedgequant/lib/documentRegistry.mjs'
+      - 'alphahedgequant/tests/documentRegistry.test.mjs'
+      - 'alphahedgequant/app/api/company-document-index/**'
+      - '.github/workflows/documents-validation.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: node --test alphahedgequant/tests/documentRegistry.test.mjs
