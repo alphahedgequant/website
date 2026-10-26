@@ -18,7 +18,11 @@ const categories = [
   {id:"calls",label:"Concall & Ratings"},
   {id:"events",label:"Events & News"}
 ];
-const fmt = (v, unit="") => v == null || !Number.isFinite(Number(v)) ? "Not available" : Number(v).toLocaleString("en-IN",{maximumFractionDigits:2}) + unit;
+const fmt = (v, unit="") => v == null || v === "" || !Number.isFinite(Number(v)) ? "Not available" : Number(v).toLocaleString("en-IN",{maximumFractionDigits:2}) + unit;
+const fmtNamed = (v, unit, name) => {
+  const result = fmt(v, unit);
+  return result === "Not available" ? result : `${result} ${name}`;
+};
 export default function StockResearchSections({data, market}) {
   const [tab,setTab]=useState("overview");
   const f=data.fundamentals || {};
@@ -46,8 +50,8 @@ export default function StockResearchSections({data, market}) {
     <div role="tabpanel">
       {tab==="overview" && <div className="grid gap-3 md:grid-cols-3">
         <Insight title="Business" value={data.sector || "Not provided"} explanation={data.industry ? `Industry: ${data.industry}` : "Sector classification is not available from this feed."}/>
-        <Insight title="Valuation" value={fmt(f.pe)+" P/E"} explanation="P/E measures the price paid for each unit of earnings. Always compare with sector peers and earnings quality."/>
-        <Insight title="Quality" value={fmt(f.roe,"%")+" ROE"} explanation="ROE indicates how efficiently shareholder equity is used to generate profit."/>
+        <Insight title="Valuation" value={fmtNamed(f.pe, "×", "")} explanation="P/E measures the price paid for each unit of earnings. Always compare with sector peers and earnings quality."/>
+        <Insight title="Quality" value={fmt(f.roe,"%")} explanation="ROE indicates how efficiently shareholder equity is used to generate profit."/>
       </div>}
       {tab==="financials" && <>
         <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
@@ -56,12 +60,12 @@ export default function StockResearchSections({data, market}) {
         <p className="mt-5 text-sm text-muted">Annual and quarterly revenue/profit charts appear further down this page when available. A complete audited income statement, balance sheet and cash-flow statement require a licensed filing-data feed; missing line items are not estimated.</p>
       </>}
       {tab==="technicals" && <div className="grid gap-3 md:grid-cols-3">
-        <Insight title="Price" value={fmt(data.price ? data.price : null, "")} explanation={isIndia?"Quoted in INR":"Quoted in USD"}/>
-        <Insight title="50-day average" value={fmt(f.sma50)} explanation="A rolling price trend measure, not an investment recommendation."/>
-        <Insight title="200-day average" value={fmt(f.sma200)} explanation="A longer-term trend benchmark. Intraday signals and indicators may not be available."/>
+        <Insight title="Price" value={(isIndia ? "₹" : "$") + fmt(data.price, "")} explanation={isIndia?"Quoted in INR":"Quoted in USD"}/>
+        <Insight title="50-day average" value={fmt(f.sma50) === "Not available" ? "Not available" : (isIndia ? "₹" : "$") + fmt(f.sma50)} explanation="A rolling price trend measure, not an investment recommendation."/>
+        <Insight title="200-day average" value={fmt(f.sma200) === "Not available" ? "Not available" : (isIndia ? "₹" : "$") + fmt(f.sma200)} explanation="A longer-term trend benchmark. Intraday signals and indicators may not be available."/>
       </div>}
       {tab==="calls" && <div className="grid gap-4 md:grid-cols-2">
-        <Insight title="Analyst consensus" value={f.analystRec ? String(f.analystRec).replaceAll("_"," ").toUpperCase() : "Not available"} explanation={f.targetPrice != null ? `Mean target from the connected fundamentals feed: ${fmt(f.targetPrice)}. This is aggregated, not an attributed brokerage note.` : "No verified broker-by-broker call and target history is connected."}/>
+        <Insight title="Analyst consensus" value={f.analystRec ? String(f.analystRec).replaceAll("_"," ").toUpperCase() : "Not available"} explanation={f.targetPrice != null ? `Mean target from the connected fundamentals feed: ${isIndia ? "₹" : "$"}${fmt(f.targetPrice)}. This is aggregated, not an attributed brokerage note.` : "No verified broker-by-broker call and target history is connected."}/>
         <Insight title="Earnings call transcripts" value="Source integration required" explanation="Transcript dates, speaker quotes and summaries will only appear once official or licensed transcripts are available. No fictional commentary is generated."/>
       </div>}
       {tab==="events" && <div className="space-y-4">
