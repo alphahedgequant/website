@@ -4,6 +4,7 @@ export const DOC_CATEGORIES = ["announcements","annual_reports","credit_ratings"
 export const ALLOWED_HOSTS = [
   "nseindia.com","bseindia.com","nsearchives.nseindia.com",
   "sec.gov","www.sec.gov","data.sec.gov",
+  "ril.com","tcs.com","avantel.in","hal-india.co.in",
 ];
 export function validateRecord(input,{additionalHosts=[]}={}) {
   if (!input || typeof input!=="object") return null;
