@@ -7,8 +7,8 @@ import { api } from "@/lib/config";
 
 // ── markets ─────────────────────────────────────────────
 const MARKETS = {
-  NSE: { scr: "/api/screener", idx: "/api/indices", cur: "₹", label: "NSE · India", delay: "live (Upstox) + Yahoo for extended names" },
-  US: { scr: "/api/us-screener", idx: "/api/us-indices", cur: "$", label: "US · NYSE/NASDAQ", delay: "~15 min delayed (Yahoo)" },
+  NSE: { scr: "/api/screener", idx: "/api/indices", cur: "₹", label: "NSE · India", delay: "provider feed · quote freshness not verified" },
+  US: { scr: "/api/us-screener", idx: "/api/us-indices", cur: "$", label: "US · NYSE/NASDAQ", delay: "Yahoo/provider feed · potentially delayed" },
 };
 
 // ── formatting ──────────────────────────────────────────
@@ -391,13 +391,19 @@ export default function Markets() {
     let alive = true;
     const wake = setTimeout(() => alive && setStatus((s) => (s === "loading" ? "waking" : s)), 4000);
     async function load() {
-      try {
-        const [idx, scr] = await Promise.all([api(MARKETS[market].idx), api(MARKETS[market].scr)]);
-        if (!alive) return;
-        setIndices(idx?.data || null);
-        setRows(Array.isArray(scr?.data) ? scr.data : []);
+      // Market index failure must never blank a valid stock screener response.
+      const [idxResult, stocksResult] = await Promise.allSettled([
+        api(MARKETS[market].idx), api(MARKETS[market].scr)
+      ]);
+      if (!alive) return;
+      if (idxResult.status === "fulfilled") setIndices(idxResult.value?.data || null);
+      if (stocksResult.status === "fulfilled" && Array.isArray(stocksResult.value?.data)) {
+        setRows(stocksResult.value.data);
         setStatus("live");
-      } catch { if (alive) setStatus("error"); }
+      } else {
+        // Preserve existing rows on transient refresh failures. Never mark old quotes as live.
+        setStatus("error");
+      }
     }
     load();
     const t = setInterval(load, 30000);
@@ -603,7 +609,7 @@ export default function Markets() {
         </div>
       )}
       {status === "error" && (
-        <div className="card mb-4 p-4 text-sm text-loss/90">Data engine unreachable — token may need a refresh.</div>
+        <div className="card mb-4 p-4 text-sm text-loss/90">Stock list could not be refreshed. Check the backend connection and market-data provider. Any displayed rows may be stale; no prices are confirmed live.</div>
       )}
 
       {/* ── TOP CONTROL BAR (Finviz) ─────────────────── */}

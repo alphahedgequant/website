@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useParams, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { fetchStock } from "@/lib/config";
+import StockResearchSections from "@/components/StockResearchSections";
 
 // ── formatting ───────────────────────────────────────────────
 const n2 = (v) => (v == null || isNaN(v) ? "—" : Number(v).toLocaleString("en-IN", { maximumFractionDigits: 2, minimumFractionDigits: 0 }));
@@ -54,7 +55,7 @@ export default function StockDetail() {
       try {
         const d = await fetchStock(sym, market);
         if (!alive) return;
-        if (!d) { setStatus("notfound"); return; }
+        if (!d) { setData(null); setStatus("notfound"); return; }
         setData(d); setStatus("live");
       } catch { if (alive) setStatus("error"); }
     })();
@@ -127,6 +128,8 @@ export default function StockDetail() {
           <Mini label="Volume" v={data.volume != null ? Number(data.volume).toLocaleString("en-IN") : "—"} />
         </div>
       </div>
+
+      <StockResearchSections data={data} market={market} />
 
       {rangePos != null && (
         <div className="card p-5 mt-4">
@@ -224,7 +227,7 @@ export default function StockDetail() {
       )}
 
       <p className="font-mono text-[11px] text-muted mt-6">
-        DATA: YAHOO FINANCE{market === "US" ? " · ~15 MIN DELAYED" : ""} · RESEARCH &amp; EDUCATION ONLY · NOT INVESTMENT ADVICE
+        DATA: {data.dataSource?.price || "PROVIDER UNVERIFIED"} · QUOTE FRESHNESS NOT VERIFIED · RESEARCH &amp; EDUCATION ONLY · NOT INVESTMENT ADVICE
       </p>
     </Shell>
   );
@@ -233,7 +236,7 @@ export default function StockDetail() {
 function buildPros(f, cagr) {
   const p = [];
   if (f.roe > 15) p.push(`Strong return on equity at ${f.roe}%.`);
-  if (f.debtEquity != null && f.debtEquity < 30) p.push("Low debt — conservative balance sheet.");
+  // Debt/equity source units are not normalized across providers; do not classify without unit metadata.
   if (f.revenueGrowth > 10) p.push(`Revenue growing ${f.revenueGrowth}% year-on-year.`);
   if (cagr != null && cagr > 12) p.push(`Healthy ${cagr.toFixed(0)}% revenue CAGR over the period.`);
   if (f.netMargin > 15) p.push(`High net margin of ${f.netMargin}%.`);
@@ -243,7 +246,7 @@ function buildPros(f, cagr) {
 }
 function buildCons(f, rangePos) {
   const c = [];
-  if (f.debtEquity > 150) c.push(`Elevated debt-to-equity of ${f.debtEquity}.`);
+  // Avoid unsupported high-debt conclusions until source scale and sector conventions are verified.
   if (f.earningsGrowth != null && f.earningsGrowth < 0) c.push(`Earnings declined ${Math.abs(f.earningsGrowth)}% year-on-year.`);
   if (f.roe != null && f.roe < 8) c.push(`Low return on equity at ${f.roe}%.`);
   if (f.pe != null && f.pe > 60) c.push(`Rich valuation — P/E of ${f.pe.toFixed(0)}.`);
