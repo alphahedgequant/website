@@ -37,7 +37,7 @@ export default function StockDocuments({symbol,market="NSE",documents=[]}) {
   },[market,symbol]);
   // Only render validated, matching issuer documents from an explicit verified feed.
   const combined=[...(Array.isArray(documents)?documents:[]),...feed];
-  const clean=combined.filter(d=>d && d.symbol===symbol && d.market===market && GROUPS.some(g=>g.key===d.category) && allowedSource(d.url) && d.verified===true):[];
+  const clean=combined.filter(d=>d && d.symbol===symbol && d.market===market && GROUPS.some(g=>g.key===d.category) && allowedSource(d.url) && d.verified===true);
   const filtered=filter==="all"?clean:clean.filter(d=>d.category===filter);
   const byGroup=GROUPS.map(g=>({...g,items:filtered.filter(d=>d.category===g.key)}));
   return <section className="card mt-5 p-5 md:p-7" id="company-documents" aria-label="Company documents">
