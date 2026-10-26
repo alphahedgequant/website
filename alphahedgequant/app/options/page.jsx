@@ -78,8 +78,12 @@ export default function OptionsPage() {
     if (!isRefresh) setStatus("loading");
     try {
       const url = `${API}/api/option-chain/${ul}${exp ? `?expiry=${exp}` : ""}`;
-      const r = await fetch(url);
-      const j = await r.json();
+      const r = await fetch(url, { cache: "no-store" });
+      const raw = await r.text();
+      let j;
+      try { j = JSON.parse(raw); }
+      catch { throw new Error(`The market-data API returned an invalid response (HTTP ${r.status}).`); }
+      if (!r.ok) throw new Error(`Market-data API HTTP ${r.status}: ${r.status === 401 || r.status === 403 ? "Authentication required" : r.status >= 500 ? "Backend API error" : "Request rejected"}.`);
       if (j.success && j.data?.strikes?.length) {
         setChain(j.data.strikes);
         setSpot(j.data.spot_price || 0);
@@ -92,15 +96,15 @@ export default function OptionsPage() {
         setChain(demoChain(ul, ds));
         setSpot(ds);
         setExpiries(["(demo)"]);
-        setStatus(j.spot_price ? "demo" : "expired");
-        setErrMsg(j.error || "Live options data unavailable — showing a demo chain.");
+        setStatus("demo");
+        setErrMsg("No verified live option chain was returned. Demo figures are illustrative only.");
       }
     } catch (e) {
       const ds = DEMO_SPOT[ul] || 1000;
       setChain(demoChain(ul, ds));
       setSpot(ds);
       setStatus("error");
-      setErrMsg("Backend unreachable — showing a demo chain.");
+      setErrMsg((e instanceof TypeError ? "Unable to contact the market-data API (network or CORS)." : e.message || "Market-data request failed.") + " Showing illustrative demo data only.");
     }
   }, []);
 
@@ -174,7 +178,7 @@ export default function OptionsPage() {
         <div className="flex items-center gap-2">
           <span className={`w-1.5 h-1.5 rounded-full ${status === "live" ? "bg-gain animate-pulse" : status === "demo" || status === "expired" ? "bg-amber" : status === "loading" ? "bg-muted" : "bg-loss"}`} />
           <span className="font-mono text-[11px] text-muted">
-            {status === "live" ? "Live · Upstox" : status === "loading" ? "Loading…" : status === "expired" ? "Token expired — demo data" : status === "demo" ? "Market closed — demo data" : "Demo data"}
+            {status === "live" ? "Live · Upstox" : status === "loading" ? "Loading…" : status === "expired" ? "Market-data auth required — demo data" : status === "demo" ? "Market closed — demo data" : "Demo data"}
           </span>
         </div>
         {status === "live" && (
