@@ -14,8 +14,8 @@ const products = [
   { href: "/options", label: "Options Analytics", description: "Option-chain intelligence", glyph: "◈" },
 ];
 const research = [
-  { href: "/research", label: "Research" },
-  { href: "/reports", label: "Reports" },
+  { href: "/research", label: "Research Papers" },
+  { href: "/reports", label: "Macro Outlooks" },
   { href: "/ipo", label: "IPO Intelligence" },
   { href: "/tracker", label: "Trust Tracker" },
 ];
