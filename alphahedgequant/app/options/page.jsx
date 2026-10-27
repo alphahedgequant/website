@@ -59,6 +59,9 @@ export default function OptionsPage() {
   const [tab, setTab] = useState("chain");
   const [underlying, setUnderlying] = useState("NIFTY");
   const [expiry, setExpiry] = useState("");
+  const [stockQuery, setStockQuery] = useState("");
+  const [stockOptions, setStockOptions] = useState([]);
+  const [symbolFeedState, setSymbolFeedState] = useState("loading");
   const [chain, setChain] = useState(null);
   const [spot, setSpot] = useState(0);
   const [expiries, setExpiries] = useState([]);
@@ -75,7 +78,7 @@ export default function OptionsPage() {
   }, [underlying]);
 
   const loadChain = useCallback(async (ul, exp, isRefresh = false) => {
-    if (!isRefresh) setStatus("loading");
+    if (!isRefresh) { setStatus("loading"); setChain(null); setSpot(0); setExpiries([]); setErrMsg(""); }
     try {
       const url = `${API}/option-chain/${ul}${exp ? `?expiry=${exp}` : ""}`;
       const r = await fetch(url, { cache: "no-store" });
@@ -92,22 +95,37 @@ export default function OptionsPage() {
         setStatus("live");
         setErrMsg("");
       } else {
-        const ds = DEMO_SPOT[ul] || 1000;
-        setChain(demoChain(ul, ds));
-        setSpot(ds);
-        setExpiries(["(demo)"]);
-        setStatus("demo");
-        setErrMsg("No verified live option chain was returned. Demo figures are illustrative only.");
+        setChain(null);
+        setSpot(0);
+        setStatus("unavailable");
+        setErrMsg("No verified option chain returned. The company may not be listed in NSE F&O, or the connected backend may not support the instrument.");
       }
     } catch (e) {
-      const ds = DEMO_SPOT[ul] || 1000;
-      setChain(demoChain(ul, ds));
-      setSpot(ds);
+      setChain(null);
+      setSpot(0);
       setStatus("error");
-      setErrMsg((e instanceof TypeError ? "Unable to contact the market-data API (network or CORS)." : e.message || "Market-data request failed.") + " Showing illustrative demo data only.");
+      setErrMsg(e instanceof TypeError ? "Cannot contact market-data API." : e.message || "Market-data request failed.");
     }
   }, []);
 
+  useEffect(() => {
+    let active=true;
+    fetch("/api/market/screener", {cache:"no-store"})
+      .then(r=>r.json())
+      .then(j=>{if(active){setStockOptions(Array.isArray(j?.data)?j.data:[]);setSymbolFeedState("ready");}})
+      .catch(()=>{if(active)setSymbolFeedState("unavailable");});
+    return ()=>{active=false;};
+  },[]);
+  const matches=useMemo(()=>{
+    const q=stockQuery.trim().toLowerCase();
+    if(!q)return [];
+    return stockOptions.filter(x=>String(x.symbol||"").toLowerCase().includes(q) || String(x.name||"").toLowerCase().includes(q)).slice(0,12);
+  },[stockQuery,stockOptions]);
+  const chooseUnderlying=useCallback(value=>{
+    const symbol=String(value||"").trim().toUpperCase();
+    if(!/^[A-Z0-9._-]{1,40}$/.test(symbol))return;
+    setExpiry("");setLegs([]);setStockQuery("");setUnderlying(symbol);
+  },[]);
   useEffect(() => { loadChain(underlying, ""); }, [underlying, loadChain]);
   useEffect(() => { if (expiry && expiry !== "(demo)") loadChain(underlying, expiry); }, [expiry, underlying, loadChain]);
 
@@ -156,18 +174,38 @@ export default function OptionsPage() {
 
       <div className="mt-6 flex flex-wrap items-center gap-2">
         {INDICES.map((i) => (
-          <button key={i.id} onClick={() => { setUnderlying(i.id); setExpiry(""); }}
+          <button key={i.id} onClick={() => chooseUnderlying(i.id)}
             className={`font-mono text-xs px-3 py-1.5 rounded border transition-colors ${underlying === i.id ? "border-amber text-amber bg-amber/[0.04]" : "border-line text-muted hover:text-body"}`}>
             {i.label}
           </button>
         ))}
         <span className="text-muted/40 mx-1">|</span>
         {STOCKS.map((s) => (
-          <button key={s} onClick={() => { setUnderlying(s); setExpiry(""); }}
+          <button key={s} onClick={() => chooseUnderlying(s)}
             className={`font-mono text-[11px] px-2.5 py-1.5 rounded border transition-colors ${underlying === s ? "border-amber text-amber bg-amber/[0.04]" : "border-line text-muted hover:text-body"}`}>
             {s}
           </button>
         ))}
+      </div>
+
+      <div className="mt-5 border border-line rounded-xl p-4 bg-surface" role="search" aria-label="Search stock option chains">
+        <label htmlFor="ahq-option-search" className="text-xs text-amber font-mono uppercase tracking-wider block mb-2">Search any NSE stock or ticker</label>
+        <div className="flex gap-2">
+          <input id="ahq-option-search" type="search" value={stockQuery} onChange={e=>setStockQuery(e.target.value)}
+            onKeyDown={e=>{if(e.key==="Enter"){e.preventDefault();chooseUnderlying(matches[0]?.symbol||stockQuery);}}}
+            placeholder="Example: AXISBANK, ITC, MARUTI…" autoComplete="off"
+            className="min-w-0 flex-1 rounded-lg border border-line bg-raised px-4 py-3 text-body placeholder:text-muted focus-visible:outline-2 focus-visible:outline-amber"/>
+          <button type="button" className="btn-primary text-sm" onClick={()=>chooseUnderlying(matches[0]?.symbol||stockQuery)}>View chain</button>
+        </div>
+        {stockQuery.trim()&&matches.length>0&&<div className="mt-2 max-h-60 overflow-y-auto border border-line rounded-lg divide-y divide-line">
+          {matches.map(x=><button key={x.symbol} type="button" onClick={()=>chooseUnderlying(x.symbol)} className="w-full text-left p-3 hover:bg-raised">
+            <span className="text-body text-sm font-semibold">{x.symbol}</span><span className="text-muted text-xs ml-3">{x.name||""}</span>
+          </button>)}
+        </div>}
+        {symbolFeedState==="loading"&&<p className="text-xs mt-2 text-muted">Loading stock suggestions…</p>}
+        {symbolFeedState==="unavailable"&&<p className="text-xs mt-2 text-muted">Suggestions unavailable; you can enter an exact NSE symbol manually.</p>}
+        {symbolFeedState==="ready"&&stockQuery.trim()&&matches.length===0&&<p className="text-xs mt-2 text-muted">No match in the available screener feed. You may still try an exact NSE symbol.</p>}
+        <p className="text-xs text-muted mt-3">Selected: <span className="font-semibold text-body">{underlying}</span>. Only NSE F&O-eligible stocks with a supported Upstox chain can return real options data. Search suggestions are not proof of derivatives eligibility.</p>
       </div>
 
       <div className="mt-4 flex flex-wrap items-center gap-4">
@@ -178,7 +216,7 @@ export default function OptionsPage() {
         <div className="flex items-center gap-2">
           <span className={`w-1.5 h-1.5 rounded-full ${status === "live" ? "bg-gain animate-pulse" : status === "demo" || status === "expired" ? "bg-amber" : status === "loading" ? "bg-muted" : "bg-loss"}`} />
           <span className="font-mono text-[11px] text-muted">
-            {status === "live" ? "Live · Upstox" : status === "loading" ? "Loading…" : status === "expired" ? "Market-data auth required — demo data" : status === "demo" ? "Market closed — demo data" : "Demo data"}
+            {status === "live" ? "Upstox chain received" : status === "loading" ? "Loading…" : "No verified chain"}
           </span>
         </div>
         {status === "live" && (
@@ -193,7 +231,7 @@ export default function OptionsPage() {
         )}
       </div>
 
-      {errMsg && (status === "expired" || status === "error") && (
+      {errMsg && status !== "live" && (
         <p className="mt-2 font-mono text-[11px] text-amber/80">{errMsg}</p>
       )}
 
@@ -224,7 +262,7 @@ function OptionChainTable({ chain, spot, atmStrike, maxOI, status, onAdd }) {
     );
   }
   if (!chain?.length) {
-    return <div className="mt-6 h-40 rounded-lg border border-line bg-surface flex items-center justify-center text-muted font-mono text-sm">No chain data.</div>;
+    return <div className="mt-6 h-40 rounded-lg border border-line bg-surface flex items-center justify-center text-muted font-mono text-sm">No verified option chain data available for the selected instrument.</div>;
   }
   return (
     <div className="mt-6 rounded-lg border border-line bg-surface overflow-hidden">
