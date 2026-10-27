@@ -1,9 +1,11 @@
 "use client";
 import { useState } from "react";
 import {modelLessons} from "@/lib/modelLessons";
+import {deeperLessons} from "@/lib/deeperModelLessons";
 
 export default function ModelLesson({model}){
  const lesson=modelLessons[model.id];
+ const deeper=deeperLessons[model.id];
  const [answer,setAnswer]=useState(null);
  if(!lesson)return <section className="border border-line rounded-xl p-4 mt-4">
   <p className="font-mono text-[10px] text-amber tracking-wider mb-2">LEARN THE CONCEPT</p>
@@ -25,11 +27,23 @@ export default function ModelLesson({model}){
   <p className="text-sm leading-relaxed text-muted mt-2"><strong className="text-body">Before starting:</strong> {lesson.prerequisites}</p>
   <h5 className="font-semibold text-body mt-5 mb-2">Important words explained</h5>
   <dl className="grid gap-2 sm:grid-cols-2">{lesson.glossary.map(([term,description])=><div key={term} className="rounded-lg bg-raised border border-line p-3"><dt className="font-semibold text-sm text-body">{term}</dt><dd className="text-xs text-muted mt-1 leading-relaxed">{description}</dd></div>)}</dl>
+  {deeper && <div className="mt-5 border-l-2 border-amber/50 pl-4">
+   <h5 className="text-base font-semibold text-body mb-2">Build the intuition</h5>
+   <p className="text-sm text-muted leading-relaxed">{deeper.intuition}</p>
+  </div>}
   <h5 className="font-semibold text-body mt-5 mb-3">Worked lesson</h5>
   <ol className="space-y-3">{lesson.steps.map((step,i)=><li className="flex gap-3" key={i}>
    <span className="shrink-0 w-7 h-7 inline-flex items-center justify-center border border-amber/40 text-amber rounded-full text-xs font-mono">{i+1}</span>
    <div><p className="text-sm font-semibold text-body">{step.title}</p><p className="text-sm text-muted leading-relaxed mt-1">{step.body}</p></div>
   </li>)}</ol>
+  {deeper && <div className="rounded-xl border border-line p-4 mt-5">
+    <h5 className="font-semibold text-body mb-3">Why each step works</h5>
+    <div className="space-y-4">{deeper.reasoning.map(([heading,body],i)=><div key={heading}>
+      <p className="font-semibold text-sm text-body">{i+1}. {heading}</p>
+      <p className="text-sm text-muted leading-relaxed mt-1">{body}</p>
+    </div>)}</div>
+    <p className="text-sm leading-relaxed mt-4 border-t border-line pt-3"><strong className="text-body">Remember:</strong> <span className="text-muted">{deeper.takeaway}</span></p>
+  </div>}
   <div className="rounded-lg bg-raised border border-line p-4 mt-4">
     <p className="text-xs font-semibold text-body mb-2">Solved numerical example</p>
     <p className="text-sm text-muted leading-relaxed">{lesson.worked}</p>
