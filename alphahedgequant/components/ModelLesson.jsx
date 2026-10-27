@@ -2,20 +2,33 @@
 import { useState } from "react";
 import {modelLessons} from "@/lib/modelLessons";
 import {deeperLessons} from "@/lib/deeperModelLessons";
+import {allModelFoundations} from "@/lib/allModelFoundations";
 
 export default function ModelLesson({model}){
  const lesson=modelLessons[model.id];
  const deeper=deeperLessons[model.id];
  const [answer,setAnswer]=useState(null);
- if(!lesson)return <section className="border border-line rounded-xl p-4 mt-4">
-  <p className="font-mono text-[10px] text-amber tracking-wider mb-2">LEARN THE CONCEPT</p>
-  <h4 className="text-base text-body font-semibold mb-2">Start from first principles</h4>
-  <p className="text-sm text-body/85 leading-relaxed">{model.intuition}</p>
-  <div className="mt-3 grid gap-3 md:grid-cols-2">
-    <div className="rounded-lg bg-raised border border-line p-3"><p className="text-xs font-semibold text-body mb-1">What is this model for?</p><p className="text-sm text-muted leading-relaxed">{model.summary}</p></div>
-    <div className="rounded-lg bg-raised border border-line p-3"><p className="text-xs font-semibold text-body mb-1">When might it fail?</p><p className="text-sm text-muted leading-relaxed">{model.risks||model.when}</p></div>
+ const foundation=allModelFoundations[model.id];
+ if(!lesson)return <section className="border border-amber/30 rounded-xl p-5 md:p-6 mt-4">
+  <p className="font-mono text-xs text-amber mb-2">FOUNDATIONS · START FROM ZERO</p>
+  <h4 className="font-display text-xl text-body">Understanding {model.name}</h4>
+  <p className="text-sm text-muted leading-relaxed mt-3"><strong className="text-body">First question:</strong> What problem are we trying to solve? {model.summary}</p>
+  <div className="bg-raised border border-line rounded-lg p-4 mt-4">
+   <p className="font-semibold text-body text-sm mb-2">An everyday analogy</p>
+   <p className="text-sm md:text-base leading-relaxed text-muted">{foundation?.analogy || model.intuition}</p>
   </div>
-  <p className="text-xs mt-3 text-muted">A full worked lesson has not yet been authored for this model. The interactive lab below is a conceptual illustration, not a validated implementation.</p>
+  <div className="mt-5 space-y-3">
+   <h5 className="font-semibold text-body">A complete numerical thought experiment</h5>
+   <p className="text-sm md:text-base leading-relaxed text-muted">{foundation?.example || model.intuition}</p>
+   <h5 className="font-semibold text-body">How to think about the calculation</h5>
+   <p className="text-sm md:text-base leading-relaxed text-muted">{foundation?.steps || model.params?.join(". ")}</p>
+  </div>
+  <div className="rounded-lg border border-line p-4 mt-4">
+   <p className="text-sm font-semibold text-body">How do you interpret this result?</p>
+   <p className="text-sm leading-relaxed text-muted mt-2">{model.when}</p>
+   <p className="text-sm leading-relaxed text-muted mt-3"><strong className="text-body">Important limitation:</strong> {foundation?.limitation || model.when}</p>
+  </div>
+  <p className="text-xs text-muted mt-3">This is an original illustrative example, not a fitted model, historical performance result or live signal. Formulas and more technical material follow below.</p>
  </section>;
  return <section className="border border-amber/30 rounded-xl p-4 md:p-5 mt-4" aria-label={model.name+" guided lesson"}>
   <div className="flex flex-wrap gap-2 justify-between items-center mb-3">
