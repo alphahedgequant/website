@@ -13,7 +13,7 @@ const INDICES = [
   { id: "FINNIFTY", label: "FIN NIFTY", lot: 65 },
 ];
 const STOCKS = ["RELIANCE", "TCS", "HDFCBANK", "INFY", "ICICIBANK", "SBIN"];
-const LOT_DEFAULT = { RELIANCE: 250, TCS: 175, HDFCBANK: 550, INFY: 400, ICICIBANK: 700, SBIN: 750 };
+
 
 const fmtNum = (n) => {
   if (n == null) return "–";
@@ -24,27 +24,6 @@ const fmtNum = (n) => {
   return n.toLocaleString("en-IN");
 };
 const fmtPx = (n) => (n == null ? "–" : Number(n).toFixed(2));
-
-function demoChain(underlying, spot) {
-  const step = underlying === "BANKNIFTY" ? 100 : underlying === "NIFTY" ? 50 : underlying === "FINNIFTY" ? 50 : 20;
-  const atm = Math.round(spot / step) * step;
-  const strikes = [];
-  for (let k = atm - step * 10; k <= atm + step * 10; k += step) {
-    const dist = Math.abs(k - spot);
-    const callItm = spot > k;
-    const putItm = spot < k;
-    const callLtp = Math.max(0.5, callItm ? (spot - k) + 40 * Math.exp(-dist / (step * 6)) : 40 * Math.exp(-dist / (step * 6)));
-    const putLtp = Math.max(0.5, putItm ? (k - spot) + 40 * Math.exp(-dist / (step * 6)) : 40 * Math.exp(-dist / (step * 6)));
-    const oiBase = Math.round(80000 * Math.exp(-dist / (step * 5)) + Math.random() * 20000);
-    strikes.push({
-      strike_price: k,
-      call: { ltp: +callLtp.toFixed(2), change: +(Math.random() * 20 - 10).toFixed(2), volume: Math.round(oiBase * 1.5), oi: oiBase + Math.round(Math.random() * 10000), oi_change: Math.round((Math.random() - 0.5) * 30000), iv: +(12 + dist / step).toFixed(2), delta: +(callItm ? 0.5 + 0.4 * (1 - Math.exp(-dist / (step * 4))) : 0.5 * Math.exp(-dist / (step * 4))).toFixed(3), gamma: 0.0008, theta: -(5 + Math.random() * 5), vega: 8 + Math.random() * 4 },
-      put: { ltp: +putLtp.toFixed(2), change: +(Math.random() * 20 - 10).toFixed(2), volume: Math.round(oiBase * 1.3), oi: oiBase + Math.round(Math.random() * 10000), oi_change: Math.round((Math.random() - 0.5) * 30000), iv: +(12 + dist / step).toFixed(2), delta: +(putItm ? -(0.5 + 0.4 * (1 - Math.exp(-dist / (step * 4)))) : -0.5 * Math.exp(-dist / (step * 4))).toFixed(3), gamma: 0.0008, theta: -(5 + Math.random() * 5), vega: 8 + Math.random() * 4 },
-    });
-  }
-  return strikes;
-}
-const DEMO_SPOT = { NIFTY: 24850, BANKNIFTY: 53200, FINNIFTY: 24100, RELIANCE: 1328, TCS: 3420, HDFCBANK: 1690, INFY: 1560, ICICIBANK: 1280, SBIN: 820 };
 
 function legPayoffAtExpiry(leg, spotAtExpiry) {
   const qty = leg.lots * leg.lotSize;
@@ -59,6 +38,9 @@ export default function OptionsPage() {
   const [tab, setTab] = useState("chain");
   const [underlying, setUnderlying] = useState("NIFTY");
   const [expiry, setExpiry] = useState("");
+  const [stockQuery, setStockQuery] = useState("");
+  const [stockOptions, setStockOptions] = useState([]);
+  const [symbolFeedState, setSymbolFeedState] = useState("loading");
   const [chain, setChain] = useState(null);
   const [spot, setSpot] = useState(0);
   const [expiries, setExpiries] = useState([]);
@@ -67,15 +49,18 @@ export default function OptionsPage() {
   const [legs, setLegs] = useState([]);
   const [autoRefresh, setAutoRefresh] = useState(true);
   const timerRef = useRef(null);
+  const requestIdRef = useRef(0);
+  const [chainLotSize,setChainLotSize] = useState(null);
 
   const lotSize = useMemo(() => {
     const idx = INDICES.find((i) => i.id === underlying);
-    if (idx) return idx.lot;
-    return LOT_DEFAULT[underlying] || 1;
-  }, [underlying]);
+    if (idx) return chainLotSize || idx.lot;
+    return chainLotSize || 1;
+  }, [underlying, chainLotSize]);
 
   const loadChain = useCallback(async (ul, exp, isRefresh = false) => {
-    if (!isRefresh) setStatus("loading");
+    const requestId = ++requestIdRef.current;
+    if (!isRefresh) { setStatus("loading"); setChain(null); setSpot(0); setExpiries([]); setChainLotSize(null); setErrMsg(""); }
     try {
       const url = `${API}/option-chain/${ul}${exp ? `?expiry=${exp}` : ""}`;
       const r = await fetch(url, { cache: "no-store" });
@@ -84,7 +69,10 @@ export default function OptionsPage() {
       try { j = JSON.parse(raw); }
       catch { throw new Error(`The market-data API returned an invalid response (HTTP ${r.status}).`); }
       if (!r.ok) throw new Error(`Market-data API HTTP ${r.status}: ${r.status === 401 || r.status === 403 ? "Authentication required" : r.status >= 500 ? "Backend API error" : "Request rejected"}.`);
+      if (requestId !== requestIdRef.current) return;
       if (j.success && j.data?.strikes?.length) {
+        const verifiedLot = Number(j.data?.lot_size ?? j.data?.lotSize);
+        setChainLotSize(Number.isSafeInteger(verifiedLot) && verifiedLot > 0 ? verifiedLot : null);
         setChain(j.data.strikes);
         setSpot(j.data.spot_price || 0);
         setExpiries(j.data.expiries || []);
@@ -92,22 +80,39 @@ export default function OptionsPage() {
         setStatus("live");
         setErrMsg("");
       } else {
-        const ds = DEMO_SPOT[ul] || 1000;
-        setChain(demoChain(ul, ds));
-        setSpot(ds);
-        setExpiries(["(demo)"]);
-        setStatus("demo");
-        setErrMsg("No verified live option chain was returned. Demo figures are illustrative only.");
+        setChain(null);
+        setSpot(0);
+        setStatus("unavailable");
+        setErrMsg("No verified option chain returned. The company may not be listed in NSE F&O, or the connected backend may not support the instrument.");
       }
     } catch (e) {
-      const ds = DEMO_SPOT[ul] || 1000;
-      setChain(demoChain(ul, ds));
-      setSpot(ds);
+      if (requestId !== requestIdRef.current) return;
+      setChain(null);
+      setSpot(0);
       setStatus("error");
-      setErrMsg((e instanceof TypeError ? "Unable to contact the market-data API (network or CORS)." : e.message || "Market-data request failed.") + " Showing illustrative demo data only.");
+      setErrMsg(e instanceof TypeError ? "Cannot contact market-data API." : e.message || "Market-data request failed.");
     }
   }, []);
 
+  useEffect(() => {
+    let active=true;
+    fetch("/api/market/screener", {cache:"no-store"})
+      .then(r=>r.json())
+      .then(j=>{if(active){setStockOptions(Array.isArray(j?.data)?j.data:[]);setSymbolFeedState("ready");}})
+      .catch(()=>{if(active)setSymbolFeedState("unavailable");});
+    return ()=>{active=false;};
+  },[]);
+  const matches=useMemo(()=>{
+    const q=stockQuery.trim().toLowerCase();
+    if(!q)return [];
+    return stockOptions.filter(x=>String(x.symbol||"").toLowerCase().includes(q) || String(x.name||"").toLowerCase().includes(q)).slice(0,12);
+  },[stockQuery,stockOptions]);
+  const chooseUnderlying=useCallback(value=>{
+    const symbol=String(value||"").trim().toUpperCase();
+    if(!/^[A-Z0-9._-]{1,40}$/.test(symbol))return;
+    requestIdRef.current++;
+    setExpiry("");setLegs([]);setStockQuery("");setUnderlying(symbol);
+  },[]);
   useEffect(() => { loadChain(underlying, ""); }, [underlying, loadChain]);
   useEffect(() => { if (expiry && expiry !== "(demo)") loadChain(underlying, expiry); }, [expiry, underlying, loadChain]);
 
@@ -133,6 +138,7 @@ export default function OptionsPage() {
   }, [chain, spot]);
 
   const addLeg = (side, type, strike, premium) => {
+    if (!chainLotSize && !INDICES.some(i=>i.id===underlying)) { setErrMsg("Verified contract lot size unavailable from this option-chain response. Strategy legs are disabled to avoid misleading payoff calculations."); return; }
     setLegs((L) => [...L, { id: Date.now() + Math.random(), side, type, strike, premium: premium || 0, lots: 1, lotSize }]);
     setTab("builder");
   };
@@ -156,18 +162,38 @@ export default function OptionsPage() {
 
       <div className="mt-6 flex flex-wrap items-center gap-2">
         {INDICES.map((i) => (
-          <button key={i.id} onClick={() => { setUnderlying(i.id); setExpiry(""); }}
+          <button key={i.id} onClick={() => chooseUnderlying(i.id)}
             className={`font-mono text-xs px-3 py-1.5 rounded border transition-colors ${underlying === i.id ? "border-amber text-amber bg-amber/[0.04]" : "border-line text-muted hover:text-body"}`}>
             {i.label}
           </button>
         ))}
         <span className="text-muted/40 mx-1">|</span>
         {STOCKS.map((s) => (
-          <button key={s} onClick={() => { setUnderlying(s); setExpiry(""); }}
+          <button key={s} onClick={() => chooseUnderlying(s)}
             className={`font-mono text-[11px] px-2.5 py-1.5 rounded border transition-colors ${underlying === s ? "border-amber text-amber bg-amber/[0.04]" : "border-line text-muted hover:text-body"}`}>
             {s}
           </button>
         ))}
+      </div>
+
+      <div className="mt-5 border border-line rounded-xl p-4 bg-surface" role="search" aria-label="Search stock option chains">
+        <label htmlFor="ahq-option-search" className="text-xs text-amber font-mono uppercase tracking-wider block mb-2">Search any NSE stock or ticker</label>
+        <div className="flex gap-2">
+          <input id="ahq-option-search" type="search" value={stockQuery} onChange={e=>setStockQuery(e.target.value)}
+            onKeyDown={e=>{if(e.key==="Enter"){e.preventDefault();chooseUnderlying(matches[0]?.symbol||stockQuery);}}}
+            placeholder="Example: AXISBANK, ITC, MARUTI…" autoComplete="off"
+            className="min-w-0 flex-1 rounded-lg border border-line bg-raised px-4 py-3 text-body placeholder:text-muted focus-visible:outline-2 focus-visible:outline-amber"/>
+          <button type="button" className="btn-primary text-sm" onClick={()=>chooseUnderlying(matches[0]?.symbol||stockQuery)}>View chain</button>
+        </div>
+        {stockQuery.trim()&&matches.length>0&&<div className="mt-2 max-h-60 overflow-y-auto border border-line rounded-lg divide-y divide-line">
+          {matches.map(x=><button key={x.symbol} type="button" onClick={()=>chooseUnderlying(x.symbol)} className="w-full text-left p-3 hover:bg-raised">
+            <span className="text-body text-sm font-semibold">{x.symbol}</span><span className="text-muted text-xs ml-3">{x.name||""}</span>
+          </button>)}
+        </div>}
+        {symbolFeedState==="loading"&&<p className="text-xs mt-2 text-muted">Loading stock suggestions…</p>}
+        {symbolFeedState==="unavailable"&&<p className="text-xs mt-2 text-muted">Suggestions unavailable; you can enter an exact NSE symbol manually.</p>}
+        {symbolFeedState==="ready"&&stockQuery.trim()&&matches.length===0&&<p className="text-xs mt-2 text-muted">No match in the available screener feed. You may still try an exact NSE symbol.</p>}
+        <p className="text-xs text-muted mt-3">Selected: <span className="font-semibold text-body">{underlying}</span>. Only NSE F&O-eligible stocks with a supported Upstox chain can return real options data. Search suggestions are not proof of derivatives eligibility.</p>
       </div>
 
       <div className="mt-4 flex flex-wrap items-center gap-4">
@@ -178,7 +204,7 @@ export default function OptionsPage() {
         <div className="flex items-center gap-2">
           <span className={`w-1.5 h-1.5 rounded-full ${status === "live" ? "bg-gain animate-pulse" : status === "demo" || status === "expired" ? "bg-amber" : status === "loading" ? "bg-muted" : "bg-loss"}`} />
           <span className="font-mono text-[11px] text-muted">
-            {status === "live" ? "Live · Upstox" : status === "loading" ? "Loading…" : status === "expired" ? "Market-data auth required — demo data" : status === "demo" ? "Market closed — demo data" : "Demo data"}
+            {status === "live" ? "Upstox chain received" : status === "loading" ? "Loading…" : "No verified chain"}
           </span>
         </div>
         {status === "live" && (
@@ -193,7 +219,7 @@ export default function OptionsPage() {
         )}
       </div>
 
-      {errMsg && (status === "expired" || status === "error") && (
+      {errMsg && (
         <p className="mt-2 font-mono text-[11px] text-amber/80">{errMsg}</p>
       )}
 
@@ -224,7 +250,7 @@ function OptionChainTable({ chain, spot, atmStrike, maxOI, status, onAdd }) {
     );
   }
   if (!chain?.length) {
-    return <div className="mt-6 h-40 rounded-lg border border-line bg-surface flex items-center justify-center text-muted font-mono text-sm">No chain data.</div>;
+    return <div className="mt-6 h-40 rounded-lg border border-line bg-surface flex items-center justify-center text-muted font-mono text-sm">No verified option chain data available for the selected instrument.</div>;
   }
   return (
     <div className="mt-6 rounded-lg border border-line bg-surface overflow-hidden">
