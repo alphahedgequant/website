@@ -329,9 +329,9 @@ function OptionChainTable({ chain, spot, atmStrike, maxOI, status, onAdd }) {
                   <td className={`py-1.5 px-2 text-right ${(c.oi_change || 0) >= 0 ? "text-gain/80" : "text-loss/80"}`}>{fmtNum(c.oi_change)}</td>
                   <td className="py-1.5 px-2 text-right text-muted">{fmtNum(c.volume)}</td>
                   <td className="py-1.5 px-2 text-right text-muted">{c.iv != null ? c.iv : "–"}</td>
-                  <td onClick={() => onAdd("BUY", "CE", row.strike_price, c.ltp)} className="py-1.5 px-2 text-right text-body font-semibold cursor-pointer hover:text-amber" title="Click to add as Buy CE leg">{fmtPx(c.ltp)}</td>
+                  <td onClick={() => onAdd("BUY", "CE", row.strike_price, c.ltp)} className="py-1.5 px-2 text-right text-body font-semibold cursor-pointer hover:text-amber" title="Click to add as Buy CE leg"><span className="block">{fmtPx(c.ltp)}</span><span className="block text-[9px] text-muted font-normal">B {c.bid_price>0?fmtPx(c.bid_price):"—"} · A {c.ask_price>0?fmtPx(c.ask_price):"—"}</span></td>
                   <td className={`py-1.5 px-2 text-center font-bold ${isATM ? "text-amber" : "text-body"}`}>{row.strike_price}</td>
-                  <td onClick={() => onAdd("BUY", "PE", row.strike_price, p.ltp)} className="py-1.5 px-2 text-left text-body font-semibold cursor-pointer hover:text-amber" title="Click to add as Buy PE leg">{fmtPx(p.ltp)}</td>
+                  <td onClick={() => onAdd("BUY", "PE", row.strike_price, p.ltp)} className="py-1.5 px-2 text-left text-body font-semibold cursor-pointer hover:text-amber" title="Click to add as Buy PE leg"><span className="block">{fmtPx(p.ltp)}</span><span className="block text-[9px] text-muted font-normal">B {p.bid_price>0?fmtPx(p.bid_price):"—"} · A {p.ask_price>0?fmtPx(p.ask_price):"—"}</span></td>
                   <td className="py-1.5 px-2 text-left text-muted">{p.iv != null ? p.iv : "–"}</td>
                   <td className="py-1.5 px-2 text-left text-muted">{fmtNum(p.volume)}</td>
                   <td className={`py-1.5 px-2 text-left ${(p.oi_change || 0) >= 0 ? "text-gain/80" : "text-loss/80"}`}>{fmtNum(p.oi_change)}</td>
@@ -346,7 +346,7 @@ function OptionChainTable({ chain, spot, atmStrike, maxOI, status, onAdd }) {
         </table>
       </div>
       <p className="px-3 py-2 font-mono text-[10px] text-muted border-t border-line">
-        Green shading = ITM calls · red = ITM puts · amber row = ATM. Click a LTP to add it to the strategy builder. {status === "demo" || status === "expired" ? "No synthetic option quotes." : "Refreshes during regular NSE hours when enabled."}
+        Green shading = ITM calls · red = ITM puts · amber row = ATM. Bid and ask are shown only if supplied by the provider; — means unavailable. Click an LTP to add a leg. {status === "demo" || status === "expired" ? "No synthetic option quotes." : "Refreshes during regular NSE hours when enabled."}
       </p>
     </div>
   );
@@ -519,6 +519,11 @@ function StrategyBuilder({ legs, setLegs, spot, lotSize, underlying, chain }) {
             <span className="text-muted">Mark: {m.mark==null?"—":fmtPx(m.mark)} {m.source?"("+m.source+")":""}</span>
             <span className={m.pl==null?"text-muted":m.pl>=0?"text-gain":"text-loss"}>{m.pl==null?"No quote":"₹"+Math.round(m.pl).toLocaleString("en-IN")}</span>
           </div>)}</div>
+        </div>}
+        {legs.length>0 && <div className="rounded-lg border border-line bg-surface p-3">
+          <p className="font-mono text-xs text-muted">BROKER MARGIN REQUIREMENT</p>
+          <p className="text-sm font-semibold mt-1 text-body">Not available</p>
+          <p className="text-xs text-muted mt-2">Accurate margin needs a broker-backed margin API for the complete strategy and an authenticated account. No margin estimate is invented.</p>
         </div>}
         {greeks && (
           <div className="grid grid-cols-4 gap-2">
