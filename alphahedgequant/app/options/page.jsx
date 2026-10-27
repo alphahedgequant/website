@@ -1,11 +1,17 @@
 "use client";
 import { useState, useEffect, useMemo, useRef, useCallback } from "react";
+import OptionIVAnalytics from "@/components/OptionIVAnalytics";
 import {
   XAxis, YAxis, CartesianGrid, Tooltip,
   ResponsiveContainer, ReferenceLine, Area, AreaChart,
 } from "recharts";
 
 const API = "/api/market";
+function isRegularNseSession(now=new Date()){
+ const parts=Object.fromEntries(new Intl.DateTimeFormat("en-GB",{timeZone:"Asia/Kolkata",weekday:"short",hour:"2-digit",minute:"2-digit",hourCycle:"h23"}).formatToParts(now).map(p=>[p.type,p.value]));
+ const t=Number(parts.hour)*60+Number(parts.minute);
+ return parts.weekday!=="Sat"&&parts.weekday!=="Sun"&&t>=555&&t<930;
+}
 
 const INDICES = [
   { id: "NIFTY", label: "NIFTY 50", lot: 75 },
@@ -51,6 +57,10 @@ export default function OptionsPage() {
   const timerRef = useRef(null);
   const requestIdRef = useRef(0);
   const [chainLotSize,setChainLotSize] = useState(null);
+  const [sessionOpen,setSessionOpen] = useState(false);
+  const [lastUpdated,setLastUpdated] = useState(null);
+  const [ivHistory,setIvHistory] = useState([]);
+  const [refreshing,setRefreshing] = useState(false);
 
   const lotSize = useMemo(() => {
     const idx = INDICES.find((i) => i.id === underlying);
@@ -60,7 +70,7 @@ export default function OptionsPage() {
 
   const loadChain = useCallback(async (ul, exp, isRefresh = false) => {
     const requestId = ++requestIdRef.current;
-    if (!isRefresh) { setStatus("loading"); setChain(null); setSpot(0); setExpiries([]); setChainLotSize(null); setErrMsg(""); }
+    if (!isRefresh) { setStatus("loading"); setChain(null); setSpot(0); setExpiries([]); setChainLotSize(null); setErrMsg(""); } else {setRefreshing(true);}
     try {
       const url = `${API}/option-chain/${ul}${exp ? `?expiry=${exp}` : ""}`;
       const r = await fetch(url, { cache: "no-store" });
@@ -87,6 +97,12 @@ export default function OptionsPage() {
         if (!exp && j.data.expiry) setExpiry(j.data.expiry);
         setStatus("live");
         setErrMsg("");
+        setLastUpdated(Date.now());
+        if(isRegularNseSession()){
+          const near=[...j.data.strikes].filter(row=>Number.isFinite(Number(row.strike_price))).sort((a,b)=>Math.abs(a.strike_price-j.data.spot_price)-Math.abs(b.strike_price-j.data.spot_price))[0];
+          const cv=near?.call?.iv,pv=near?.put?.iv;
+          if(near&&(cv!=null||pv!=null))setIvHistory(prev=>[...prev,{time:new Date().toLocaleTimeString("en-IN",{timeZone:"Asia/Kolkata",hour12:false}),call:cv==null?null:Number(cv),put:pv==null?null:Number(pv)}].slice(-160));
+        }
       } else {
         setChain(null);
         setSpot(0);
@@ -99,6 +115,8 @@ export default function OptionsPage() {
       setSpot(0);
       setStatus("error");
       setErrMsg(e instanceof TypeError ? "Cannot contact market-data API." : e.message || "Market-data request failed.");
+    } finally {
+      if(requestId===requestIdRef.current)setRefreshing(false);
     }
   }, []);
 
@@ -119,20 +137,24 @@ export default function OptionsPage() {
     const symbol=String(value||"").trim().toUpperCase();
     if(!/^[A-Z0-9._-]{1,40}$/.test(symbol))return;
     requestIdRef.current++;
-    setExpiry("");setLegs([]);setStockQuery("");setUnderlying(symbol);
+    setExpiry("");setLegs([]);setStockQuery("");setIvHistory([]);setLastUpdated(null);setUnderlying(symbol);
   },[]);
   useEffect(() => { loadChain(underlying, ""); }, [underlying, loadChain]);
   useEffect(() => { if (expiry && expiry !== "(demo)") loadChain(underlying, expiry); }, [expiry, underlying, loadChain]);
 
+  useEffect(()=>{
+    const check=()=>setSessionOpen(isRegularNseSession());
+    check();const id=setInterval(check,30000);return()=>clearInterval(id);
+  },[]);
   useEffect(() => {
     if (timerRef.current) clearInterval(timerRef.current);
-    if (autoRefresh && status === "live" && tab === "chain") {
+    if (autoRefresh && sessionOpen && status === "live") {
       timerRef.current = setInterval(() => {
         if (!document.hidden) loadChain(underlying, expiry, true);
       }, 8000);
     }
     return () => timerRef.current && clearInterval(timerRef.current);
-  }, [autoRefresh, status, tab, underlying, expiry, loadChain]);
+  }, [autoRefresh, sessionOpen, status, underlying, expiry, loadChain]);
 
   const { atmStrike, maxOI } = useMemo(() => {
     if (!chain?.length) return { atmStrike: null, maxOI: 1 };
