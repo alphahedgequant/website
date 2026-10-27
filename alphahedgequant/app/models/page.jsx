@@ -3,6 +3,7 @@ import { useState } from "react";
 import Link from "next/link";
 import ModelPlayground from "@/components/ModelPlayground";
 import ModelLesson from "@/components/ModelLesson";
+import BeginnerChapter from "@/components/BeginnerChapter";
 
 // ════════════════════════════════════════════════════════════════════
 //  MODEL LIBRARY — grouped into 4 categories.
@@ -535,16 +536,10 @@ function ModelCard({ m, open, onToggle }) {
         <div className="px-5 pb-5 -mt-1">
           <div className="h-px bg-line mb-4" />
 
-          <p className="font-mono text-[10px] text-muted tracking-wider mb-1.5">INTUITION</p>
-          <p className="text-sm text-body/85 leading-relaxed mb-4">{m.intuition}</p>
 
-          <div className="rounded-lg border border-line p-4 mb-4 bg-raised">
-            <p className="font-mono text-[10px] text-amber tracking-wider mb-2">EXPLAINED SIMPLY</p>
-            <p className="text-sm text-body leading-relaxed">{m.beginner || m.intuition.split(". ").slice(0,2).join(". ") + "."}</p>
-            {m.example && <p className="text-sm text-muted mt-3 leading-relaxed"><strong className="text-body">Example (illustrative): </strong>{m.example}</p>}
-            <p className="text-xs text-muted mt-3 leading-relaxed"><strong className="text-body">What can go wrong: </strong>{m.risks || m.when}</p>
-          </div>
-          <ModelLesson key={m.id} model={m} />
+
+          <BeginnerChapter model={m} />
+          {!["S4","R2"].includes(m.id) && <ModelLesson key={m.id} model={m} />}
           <ModelPlayground key={m.id+"-lab"} model={m} />
           <p className="font-mono text-[10px] text-muted tracking-wider mb-1">THE MATH (OPTIONAL)</p>
           {m.math.map((f, i) => <Formula key={i} label={f.label} lines={f.lines} />)}
@@ -630,7 +625,7 @@ export default function Models() {
               <p className="text-sm text-muted leading-relaxed mt-2 max-w-2xl">{cat.blurb}</p>
             </div>
 
-            <div className={`grid gap-3 ${cat.headline ? "" : "md:grid-cols-2"}`}>
+            <div className="grid gap-3 grid-cols-1">
               {models.map((m) => (
                 <ModelCard
                   key={m.id}
