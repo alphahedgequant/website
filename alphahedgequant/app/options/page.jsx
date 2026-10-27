@@ -423,6 +423,23 @@ function StrategyBuilder({ legs, setLegs, spot, lotSize, underlying, chain }) {
     return { pts, maxProfit: maxP, maxLoss: minP, netPremium, breakevens };
   }, [legs, spot]);
 
+  const markToMarket = useMemo(() => {
+    if (!legs.length || !chain?.length) return null;
+    const marks = legs.map(l => {
+      const row=chain.find(r=>Number(r.strike_price)===Number(l.strike));
+      const quote=l.type==="CE"?row?.call:row?.put;
+      const mid=quote?.bid_price>0 && quote?.ask_price>0 ? (Number(quote.bid_price)+Number(quote.ask_price))/2 : null;
+      const ltp=quote?.ltp != null && Number(quote.ltp)>0 ? Number(quote.ltp) : null;
+      const mark=mid??ltp;
+      if(mark===null || !Number.isFinite(mark)) return {...l,mark:null,pl:null,source:null};
+      const quantity=l.lots*l.lotSize;
+      const pl=(l.side==="BUY"?1:-1)*(mark-l.premium)*quantity;
+      return {...l,mark,pl,source:mid!==null?"Bid/ask midpoint":"LTP"};
+    });
+    const complete=marks.every(m=>m.pl!==null);
+    return {marks,complete,total:complete?marks.reduce((sum,m)=>sum+m.pl,0):null};
+  },[legs,chain]);
+
   const greeks = useMemo(() => {
     if (!legs.length || !chain) return null;
     let d = 0, g = 0, t = 0, v = 0, found = false;
@@ -493,6 +510,16 @@ function StrategyBuilder({ legs, setLegs, spot, lotSize, underlying, chain }) {
           </div>
         )}
 
+        {legs.length>0 && <div className="rounded-lg border border-line bg-surface p-4">
+          <div className="flex flex-wrap gap-2 justify-between items-center"><p className="font-mono text-xs text-muted tracking-wider">ESTIMATED LIVE MARK-TO-MARKET</p><span className="text-xs text-muted">Prices refresh with chain</span></div>
+          <p className="font-mono text-xl mt-2 font-bold text-body">{markToMarket?.complete ? "₹"+Math.round(markToMarket.total).toLocaleString("en-IN") : "Not available"}</p>
+          <p className="text-xs text-muted leading-relaxed mt-2">Theoretical change in value since each leg's saved entry premium. Uses bid/ask midpoint when supplied; otherwise Upstox last traded price. Excludes brokerage, taxes, slippage and margin. Not account P&L or an executable exit quote.</p>
+          <div className="mt-3 divide-y divide-line">{markToMarket?.marks.map(m=><div key={m.id} className="flex flex-wrap gap-2 py-2 items-center justify-between text-xs">
+            <span className="text-body">{m.side} {m.strike} {m.type} · {m.lots} lot(s)</span>
+            <span className="text-muted">Mark: {m.mark==null?"—":fmtPx(m.mark)} {m.source?"("+m.source+")":""}</span>
+            <span className={m.pl==null?"text-muted":m.pl>=0?"text-gain":"text-loss"}>{m.pl==null?"No quote":"₹"+Math.round(m.pl).toLocaleString("en-IN")}</span>
+          </div>)}</div>
+        </div>}
         {greeks && (
           <div className="grid grid-cols-4 gap-2">
             {[["Δ Delta", greeks.delta, 1], ["Γ Gamma", greeks.gamma, 4], ["Θ Theta", greeks.theta, 0], ["V Vega", greeks.vega, 0]].map(([label, val, dp]) => (
