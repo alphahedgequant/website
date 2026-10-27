@@ -4,6 +4,7 @@ import Link from "next/link";
 import ModelPlayground from "@/components/ModelPlayground";
 import ModelLesson from "@/components/ModelLesson";
 import BeginnerChapter from "@/components/BeginnerChapter";
+import ModelMasterclass from "@/components/ModelMasterclass";
 
 // ════════════════════════════════════════════════════════════════════
 //  MODEL LIBRARY — grouped into 4 categories.
@@ -539,7 +540,7 @@ function ModelCard({ m, open, onToggle }) {
 
 
           <BeginnerChapter model={m} />
-          {!["S4","R2"].includes(m.id) && <ModelLesson key={m.id} model={m} />}
+          {["O1","R1","O2","G4","G5"].includes(m.id) ? <ModelLesson key={m.id} model={m} /> : !["S4","R2"].includes(m.id) ? <ModelMasterclass key={m.id} model={m} /> : null}
           <ModelPlayground key={m.id+"-lab"} model={m} />
           <p className="font-mono text-[10px] text-muted tracking-wider mb-1">THE MATH (OPTIONAL)</p>
           {m.math.map((f, i) => <Formula key={i} label={f.label} lines={f.lines} />)}
@@ -596,7 +597,7 @@ export default function Models() {
 
       <div className="mt-5 border border-line rounded-xl p-4 bg-raised max-w-3xl">
         <p className="text-sm text-body font-semibold">New to quant finance? Start here.</p>
-        <p className="text-sm text-muted leading-relaxed mt-2">Pick a section, open any model, read the guided lesson and worked calculations where available, then move the sliders under “Try an example”. The numbers are hypothetical learning tools—not real-time signals or verified backtests.</p>
+        <p className="text-sm text-muted leading-relaxed mt-2">Pick a section, open any model, read the structured lessons and worked calculations, then move the sliders under “Try an example”. The numbers are hypothetical learning tools—not real-time signals or verified backtests.</p>
       </div>
       <div className="flex flex-wrap gap-2 mt-6">
         {CATEGORIES.map((c) => (
