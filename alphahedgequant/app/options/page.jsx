@@ -1,11 +1,17 @@
 "use client";
 import { useState, useEffect, useMemo, useRef, useCallback } from "react";
+import OptionIVAnalytics from "@/components/OptionIVAnalytics";
 import {
   XAxis, YAxis, CartesianGrid, Tooltip,
   ResponsiveContainer, ReferenceLine, Area, AreaChart,
 } from "recharts";
 
 const API = "/api/market";
+function isRegularNseSession(now=new Date()){
+ const parts=Object.fromEntries(new Intl.DateTimeFormat("en-GB",{timeZone:"Asia/Kolkata",weekday:"short",hour:"2-digit",minute:"2-digit",hourCycle:"h23"}).formatToParts(now).map(p=>[p.type,p.value]));
+ const t=Number(parts.hour)*60+Number(parts.minute);
+ return parts.weekday!=="Sat"&&parts.weekday!=="Sun"&&t>=555&&t<930;
+}
 
 const INDICES = [
   { id: "NIFTY", label: "NIFTY 50", lot: 75 },
@@ -51,6 +57,10 @@ export default function OptionsPage() {
   const timerRef = useRef(null);
   const requestIdRef = useRef(0);
   const [chainLotSize,setChainLotSize] = useState(null);
+  const [sessionOpen,setSessionOpen] = useState(false);
+  const [lastUpdated,setLastUpdated] = useState(null);
+  const [ivHistory,setIvHistory] = useState([]);
+  const [refreshing,setRefreshing] = useState(false);
 
   const lotSize = useMemo(() => {
     const idx = INDICES.find((i) => i.id === underlying);
@@ -60,7 +70,7 @@ export default function OptionsPage() {
 
   const loadChain = useCallback(async (ul, exp, isRefresh = false) => {
     const requestId = ++requestIdRef.current;
-    if (!isRefresh) { setStatus("loading"); setChain(null); setSpot(0); setExpiries([]); setChainLotSize(null); setErrMsg(""); }
+    if (!isRefresh) { setStatus("loading"); setChain(null); setSpot(0); setExpiries([]); setChainLotSize(null); setErrMsg(""); } else {setRefreshing(true);}
     try {
       const url = `${API}/option-chain/${ul}${exp ? `?expiry=${exp}` : ""}`;
       const r = await fetch(url, { cache: "no-store" });
@@ -87,6 +97,12 @@ export default function OptionsPage() {
         if (!exp && j.data.expiry) setExpiry(j.data.expiry);
         setStatus("live");
         setErrMsg("");
+        setLastUpdated(Date.now());
+        if(isRegularNseSession()){
+          const near=[...j.data.strikes].filter(row=>Number.isFinite(Number(row.strike_price))).sort((a,b)=>Math.abs(a.strike_price-j.data.spot_price)-Math.abs(b.strike_price-j.data.spot_price))[0];
+          const cv=near?.call?.iv,pv=near?.put?.iv;
+          if(near&&(cv!=null||pv!=null))setIvHistory(prev=>[...prev,{time:new Date().toLocaleTimeString("en-IN",{timeZone:"Asia/Kolkata",hour12:false}),call:cv==null?null:Number(cv),put:pv==null?null:Number(pv)}].slice(-160));
+        }
       } else {
         setChain(null);
         setSpot(0);
@@ -99,6 +115,8 @@ export default function OptionsPage() {
       setSpot(0);
       setStatus("error");
       setErrMsg(e instanceof TypeError ? "Cannot contact market-data API." : e.message || "Market-data request failed.");
+    } finally {
+      if(requestId===requestIdRef.current)setRefreshing(false);
     }
   }, []);
 
@@ -119,20 +137,24 @@ export default function OptionsPage() {
     const symbol=String(value||"").trim().toUpperCase();
     if(!/^[A-Z0-9._-]{1,40}$/.test(symbol))return;
     requestIdRef.current++;
-    setExpiry("");setLegs([]);setStockQuery("");setUnderlying(symbol);
+    setExpiry("");setLegs([]);setStockQuery("");setIvHistory([]);setLastUpdated(null);setUnderlying(symbol);
   },[]);
   useEffect(() => { loadChain(underlying, ""); }, [underlying, loadChain]);
   useEffect(() => { if (expiry && expiry !== "(demo)") loadChain(underlying, expiry); }, [expiry, underlying, loadChain]);
 
+  useEffect(()=>{
+    const check=()=>setSessionOpen(isRegularNseSession());
+    check();const id=setInterval(check,30000);return()=>clearInterval(id);
+  },[]);
   useEffect(() => {
     if (timerRef.current) clearInterval(timerRef.current);
-    if (autoRefresh && status === "live" && tab === "chain") {
+    if (autoRefresh && sessionOpen && status === "live") {
       timerRef.current = setInterval(() => {
         if (!document.hidden) loadChain(underlying, expiry, true);
       }, 8000);
     }
     return () => timerRef.current && clearInterval(timerRef.current);
-  }, [autoRefresh, status, tab, underlying, expiry, loadChain]);
+  }, [autoRefresh, sessionOpen, status, underlying, expiry, loadChain]);
 
   const { atmStrike, maxOI } = useMemo(() => {
     if (!chain?.length) return { atmStrike: null, maxOI: 1 };
@@ -242,6 +264,12 @@ export default function OptionsPage() {
         </div>
       )}
 
+      <div className="mt-4 flex flex-wrap items-center gap-3 text-xs text-muted">
+        <span>{sessionOpen ? "Regular NSE session" : "Outside regular NSE hours (holidays not detected)"}</span>
+        <span>{lastUpdated ? "Last response "+new Date(lastUpdated).toLocaleTimeString("en-IN",{timeZone:"Asia/Kolkata"})+" IST" : "Awaiting verified quotes"}</span>
+        <button type="button" onClick={()=>loadChain(underlying,expiry,true)} disabled={refreshing} className="rounded border border-line px-3 py-1.5 hover:text-body disabled:opacity-50">{refreshing?"Refreshing…":"Refresh now"}</button>
+      </div>
+      <OptionIVAnalytics chain={chain} spot={spot} history={ivHistory} expiry={expiry} marketOpen={sessionOpen} lastUpdated={lastUpdated}/>
       {tab === "chain"
         ? <OptionChainTable chain={chain} spot={spot} atmStrike={atmStrike} maxOI={maxOI} status={status} onAdd={addLeg} />
         : <StrategyBuilder legs={legs} setLegs={setLegs} spot={spot} lotSize={lotSize} underlying={underlying} chain={chain} />}
@@ -318,7 +346,7 @@ function OptionChainTable({ chain, spot, atmStrike, maxOI, status, onAdd }) {
         </table>
       </div>
       <p className="px-3 py-2 font-mono text-[10px] text-muted border-t border-line">
-        Green shading = ITM calls · red = ITM puts · amber row = ATM. Click a LTP to add it to the strategy builder. {status === "demo" || status === "expired" ? "Demo values shown." : "Auto-refreshes every 8s."}
+        Green shading = ITM calls · red = ITM puts · amber row = ATM. Click a LTP to add it to the strategy builder. {status === "demo" || status === "expired" ? "No synthetic option quotes." : "Refreshes during regular NSE hours when enabled."}
       </p>
     </div>
   );
@@ -346,19 +374,25 @@ function StrategyBuilder({ legs, setLegs, spot, lotSize, underlying, chain }) {
 
   const ltpAt = useCallback((strike, type) => {
     const row = chain?.find((r) => r.strike_price === strike);
-    if (!row) return 0;
-    return (type === "CE" ? row.call?.ltp : row.put?.ltp) || 0;
+    if (!row) return null;
+    const px = type === "CE" ? row.call?.ltp : row.put?.ltp;
+    return Number.isFinite(Number(px)) && px != null ? Number(px) : null;
   }, [chain]);
 
-  const step = underlying === "BANKNIFTY" ? 100 : 50;
+  const strikes = (chain||[]).map(r=>Number(r.strike_price)).filter(Number.isFinite).sort((a,b)=>a-b);
+  const step = strikes.length>1 ? Math.min(...strikes.slice(1).map((x,i)=>x-strikes[i]).filter(x=>x>0)) : 50;
 
   const applyPreset = (key) => {
-    const mk = (side, type, strike) => ({ id: Date.now() + Math.random(), side, type, strike, premium: ltpAt(strike, type) || 50, lots: 1, lotSize });
-    if (key === "long_straddle") setLegs([mk("BUY", "CE", atm), mk("BUY", "PE", atm)]);
-    else if (key === "short_straddle") setLegs([mk("SELL", "CE", atm), mk("SELL", "PE", atm)]);
-    else if (key === "bull_call") setLegs([mk("BUY", "CE", atm), mk("SELL", "CE", atm + step * 2)]);
-    else if (key === "bear_put") setLegs([mk("BUY", "PE", atm), mk("SELL", "PE", atm - step * 2)]);
-    else if (key === "iron_condor") setLegs([mk("SELL", "PE", atm - step * 2), mk("BUY", "PE", atm - step * 4), mk("SELL", "CE", atm + step * 2), mk("BUY", "CE", atm + step * 4)]);
+    if(!chain?.length || !spot || !lotSize || (lotSize===1 && !INDICES.some(x=>x.id===underlying)))return;
+    const mk = (side, type, strike) => {
+      const premium=ltpAt(strike,type);
+      return premium===null ? null : {id:Date.now()+Math.random(),side,type,strike,premium,lots:1,lotSize};
+    };
+    if (key === "long_straddle") setLegs([mk("BUY", "CE", atm), mk("BUY", "PE", atm)].filter(Boolean));
+    else if (key === "short_straddle") setLegs([mk("SELL", "CE", atm), mk("SELL", "PE", atm)].filter(Boolean));
+    else if (key === "bull_call") setLegs([mk("BUY", "CE", atm), mk("SELL", "CE", atm + step * 2)].filter(Boolean));
+    else if (key === "bear_put") setLegs([mk("BUY", "PE", atm), mk("SELL", "PE", atm - step * 2)].filter(Boolean));
+    else if (key === "iron_condor") setLegs([mk("SELL", "PE", atm - step * 2), mk("BUY", "PE", atm - step * 4), mk("SELL", "CE", atm + step * 2), mk("BUY", "CE", atm + step * 4)].filter(Boolean));
   };
 
   const payoff = useMemo(() => {
@@ -412,10 +446,11 @@ function StrategyBuilder({ legs, setLegs, spot, lotSize, underlying, chain }) {
     <div className="mt-6 grid lg:grid-cols-[1fr_1.1fr] gap-6">
       <div className="space-y-4">
         <div>
-          <p className="font-mono text-xs text-muted tracking-wider mb-2">PRESETS</p>
+          <p className="font-mono text-xs text-muted tracking-wider mb-2">STRATEGY PRESETS · QUOTES REQUIRED</p>
+          <p className="text-xs text-muted mb-3">Construct strategies from available strike prices. If an exact leg's quote is missing, do not assume its premium.</p>
           <div className="flex flex-wrap gap-1.5">
             {Object.entries(PRESETS).map(([k, label]) => (
-              <button key={k} onClick={() => applyPreset(k)} className="font-mono text-[10px] px-2.5 py-1 rounded border border-line text-muted hover:border-amber/40 hover:text-amber transition-colors">{label}</button>
+              <button key={k} onClick={() => applyPreset(k)} disabled={!chain?.length} className="disabled:opacity-40 font-mono text-[10px] px-2.5 py-1 rounded border border-line text-muted hover:border-amber/40 hover:text-amber transition-colors">{label}</button>
             ))}
           </div>
         </div>
@@ -423,7 +458,7 @@ function StrategyBuilder({ legs, setLegs, spot, lotSize, underlying, chain }) {
         <div className="flex items-center justify-between">
           <p className="font-mono text-xs text-muted tracking-wider">LEGS ({legs.length})</p>
           <div className="flex gap-1.5">
-            <button onClick={() => setLegs((L) => [...L, { id: Date.now() + Math.random(), side: "BUY", type: "CE", strike: atm, premium: ltpAt(atm, "CE") || 50, lots: 1, lotSize }])} className="font-mono text-[10px] px-2 py-1 rounded border border-amber/40 text-amber hover:bg-amber/10">+ ADD LEG</button>
+            <button onClick={() => setLegs((L) => [...L, { id: Date.now() + Math.random(), side: "BUY", type: "CE", strike: atm, premium: ltpAt(atm, "CE") ?? 0, lots: 1, lotSize }])} className="font-mono text-[10px] px-2 py-1 rounded border border-amber/40 text-amber hover:bg-amber/10">+ ADD LEG</button>
             {legs.length > 0 && <button onClick={clearAll} className="font-mono text-[10px] px-2 py-1 rounded border border-line text-muted hover:text-loss">CLEAR</button>}
           </div>
         </div>
@@ -479,12 +514,12 @@ function StrategyBuilder({ legs, setLegs, spot, lotSize, underlying, chain }) {
           <div className="space-y-4">
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
               <div className="p-2.5 rounded-lg border border-line bg-surface">
-                <p className="font-mono text-[9px] text-muted tracking-wider mb-0.5">MAX PROFIT</p>
-                <p className="font-mono text-sm font-bold text-gain">{payoff.maxProfit > 1e6 ? "Unlimited" : "₹" + Math.round(payoff.maxProfit).toLocaleString("en-IN")}</p>
+                <p className="font-mono text-[9px] text-muted tracking-wider mb-0.5">P&L HIGH (CHART RANGE)</p>
+                <p className="font-mono text-sm font-bold text-gain">{"₹" + Math.round(payoff.maxProfit).toLocaleString("en-IN")}</p>
               </div>
               <div className="p-2.5 rounded-lg border border-line bg-surface">
-                <p className="font-mono text-[9px] text-muted tracking-wider mb-0.5">MAX LOSS</p>
-                <p className="font-mono text-sm font-bold text-loss">{payoff.maxLoss < -1e6 ? "Unlimited" : "₹" + Math.round(payoff.maxLoss).toLocaleString("en-IN")}</p>
+                <p className="font-mono text-[9px] text-muted tracking-wider mb-0.5">P&L LOW (CHART RANGE)</p>
+                <p className="font-mono text-sm font-bold text-loss">{"₹" + Math.round(payoff.maxLoss).toLocaleString("en-IN")}</p>
               </div>
               <div className="p-2.5 rounded-lg border border-line bg-surface">
                 <p className="font-mono text-[9px] text-muted tracking-wider mb-0.5">{payoff.netPremium >= 0 ? "NET CREDIT" : "NET DEBIT"}</p>
