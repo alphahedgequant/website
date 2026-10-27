@@ -618,7 +618,7 @@ export default function Models() {
         Quant models, by category
       </h1>
       <p className="text-muted text-sm mt-2 max-w-2xl leading-relaxed">
-        Explore function raw() { [native code] }{MODELS.length} research models — from market-neutral statistical arbitrage to risk
+        Explore {MODELS.length} research models — from market-neutral statistical arbitrage to risk
         quantification and options risk. Every model includes a simple explanation before the math. These are educational descriptions, not evidence of an active or profitable live strategy.
       </p>
 
