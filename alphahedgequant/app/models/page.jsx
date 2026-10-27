@@ -2,6 +2,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import ModelPlayground from "@/components/ModelPlayground";
+import ModelLesson from "@/components/ModelLesson";
 
 // ════════════════════════════════════════════════════════════════════
 //  MODEL LIBRARY — grouped into 4 categories.
@@ -543,7 +544,8 @@ function ModelCard({ m, open, onToggle }) {
             {m.example && <p className="text-sm text-muted mt-3 leading-relaxed"><strong className="text-body">Example (illustrative): </strong>{m.example}</p>}
             <p className="text-xs text-muted mt-3 leading-relaxed"><strong className="text-body">What can go wrong: </strong>{m.risks || m.when}</p>
           </div>
-          <ModelPlayground key={m.id} model={m} />
+          <ModelLesson key={m.id} model={m} />
+          <ModelPlayground key={m.id+"-lab"} model={m} />
           <p className="font-mono text-[10px] text-muted tracking-wider mb-1">THE MATH (OPTIONAL)</p>
           {m.math.map((f, i) => <Formula key={i} label={f.label} lines={f.lines} />)}
 
@@ -599,7 +601,7 @@ export default function Models() {
 
       <div className="mt-5 border border-line rounded-xl p-4 bg-raised max-w-3xl">
         <p className="text-sm text-body font-semibold">New to quant finance? Start here.</p>
-        <p className="text-sm text-muted leading-relaxed mt-2">Pick a section, open any model, read its plain-English explanation, then move the sliders under “Try an example”. The numbers are hypothetical learning tools—not real-time signals or verified backtests.</p>
+        <p className="text-sm text-muted leading-relaxed mt-2">Pick a section, open any model, read the guided lesson and worked calculations where available, then move the sliders under “Try an example”. The numbers are hypothetical learning tools—not real-time signals or verified backtests.</p>
       </div>
       <div className="flex flex-wrap gap-2 mt-6">
         {CATEGORIES.map((c) => (
