@@ -1,6 +1,7 @@
 "use client";
 import { useState } from "react";
 import Link from "next/link";
+import ModelPlayground from "@/components/ModelPlayground";
 
 // ════════════════════════════════════════════════════════════════════
 //  MODEL LIBRARY — grouped into 4 categories.
@@ -9,50 +10,23 @@ import Link from "next/link";
 // ════════════════════════════════════════════════════════════════════
 
 const CATEGORIES = [
-  {
-    key: "general",
-    label: "General Models",
-    eyebrow: "TREND · REGIME · PORTFOLIO",
-    blurb: "Directional and allocation models that form the backbone of a systematic book — trend capture, regime gating, volatility harvesting and portfolio construction.",
-  },
-  {
-    key: "statarb",
-    label: "Statistical Arbitrage",
-    eyebrow: "THE CORE ENGINE — MARKET-NEUTRAL",
-    blurb: "The heart of AHQ. Market-neutral strategies that trade the relationship between assets rather than direction. Cointegration, dynamic hedging, and mean-reversion of spreads — built from first principles.",
-    headline: true,
-  },
-  {
-    key: "vol",
-    label: "Volatility Models",
-    eyebrow: "ARCH · GARCH · CONDITIONAL VARIANCE",
-    blurb: "Volatility clusters — calm begets calm, turbulence begets turbulence. The ARCH/GARCH family models this time-varying conditional variance, feeding option pricing, VaR and position sizing with forward-looking volatility forecasts.",
-  },
-  {
-    key: "risk",
-    label: "Risk Models — VaR Family",
-    eyebrow: "LOSS QUANTIFICATION · TAIL RISK",
-    blurb: "How much can you lose, and how often? Value-at-Risk, Expected Shortfall, stress testing and the statistical tests that validate them. The language risk desks and regulators speak.",
-  },
-  {
-    key: "ml",
-    label: "Machine Learning Models",
-    eyebrow: "SUPERVISED · DEEP · UNSUPERVISED · RL",
-    blurb: "Where modern quant is heading — learning patterns from data rather than specifying them by hand. From gradient-boosted return prediction to LSTMs, regime clustering and reinforcement-learned execution. Powerful, but prone to overfitting noise — discipline matters more here than anywhere.",
-  },
-  {
-    key: "options",
-    label: "Options & Market Microstructure",
-    eyebrow: "IMPLIED VOL · GAMMA · SKEW · LIQUIDITY",
-    blurb: "Options models explained in practical terms, with explicit warnings about estimated exposure and the risks of selling options.",
-  },
-  {
-    key: "banking",
-    label: "Banking & Regulatory Models",
-    eyebrow: "BASEL III · RBI · CREDIT RISK",
-    blurb: "The capital and liquidity framework banks live under — Basel III ratios, RBI reserve requirements (SLR/CRR), and the credit-risk parameters behind every loan-loss provision.",
-  },
+  {key:"market-risk",label:"Market Risk",eyebrow:"VAR · EXPECTED SHORTFALL · STRESS",blurb:"How much could a portfolio lose? Learn everyday risk concepts before looking at statistical estimates."},
+  {key:"volatility",label:"Volatility & Options",eyebrow:"IV · GAMMA · GARCH · SKEW",blurb:"Understand why option prices change, what volatility measures, and why selling premium can be risky."},
+  {key:"portfolio",label:"Portfolio Management",eyebrow:"DIVERSIFICATION · ALLOCATION · DRAWDOWN",blurb:"Build portfolios, measure drawdowns and understand the trade-offs between growth and risk."},
+  {key:"strategies",label:"Trading Strategies & Statistical Arbitrage",eyebrow:"MOMENTUM · MEAN REVERSION · PAIRS",blurb:"Explore rule-based trends and relative-value ideas. Research does not mean a profitable trading signal."},
+  {key:"microstructure",label:"Market Activity & Microstructure",eyebrow:"RVOL · LIQUIDITY · HEDGING",blurb:"Study participation, order flow proxies and the limitations of option-position estimates."},
+  {key:"machine-learning",label:"Machine Learning & Regimes",eyebrow:"SUPERVISED · UNSUPERVISED · DEEP LEARNING",blurb:"Learn how predictive models are trained, what they output and why overfitting matters."},
+  {key:"banking",label:"Banking & Credit Risk",eyebrow:"CAPITAL · LIQUIDITY · DEFAULT",blurb:"See how banks assess capital, liquidity and loan losses."},
 ];
+const SECTION_BY_ID = {
+ G1:"strategies",G2:"machine-learning",G3:"volatility",G4:"portfolio",G5:"microstructure",
+ S1:"strategies",S2:"strategies",S3:"strategies",S4:"strategies",S5:"strategies",S6:"strategies",
+ V1:"volatility",V2:"volatility",V3:"volatility",V4:"volatility",V5:"volatility",
+ R1:"market-risk",R2:"market-risk",R3:"market-risk",R4:"market-risk",R5:"market-risk",R6:"market-risk",R9:"portfolio",
+ O1:"volatility",O2:"microstructure",O3:"volatility",O4:"volatility",
+ M1:"machine-learning",M2:"machine-learning",M3:"machine-learning",M4:"machine-learning",M5:"machine-learning",
+ B1:"banking",B2:"banking",B3:"banking",B4:"banking",B5:"banking",B6:"banking"
+};
 
 const MODELS = [
   // ─────────────────────────── GENERAL ───────────────────────────
@@ -569,6 +543,7 @@ function ModelCard({ m, open, onToggle }) {
             {m.example && <p className="text-sm text-muted mt-3 leading-relaxed"><strong className="text-body">Example (illustrative): </strong>{m.example}</p>}
             <p className="text-xs text-muted mt-3 leading-relaxed"><strong className="text-body">What can go wrong: </strong>{m.risks || m.when}</p>
           </div>
+          <ModelPlayground key={m.id} model={m} />
           <p className="font-mono text-[10px] text-muted tracking-wider mb-1">THE MATH (OPTIONAL)</p>
           {m.math.map((f, i) => <Formula key={i} label={f.label} lines={f.lines} />)}
 
@@ -622,6 +597,10 @@ export default function Models() {
         quantification and options risk. Every model includes a simple explanation before the math. These are educational descriptions, not evidence of an active or profitable live strategy.
       </p>
 
+      <div className="mt-5 border border-line rounded-xl p-4 bg-raised max-w-3xl">
+        <p className="text-sm text-body font-semibold">New to quant finance? Start here.</p>
+        <p className="text-sm text-muted leading-relaxed mt-2">Pick a section, open any model, read its plain-English explanation, then move the sliders under “Try an example”. The numbers are hypothetical learning tools—not real-time signals or verified backtests.</p>
+      </div>
       <div className="flex flex-wrap gap-2 mt-6">
         {CATEGORIES.map((c) => (
           <a
@@ -635,7 +614,7 @@ export default function Models() {
       </div>
 
       {CATEGORIES.map((cat) => {
-        const models = MODELS.filter((m) => m.cat === cat.key);
+        const models = MODELS.filter((m) => SECTION_BY_ID[m.id] === cat.key);
         return (
           <section key={cat.key} id={cat.key} className="mt-12 scroll-mt-24">
             <div className={`pb-3 mb-5 border-b ${cat.headline ? "border-amber/40" : "border-line"}`}>
