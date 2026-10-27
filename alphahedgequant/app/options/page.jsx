@@ -68,7 +68,15 @@ export default function OptionsPage() {
       let j;
       try { j = JSON.parse(raw); }
       catch { throw new Error(`The market-data API returned an invalid response (HTTP ${r.status}).`); }
-      if (!r.ok) throw new Error(`Market-data API HTTP ${r.status}: ${r.status === 401 || r.status === 403 ? "Authentication required" : r.status >= 500 ? "Backend API error" : "Request rejected"}.`);
+      const errorText = [j?.error,j?.message,j?.errorCode,JSON.stringify(j?.errors||"")].filter(Boolean).join(" ");
+      if (r.status === 401 || /invalid token|token expired|access token|unauthori[sz]ed|upstox.*401/i.test(errorText)) {
+        if (requestId === requestIdRef.current) {
+          setChain(null);setSpot(0);setStatus("expired");
+          setErrMsg("Upstox rejected the backend access token. Reconnect Upstox to restore option-chain data.");
+        }
+        return;
+      }
+      if (!r.ok) throw new Error(`Market-data API HTTP ${r.status}: ${r.status >= 500 ? "Backend API error" : "Request rejected"}.`);
       if (requestId !== requestIdRef.current) return;
       if (j.success && j.data?.strikes?.length) {
         const verifiedLot = Number(j.data?.lot_size ?? j.data?.lotSize);
@@ -83,7 +91,7 @@ export default function OptionsPage() {
         setChain(null);
         setSpot(0);
         setStatus("unavailable");
-        setErrMsg("No verified option chain returned. The company may not be listed in NSE F&O, or the connected backend may not support the instrument.");
+        setErrMsg("The backend returned no option chain. Check Upstox authentication first; then verify F&O eligibility and the instrument mapping.");
       }
     } catch (e) {
       if (requestId !== requestIdRef.current) return;
@@ -150,7 +158,7 @@ export default function OptionsPage() {
         <div>
           <h1 className="font-display text-3xl font-medium tracking-tight">Options Desk</h1>
           <p className="text-muted text-sm mt-1.5 max-w-2xl leading-relaxed">
-            Live NSE option chains for indices and stocks (Upstox), with a Sensibull-style strategy builder —
+            NSE option chains for supported derivatives from Upstox (when connected), with a strategy builder —
             payoff, breakevens, and net Greeks. Click any LTP in the chain to add it as a leg.
           </p>
         </div>
@@ -204,7 +212,7 @@ export default function OptionsPage() {
         <div className="flex items-center gap-2">
           <span className={`w-1.5 h-1.5 rounded-full ${status === "live" ? "bg-gain animate-pulse" : status === "demo" || status === "expired" ? "bg-amber" : status === "loading" ? "bg-muted" : "bg-loss"}`} />
           <span className="font-mono text-[11px] text-muted">
-            {status === "live" ? "Upstox chain received" : status === "loading" ? "Loading…" : "No verified chain"}
+            {status === "live" ? "Upstox chain received" : status === "loading" ? "Loading…" : status === "expired" ? "Upstox login expired" : "No verified chain"}
           </span>
         </div>
         {status === "live" && (
