@@ -374,19 +374,25 @@ function StrategyBuilder({ legs, setLegs, spot, lotSize, underlying, chain }) {
 
   const ltpAt = useCallback((strike, type) => {
     const row = chain?.find((r) => r.strike_price === strike);
-    if (!row) return 0;
-    return (type === "CE" ? row.call?.ltp : row.put?.ltp) || 0;
+    if (!row) return null;
+    const px = type === "CE" ? row.call?.ltp : row.put?.ltp;
+    return Number.isFinite(Number(px)) && px != null ? Number(px) : null;
   }, [chain]);
 
-  const step = underlying === "BANKNIFTY" ? 100 : 50;
+  const strikes = (chain||[]).map(r=>Number(r.strike_price)).filter(Number.isFinite).sort((a,b)=>a-b);
+  const step = strikes.length>1 ? Math.min(...strikes.slice(1).map((x,i)=>x-strikes[i]).filter(x=>x>0)) : 50;
 
   const applyPreset = (key) => {
-    const mk = (side, type, strike) => ({ id: Date.now() + Math.random(), side, type, strike, premium: ltpAt(strike, type) || 50, lots: 1, lotSize });
-    if (key === "long_straddle") setLegs([mk("BUY", "CE", atm), mk("BUY", "PE", atm)]);
-    else if (key === "short_straddle") setLegs([mk("SELL", "CE", atm), mk("SELL", "PE", atm)]);
-    else if (key === "bull_call") setLegs([mk("BUY", "CE", atm), mk("SELL", "CE", atm + step * 2)]);
-    else if (key === "bear_put") setLegs([mk("BUY", "PE", atm), mk("SELL", "PE", atm - step * 2)]);
-    else if (key === "iron_condor") setLegs([mk("SELL", "PE", atm - step * 2), mk("BUY", "PE", atm - step * 4), mk("SELL", "CE", atm + step * 2), mk("BUY", "CE", atm + step * 4)]);
+    if(!chain?.length || !spot || !lotSize || (lotSize===1 && !INDICES.some(x=>x.id===underlying)))return;
+    const mk = (side, type, strike) => {
+      const premium=ltpAt(strike,type);
+      return premium===null ? null : {id:Date.now()+Math.random(),side,type,strike,premium,lots:1,lotSize};
+    };
+    if (key === "long_straddle") setLegs([mk("BUY", "CE", atm), mk("BUY", "PE", atm)].filter(Boolean));
+    else if (key === "short_straddle") setLegs([mk("SELL", "CE", atm), mk("SELL", "PE", atm)].filter(Boolean));
+    else if (key === "bull_call") setLegs([mk("BUY", "CE", atm), mk("SELL", "CE", atm + step * 2)].filter(Boolean));
+    else if (key === "bear_put") setLegs([mk("BUY", "PE", atm), mk("SELL", "PE", atm - step * 2)].filter(Boolean));
+    else if (key === "iron_condor") setLegs([mk("SELL", "PE", atm - step * 2), mk("BUY", "PE", atm - step * 4), mk("SELL", "CE", atm + step * 2), mk("BUY", "CE", atm + step * 4)].filter(Boolean));
   };
 
   const payoff = useMemo(() => {
@@ -440,10 +446,11 @@ function StrategyBuilder({ legs, setLegs, spot, lotSize, underlying, chain }) {
     <div className="mt-6 grid lg:grid-cols-[1fr_1.1fr] gap-6">
       <div className="space-y-4">
         <div>
-          <p className="font-mono text-xs text-muted tracking-wider mb-2">PRESETS</p>
+          <p className="font-mono text-xs text-muted tracking-wider mb-2">STRATEGY PRESETS · QUOTES REQUIRED</p>
+          <p className="text-xs text-muted mb-3">Construct strategies from available strike prices. If an exact leg's quote is missing, do not assume its premium.</p>
           <div className="flex flex-wrap gap-1.5">
             {Object.entries(PRESETS).map(([k, label]) => (
-              <button key={k} onClick={() => applyPreset(k)} className="font-mono text-[10px] px-2.5 py-1 rounded border border-line text-muted hover:border-amber/40 hover:text-amber transition-colors">{label}</button>
+              <button key={k} onClick={() => applyPreset(k)} disabled={!chain?.length} className="disabled:opacity-40 font-mono text-[10px] px-2.5 py-1 rounded border border-line text-muted hover:border-amber/40 hover:text-amber transition-colors">{label}</button>
             ))}
           </div>
         </div>
@@ -451,7 +458,7 @@ function StrategyBuilder({ legs, setLegs, spot, lotSize, underlying, chain }) {
         <div className="flex items-center justify-between">
           <p className="font-mono text-xs text-muted tracking-wider">LEGS ({legs.length})</p>
           <div className="flex gap-1.5">
-            <button onClick={() => setLegs((L) => [...L, { id: Date.now() + Math.random(), side: "BUY", type: "CE", strike: atm, premium: ltpAt(atm, "CE") || 50, lots: 1, lotSize }])} className="font-mono text-[10px] px-2 py-1 rounded border border-amber/40 text-amber hover:bg-amber/10">+ ADD LEG</button>
+            <button onClick={() => setLegs((L) => [...L, { id: Date.now() + Math.random(), side: "BUY", type: "CE", strike: atm, premium: ltpAt(atm, "CE") ?? 0, lots: 1, lotSize }])} className="font-mono text-[10px] px-2 py-1 rounded border border-amber/40 text-amber hover:bg-amber/10">+ ADD LEG</button>
             {legs.length > 0 && <button onClick={clearAll} className="font-mono text-[10px] px-2 py-1 rounded border border-line text-muted hover:text-loss">CLEAR</button>}
           </div>
         </div>
@@ -507,12 +514,12 @@ function StrategyBuilder({ legs, setLegs, spot, lotSize, underlying, chain }) {
           <div className="space-y-4">
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
               <div className="p-2.5 rounded-lg border border-line bg-surface">
-                <p className="font-mono text-[9px] text-muted tracking-wider mb-0.5">MAX PROFIT</p>
-                <p className="font-mono text-sm font-bold text-gain">{payoff.maxProfit > 1e6 ? "Unlimited" : "₹" + Math.round(payoff.maxProfit).toLocaleString("en-IN")}</p>
+                <p className="font-mono text-[9px] text-muted tracking-wider mb-0.5">P&L HIGH (CHART RANGE)</p>
+                <p className="font-mono text-sm font-bold text-gain">{"₹" + Math.round(payoff.maxProfit).toLocaleString("en-IN")}</p>
               </div>
               <div className="p-2.5 rounded-lg border border-line bg-surface">
-                <p className="font-mono text-[9px] text-muted tracking-wider mb-0.5">MAX LOSS</p>
-                <p className="font-mono text-sm font-bold text-loss">{payoff.maxLoss < -1e6 ? "Unlimited" : "₹" + Math.round(payoff.maxLoss).toLocaleString("en-IN")}</p>
+                <p className="font-mono text-[9px] text-muted tracking-wider mb-0.5">P&L LOW (CHART RANGE)</p>
+                <p className="font-mono text-sm font-bold text-loss">{"₹" + Math.round(payoff.maxLoss).toLocaleString("en-IN")}</p>
               </div>
               <div className="p-2.5 rounded-lg border border-line bg-surface">
                 <p className="font-mono text-[9px] text-muted tracking-wider mb-0.5">{payoff.netPremium >= 0 ? "NET CREDIT" : "NET DEBIT"}</p>
