@@ -264,6 +264,12 @@ export default function OptionsPage() {
         </div>
       )}
 
+      <div className="mt-4 flex flex-wrap items-center gap-3 text-xs text-muted">
+        <span>{sessionOpen ? "Regular NSE session" : "Outside regular NSE hours (holidays not detected)"}</span>
+        <span>{lastUpdated ? "Last response "+new Date(lastUpdated).toLocaleTimeString("en-IN",{timeZone:"Asia/Kolkata"})+" IST" : "Awaiting verified quotes"}</span>
+        <button type="button" onClick={()=>loadChain(underlying,expiry,true)} disabled={refreshing} className="rounded border border-line px-3 py-1.5 hover:text-body disabled:opacity-50">{refreshing?"Refreshing…":"Refresh now"}</button>
+      </div>
+      <OptionIVAnalytics chain={chain} spot={spot} history={ivHistory} expiry={expiry} marketOpen={sessionOpen} lastUpdated={lastUpdated}/>
       {tab === "chain"
         ? <OptionChainTable chain={chain} spot={spot} atmStrike={atmStrike} maxOI={maxOI} status={status} onAdd={addLeg} />
         : <StrategyBuilder legs={legs} setLegs={setLegs} spot={spot} lotSize={lotSize} underlying={underlying} chain={chain} />}
@@ -340,7 +346,7 @@ function OptionChainTable({ chain, spot, atmStrike, maxOI, status, onAdd }) {
         </table>
       </div>
       <p className="px-3 py-2 font-mono text-[10px] text-muted border-t border-line">
-        Green shading = ITM calls · red = ITM puts · amber row = ATM. Click a LTP to add it to the strategy builder. {status === "demo" || status === "expired" ? "Demo values shown." : "Auto-refreshes every 8s."}
+        Green shading = ITM calls · red = ITM puts · amber row = ATM. Click a LTP to add it to the strategy builder. {status === "demo" || status === "expired" ? "No synthetic option quotes." : "Refreshes during regular NSE hours when enabled."}
       </p>
     </div>
   );
