@@ -21,6 +21,19 @@ export default function AboutPage() {
         <Link href="/screener" className="btn-primary">Explore products</Link>
         <Link href="/learn" className="btn-ghost">Start learning</Link>
       </div>
+      <div className="mt-14 max-w-2xl rounded-xl border border-line p-5 md:p-6">
+        <p className="eyebrow mb-4">Founder</p>
+        <div className="flex items-center gap-3">
+          <span aria-label="AlphaHedgeQuant logo" className="font-mono text-amber border border-amber/50 rounded px-2 py-1 text-sm tracking-widest">AHQ</span>
+          <div>
+            <h2 className="font-display text-xl text-body">Shreyash</h2>
+            <p className="text-xs text-muted mt-1">Building AlphaHedgeQuant</p>
+          </div>
+        </div>
+        <a href="https://x.com/Shreyy214" target="_blank" rel="noopener noreferrer" className="mt-5 inline-flex items-center gap-2 text-sm text-muted hover:text-body" aria-label="Shreyash on X, @Shreyy214">
+          <span aria-hidden="true" className="text-lg">𝕏</span><span>@Shreyy214</span><span aria-hidden="true">↗</span>
+        </a>
+      </div>
       <p className="mt-14 max-w-2xl border-t border-line pt-6 text-sm leading-relaxed text-muted">
         Analytics and model outputs are intended for research and education.
         They are not a guarantee of future financial results.

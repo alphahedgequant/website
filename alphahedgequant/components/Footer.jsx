@@ -11,6 +11,12 @@ export default function Footer() {
             </span>
             <span className="font-display font-medium">AlphaHedgeQuant</span>
           </div>
+          <a href="https://x.com/Shreyy214" target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 text-xs text-muted hover:text-body mb-3" aria-label="Follow AlphaHedgeQuant founder Shreyash on X">
+            <span aria-hidden="true" className="font-mono text-amber border border-amber/50 rounded px-1 py-0.5 text-[10px] tracking-wider">AHQ</span>
+            <span>Founder: Shreyash</span>
+            <span aria-hidden="true">· 𝕏</span>
+            <span>@Shreyy214</span>
+          </a>
           <p className="text-sm text-muted leading-relaxed max-w-xs">
             Quantitative research, live market intelligence and AI-assisted
             backtesting for NSE &amp; US markets.
