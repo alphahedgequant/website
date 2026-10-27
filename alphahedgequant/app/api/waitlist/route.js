@@ -21,7 +21,7 @@ function isRateLimited(ip) {
 
 export async function POST(request) {
   try {
-    const ip = request.headers.get("x-forwarded-for") || request.headers.get("x-real-ip") || "unknown";
+    const ip = (request.headers.get("x-real-ip") || request.headers.get("x-forwarded-for") || "unknown").split(",")[0].trim().slice(0,128);
     if (isRateLimited(ip)) {
       return Response.json(
         { success: false, error: "Too many submissions. Please try again later." },
@@ -30,7 +30,11 @@ export async function POST(request) {
     }
 
     const body = await request.json();
-    const { email, source = "landing" } = body;
+    const { email, source = "landing" } = body || {};
+    // Treat attribution as untrusted client input; prevent uncontrolled text in database.
+    if (typeof source !== "string" || !/^[a-zA-Z0-9_-]{1,40}$/.test(source)) {
+      return Response.json({ success: false, error: "Invalid source." }, { status: 400 });
+    }
 
     if (!email || typeof email !== "string") {
       return Response.json({ success: false, error: "Email is required." }, { status: 400 });

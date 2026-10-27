@@ -96,8 +96,8 @@ export async function POST(request) {
       }),
     });
     if (!aiRes.ok) {
-      const detail = await aiRes.text().catch(() => "");
-      return Response.json({ ok: false, error: `Model call failed (HTTP ${aiRes.status}).`, detail: detail.slice(0, 200) }, { status: 502 });
+      // Do not return third-party error bodies to clients: they may contain sensitive metadata.
+      return Response.json({ ok: false, error: `Model provider unavailable (HTTP ${aiRes.status}).` }, { status: 502 });
     }
     const aiJson = await aiRes.json();
     const raw = (aiJson.candidates?.[0]?.content?.parts?.[0]?.text || "").replace(/```json|```/g, "").trim();

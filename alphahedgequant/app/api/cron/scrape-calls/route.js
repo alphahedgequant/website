@@ -17,9 +17,9 @@
 import { neon } from "@neondatabase/serverless";
 import { fetchConsensus } from "../../../../lib/fetchConsensus";
 
-const sql = neon(process.env.NEON_DATABASE_URL);
+// Build-safe: only initialize the DB client after authorization and configuration checks.
 
-async function ensureTable() {
+async function ensureTable(sql) {
   await sql`
     CREATE TABLE IF NOT EXISTS analyst_calls (
       id            SERIAL PRIMARY KEY,
@@ -45,8 +45,12 @@ export async function GET(request) {
     });
   }
 
+  if (!process.env.NEON_DATABASE_URL) {
+    return Response.json({ ok: false, error: "Database not configured." }, { status: 503 });
+  }
+  const sql = neon(process.env.NEON_DATABASE_URL);
   try {
-    await ensureTable();
+    await ensureTable(sql);
     const { valid, report } = await fetchConsensus();
 
     // Broken-fetch guard: never act on an empty result set.
