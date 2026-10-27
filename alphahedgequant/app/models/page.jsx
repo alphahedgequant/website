@@ -539,7 +539,7 @@ function ModelCard({ m, open, onToggle }) {
 
 
           <BeginnerChapter model={m} />
-          <ModelLesson key={m.id} model={m} />
+          {!["S4","R2"].includes(m.id) && <ModelLesson key={m.id} model={m} />}
           <ModelPlayground key={m.id+"-lab"} model={m} />
           <p className="font-mono text-[10px] text-muted tracking-wider mb-1">THE MATH (OPTIONAL)</p>
           {m.math.map((f, i) => <Formula key={i} label={f.label} lines={f.lines} />)}
