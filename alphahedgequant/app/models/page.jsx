@@ -41,6 +41,12 @@ const CATEGORIES = [
     blurb: "Where modern quant is heading — learning patterns from data rather than specifying them by hand. From gradient-boosted return prediction to LSTMs, regime clustering and reinforcement-learned execution. Powerful, but prone to overfitting noise — discipline matters more here than anywhere.",
   },
   {
+    key: "options",
+    label: "Options & Market Microstructure",
+    eyebrow: "IMPLIED VOL · GAMMA · SKEW · LIQUIDITY",
+    blurb: "Options models explained in practical terms, with explicit warnings about estimated exposure and the risks of selling options.",
+  },
+  {
     key: "banking",
     label: "Banking & Regulatory Models",
     eyebrow: "BASEL III · RBI · CREDIT RISK",
@@ -445,6 +451,74 @@ const MODELS = [
     when: "Optimal execution, market making, dynamic hedging/sizing. Fragile and reward-hacking-prone — strongest where the task is truly sequential.",
     refs: ["Sutton & Barto (2018), \"Reinforcement Learning: An Introduction\" — MIT Press (2nd ed.)", "Nevmyvaka, Feng & Kearns (2006), \"Reinforcement Learning for Optimized Trade Execution\" — ICML"],
   },
+  {
+    id: "O1", cat: "options", name: "Implied vs Realised Volatility", tag: "Options IV",
+    summary: "Compare what options price in against how much the stock actually moves.",
+    intuition: "An option's implied volatility is a price-implied estimate of possible movement, not a guaranteed forecast. Realised volatility measures past actual movement. A big difference can indicate expensive option premium, but event risk and gap moves can justify it.",
+    beginner: "Think of insurance: a high premium may seem attractive to the seller, but a big storm could make the payout much larger.",
+    example: "Illustrative: implied volatility 30%, recent realised volatility 20%. The difference is 10 percentage points; that is not a guaranteed 10% profit.",
+    risks: "Earnings, liquidity, jumps, transaction costs, and volatility changing faster than a hedge can react.",
+    math:[{label:"VOLATILITY SPREAD",lines:"IV spread = IV − realised volatility\\nVariance spread = IV² − realised volatility²"}],
+    params:["Match IV and realised-vol horizons","Screen liquidity, spreads and earnings dates","Size by worst-case option loss"],
+    when:"Useful for evaluating option premiums; not a standalone sell signal.",
+    refs:["Carr & Wu (2009), Variance Risk Premiums — Review of Financial Studies"]
+  },
+  {
+    id: "O2", cat: "options", name: "Gamma Exposure & Gamma Flip", tag: "Options GEX",
+    summary: "Estimate how option positions might change dealer hedging pressure near spot.",
+    intuition: "Gamma describes how an option's delta changes when the underlying moves. Combining estimated open positions may show price levels where hedging behavior could change. Open interest alone cannot reliably reveal who is long or short each option.",
+    beginner:"A car that needs frequent steering corrections is more sensitive to small changes. Gamma estimates how quickly option hedges need adjustment.",
+    example:"Illustrative: if estimated aggregate dealer gamma changes sign near an index level, traders watch whether hedging may amplify or dampen moves. That level is a model estimate, not a guaranteed support or resistance.",
+    risks:"Dealer inventory signs are unobserved in public chains; OI, expiry, implied-volatility surfaces and hedge assumptions can make GEX estimates unreliable.",
+    math:[{label:"GAMMA EXPOSURE (CONVENTION-DEPENDENT)",lines:"Estimated GEX ≈ Σ(position_sign × OI × contract_size × Γ × S² × scale)\\nGamma flip = spot where estimated aggregate GEX crosses zero"}],
+    params:["Option chain OI, Greeks and lot size","State dealer sign assumptions clearly","Recompute across spot scenarios and expiries"],
+    when:"A contextual risk map for option markets, not a causal or independently validated trading signal.",
+    refs:["Black & Scholes (1973), The Pricing of Options and Corporate Liabilities"]
+  },
+  {
+    id: "O3", cat: "options", name: "Volatility Skew & Event Risk", tag: "Options Smile",
+    summary: "Compare implied volatility across strikes and upcoming company events.",
+    intuition:"Out-of-the-money puts can carry higher implied volatility than calls because investors pay more for downside protection. Earnings and policy announcements can make certain expiries particularly expensive.",
+    beginner:"Insurance against a rare crash often costs more than insurance against a similarly sized rally.",
+    example:"Illustrative: a 25-delta put has IV 28% and a 25-delta call has IV 22%. The six-point difference describes option-pricing skew, not a probability of a crash.",
+    risks:"Thin strikes, stale quotes, dividends, corporate actions, earnings jumps, and expiry mismatch.",
+    math:[{label:"RISK REVERSAL",lines:"25Δ risk reversal = IV(25Δ call) − IV(25Δ put)"}],
+    params:["Same expiry and delta convention","Exclude stale or crossed quotes","Check event calendar and liquidity"],
+    when:"Useful for understanding protection demand and comparing the shape of option prices."
+  },
+  {
+    id:"O4",cat:"options",name:"Delta-Neutral Straddle Risk Map",tag:"Options Hedging",
+    summary:"Understand how an option position is exposed to spot moves, volatility and time.",
+    intuition:"A straddle holds both a call and put at the same strike. It can gain from large moves or changes in volatility, but a seller faces nonlinear and potentially substantial losses. Delta-neutral only describes first-order exposure at one instant.",
+    beginner:"Even if a boat is balanced right now, a change in wind can push it to one side. Delta neutrality must be maintained, and hedging costs money.",
+    example:"Illustrative: an at-the-money straddle is initially near delta-neutral. A sharp move increases directional exposure and may require costly rehedging.",
+    risks:"Short gamma, overnight gaps, theta, vega, poor fills and large unhedgeable losses.",
+    math:[{label:"FIRST-ORDER OPTION P&L APPROXIMATION",lines:"ΔV ≈ Δ·ΔS + ½Γ·(ΔS)² + Vega·ΔIV + Θ·Δt"}],
+    params:["Strike, maturity and premium","Combined delta/gamma/vega/theta","Stress test moves and IV shocks"],
+    when:"Good for scenario analysis and risk education, not guaranteed income."
+  },
+  {
+    id:"R9",cat:"risk",name:"Maximum Drawdown & Recovery",tag:"Portfolio Risk",
+    summary:"Measure the largest peak-to-trough portfolio loss and recovery requirements.",
+    intuition:"A 20% fall requires a 25% gain to recover because the recovery starts from a smaller amount. Looking only at average returns hides painful losing stretches.",
+    beginner:"If ₹100 falls to ₹80, earning ₹20 brings it back to ₹100: that is 25% of ₹80.",
+    example:"Illustrative: equity goes from ₹100 to ₹75: drawdown is −25%; it then needs +33.3% to regain its prior peak.",
+    risks:"Historical drawdowns cannot establish future worst-case losses; short histories often miss crashes.",
+    math:[{label:"DRAWDOWN",lines:"Drawdown_t = Equity_t / max(Equity_0,…,Equity_t) − 1\\nMaximum drawdown = min_t Drawdown_t"}],
+    params:["Total-return equity curve","Costs, splits and distributions","Check both max drawdown and recovery duration"],
+    when:"Helpful for deciding whether a strategy's losses are tolerable."
+  },
+  {
+    id:"G5",cat:"general",name:"Volume Relative to History (RVOL)",tag:"Market Activity",
+    summary:"Compare today's traded volume with typical volume at the same time of day.",
+    intuition:"A daily volume number at 10:00 AM should not be compared directly with a full day's average. An intraday volume curve accounts for the normal time-of-day pattern.",
+    beginner:"If a shop normally serves 20 customers by noon but has served 60 today, activity is three times usual at that hour.",
+    example:"Illustrative: 2 lakh shares traded by 11 AM compared with a 15-day median of 1 lakh by 11 AM: RVOL = 2.0.",
+    risks:"Corporate events, holidays, expiries, low-float names and missing prints can distort the baseline.",
+    math:[{label:"TIME-ADJUSTED RVOL",lines:"RVOL_t = cumulative volume today by t / median historical cumulative volume by t"}],
+    params:["10–20 comparable trading days","Same elapsed session time","Use median as robust baseline"],
+    when:"Useful for spotting unusual participation, not predicting direction."
+  },
 ];
 
 // ════════════════════════════════════════════════════════════════════
@@ -489,7 +563,13 @@ function ModelCard({ m, open, onToggle }) {
           <p className="font-mono text-[10px] text-muted tracking-wider mb-1.5">INTUITION</p>
           <p className="text-sm text-body/85 leading-relaxed mb-4">{m.intuition}</p>
 
-          <p className="font-mono text-[10px] text-muted tracking-wider mb-1">THE MATH</p>
+          <div className="rounded-lg border border-line p-4 mb-4 bg-raised">
+            <p className="font-mono text-[10px] text-amber tracking-wider mb-2">EXPLAINED SIMPLY</p>
+            <p className="text-sm text-body leading-relaxed">{m.beginner || m.intuition.split(". ").slice(0,2).join(". ") + "."}</p>
+            {m.example && <p className="text-sm text-muted mt-3 leading-relaxed"><strong className="text-body">Example (illustrative): </strong>{m.example}</p>}
+            <p className="text-xs text-muted mt-3 leading-relaxed"><strong className="text-body">What can go wrong: </strong>{m.risks || m.when}</p>
+          </div>
+          <p className="font-mono text-[10px] text-muted tracking-wider mb-1">THE MATH (OPTIONAL)</p>
           {m.math.map((f, i) => <Formula key={i} label={f.label} lines={f.lines} />)}
 
           <div className="grid sm:grid-cols-2 gap-4 mt-4">
@@ -538,9 +618,8 @@ export default function Models() {
         Quant models, by category
       </h1>
       <p className="text-muted text-sm mt-2 max-w-2xl leading-relaxed">
-        The models behind AHQ — from market-neutral statistical arbitrage to risk
-        quantification and the regulatory frameworks banks operate under. Click any
-        model to expand the math, intuition, parameters and where it works.
+        Explore {MODELS.length} research models — from market-neutral statistical arbitrage to risk
+        quantification and options risk. Every model includes a simple explanation before the math. These are educational descriptions, not evidence of an active or profitable live strategy.
       </p>
 
       <div className="flex flex-wrap gap-2 mt-6">
@@ -588,7 +667,7 @@ export default function Models() {
         <div>
           <p className="font-display font-medium">See these models run live</p>
           <p className="text-sm text-muted mt-1">
-            The Scanner runs the stat-arb and trend models across 50 NSE stocks in real time.
+            Explore available tools separately. Library models are educational; they are not all implemented or running live.
           </p>
         </div>
         <Link href="/scanner" className="btn-primary">Open Scanner →</Link>
