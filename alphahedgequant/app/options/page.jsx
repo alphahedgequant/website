@@ -13,7 +13,7 @@ const INDICES = [
   { id: "FINNIFTY", label: "FIN NIFTY", lot: 65 },
 ];
 const STOCKS = ["RELIANCE", "TCS", "HDFCBANK", "INFY", "ICICIBANK", "SBIN"];
-const LOT_DEFAULT = { RELIANCE: 250, TCS: 175, HDFCBANK: 550, INFY: 400, ICICIBANK: 700, SBIN: 750 };
+
 
 const fmtNum = (n) => {
   if (n == null) return "–";
@@ -24,27 +24,6 @@ const fmtNum = (n) => {
   return n.toLocaleString("en-IN");
 };
 const fmtPx = (n) => (n == null ? "–" : Number(n).toFixed(2));
-
-function demoChain(underlying, spot) {
-  const step = underlying === "BANKNIFTY" ? 100 : underlying === "NIFTY" ? 50 : underlying === "FINNIFTY" ? 50 : 20;
-  const atm = Math.round(spot / step) * step;
-  const strikes = [];
-  for (let k = atm - step * 10; k <= atm + step * 10; k += step) {
-    const dist = Math.abs(k - spot);
-    const callItm = spot > k;
-    const putItm = spot < k;
-    const callLtp = Math.max(0.5, callItm ? (spot - k) + 40 * Math.exp(-dist / (step * 6)) : 40 * Math.exp(-dist / (step * 6)));
-    const putLtp = Math.max(0.5, putItm ? (k - spot) + 40 * Math.exp(-dist / (step * 6)) : 40 * Math.exp(-dist / (step * 6)));
-    const oiBase = Math.round(80000 * Math.exp(-dist / (step * 5)) + Math.random() * 20000);
-    strikes.push({
-      strike_price: k,
-      call: { ltp: +callLtp.toFixed(2), change: +(Math.random() * 20 - 10).toFixed(2), volume: Math.round(oiBase * 1.5), oi: oiBase + Math.round(Math.random() * 10000), oi_change: Math.round((Math.random() - 0.5) * 30000), iv: +(12 + dist / step).toFixed(2), delta: +(callItm ? 0.5 + 0.4 * (1 - Math.exp(-dist / (step * 4))) : 0.5 * Math.exp(-dist / (step * 4))).toFixed(3), gamma: 0.0008, theta: -(5 + Math.random() * 5), vega: 8 + Math.random() * 4 },
-      put: { ltp: +putLtp.toFixed(2), change: +(Math.random() * 20 - 10).toFixed(2), volume: Math.round(oiBase * 1.3), oi: oiBase + Math.round(Math.random() * 10000), oi_change: Math.round((Math.random() - 0.5) * 30000), iv: +(12 + dist / step).toFixed(2), delta: +(putItm ? -(0.5 + 0.4 * (1 - Math.exp(-dist / (step * 4)))) : -0.5 * Math.exp(-dist / (step * 4))).toFixed(3), gamma: 0.0008, theta: -(5 + Math.random() * 5), vega: 8 + Math.random() * 4 },
-    });
-  }
-  return strikes;
-}
-const DEMO_SPOT = { NIFTY: 24850, BANKNIFTY: 53200, FINNIFTY: 24100, RELIANCE: 1328, TCS: 3420, HDFCBANK: 1690, INFY: 1560, ICICIBANK: 1280, SBIN: 820 };
 
 function legPayoffAtExpiry(leg, spotAtExpiry) {
   const qty = leg.lots * leg.lotSize;
@@ -70,15 +49,18 @@ export default function OptionsPage() {
   const [legs, setLegs] = useState([]);
   const [autoRefresh, setAutoRefresh] = useState(true);
   const timerRef = useRef(null);
+  const requestIdRef = useRef(0);
+  const [chainLotSize,setChainLotSize] = useState(null);
 
   const lotSize = useMemo(() => {
     const idx = INDICES.find((i) => i.id === underlying);
-    if (idx) return idx.lot;
-    return LOT_DEFAULT[underlying] || 1;
-  }, [underlying]);
+    if (idx) return chainLotSize || idx.lot;
+    return chainLotSize || 1;
+  }, [underlying, chainLotSize]);
 
   const loadChain = useCallback(async (ul, exp, isRefresh = false) => {
-    if (!isRefresh) { setStatus("loading"); setChain(null); setSpot(0); setExpiries([]); setErrMsg(""); }
+    const requestId = ++requestIdRef.current;
+    if (!isRefresh) { setStatus("loading"); setChain(null); setSpot(0); setExpiries([]); setChainLotSize(null); setErrMsg(""); }
     try {
       const url = `${API}/option-chain/${ul}${exp ? `?expiry=${exp}` : ""}`;
       const r = await fetch(url, { cache: "no-store" });
@@ -87,7 +69,10 @@ export default function OptionsPage() {
       try { j = JSON.parse(raw); }
       catch { throw new Error(`The market-data API returned an invalid response (HTTP ${r.status}).`); }
       if (!r.ok) throw new Error(`Market-data API HTTP ${r.status}: ${r.status === 401 || r.status === 403 ? "Authentication required" : r.status >= 500 ? "Backend API error" : "Request rejected"}.`);
+      if (requestId !== requestIdRef.current) return;
       if (j.success && j.data?.strikes?.length) {
+        const verifiedLot = Number(j.data?.lot_size ?? j.data?.lotSize);
+        setChainLotSize(Number.isSafeInteger(verifiedLot) && verifiedLot > 0 ? verifiedLot : null);
         setChain(j.data.strikes);
         setSpot(j.data.spot_price || 0);
         setExpiries(j.data.expiries || []);
@@ -101,6 +86,7 @@ export default function OptionsPage() {
         setErrMsg("No verified option chain returned. The company may not be listed in NSE F&O, or the connected backend may not support the instrument.");
       }
     } catch (e) {
+      if (requestId !== requestIdRef.current) return;
       setChain(null);
       setSpot(0);
       setStatus("error");
@@ -124,6 +110,7 @@ export default function OptionsPage() {
   const chooseUnderlying=useCallback(value=>{
     const symbol=String(value||"").trim().toUpperCase();
     if(!/^[A-Z0-9._-]{1,40}$/.test(symbol))return;
+    requestIdRef.current++;
     setExpiry("");setLegs([]);setStockQuery("");setUnderlying(symbol);
   },[]);
   useEffect(() => { loadChain(underlying, ""); }, [underlying, loadChain]);
@@ -151,6 +138,7 @@ export default function OptionsPage() {
   }, [chain, spot]);
 
   const addLeg = (side, type, strike, premium) => {
+    if (!chainLotSize && !INDICES.some(i=>i.id===underlying)) { setErrMsg("Verified contract lot size unavailable from this option-chain response. Strategy legs are disabled to avoid misleading payoff calculations."); return; }
     setLegs((L) => [...L, { id: Date.now() + Math.random(), side, type, strike, premium: premium || 0, lots: 1, lotSize }]);
     setTab("builder");
   };
@@ -231,7 +219,7 @@ export default function OptionsPage() {
         )}
       </div>
 
-      {errMsg && status !== "live" && (
+      {errMsg && (
         <p className="mt-2 font-mono text-[11px] text-amber/80">{errMsg}</p>
       )}
 
