@@ -5,14 +5,12 @@ export default function Footer() {
     <footer className="ahq-site-footer border-t border-line mt-20">
       <div className="max-w-[1440px] mx-auto px-5 md:px-10 py-16 grid gap-10 md:grid-cols-3">
         <div>
-          <div className="flex items-center gap-2.5 mb-3">
-            <span className="font-mono text-amber border border-amber/50 rounded px-1.5 py-0.5 text-xs tracking-widest">
-              AHQ
-            </span>
+          <Link href="/" className="ahq-logo inline-flex items-center gap-2.5 mb-5" aria-label="AlphaHedgeQuant home">
+            <span className="ahq-logo-mark text-amber border border-amber/60">α</span>
             <span className="font-semibold tracking-tight">alphahedgequant</span>
-          </div>
+          </Link>
           <a href="https://x.com/Shreyy214" target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 text-xs text-muted hover:text-body mb-3" aria-label="Follow AlphaHedgeQuant founder Shreyash on X">
-            <span aria-hidden="true" className="font-mono text-amber border border-amber/50 rounded px-1 py-0.5 text-[10px] tracking-wider">AHQ</span>
+            
             <span>Founder: Shreyash</span>
             <span aria-hidden="true">· 𝕏</span>
             <span>@Shreyy214</span>
