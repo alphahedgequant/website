@@ -4,6 +4,7 @@ import { clerkMiddleware, createRouteMatcher } from "@clerk/nextjs/server";
 // Homepage, the auth pages, legal pages, the waitlist API, and the cron endpoint stay open.
 const isPublicRoute = createRouteMatcher([
   "/",
+  "/about",
   "/sign-in(.*)",
   "/sign-up(.*)",
   "/privacy",
