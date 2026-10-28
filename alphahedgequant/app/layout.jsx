@@ -2,6 +2,7 @@ import "./globals.css";
 import { ClerkProvider } from "@clerk/nextjs";
 import Nav from "@/components/Nav";
 import Footer from "@/components/Footer";
+import SitePageFrame from "@/components/SitePageFrame";
 
 export const metadata = {
   title: "AlphaHedgeQuant — Quant research, market intelligence & AI backtesting",
@@ -49,7 +50,7 @@ export default function RootLayout({ children }) {
           <link rel="preconnect" href="https://fonts.googleapis.com" />
           <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
           <link
-            href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;0,800;0,900;1,400;1,500;1,600;1,700&family=Archivo:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap"
+            href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@400;500;600;700;800&family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;0,800;0,900;1,400;1,500;1,600;1,700&family=Archivo:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap"
             rel="stylesheet"
           />
         </head>
@@ -62,7 +63,7 @@ export default function RootLayout({ children }) {
           <div className="vignette" aria-hidden="true" />
           <div className="alpha-mark" aria-hidden="true">&#945;</div>
           <Nav />
-          <main className="flex-1">{children}</main>
+          <main className="flex-1"><SitePageFrame>{children}</SitePageFrame></main>
           <Footer />
         </body>
       </html>
