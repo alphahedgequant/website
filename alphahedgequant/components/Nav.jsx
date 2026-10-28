@@ -52,7 +52,7 @@ export default function Nav() {
       <div className="max-w-[1440px] mx-auto px-5 md:px-10 h-[76px] flex items-center justify-between gap-3">
         <Link href="/" className="ahq-logo flex shrink-0 items-center gap-2.5" aria-label="AlphaHedgeQuant home">
           <span className="ahq-logo-mark text-amber border border-amber/60">α</span>
-          <span className="font-semibold tracking-tight">alphahedgequant<span className="text-amber">/</span></span>
+          <span className="font-semibold tracking-tight">alphahedgequant</span>
         </Link>
 
         <div ref={panelRef} className="hidden md:flex items-center gap-5 h-full">
