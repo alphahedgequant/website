@@ -296,3 +296,68 @@ html[data-theme="light"] .ahq-apple-icon { filter: none !important; }
 @media (max-width: 640px) {
   body { line-height: 1.6; }
 }
+
+
+/* ═══ SITE-WIDE PREMIUM DESIGN V3 — approved Obsidian / Warm Porcelain ═══
+   Shared semantic tokens retain chart and trading functionality across all routes. */
+:root {
+  --ahq-ink:#08090b; --ahq-ink-rgb:8 9 11;
+  --ahq-surface:#111316; --ahq-surface-rgb:17 19 22;
+  --ahq-raised:#1b1d20; --ahq-raised-rgb:27 29 32;
+  --ahq-line:rgba(196,170,123,.16);
+  --ahq-body:#f0eeea; --ahq-body-rgb:240 238 234;
+  --ahq-muted:#a4a3a0; --ahq-muted-rgb:164 163 160;
+  --ahq-amber:#c4aa7b; --ahq-amber-rgb:196 170 123;
+  --ahq-amberdim:#b49865; --ahq-amberdim-rgb:180 152 101;
+  --ahq-gold:#c4aa7b; --ahq-gold-rgb:196 170 123;
+}
+html[data-theme="light"] {
+  --ahq-ink:#f4f1ea; --ahq-ink-rgb:244 241 234;
+  --ahq-surface:#fffefa; --ahq-surface-rgb:255 254 250;
+  --ahq-raised:#e9e4db; --ahq-raised-rgb:233 228 219;
+  --ahq-line:rgba(91,77,55,.2);
+  --ahq-body:#242320; --ahq-body-rgb:36 35 32;
+  --ahq-muted:#66635d; --ahq-muted-rgb:102 99 93;
+  --ahq-amber:#866638; --ahq-amber-rgb:134 102 56;
+  --ahq-amberdim:#74582d; --ahq-amberdim-rgb:116 88 45;
+  --ahq-gold:#866638; --ahq-gold-rgb:134 102 56;
+}
+body { font-family:"DM Sans",Archivo,system-ui,sans-serif; letter-spacing:-.012em; }
+.font-display {font-family:Manrope,Archivo,system-ui,sans-serif!important;letter-spacing:-.052em;line-height:1.15}
+.bg-field{background:var(--ahq-ink)}
+.bg-field::after{background:radial-gradient(70vw 65vh at 82% 27%,rgba(196,170,123,.045),transparent 70%)}
+html[data-theme="light"] .bg-field{background:var(--ahq-ink)}
+html[data-theme="light"] .bg-field::after{background:radial-gradient(70vw 65vh at 82% 27%,rgba(134,102,56,.045),transparent 70%)}
+.grid-field{background-image:linear-gradient(rgba(196,170,123,.045) 1px,transparent 1px),linear-gradient(90deg,rgba(196,170,123,.045) 1px,transparent 1px)}
+html[data-theme="light"] .grid-field{background-image:linear-gradient(rgba(80,67,50,.055) 1px,transparent 1px),linear-gradient(90deg,rgba(80,67,50,.055) 1px,transparent 1px)}
+.vignette{background:radial-gradient(120vw 90vh at 50% 28%,transparent 52%,rgba(0,0,0,.26))}
+html[data-theme="light"] .vignette{background:radial-gradient(120vw 90vh at 50% 28%,transparent 55%,rgba(116,97,70,.045))}
+.alpha-mark{font-family:Georgia,serif;-webkit-text-stroke:1px rgba(196,170,123,.095)}
+html[data-theme="light"] .alpha-mark{-webkit-text-stroke-color:rgba(134,102,56,.095)}
+/* A single global header/footer system across Home, About, tools and educational pages. */
+.ahq-site-nav{background:color-mix(in srgb,var(--ahq-ink) 89%,transparent);backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);border-color:var(--ahq-line);box-shadow:0 6px 30px -24px rgba(0,0,0,.4)}
+.ahq-site-nav .ahq-logo{font-family:Manrope,Archivo,sans-serif;font-weight:800;letter-spacing:-.065em}
+.ahq-site-nav .ahq-logo-mark{font-family:Georgia,serif;font-size:19px;font-style:italic;border-radius:8px;display:grid;place-items:center;width:35px;height:35px;letter-spacing:0}
+.ahq-site-nav nav>a,.ahq-site-nav nav button{transition:color .2s ease}
+.ahq-site-nav nav>a:hover,.ahq-site-nav nav button:hover{color:var(--ahq-amber)}
+.ahq-site-nav .ahq-nav-panel{background:var(--ahq-surface);border:1px solid var(--ahq-line);box-shadow:0 25px 65px -28px rgba(0,0,0,.6);border-radius:6px}
+.ahq-site-footer{background:color-mix(in srgb,var(--ahq-surface) 40%,var(--ahq-ink));border-color:var(--ahq-line)}
+.ahq-site-footer a{transition:color .25s ease}
+.ahq-site-footer a:hover{color:var(--ahq-amber)}
+/* Product pages inherit the design language without damaging data-density or charts. */
+main :is(.card,.glass){border-color:var(--ahq-line);transition:border-color .3s,box-shadow .3s}
+main :is(.card,.glass):hover{border-color:color-mix(in srgb,var(--ahq-amber) 36%,var(--ahq-line))}
+main input:not([type=checkbox]):not([type=radio]),main select,main textarea{border-radius:6px}
+main button{touch-action:manipulation}
+.btn-primary{background:var(--ahq-body);color:var(--ahq-ink);border-radius:5px}
+.btn-primary:hover{background:var(--ahq-amber);color:#10100f;box-shadow:0 10px 32px -16px var(--ahq-amber)}
+html[data-theme="light"] .btn-primary{background:var(--ahq-body);color:var(--ahq-ink)}
+html[data-theme="light"] .btn-primary:hover{background:var(--ahq-amber);color:white}
+.btn-ghost{border-radius:5px}
+.search-pop{background:var(--ahq-surface);border-color:var(--ahq-line)}
+/* Keep market semantic colors distinct from brand accents. */
+.tick-up{color:#50c9a0}.tick-down{color:#f27979}
+html[data-theme="light"] :is(.text-gain,.tick-up){color:#087443}
+html[data-theme="light"] :is(.text-loss,.tick-down){color:#a52c31}
+@media(max-width:640px){.ahq-site-nav .ahq-logo{font-size:15px}.ahq-site-nav .ahq-logo-mark{width:31px;height:31px}main{min-width:0}main table{font-variant-numeric:tabular-nums}main .max-w-shell{max-width:100%}}
+@media(prefers-reduced-motion:reduce){.ahq-site-nav *, .ahq-site-footer *, main :is(.card,.glass){transition:none!important}}
