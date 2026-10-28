@@ -1,262 +1,100 @@
-"use client";
-
 import Link from "next/link";
-import { useEffect, useState } from "react";
-import WaitlistForm from "@/components/WaitlistForm";
 import StockSearch from "@/components/StockSearch";
+import WaitlistForm from "@/components/WaitlistForm";
 
-// Rotating consensus-scan terminal demo — real symbols, illustrative output.
-const SCANS = [
-  ["$ ahq scan --consensus RELIANCE", "resolving NSE:RELIANCE · 14 brokerages · window 90d", "CONSENSUS        BUY 9 · HOLD 4 · SELL 1", "MEDIAN TARGET    ₹ 3,120 (+9.6%)", "TRUST SCORE      78 / 100 ▲ reliable", "REGIME (HMM)     low-vol · mean-revert", "✓ scan complete in 0.42s — not investment advice"],
-  ["$ ahq scan --consensus HDFCBANK", "resolving NSE:HDFCBANK · 12 brokerages · window 90d", "CONSENSUS        BUY 8 · HOLD 5 · SELL 0", "MEDIAN TARGET    ₹ 1,048 (+31.6%)", "TRUST SCORE      74 / 100 ▲ reliable", "REGIME (HMM)     low-vol · trending", "✓ scan complete in 0.39s — not investment advice"],
-  ["$ ahq scan --consensus IRFC", "resolving NSE:IRFC · 6 brokerages · window 90d", "CONSENSUS        BUY 1 · HOLD 2 · SELL 4", "MEDIAN TARGET    ₹ 60 (−34.6%)", "TRUST SCORE      41 / 100 ▽ caution", "REGIME (HMM)     high-vol · momentum", "✓ scan complete in 0.44s — not investment advice"],
+const experiences=[
+  {no:"01",eyebrow:"THE MARKET, IN CONTEXT",title:"See beyond the ticker.",desc:"Discover Indian and US companies, understand price movements and find the research that matters.",href:"/screener",cta:"Explore markets",symbol:"↗"},
+  {no:"02",eyebrow:"DERIVATIVES, DECODED",title:"Make sense of uncertainty.",desc:"Explore option chains, implied volatility and the shape of risk before constructing a strategy.",href:"/options",cta:"Enter options desk",symbol:"σ"},
+  {no:"03",eyebrow:"IDEAS, TESTED",title:"Curiosity deserves evidence.",desc:"Move from quantitative ideas to understandable models and repeatable research workflows.",href:"/models",cta:"Explore quant models",symbol:"α"}
 ];
-
-const TAPE = [
-  "STAT-ARB", "REGIME DETECTION", "OPTIONS GREEKS", "PORTFOLIO OPTIMIZATION",
-  "KALMAN FILTER", "VRP HARVESTING", "COINTEGRATION",
+const disciplines=[
+ {number:"I",title:"Clarity before conviction.",copy:"A good decision starts by knowing what the numbers mean, where they came from, and what they cannot tell you."},
+ {number:"II",title:"Process before prediction.",copy:"Markets do not owe anyone certainty. We focus on the quality of the question, the method, and the evidence."},
+ {number:"III",title:"Progress over spectacle.",copy:"Useful tools improve with scrutiny, iteration and time. That is the kind of platform we intend to build."}
 ];
-
-const ENGINES = [
-  {
-    tag: "AHQ:TRUST", title: "Analyst calls, scored", href: "/tracker", cta: "Open the Trust Tracker",
-    color: "#F0A93B", tint: "rgba(240,169,59,0.13)",
-    icon: "M12 2l7 3v6c0 4.5-3 8-7 11-4-3-7-6.5-7-11V5l7-3z",
-    desc: "Every brokerage target is logged with the price on the day it was made — then graded against what the market actually did. A credit score for the sell side, fed daily by street consensus.",
-  },
-  {
-    tag: "AHQ:AI", title: "AI Quant Copilot", href: "/copilot", cta: "Try the copilot",
-    color: "#2DD482", tint: "rgba(45,212,130,0.13)",
-    icon: "M9 3h6v2h3a2 2 0 012 2v3h2v4h-2v3a2 2 0 01-2 2h-3v2H9v-2H6a2 2 0 01-2-2v-3H2v-4h2V7a2 2 0 012-2h3V3zm-.5 8a1.5 1.5 0 100 3 1.5 1.5 0 000-3zm7 0a1.5 1.5 0 100 3 1.5 1.5 0 000-3z",
-    desc: "Describe a strategy in a sentence. The copilot converts it to a whitelisted rule spec — never code — and runs a deterministic backtest with real costs, ATR stops and honest next-bar fills.",
-  },
-  {
-    tag: "AHQ:MACRO", title: "Primary-source reports", href: "/reports", cta: "Read the reports",
-    color: "#B79BFF", tint: "rgba(183,155,255,0.13)",
-    icon: "M6 2h9l5 5v13a2 2 0 01-2 2H6a2 2 0 01-2-2V4a2 2 0 012-2zm8 1.5V8h4.5L14 3.5zM8 12h8v1.5H8V12zm0 3h8v1.5H8V15z",
-    desc: "Macro research where every figure is verified against the primary release — MoSPI, GSTN, RBI, the Fed, BLS — before publication. No hot takes, no unverified numbers.",
-  },
-];
-
-const STRATEGIES = [
-  ["01", "Engle-Granger pairs", "COINTEGRATION"],
-  ["02", "Johansen basket", "MULTIVARIATE"],
-  ["03", "PCA stat-arb", "FACTOR"],
-  ["04", "Kalman filter", "DYNAMIC HEDGE"],
-  ["05", "OU mean reversion", "ORNSTEIN-UHLENBECK"],
-  ["06", "Momentum", "CROSS-SECTIONAL"],
-  ["07", "HMM regimes", "REGIME DETECTION"],
-  ["08", "VRP harvesting", "OPTIONS"],
-  ["09", "Multi-pair scan", "BREADTH"],
-  ["10", "Ledoit-Wolf optimization", "PORTFOLIO"],
-];
-
-function Terminal() {
-  const [idx, setIdx] = useState(0);
-  const [shown, setShown] = useState(1);
-  useEffect(() => {
-    const line = setInterval(() => setShown((s) => (s < SCANS[idx].length ? s + 1 : s)), 420);
-    const scan = setInterval(() => { setIdx((i) => (i + 1) % SCANS.length); setShown(1); }, 5200);
-    return () => { clearInterval(line); clearInterval(scan); };
-  }, [idx]);
-  return (
-    <div className="card p-0 overflow-hidden font-mono text-[13px] max-w-xl w-full" aria-label="Live scan demo">
-      <div className="flex items-center gap-2 px-4 py-3 border-b border-line">
-        <span className="w-3 h-3 rounded-full bg-[#f0564f]" />
-        <span className="w-3 h-3 rounded-full bg-amber" />
-        <span className="w-3 h-3 rounded-full bg-[#2dd482]" />
-        <span className="ml-3 text-muted text-xs">ahq — consensus scanner</span>
+export default function Home(){
+ return <main className="ahq-editorial-home">
+   <style>{`
+    .ahq-editorial-home{overflow:hidden}
+    .ahq-editorial-home .serif{font-family:"Playfair Display",Georgia,serif;font-weight:400;letter-spacing:-.057em}
+    .ahq-editorial-home .editorial-hero{background:radial-gradient(ellipse 55% 55% at 80% 36%,rgba(203,169,91,.10),transparent 70%),linear-gradient(180deg,rgba(255,255,255,.012),transparent)}
+    .ahq-editorial-home .brand-frame{border:1px solid var(--ahq-line);background:linear-gradient(140deg,rgba(227,190,79,.08),transparent 54%),var(--ahq-surface);box-shadow:0 30px 90px -65px rgba(0,0,0,.75)}
+    .ahq-editorial-home .orbital{width:min(62vw,430px);aspect-ratio:1;border:1px solid rgba(227,190,79,.24);border-radius:50%;display:grid;place-items:center;position:relative}
+    .ahq-editorial-home .orbital:before,.ahq-editorial-home .orbital:after{content:"";position:absolute;border-radius:50%;inset:13%;border:1px solid rgba(227,190,79,.17)}
+    .ahq-editorial-home .orbital:after{inset:29%;border-color:rgba(227,190,79,.3)}
+    .ahq-editorial-home .orbital-glyph{font-family:Georgia,serif;font-size:clamp(8rem,18vw,14rem);font-style:italic;font-weight:400;color:var(--ahq-amber);opacity:.86;line-height:1;z-index:1}
+    .ahq-editorial-home .experience{transition:transform .24s ease,border-color .24s ease;background:var(--ahq-surface)}
+    .ahq-editorial-home .experience:hover{transform:translateY(-5px);border-color:var(--ahq-amber)}
+    .ahq-editorial-home .hairline{background:linear-gradient(90deg,transparent,var(--ahq-amber),transparent);height:1px;opacity:.4}
+    .ahq-editorial-home .chapter-no{font-family:Georgia,serif;font-size:5rem;line-height:1;opacity:.23}
+    @media(prefers-reduced-motion:reduce){.ahq-editorial-home .experience{transition:none}}
+   `}</style>
+   <section className="editorial-hero relative">
+    <div className="max-w-shell mx-auto px-5 pt-20 md:pt-28 pb-24 md:pb-32">
+      <div className="flex items-center gap-3 text-xs font-mono uppercase tracking-[.27em] text-amber"><span className="h-px w-9 bg-amber"/> ALPHAHEDGEQUANT / AN INDEPENDENT PERSPECTIVE</div>
+      <div className="grid grid-cols-1 lg:grid-cols-[1.18fr_.82fr] gap-12 lg:gap-8 items-center mt-10">
+       <div>
+        <h1 className="serif text-[clamp(4.5rem,9.8vw,9rem)] leading-[.92] text-body">The market<br/>rewards <span className="italic text-amber">clarity.</span></h1>
+        <p className="mt-9 max-w-xl text-lg md:text-xl leading-relaxed text-muted">Not louder opinions. Better questions. AlphaHedgeQuant brings research, options analytics and quantitative thinking together for people who want to understand markets more deeply.</p>
+        <div className="mt-10 flex flex-wrap gap-3">
+         <Link href="/options" className="btn-primary !rounded-full !px-7 !py-3">Explore the options desk <span aria-hidden="true">↗</span></Link>
+         <Link href="/about" className="btn-ghost !rounded-full !px-7 !py-3">What we believe <span aria-hidden="true">↗</span></Link>
+        </div>
+       </div>
+       <div className="brand-frame rounded-[2rem] min-h-[370px] lg:min-h-[520px] flex items-center justify-center relative overflow-hidden" aria-label="Abstract AlphaHedgeQuant alpha symbol">
+        <div className="absolute top-6 left-6 font-mono tracking-[.25em] text-[10px] text-muted">THE DISCIPLINE OF THINKING</div>
+        <div className="orbital"><span className="orbital-glyph">α</span></div>
+        <div className="absolute bottom-6 right-6 font-mono tracking-[.25em] text-[10px] text-muted">INFORMATION ≠ UNDERSTANDING</div>
+       </div>
       </div>
-      <div className="p-5 min-h-[210px] leading-relaxed">
-        {SCANS[idx].slice(0, shown).map((l, i) => (
-          <p key={i} className={i === 0 ? "text-amber" : i === SCANS[idx].length - 1 ? "text-[#2dd482]" : "text-body/75"}>{l}</p>
-        ))}
-        <span className="inline-block w-2.5 h-4 bg-amber/80 animate-pulse align-middle" aria-hidden="true" />
+      <div className="mt-16 md:mt-24 pt-6 border-t border-line grid gap-4 sm:grid-cols-3 text-xs font-mono tracking-[.16em] text-muted">
+       <p>RESEARCH WITHOUT THE NOISE</p><p>TOOLS WITHOUT THE MYSTERY</p><p>AMBITION WITHOUT SHORTCUTS</p>
       </div>
     </div>
-  );
-}
+   </section>
 
-// Italic emphasis word — soft yellow-gold shimmer, clipped to the text.
-function Accent({ children }) {
-  return <span className="ahq-em-shine">{children}</span>;
-}
+   <section className="bg-surface border-y border-line py-24 md:py-32">
+    <div className="max-w-shell mx-auto px-5">
+     <p className="eyebrow mb-6">[ WHY WE EXIST ]</p>
+     <div className="grid lg:grid-cols-[1.2fr_.8fr] gap-12 items-end">
+      <h2 className="serif text-5xl md:text-7xl leading-[1.03] text-body">Information is everywhere.<br/><em className="text-amber">Understanding is rare.</em></h2>
+      <p className="text-lg leading-relaxed text-muted max-w-md">More dashboards will not automatically create better investors. We want to make reasoning visible: what a metric measures, what a strategy assumes and where a model might fail.</p>
+     </div>
+    </div>
+   </section>
 
-export default function Home() {
-  return (
-    <>
-      {/* Homepage type + accent styling: thin Instrument Serif headlines + animated yellow-gold shimmer */}
-      <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&display=swap');
+   <section className="max-w-shell mx-auto px-5 py-24 md:py-32">
+    <div className="flex flex-wrap gap-4 justify-between items-end mb-12"><div><p className="eyebrow mb-5">[ THE WORKSPACE ]</p><h2 className="serif text-5xl md:text-7xl text-body">Tools for the <em>thoughtful.</em></h2></div><Link href="/models" className="text-sm text-amber hover:underline">Explore the research library ↗</Link></div>
+    <div className="grid md:grid-cols-3 gap-4">
+     {experiences.map(e=><Link key={e.no} href={e.href} className="experience group rounded-2xl border border-line p-7 md:p-8 flex flex-col min-h-[370px]">
+       <div className="flex justify-between items-start"><span className="font-mono text-xs text-amber tracking-widest">{e.no} / {e.eyebrow}</span><span className="serif text-6xl text-amber/70" aria-hidden="true">{e.symbol}</span></div>
+       <div className="mt-auto"><h3 className="serif text-4xl leading-tight text-body">{e.title}</h3><p className="mt-5 text-muted text-sm md:text-base leading-relaxed">{e.desc}</p><p className="mt-8 text-xs uppercase tracking-widest font-mono text-amber group-hover:translate-x-1 transition-transform">{e.cta} ↗</p></div>
+     </Link>)}
+    </div>
+   </section>
 
-        .ahq-serif {
-          font-family: 'Instrument Serif', 'Playfair Display', Georgia, serif;
-          font-weight: 400;
-          letter-spacing: -0.01em;
-        }
+   <section className="bg-surface border-y border-line py-24 md:py-32">
+     <div className="max-w-shell mx-auto px-5">
+      <p className="eyebrow mb-5">[ AN OPEN DOOR TO RESEARCH ]</p>
+      <h2 className="serif text-5xl md:text-6xl text-body max-w-3xl">Begin with a company.<br/><em>Follow the evidence.</em></h2>
+      <p className="text-muted mt-5 mb-9 max-w-2xl leading-relaxed">Search the companies covered by our connected feeds and begin exploring their financials and market context. Availability and freshness depend on the underlying providers.</p>
+      <StockSearch/>
+     </div>
+   </section>
 
-        .ahq-em-shine {
-          font-style: italic;
-          background: linear-gradient(100deg,
-            #C9A23A 16%,
-            #FBF0BE 40%,
-            #EBC85A 50%,
-            #FBF0BE 60%,
-            #C9A23A 84%
-          );
-          background-size: 200% auto;
-          -webkit-background-clip: text;
-          background-clip: text;
-          color: transparent;
-          -webkit-text-fill-color: transparent;
-          animation: ahqShine 7s linear infinite;
-          opacity: 0.96;
-        }
-        @keyframes ahqShine {
-          0%   { background-position: 200% center; }
-          100% { background-position: -200% center; }
-        }
-        @media (prefers-reduced-motion: reduce) {
-          .ahq-em-shine { animation: none; background-position: 50% center; }
-        }
-      `}</style>
+   <section className="max-w-shell mx-auto px-5 py-24 md:py-32">
+    <p className="eyebrow mb-5">[ THE PRINCIPLES ]</p><h2 className="serif text-5xl md:text-7xl max-w-4xl text-body">Built for people who<br/>prefer <em className="text-amber">substance.</em></h2>
+    <div className="mt-14 grid md:grid-cols-3 gap-10">{disciplines.map(d=><div key={d.number} className="border-t border-line pt-6"><span className="chapter-no text-amber">{d.number}</span><h3 className="serif text-3xl mt-5 text-body">{d.title}</h3><p className="text-muted mt-4 leading-relaxed">{d.copy}</p></div>)}</div>
+   </section>
 
-      {/* ── HERO ── */}
-      <section className="relative overflow-hidden">
-        <div className="max-w-shell mx-auto px-5 pt-20 pb-16 relative fade-up">
-          <p className="eyebrow mb-6">[ AHQ : QUANT RESEARCH PLATFORM ]</p>
-          <div className="grid gap-12 lg:grid-cols-2 lg:items-center">
-            <div>
-              <h1 className="ahq-serif text-6xl md:text-[6rem] tracking-tight leading-[1.0]">
-                Where alpha<br />becomes<br /><Accent>edge</Accent>.
-              </h1>
-              <p className="mt-7 text-muted text-lg max-w-md leading-relaxed">
-                Live NSE &amp; US screeners, a 10-strategy quant scanner, analyst
-                calls scored against what actually happened, and an AI copilot
-                that turns plain English into honest backtests.
-              </p>
-              <div className="mt-9 flex flex-wrap gap-3">
-                <Link href="/screener" className="btn-primary !rounded-full !px-6 !py-3">
-                  Open the screener
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M5 12h14M13 6l6 6-6 6" /></svg>
-                </Link>
-                <Link href="/tracker" className="btn-ghost !rounded-full !px-6 !py-3">
-                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="9" /><circle cx="12" cy="12" r="4" /><circle cx="12" cy="12" r="0.5" /></svg>
-                  See who to trust
-                </Link>
-              </div>
-            </div>
-            <div className="flex lg:justify-end">
-              <Terminal />
-            </div>
-          </div>
-        </div>
-        {/* strategy tape */}
-        <div className="border-y border-line py-4 overflow-hidden mt-6">
-          <div className="flex gap-8 whitespace-nowrap font-mono text-xs text-muted px-5 justify-center flex-wrap">
-            {TAPE.map((s, i) => (
-              <span key={s}>{s}{i < TAPE.length - 1 && <span className="text-amber/50 ml-8">·</span>}</span>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Unified company discovery — data backed, not a mocked ticker demo. */}
-      <section className="max-w-shell mx-auto px-5 pt-16 pb-3">
-        <h2 className="font-display text-3xl md:text-4xl text-body mb-3">Know the company behind the price.</h2>
-        <p className="text-muted max-w-2xl mb-6">Find a company, then explore its financials, valuation, technical context and available research—all in one place.</p>
-        <StockSearch />
-      </section>
-
-      {/* ── THREE ENGINES ── */}
-      <section className="max-w-shell mx-auto px-5 pt-24 pb-6">
-        <p className="eyebrow mb-4">[ AHQ : WHAT YOU GET ]</p>
-        <h2 className="ahq-serif text-5xl md:text-6xl tracking-tight">
-          Three engines, one <Accent>honest</Accent> answer.
-        </h2>
-        <hr className="rule-grad mt-6 max-w-xs" />
-        <div className="grid gap-5 md:grid-cols-3 mt-12">
-          {ENGINES.map((e) => (
-            <Link
-              key={e.tag}
-              href={e.href}
-              className="card feature-card p-6 group"
-              style={{ "--glow": e.color, background: `radial-gradient(130% 110% at 0% 0%, ${e.tint}, transparent 55%)` }}
-            >
-              <div className="flex items-center justify-between mb-6">
-                <span
-                  className="w-11 h-11 rounded-xl flex items-center justify-center border"
-                  style={{ background: e.tint, borderColor: e.color + "40" }}
-                >
-                  <svg width="20" height="20" viewBox="0 0 24 24" fill={e.color}><path d={e.icon} /></svg>
-                </span>
-                <span className="font-mono text-[10px] tracking-[0.2em]" style={{ color: e.color }}>[ {e.tag} ]</span>
-              </div>
-              <h3 className="ahq-serif text-2xl mb-2.5">{e.title}</h3>
-              <p className="text-sm text-muted leading-relaxed">{e.desc}</p>
-              <p className="mt-5 font-mono text-[13px] flex items-center gap-1.5" style={{ color: e.color }}>
-                {e.cta}
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="group-hover:translate-x-1 transition-transform"><path d="M5 12h14M13 6l6 6-6 6" /></svg>
-              </p>
-            </Link>
-          ))}
-        </div>
-      </section>
-
-      {/* ── TEN STRATEGIES ── */}
-      <section className="max-w-shell mx-auto px-5 pt-24 pb-6">
-        <div className="grid gap-12 lg:grid-cols-2 lg:items-start">
-          <div>
-            <p className="eyebrow mb-4">[ AHQ : THE SCANNER ]</p>
-            <h2 className="ahq-serif text-5xl md:text-6xl tracking-tight leading-[1.02]">
-              Ten strategies,<br />run <Accent>every bar</Accent>.
-            </h2>
-            <hr className="rule-grad mt-6 max-w-[220px]" />
-            <p className="mt-7 text-muted text-base max-w-md leading-relaxed">
-              A single scan sweeps the whole book through the classical stat-arb
-              and regime toolkit — deterministic, cost-aware, and logged. No black
-              boxes, no curve-fitting.
-            </p>
-            <div className="flex gap-10 mt-10">
-              {[["4,200", "SCANS / DAY"], ["10", "STRATEGIES"], ["99.9%", "DATA UPTIME"]].map(([n, l]) => (
-                <div key={l}>
-                  <p className="ahq-serif text-4xl">{n}</p>
-                  <p className="font-mono text-[10px] tracking-[0.15em] text-muted mt-1.5">{l}</p>
-                </div>
-              ))}
-            </div>
-          </div>
-          <div className="card overflow-hidden">
-            {STRATEGIES.map(([n, name, cat], i) => (
-              <div key={n} className={`flex items-center justify-between px-5 py-4 ${i > 0 ? "border-t border-line" : ""} hover:bg-amber/[0.03] transition-colors`}>
-                <div className="flex items-center gap-4">
-                  <span className="font-mono text-xs text-muted">{n}</span>
-                  <span className="text-body">{name}</span>
-                </div>
-                <span className="font-mono text-[10px] tracking-[0.15em] text-muted uppercase">{cat}</span>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* ── EARLY ACCESS ── */}
-      <section id="waitlist" className="max-w-shell mx-auto px-5 py-24">
-        <div className="relative overflow-hidden card px-6 py-16 md:py-20 text-center">
-          <p className="eyebrow mb-5">[ AHQ : EARLY ACCESS ]</p>
-          <h2 className="ahq-serif text-5xl md:text-6xl tracking-tight leading-[1.02]">
-            Be first when the<br />platform <Accent>ships</Accent>.
-          </h2>
-          <p className="text-muted mt-5 text-base max-w-lg mx-auto leading-relaxed">
-            Pro scanner signals, the AI copilot and the full education library
-            roll out in phases. Join the list — no spam, only launches.
-          </p>
-          <div className="mt-8 flex justify-center">
-            <WaitlistForm source="landing" />
-          </div>
-          <p className="mt-6 font-mono text-[11px] tracking-[0.2em] text-muted">NSE · NYSE · NASDAQ</p>
-        </div>
-      </section>
-    </>
-  );
+   <section className="border-t border-line bg-surface">
+    <div className="max-w-shell mx-auto px-5 py-24 md:py-32 grid lg:grid-cols-[1.2fr_.8fr] gap-10 items-center">
+     <div><p className="eyebrow mb-5">[ A LONG-TERM COMMITMENT ]</p><h2 className="serif text-5xl md:text-7xl text-body leading-tight">Not here for a moment.<br/><em className="text-amber">Here to build.</em></h2><p className="max-w-xl mt-6 text-muted leading-relaxed">We want to earn credibility through transparent methods, careful iteration and products that become more useful with time. Trust is not something a homepage can declare. It is something our work must deserve.</p><Link href="/about" className="btn-ghost !rounded-full mt-8">Read our philosophy ↗</Link></div>
+     <div className="rounded-2xl border border-line p-8 md:p-10"><p className="font-mono text-xs tracking-widest text-amber">RESEARCH, NOT PROMISES</p><p className="serif text-3xl mt-8 leading-snug text-body">We would rather explain what we do not know than pretend to know what happens next.</p><div className="hairline my-8"/><p className="text-xs text-muted leading-relaxed">Market data may be delayed or unavailable. Educational models and analytics are not investment recommendations or guarantees of returns.</p></div>
+    </div>
+   </section>
+   <section id="waitlist" className="max-w-shell mx-auto px-5 py-24 md:py-32 text-center">
+    <p className="eyebrow mb-5">[ BUILD WITH THE FUTURE IN MIND ]</p><h2 className="serif text-5xl md:text-7xl text-body">Stay curious.<br/><em className="text-amber">Stay close.</em></h2><p className="max-w-lg mx-auto text-muted mt-5 mb-8">Follow the next chapters of AlphaHedgeQuant as our research and tools evolve.</p><div className="flex justify-center"><WaitlistForm source="landing"/></div>
+   </section>
+ </main>;
 }
