@@ -17,7 +17,7 @@ export default function Privacy() {
     <div className="max-w-3xl mx-auto px-5 py-12">
       <p className="eyebrow mb-3">[ AHQ : LEGAL — PRIVACY ]</p>
       <h1 className="font-display text-3xl font-medium tracking-tight">Privacy Policy</h1>
-      <p className="text-muted text-sm mt-2">Last updated: June 2026</p>
+      <p className="text-muted text-sm mt-2">Last updated: October 2026</p>
 
       <div className="mt-10">
         <Section title="1. Who We Are">
@@ -58,7 +58,11 @@ export default function Privacy() {
           </p>
         </Section>
 
-        <Section title="5. Cookies">
+        <Section title="5. Product Analytics">
+          <p>If enabled, we use PostHog to measure page visits, pseudonymous unique visitors, active time spent on pages and broad feature-use events. We assign a random browser identifier stored locally to distinguish repeat visits. We do not send option symbols, strategy legs, trades, financial account details or search terms in these events.</p>
+          <p>Tracking respects browser Do Not Track and Global Privacy Control signals where available. Analytics may be processed by PostHog outside your country of residence. For privacy requests, contact us at the address below.</p>
+        </Section>
+        <Section title="6. Cookies">
           <p>
             We use minimal cookies — primarily those strictly necessary for the site to function and,
             if enabled, privacy-respecting analytics. We do not use advertising or cross-site tracking
@@ -66,7 +70,7 @@ export default function Privacy() {
           </p>
         </Section>
 
-        <Section title="6. Your Rights">
+        <Section title="7. Your Rights">
           <p>
             You can ask us to access, correct, or delete your personal data at any time. To be
             removed from the waitlist or to request deletion of your data, email us and we will
@@ -74,14 +78,14 @@ export default function Privacy() {
           </p>
         </Section>
 
-        <Section title="7. Data Retention">
+        <Section title="8. Data Retention">
           <p>
             We retain waitlist emails until you ask us to remove them or until the data is no longer
             needed for the purpose it was collected.
           </p>
         </Section>
 
-        <Section title="8. Changes">
+        <Section title="9. Changes">
           <p>
             We may update this policy as the platform evolves. Material changes will be reflected by
             updating the "last updated" date above.

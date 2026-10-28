@@ -93,6 +93,7 @@ export default function OptionsPage() {
         const verifiedLot = Number(j.data?.lot_size ?? j.data?.lotSize);
         setChainLotSize(Number.isSafeInteger(verifiedLot) && verifiedLot > 0 ? verifiedLot : null);
         setChain(j.data.strikes);
+        if (!isRefresh) window.dispatchEvent(new CustomEvent("ahq:analytics",{detail:{name:"option_chain_opened"}}));
         setProviderReceivedAt(j.data.received_at||null);
         setSpot(j.data.spot_price || 0);
         setExpiries(j.data.expiries || []);
@@ -172,6 +173,7 @@ export default function OptionsPage() {
   const addLeg = (side, type, strike, premium) => {
     if (!chainLotSize && !INDICES.some(i=>i.id===underlying)) { setErrMsg("Verified contract lot size unavailable from this option-chain response. Strategy legs are disabled to avoid misleading payoff calculations."); return; }
     setLegs((L) => [...L, { id: Date.now() + Math.random(), side, type, strike, premium: premium || 0, lots: 1, lotSize }]);
+    window.dispatchEvent(new CustomEvent("ahq:analytics",{detail:{name:"strategy_builder_opened"}}));
     setTab("builder");
   };
 
@@ -188,7 +190,7 @@ export default function OptionsPage() {
         </div>
         <div className="flex gap-1.5">
           <button onClick={() => setTab("chain")} className={`font-mono text-xs px-3 py-1.5 rounded border transition-colors ${tab === "chain" ? "border-amber text-amber" : "border-line text-muted hover:text-body"}`}>OPTION CHAIN</button>
-          <button onClick={() => setTab("builder")} className={`font-mono text-xs px-3 py-1.5 rounded border transition-colors ${tab === "builder" ? "border-amber text-amber" : "border-line text-muted hover:text-body"}`}>STRATEGY BUILDER{legs.length ? ` (${legs.length})` : ""}</button>
+          <button onClick={() => {window.dispatchEvent(new CustomEvent("ahq:analytics",{detail:{name:"strategy_builder_opened"}}));setTab("builder");}} className={`font-mono text-xs px-3 py-1.5 rounded border transition-colors ${tab === "builder" ? "border-amber text-amber" : "border-line text-muted hover:text-body"}`}>STRATEGY BUILDER{legs.length ? ` (${legs.length})` : ""}</button>
         </div>
       </div>
 
