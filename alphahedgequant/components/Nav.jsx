@@ -48,11 +48,11 @@ export default function Nav() {
   }, []);
 
   return (
-    <header className="sticky top-0 z-50 border-b border-line bg-ink/95 backdrop-blur">
-      <div className="max-w-shell mx-auto px-5 h-16 flex items-center justify-between gap-3">
-        <Link href="/" className="flex shrink-0 items-center gap-2.5" aria-label="AlphaHedgeQuant home">
-          <span className="font-mono text-amber border border-amber/50 rounded px-1.5 py-0.5 text-xs tracking-widest">AHQ</span>
-          <span className="font-display font-medium tracking-tight">AlphaHedgeQuant</span>
+    <header className="ahq-site-nav sticky top-0 z-50 border-b border-line backdrop-blur">
+      <div className="max-w-[1440px] mx-auto px-5 md:px-10 h-[76px] flex items-center justify-between gap-3">
+        <Link href="/" className="ahq-logo flex shrink-0 items-center gap-2.5" aria-label="AlphaHedgeQuant home">
+          <span className="ahq-logo-mark text-amber border border-amber/60">α</span>
+          <span className="font-semibold tracking-tight">alphahedgequant<span className="text-amber">/</span></span>
         </Link>
 
         <div ref={panelRef} className="hidden md:flex items-center gap-5 h-full">
@@ -73,7 +73,7 @@ export default function Nav() {
                   <svg aria-hidden="true" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="m6 9 6 6 6-6" /></svg>
                 </button>
                 {menu === group.key && (
-                  <div className={`absolute top-full right-0 mt-2 rounded-xl border border-line bg-surface p-4 shadow-2xl ${group.key === "products" ? "w-[520px]" : "w-60"}`}>
+                  <div className={`ahq-nav-panel absolute top-full right-0 mt-2 border border-line bg-surface p-4 shadow-2xl ${group.key === "products" ? "w-[520px]" : "w-60"}`}>
                     <p className="mb-3 font-mono text-[11px] uppercase tracking-[.2em] text-amber">
                       {group.key === "products" ? "Explore our products" : "Explore research"}
                     </p>
@@ -115,7 +115,7 @@ export default function Nav() {
       </div>
 
       {mobileOpen && (
-        <nav id="ahq-mobile-navigation" aria-label="Mobile navigation" className="md:hidden max-h-[calc(100vh-4rem)] overflow-y-auto border-t border-line bg-ink px-5 py-4">
+        <nav id="ahq-mobile-navigation" aria-label="Mobile navigation" className="md:hidden max-h-[calc(100vh-4.75rem)] overflow-y-auto border-t border-line bg-surface px-5 py-4">
           <p className="mb-2 font-mono text-[11px] uppercase tracking-widest text-amber">Products</p>
           <div className="grid grid-cols-1 gap-1">
             {products.map(item => <Link key={item.href} href={item.href} onClick={() => setMobileOpen(false)}
