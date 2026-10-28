@@ -2,6 +2,7 @@ import "./globals.css";
 import { ClerkProvider } from "@clerk/nextjs";
 import Nav from "@/components/Nav";
 import Footer from "@/components/Footer";
+import SitePageFrame from "@/components/SitePageFrame";
 
 export const metadata = {
   title: "AlphaHedgeQuant — Quant research, market intelligence & AI backtesting",
@@ -62,7 +63,7 @@ export default function RootLayout({ children }) {
           <div className="vignette" aria-hidden="true" />
           <div className="alpha-mark" aria-hidden="true">&#945;</div>
           <Nav />
-          <main className="flex-1">{children}</main>
+          <main className="flex-1"><SitePageFrame>{children}</SitePageFrame></main>
           <Footer />
         </body>
       </html>
