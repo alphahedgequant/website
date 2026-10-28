@@ -15,9 +15,12 @@ export default function Footer() {
             <span aria-hidden="true">· 𝕏</span>
             <span>@Shreyy214</span>
           </a>
-          <p className="text-sm text-muted leading-relaxed max-w-xs">
-            Quantitative research, live market intelligence and AI-assisted
-            backtesting for NSE &amp; US markets.
+          <p className="max-w-sm font-display text-xl sm:text-2xl font-semibold leading-snug tracking-tight text-body">
+            Decoding market inefficiencies by quantifying{" "}
+            <span className="text-amber">opportunities.</span>
+          </p>
+          <p className="mt-3 max-w-xs text-sm leading-relaxed text-muted">
+            Independent quantitative research, market intelligence and options analytics.
           </p>
         </div>
 
