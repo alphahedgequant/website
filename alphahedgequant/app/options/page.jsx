@@ -57,6 +57,7 @@ export default function OptionsPage() {
   const timerRef = useRef(null);
   const requestIdRef = useRef(0);
   const [chainLotSize,setChainLotSize] = useState(null);
+  const [providerReceivedAt,setProviderReceivedAt] = useState(null);
   const [sessionOpen,setSessionOpen] = useState(false);
   const [lastUpdated,setLastUpdated] = useState(null);
   const [ivHistory,setIvHistory] = useState([]);
@@ -92,6 +93,7 @@ export default function OptionsPage() {
         const verifiedLot = Number(j.data?.lot_size ?? j.data?.lotSize);
         setChainLotSize(Number.isSafeInteger(verifiedLot) && verifiedLot > 0 ? verifiedLot : null);
         setChain(j.data.strikes);
+        setProviderReceivedAt(j.data.received_at||null);
         setSpot(j.data.spot_price || 0);
         setExpiries(j.data.expiries || []);
         if (!exp && j.data.expiry) setExpiry(j.data.expiry);
@@ -137,7 +139,7 @@ export default function OptionsPage() {
     const symbol=String(value||"").trim().toUpperCase();
     if(!/^[A-Z0-9._-]{1,40}$/.test(symbol))return;
     requestIdRef.current++;
-    setExpiry("");setLegs([]);setStockQuery("");setIvHistory([]);setLastUpdated(null);setUnderlying(symbol);
+    setExpiry("");setLegs([]);setStockQuery("");setIvHistory([]);setLastUpdated(null);setProviderReceivedAt(null);setUnderlying(symbol);
   },[]);
   useEffect(() => { loadChain(underlying, ""); }, [underlying, loadChain]);
   useEffect(() => { if (expiry && expiry !== "(demo)") loadChain(underlying, expiry); }, [expiry, underlying, loadChain]);
@@ -266,7 +268,7 @@ export default function OptionsPage() {
 
       <div className="mt-4 flex flex-wrap items-center gap-3 text-xs text-muted">
         <span>{sessionOpen ? "Regular NSE session" : "Outside regular NSE hours (holidays not detected)"}</span>
-        <span>{lastUpdated ? "Last response "+new Date(lastUpdated).toLocaleTimeString("en-IN",{timeZone:"Asia/Kolkata"})+" IST" : "Awaiting verified quotes"}</span>
+        <span>{providerReceivedAt ? "Backend received "+new Date(providerReceivedAt).toLocaleTimeString("en-IN",{timeZone:"Asia/Kolkata"})+" IST" : "Awaiting verified quotes"}</span>
         <button type="button" onClick={()=>loadChain(underlying,expiry,true)} disabled={refreshing} className="rounded border border-line px-3 py-1.5 hover:text-body disabled:opacity-50">{refreshing?"Refreshing…":"Refresh now"}</button>
       </div>
       <OptionIVAnalytics chain={chain} spot={spot} history={ivHistory} expiry={expiry} marketOpen={sessionOpen} lastUpdated={lastUpdated}/>
@@ -329,9 +331,9 @@ function OptionChainTable({ chain, spot, atmStrike, maxOI, status, onAdd }) {
                   <td className={`py-1.5 px-2 text-right ${(c.oi_change || 0) >= 0 ? "text-gain/80" : "text-loss/80"}`}>{fmtNum(c.oi_change)}</td>
                   <td className="py-1.5 px-2 text-right text-muted">{fmtNum(c.volume)}</td>
                   <td className="py-1.5 px-2 text-right text-muted">{c.iv != null ? c.iv : "–"}</td>
-                  <td onClick={() => onAdd("BUY", "CE", row.strike_price, c.ltp)} className="py-1.5 px-2 text-right text-body font-semibold cursor-pointer hover:text-amber" title="Click to add as Buy CE leg"><span className="block">{fmtPx(c.ltp)}</span><span className="block text-[9px] text-muted font-normal">B {c.bid_price>0?fmtPx(c.bid_price):"—"} · A {c.ask_price>0?fmtPx(c.ask_price):"—"}</span></td>
+                  <td onClick={() => onAdd("BUY", "CE", row.strike_price, c.ltp)} className="py-1.5 px-2 text-right text-body font-semibold cursor-pointer hover:text-amber" title="Click to add as Buy CE leg"><span className="block">{fmtPx(c.ltp)}</span><span className="block text-[9px] text-muted font-normal">B {c.bid_price>0?fmtPx(c.bid_price):"—"} ({fmtNum(c.bid_qty)}) · A {c.ask_price>0?fmtPx(c.ask_price):"—"} ({fmtNum(c.ask_qty)})</span></td>
                   <td className={`py-1.5 px-2 text-center font-bold ${isATM ? "text-amber" : "text-body"}`}>{row.strike_price}</td>
-                  <td onClick={() => onAdd("BUY", "PE", row.strike_price, p.ltp)} className="py-1.5 px-2 text-left text-body font-semibold cursor-pointer hover:text-amber" title="Click to add as Buy PE leg"><span className="block">{fmtPx(p.ltp)}</span><span className="block text-[9px] text-muted font-normal">B {p.bid_price>0?fmtPx(p.bid_price):"—"} · A {p.ask_price>0?fmtPx(p.ask_price):"—"}</span></td>
+                  <td onClick={() => onAdd("BUY", "PE", row.strike_price, p.ltp)} className="py-1.5 px-2 text-left text-body font-semibold cursor-pointer hover:text-amber" title="Click to add as Buy PE leg"><span className="block">{fmtPx(p.ltp)}</span><span className="block text-[9px] text-muted font-normal">B {p.bid_price>0?fmtPx(p.bid_price):"—"} ({fmtNum(p.bid_qty)}) · A {p.ask_price>0?fmtPx(p.ask_price):"—"} ({fmtNum(p.ask_qty)})</span></td>
                   <td className="py-1.5 px-2 text-left text-muted">{p.iv != null ? p.iv : "–"}</td>
                   <td className="py-1.5 px-2 text-left text-muted">{fmtNum(p.volume)}</td>
                   <td className={`py-1.5 px-2 text-left ${(p.oi_change || 0) >= 0 ? "text-gain/80" : "text-loss/80"}`}>{fmtNum(p.oi_change)}</td>
@@ -346,7 +348,7 @@ function OptionChainTable({ chain, spot, atmStrike, maxOI, status, onAdd }) {
         </table>
       </div>
       <p className="px-3 py-2 font-mono text-[10px] text-muted border-t border-line">
-        Green shading = ITM calls · red = ITM puts · amber row = ATM. Bid and ask are shown only if supplied by the provider; — means unavailable. Click an LTP to add a leg. {status === "demo" || status === "expired" ? "No synthetic option quotes." : "Refreshes during regular NSE hours when enabled."}
+        Green shading = ITM calls · red = ITM puts · amber row = ATM. Bid/ask prices and quantities are shown only when supplied by Upstox; — means unavailable. Click an LTP to add a leg. {status === "demo" || status === "expired" ? "No synthetic option quotes." : "Refreshes during regular NSE hours when enabled."}
       </p>
     </div>
   );
@@ -428,13 +430,14 @@ function StrategyBuilder({ legs, setLegs, spot, lotSize, underlying, chain }) {
     const marks = legs.map(l => {
       const row=chain.find(r=>Number(r.strike_price)===Number(l.strike));
       const quote=l.type==="CE"?row?.call:row?.put;
-      const mid=quote?.bid_price>0 && quote?.ask_price>0 ? (Number(quote.bid_price)+Number(quote.ask_price))/2 : null;
+      const executableSide=l.side==="BUY"?Number(quote?.bid_price):Number(quote?.ask_price);
+      const sideQuote=executableSide>0 ? executableSide : null;
       const ltp=quote?.ltp != null && Number(quote.ltp)>0 ? Number(quote.ltp) : null;
-      const mark=mid??ltp;
+      const mark=sideQuote??ltp;
       if(mark===null || !Number.isFinite(mark)) return {...l,mark:null,pl:null,source:null};
       const quantity=l.lots*l.lotSize;
       const pl=(l.side==="BUY"?1:-1)*(mark-l.premium)*quantity;
-      return {...l,mark,pl,source:mid!==null?"Bid/ask midpoint":"LTP"};
+      return {...l,mark,pl,source:sideQuote!==null?(l.side==="BUY"?"Bid (sell to close)":"Ask (buy to close)"):"LTP"};
     });
     const complete=marks.every(m=>m.pl!==null);
     return {marks,complete,total:complete?marks.reduce((sum,m)=>sum+m.pl,0):null};
@@ -452,8 +455,8 @@ function StrategyBuilder({ legs, setLegs, spot, lotSize, underlying, chain }) {
         const qty = l.lots * l.lotSize;
         d += sign * (o.delta || 0) * qty;
         g += sign * (o.gamma || 0) * qty;
-        t += sign * (o.theta || 0) * l.lots;
-        v += sign * (o.vega || 0) * l.lots;
+        t += sign * (o.theta || 0) * qty;
+        v += sign * (o.vega || 0) * qty;
       }
     }
     return found ? { delta: d, gamma: g, theta: t, vega: v } : null;
@@ -513,7 +516,7 @@ function StrategyBuilder({ legs, setLegs, spot, lotSize, underlying, chain }) {
         {legs.length>0 && <div className="rounded-lg border border-line bg-surface p-4">
           <div className="flex flex-wrap gap-2 justify-between items-center"><p className="font-mono text-xs text-muted tracking-wider">ESTIMATED LIVE MARK-TO-MARKET</p><span className="text-xs text-muted">Prices refresh with chain</span></div>
           <p className="font-mono text-xl mt-2 font-bold text-body">{markToMarket?.complete ? "₹"+Math.round(markToMarket.total).toLocaleString("en-IN") : "Not available"}</p>
-          <p className="text-xs text-muted leading-relaxed mt-2">Theoretical change in value since each leg's saved entry premium. Uses bid/ask midpoint when supplied; otherwise Upstox last traded price. Excludes brokerage, taxes, slippage and margin. Not account P&L or an executable exit quote.</p>
+          <p className="text-xs text-muted leading-relaxed mt-2">Theoretical change in value since each leg's saved entry premium. Uses the bid to value long legs and the ask to value short legs when available, otherwise the Upstox last traded price. Excludes brokerage, taxes, slippage and margin. Not account P&L or an executable exit quote.</p>
           <div className="mt-3 divide-y divide-line">{markToMarket?.marks.map(m=><div key={m.id} className="flex flex-wrap gap-2 py-2 items-center justify-between text-xs">
             <span className="text-body">{m.side} {m.strike} {m.type} · {m.lots} lot(s)</span>
             <span className="text-muted">Mark: {m.mark==null?"—":fmtPx(m.mark)} {m.source?"("+m.source+")":""}</span>
