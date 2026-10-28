@@ -22,11 +22,11 @@ module.exports = {
       },
       fontFamily: {
         // AHQ design system: Playfair Display (display) · Archivo (body) · JetBrains Mono (data)
-        display: ["'Playfair Display'", "Georgia", "serif"],
-        body: ["Archivo", "system-ui", "sans-serif"],
+        display: ["Manrope", "Archivo", "sans-serif"],
+        body: ["'DM Sans'", "Archivo", "system-ui", "sans-serif"],
         mono: ["'JetBrains Mono'", "monospace"],
       },
-      maxWidth: { shell: "1180px" },
+      maxWidth: { shell: "1440px" },
     },
   },
   plugins: [],
