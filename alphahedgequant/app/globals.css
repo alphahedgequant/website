@@ -391,3 +391,18 @@ html[data-theme=light] .ahq-page-product :is(input,textarea,select){background:v
  .ahq-page-product :is(input,textarea,select){font-size:16px}
 }
 @media(prefers-reduced-motion:reduce){.ahq-page-product{animation:none!important}.ahq-scroll-entry{opacity:1!important;transform:none!important;transition:none!important}}
+
+
+/* Uploaded reference V2: midnight-blue, steel-blue, champagne gold */
+:root{--ahq-ink:#090c13;--ahq-ink-rgb:9 12 19;--ahq-surface:#131924;--ahq-surface-rgb:19 25 36;--ahq-raised:#18212e;--ahq-raised-rgb:24 33 46;--ahq-line:rgba(119,136,160,.23);--ahq-body:#f2efe9;--ahq-body-rgb:242 239 233;--ahq-muted:#a5a9b4;--ahq-muted-rgb:165 169 180;--ahq-amber:#d7b477;--ahq-amber-rgb:215 180 119;--ahq-amberdim:#bfa06e;--ahq-amberdim-rgb:191 160 110;--ahq-gold:#d7b477;--ahq-gold-rgb:215 180 119}
+html[data-theme=light]{--ahq-ink:#f7f5f0;--ahq-ink-rgb:247 245 240;--ahq-surface:#fffdf9;--ahq-surface-rgb:255 253 249;--ahq-raised:#e9e8e3;--ahq-raised-rgb:233 232 227;--ahq-line:rgba(79,97,119,.2);--ahq-body:#17212d;--ahq-body-rgb:23 33 45;--ahq-muted:#566372;--ahq-muted-rgb:86 99 114;--ahq-amber:#88632d;--ahq-amber-rgb:136 99 45;--ahq-amberdim:#74542a;--ahq-amberdim-rgb:116 84 42;--ahq-gold:#88632d;--ahq-gold-rgb:136 99 45}
+.bg-field{background:var(--ahq-ink)}
+.bg-field::after{background:radial-gradient(ellipse 55% 52% at 75% 27%,rgba(102,123,157,.12),transparent 73%),radial-gradient(ellipse 48% 62% at 17% 75%,rgba(181,148,98,.045),transparent 77%)}
+html[data-theme=light] .bg-field::after{background:radial-gradient(ellipse 55% 52% at 75% 27%,rgba(100,132,160,.06),transparent 73%)}
+.grid-field{background-image:linear-gradient(rgba(106,129,158,.065) 1px,transparent 1px),linear-gradient(90deg,rgba(106,129,158,.065) 1px,transparent 1px)}
+html[data-theme=light] .grid-field{background-image:linear-gradient(rgba(82,108,136,.065) 1px,transparent 1px),linear-gradient(90deg,rgba(82,108,136,.065) 1px,transparent 1px)}
+.ahq-site-nav{background:rgba(9,12,19,.89)}
+html[data-theme=light] .ahq-site-nav{background:rgba(247,245,240,.91)}
+.ahq-page-product:before{background:radial-gradient(ellipse 54% 53% at 82% 11%,rgba(93,115,154,.13),transparent 72%),radial-gradient(ellipse 35% 43% at 14% 41%,rgba(215,180,119,.05),transparent 70%)}
+html[data-theme=light] .ahq-page-product:before{background:radial-gradient(ellipse 54% 53% at 82% 11%,rgba(110,145,177,.07),transparent 72%)}
+.ahq-site-footer{background:linear-gradient(125deg,var(--ahq-surface),var(--ahq-ink))}
