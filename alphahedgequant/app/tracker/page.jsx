@@ -26,7 +26,8 @@ export default function TrackerPage() {
   const [loading, setLoading] = useState(true);
   const [form, setForm] = useState({ house: "", symbol: "", rating: "BUY", target_price: "", price_at_call: "", call_date: "", horizon_days: 365, note: "", source_url: "" });
   const [submitting, setSubmitting] = useState(false);
-  const [msg, setMsg] = useState(null);\n  const [search,setSearch]=useState("");
+  const [msg, setMsg] = useState(null);
+  const [search,setSearch]=useState("");
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -223,7 +224,8 @@ export default function TrackerPage() {
               <Field label="CALL DATE" type="date" value={form.call_date} onChange={(v) => setF("call_date", v)} />
               <Field label="HORIZON (DAYS)" type="number" placeholder="365" value={form.horizon_days} onChange={(v) => setF("horizon_days", v)} />
             </div>
-            <Field label="ORIGINAL RESEARCH REPORT URL (REQUIRED)" type="url" placeholder="https://.../dated-research-report" value={form.source_url} onChange={(v)=>setF("source_url",v)} />\n            <Field label="NOTE (OPTIONAL)" placeholder="Source / thesis / link" value={form.note} onChange={(v) => setF("note", v)} />
+            <Field label="ORIGINAL RESEARCH REPORT URL (REQUIRED)" type="url" placeholder="https://.../dated-research-report" value={form.source_url} onChange={(v)=>setF("source_url",v)} />
+            <Field label="NOTE (OPTIONAL)" placeholder="Source / thesis / link" value={form.note} onChange={(v) => setF("note", v)} />
             <button onClick={submit} disabled={!formValid || submitting} className="w-full py-3 rounded bg-amber text-ink font-display font-semibold text-sm hover:bg-amber/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
               {submitting ? "Adding…" : "Add Call to Tracker"}
             </button>
