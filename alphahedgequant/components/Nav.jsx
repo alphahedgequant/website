@@ -15,11 +15,10 @@ const products = [
 ];
 const research = [
   { href: "/research", label: "Research Papers" },
-  { href: "/reports", label: "Macro Outlooks" },
-  { href: "/ipo", label: "IPO Intelligence" },
-  { href: "/tracker", label: "Trust Tracker" },
+  { href: "/learn", label: "Learn" },
+  { href: "/about", label: "About" },
 ];
-const isActive = (path, links) => links.some(l => path === l.href);
+const isActive = (path, links) => links.some(l => path === l.href || path.startsWith(l.href + "/"));
 
 export default function Nav() {
   const path = usePathname();
@@ -55,8 +54,8 @@ export default function Nav() {
           <span className="font-semibold tracking-tight">alphahedgequant</span>
         </Link>
 
-        <div ref={panelRef} className="hidden md:flex items-center gap-5 h-full">
-          <nav aria-label="Main navigation" className="flex h-full items-center gap-5">
+        <div ref={panelRef} className="hidden lg:flex items-center gap-3 xl:gap-5 h-full">
+          <nav aria-label="Main navigation" className="flex h-full items-center gap-3 xl:gap-5">
             {[
               { key: "products", label: "Products", links: products },
               { key: "research", label: "Research", links: research },
@@ -92,8 +91,14 @@ export default function Nav() {
                 )}
               </div>
             ))}
-            <Link href="/learn" className={`text-sm hover:text-body ${path === "/learn" ? "text-amber" : "text-muted"}`}>Learn</Link>
-            <Link href="/about" className={`text-sm hover:text-body ${path === "/about" ? "text-amber" : "text-muted"}`}>About</Link>
+            {[
+              {href:"/reports",label:"Macro Outlook"},
+              {href:"/ipo",label:"IPO Intelligence"},
+              {href:"/tracker",label:"Trust Tracker"}
+            ].map(item=><Link key={item.href} href={item.href}
+              className={`whitespace-nowrap text-[13px] xl:text-sm transition-colors hover:text-body ${path===item.href || path.startsWith(item.href+"/") ? "text-amber" : "text-muted"}`}>
+              {item.label}
+            </Link>)}
           </nav>
           <ThemeToggle />
           <SignedOut>
@@ -103,7 +108,7 @@ export default function Nav() {
           <SignedIn><UserButton afterSignOutUrl="/" /></SignedIn>
         </div>
 
-        <div className="md:hidden flex items-center gap-2">
+        <div className="lg:hidden flex items-center gap-2">
           <ThemeToggle />
           <button type="button" className="p-2 text-muted" onClick={() => setMobileOpen(!mobileOpen)}
             aria-label={mobileOpen ? "Close menu" : "Open menu"} aria-expanded={mobileOpen} aria-controls="ahq-mobile-navigation">
@@ -115,7 +120,7 @@ export default function Nav() {
       </div>
 
       {mobileOpen && (
-        <nav id="ahq-mobile-navigation" aria-label="Mobile navigation" className="md:hidden max-h-[calc(100vh-4.75rem)] overflow-y-auto border-t border-line bg-surface px-5 py-4">
+        <nav id="ahq-mobile-navigation" aria-label="Mobile navigation" className="lg:hidden max-h-[calc(100vh-4.75rem)] overflow-y-auto border-t border-line bg-surface px-5 py-4">
           <p className="mb-2 font-mono text-[11px] uppercase tracking-widest text-amber">Products</p>
           <div className="grid grid-cols-1 gap-1">
             {products.map(item => <Link key={item.href} href={item.href} onClick={() => setMobileOpen(false)}
@@ -128,8 +133,13 @@ export default function Nav() {
               className="rounded-lg px-3 py-2.5 text-sm text-body hover:bg-raised">{item.label}</Link>)}
           </div>
           <div className="my-4 border-t border-line" />
-          <Link href="/learn" onClick={() => setMobileOpen(false)} className="block rounded-lg px-3 py-2.5 text-sm text-body">Learn</Link>
-          <Link href="/about" onClick={() => setMobileOpen(false)} className="block rounded-lg px-3 py-2.5 text-sm text-body">About</Link>
+          <p className="mb-2 font-mono text-[11px] uppercase tracking-widest text-amber">Featured</p>
+          {[
+            {href:"/reports",label:"Macro Outlook"},
+            {href:"/ipo",label:"IPO Intelligence"},
+            {href:"/tracker",label:"Trust Tracker"}
+          ].map(item=><Link key={item.href} href={item.href} onClick={()=>setMobileOpen(false)}
+            className={`block rounded-lg px-3 py-2.5 text-sm ${path===item.href?"text-amber":"text-body"} hover:bg-raised`}>{item.label}</Link>)}
           <div className="mt-4 flex items-center gap-3 border-t border-line pt-4">
             <SignedOut>
               <Link href="/sign-in" onClick={() => setMobileOpen(false)} className="text-sm text-muted">Sign in</Link>
