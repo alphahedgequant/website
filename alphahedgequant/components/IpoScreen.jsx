@@ -14,6 +14,7 @@ import { useEffect, useState } from "react";
 const TABS = [
   { key: "open",     label: "Open Now" },
   { key: "upcoming", label: "Upcoming" },
+  { key: "closed",   label: "Closed" },
   { key: "listed",   label: "Recently Listed" },
 ];
 
@@ -77,7 +78,7 @@ function IpoCard({ ipo, showGain }) {
         <Field label="Open" value={fmt(ipo.open)} />
         <Field label="Close" value={fmt(ipo.close)} />
         {ipo.issueSize && <Field label="Issue Size" value={ipo.issueSize} />}
-        {ipo.subscription && <Field label="Subscribed" value={`${ipo.subscription}x`} />}
+        {ipo.subscription != null && <Field label="Subscribed" value={`${ipo.subscription}x`} />}
         {showGain && <Field label="Listing Gain" value={<GainBadge value={ipo.listingGain} />} />}
         {ipo.listingDate && <Field label="Listed" value={ipo.listingDate} />}
       </div>
@@ -116,7 +117,8 @@ export default function IpoScreen() {
   useEffect(() => {
     let alive = true;
     setLoading(true);
-    fetch("/api/ipo")
+    setError(null);
+    fetch("/api/ipo", { cache: "no-store" })
       .then((r) => r.json())
       .then((j) => {
         if (!alive) return;
@@ -170,7 +172,7 @@ export default function IpoScreen() {
         </div>
       )}
 
-      <div style={{ display: "flex", gap: 8, marginBottom: 20 }}>
+      <div style={{ display: "flex", flexWrap: "wrap", gap: 8, marginBottom: 20 }}>
         {TABS.map((t) => (
           <button
             key={t.key}
@@ -197,7 +199,7 @@ export default function IpoScreen() {
         <div style={{ color: "#8a8a8a", padding: "40px 0" }}>No {tab} IPOs right now.</div>
       )}
 
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(300px, 1fr))", gap: 16 }}>
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(min(100%, 300px), 1fr))", gap: 16 }}>
         {list.map((ipo, i) => (
           <IpoCard key={i} ipo={ipo} showGain={tab === "listed"} />
         ))}
