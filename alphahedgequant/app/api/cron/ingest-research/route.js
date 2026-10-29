@@ -28,7 +28,9 @@ export async function GET(request) {
     await ensureResearchTable(sql);
     let processed=0;const failures=[];
     // Sequential requests respect arXiv API usage; each broad query returns up to 75 recent records.
+    let requestIndex=0;
     for(const [topic,query] of Object.entries(TOPICS)){
+      if(requestIndex++>0) await new Promise(resolve=>setTimeout(resolve,3200));
       try {
         const params=new URLSearchParams({search_query:query,start:"0",max_results:"75",sortBy:"submittedDate",sortOrder:"descending"});
         const response=await fetch("https://export.arxiv.org/api/query?"+params,{cache:"no-store",headers:{"User-Agent":"AlphaHedgeQuantResearch/1.0 (research indexing)"},signal:AbortSignal.timeout(12000)});
