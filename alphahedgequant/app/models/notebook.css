@@ -1,0 +1,19 @@
+/* Quant Models reading sheet only. Global theme, card navigation and tools remain untouched. */
+.ahq-model-notebook{position:relative;overflow:hidden;border-radius:20px;border:1px solid #d8cbb8;background:repeating-linear-gradient(to bottom,transparent 0,transparent 38px,rgba(75,122,172,.10) 39px,transparent 40px),#fcf9f0;color:#263449;box-shadow:0 18px 42px rgba(0,0,0,.15);font-family:Georgia,"Times New Roman",serif;padding:clamp(24px,4vw,54px) clamp(20px,5vw,70px) clamp(25px,4vw,55px) clamp(40px,7vw,92px)}
+.ahq-model-notebook:before{content:"";position:absolute;top:0;bottom:0;left:clamp(22px,4vw,58px);border-left:1px solid rgba(165,50,73,.28);pointer-events:none}
+.ahq-model-notebook .model-notebook-kicker{color:#966435;font:700 11px/1.7 ui-monospace,monospace;letter-spacing:.14em;text-transform:uppercase}
+.ahq-model-notebook .model-notebook-headline{font:600 clamp(27px,3vw,41px)/1.2 Georgia,serif;letter-spacing:-.03em;color:#253653;margin:10px 0}
+.ahq-model-notebook .model-notebook-note{font:italic 17px/1.65 "Segoe Print","Comic Sans MS",cursive;color:#923b57;display:inline-block;transform:rotate(-1deg);border-bottom:2px solid rgba(146,59,87,.35);margin:14px 0}
+.ahq-model-notebook :is(.text-body,.text-muted,.text-amber){color:#34445d!important}
+.ahq-model-notebook :is(p,li,dd){line-height:1.9}
+.ahq-model-notebook :is(h4,h5,h6,dt){color:#263955!important}
+.ahq-model-notebook :is(.bg-raised,.bg-surface){background:transparent!important}
+.ahq-model-notebook :is(.border-line,.border-amber\/30){border-color:rgba(70,94,123,.25)!important}
+.ahq-model-notebook :is(article,section)[class*="rounded-xl"][class*="border"]{border:0!important;border-radius:0!important;padding:0!important;margin-top:32px!important;background:transparent!important;box-shadow:none!important}
+.ahq-model-notebook .font-display{font-family:Georgia,"Times New Roman",serif}
+.ahq-model-notebook :is(h4,h5){text-decoration-color:#e0bc51;text-decoration-thickness:4px;text-underline-offset:5px}
+.ahq-model-notebook button{background:#fffdf8!important;color:#273e5d!important;border-color:#a6b4c7!important}
+.ahq-model-notebook button[aria-pressed="true"]{background:#f5e2a4!important;border-color:#9a7240!important}
+.ahq-model-notebook pre{color:#244b78!important;background:rgba(255,255,255,.45);padding:12px;border-radius:7px}
+.ahq-model-notebook .grid > div[class*="rounded"],.ahq-model-notebook .space-y-3 > div[class*="rounded"]{background:rgba(255,247,222,.24)!important}
+@media(max-width:640px){.ahq-model-notebook{padding:28px 18px 32px 42px}.ahq-model-notebook:before{left:23px}.ahq-model-notebook pre{font-size:11px;overflow-x:auto}}
