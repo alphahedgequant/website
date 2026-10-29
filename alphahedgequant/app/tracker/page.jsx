@@ -140,7 +140,7 @@ export default function TrackerPage() {
               </table>
             </div>
             <p className="px-4 py-2.5 font-mono text-[10px] text-muted border-t border-line">
-              Trust Score = % of resolved calls that made money in the called direction. Resolved = we have a current price to compare. Prices via Yahoo Finance.
+              Trust Score = % of resolved calls that made money in the called direction. Resolved = the stated horizon ended and a historical closing price was available. Active, HOLD and unverified calls are excluded. Small samples are not statistically reliable.
             </p>
           </div>
         )
@@ -163,7 +163,7 @@ export default function TrackerPage() {
                     <th className="py-2.5 px-3 text-right font-normal">NOW</th>
                     <th className="py-2.5 px-3 text-right font-normal">RETURN</th>
                     <th className="py-2.5 px-3 text-center font-normal">DATE</th>
-                    <th className="py-2.5 px-3 text-center font-normal">OUTCOME</th>
+                    <th className="py-2.5 px-3 text-center font-normal">HORIZON OUTCOME</th>
                     <th className="py-2.5 px-3 text-center font-normal"></th>
                   </tr>
                 </thead>
@@ -179,7 +179,7 @@ export default function TrackerPage() {
                       <td className={`py-2.5 px-3 text-right ${(c.returnPct ?? 0) >= 0 ? "text-gain" : "text-loss"}`}>{c.returnPct != null ? (c.returnPct > 0 ? "+" : "") + c.returnPct + "%" : "–"}</td>
                       <td className="py-2.5 px-3 text-center text-muted">{c.call_date ? String(c.call_date).slice(0, 10) : "–"}</td>
                       <td className="py-2.5 px-3 text-center">
-                        {!c.resolved ? <span className="text-muted">pending</span>
+                        {!c.resolved ? <span className="text-muted">{c.status === "active" ? "active" : c.status === "hold_unscored" ? "HOLD · not scored" : "unverified"}</span>
                           : c.madeMoney ? <span className="text-gain">✓ {c.targetHit ? "hit target" : "profit"}</span>
                           : <span className="text-loss">✗ failed</span>}
                       </td>
@@ -223,7 +223,7 @@ export default function TrackerPage() {
               {submitting ? "Adding…" : "Add Call to Tracker"}
             </button>
             <p className="font-mono text-[10px] text-muted leading-relaxed">
-              The outcome is scored automatically from the live price — you only enter what the house actually said
+              Only approved editors can add calls. Scores use historical prices at the stated horizon — record exactly what the house said
               (house, stock, rating, target, the price when they said it, and the date). Use NSE symbols (RELIANCE) or US tickers (AAPL).
             </p>
           </div>
@@ -253,7 +253,7 @@ function EmptyState({ onAdd }) {
     <div className="mt-8 h-56 rounded-lg border border-line bg-surface flex flex-col items-center justify-center text-muted px-6 text-center">
       <div className="text-4xl mb-3 opacity-30">📊</div>
       <p className="font-display text-lg opacity-50">No calls tracked yet</p>
-      <p className="text-xs mt-1.5 opacity-40 font-mono max-w-sm leading-relaxed">Add your first analyst call — house, stock, rating, target, and the price when the call was made. The tracker scores the rest automatically.</p>
+      <p className="text-xs mt-1.5 opacity-40 font-mono max-w-sm leading-relaxed">Approved editors can record sourced historical calls. Unverified calls will not be ranked.</p>
       <button onClick={onAdd} className="mt-4 font-mono text-xs px-4 py-2 rounded border border-amber/40 text-amber hover:bg-amber/10">+ Add the first call</button>
     </div>
   );
