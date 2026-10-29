@@ -37,14 +37,18 @@ const PIPELINE = [
 //  RESEARCH LIBRARY  (live arXiv q-fin feed)
 // ════════════════════════════════════════════════════════════════════
 const CATEGORIES = [
-  { key: "all", label: "All q-fin" },
-  { key: "ST", label: "Stat-arb" },
-  { key: "TR", label: "Trading & Microstructure" },
-  { key: "PM", label: "Portfolio" },
-  { key: "RM", label: "Risk" },
-  { key: "CP", label: "Computational" },
-  { key: "PR", label: "Pricing" },
-  { key: "MF", label: "Math Finance" },
+  {key:"all",label:"All disciplines"},
+  {key:"quant",label:"Quantitative Finance"},
+  {key:"math",label:"Mathematics"},
+  {key:"engineering",label:"Financial Engineering"},
+  {key:"finance",label:"Finance"},
+  {key:"economics",label:"Economics"},
+  {key:"ml",label:"Machine Learning"},
+  {key:"ai",label:"Artificial Intelligence"},
+  {key:"llm",label:"LLMs & NLP"},
+  {key:"ST",label:"Statistical Arbitrage"},
+  {key:"TR",label:"Microstructure"},
+  {key:"RM",label:"Risk"}
 ];
 
 // Curated foundational papers — real links, hand-picked (not auto-fetched).
@@ -56,6 +60,11 @@ const FOUNDATIONAL = [
   { title: "Statistical Arbitrage Pairs Trading Strategies: Review and Outlook", authors: "Krauss", year: 2017, venue: "J. Economic Surveys", url: "https://onlinelibrary.wiley.com/doi/abs/10.1111/joes.12153" },
   { title: "Coherent Measures of Risk", authors: "Artzner, Delbaen, Eber & Heath", year: 1999, venue: "Mathematical Finance", url: "https://doi.org/10.1111/1467-9965.00068" },
   { title: "Attention Is All You Need", authors: "Vaswani et al.", year: 2017, venue: "NeurIPS (arXiv)", url: "https://arxiv.org/abs/1706.03762" },
+  { title: "Deep Reinforcement Learning for Trading", authors: "Moody & Saffell", year: 2001, venue: "IEEE Transactions on Neural Networks", url: "https://doi.org/10.1109/72.935097" },
+  { title: "BERT: Pre-training of Deep Bidirectional Transformers for Language Understanding", authors: "Devlin et al.", year: 2018, venue: "NAACL / arXiv", url: "https://arxiv.org/abs/1810.04805" },
+  { title: "Language Models are Few-Shot Learners", authors: "Brown et al.", year: 2020, venue: "NeurIPS / arXiv", url: "https://arxiv.org/abs/2005.14165" },
+  { title: "DeepLOB: Deep Convolutional Neural Networks for Limit Order Books", authors: "Zhang, Zohren & Roberts", year: 2018, venue: "IEEE / arXiv", url: "https://arxiv.org/abs/1808.03668" },
+  { title: "The Econometrics of Financial Markets", authors: "Campbell, Lo & MacKinlay", year: 1997, venue: "Princeton University Press", url: "https://press.princeton.edu/books/hardcover/9780691043012/the-econometrics-of-financial-markets" },
   { title: "A Well-Conditioned Estimator for Large-Dimensional Covariance Matrices", authors: "Ledoit & Wolf", year: 2004, venue: "J. Multivariate Analysis", url: "https://doi.org/10.1016/S0047-259X(03)00096-4" },
 ];
 
@@ -100,17 +109,20 @@ export default function Research() {
   const [papers, setPapers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [appliedSearch,setAppliedSearch] = useState("");
+  const [sort,setSort] = useState("newest");
 
   const fetchPapers = useCallback(async (category, q) => {
     setLoading(true);
     setError(null);
     try {
-      const params = new URLSearchParams({ cat: category, max: "24" });
+      const params = new URLSearchParams({ cat: category, max: "48" });
       if (q) params.set("q", q);
       const r = await fetch(`${API}/api/research/arxiv?${params}`);
       const json = await r.json();
       if (!json.success) throw new Error(json.error || "Feed error");
       setPapers(json.data || []);
+      setAppliedSearch(q);
     } catch (e) {
       setError(e.message);
     } finally {
@@ -118,7 +130,7 @@ export default function Research() {
     }
   }, []);
 
-  useEffect(() => { fetchPapers(cat, ""); }, [cat, fetchPapers]);
+  useEffect(() => { fetchPapers(cat, search.trim()); }, [cat, fetchPapers]);
 
   const onSearch = (e) => {
     e.preventDefault();
@@ -189,7 +201,7 @@ export default function Research() {
           {CATEGORIES.map((c) => (
             <button
               key={c.key}
-              onClick={() => { setCat(c.key); setSearch(""); }}
+              onClick={() => { setCat(c.key); }}
               className={`font-mono text-[11px] tracking-wider px-3 py-1.5 rounded border transition-colors ${
                 cat === c.key ? "border-amber text-amber" : "border-line text-muted hover:text-body"
               }`}
@@ -199,12 +211,12 @@ export default function Research() {
           ))}
         </div>
 
-        <form onSubmit={onSearch} className="mt-3 flex gap-2 max-w-md">
+        <form onSubmit={onSearch} className="mt-4 flex flex-wrap gap-2 max-w-3xl">
           <input
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            placeholder="Search title / abstract (e.g. cointegration, LSTM)..."
-            className="flex-1 bg-raised/40 border border-line rounded px-3 py-2 font-mono text-sm text-body placeholder:text-muted focus:outline-none focus:border-amber/40"
+            placeholder="Search all paper titles and abstracts: stochastic volatility, transformers, LLM agents..."
+            className="min-w-[240px] flex-1 bg-raised/40 border border-line rounded px-3 py-2 font-mono text-sm text-body placeholder:text-muted focus:outline-none focus:border-amber/40"
           />
           <button type="submit" className="px-4 py-2 rounded bg-amber text-ink font-mono text-sm font-medium hover:bg-[#f7bd5e] transition-colors">
             Search
@@ -215,7 +227,7 @@ export default function Research() {
         <div className="mt-6">
           <div className="flex items-center justify-between mb-4">
             <p className="font-mono text-[11px] text-muted tracking-wider">
-              LIVE · arXiv q-fin {loading ? "· loading…" : papers.length ? `· ${papers.length} papers` : ""}
+              ARXIV · {CATEGORIES.find(c=>c.key===cat)?.label} · DAILY REFRESH {loading ? "· loading…" : papers.length ? `· ${papers.length} papers` : ""} {appliedSearch ? `· "${appliedSearch}"` : ""}
             </p>
           </div>
 
@@ -225,9 +237,10 @@ export default function Research() {
             </div>
           )}
 
+          <div className="flex gap-3 items-center mb-4"><label htmlFor="paper-sort" className="font-mono text-xs text-muted">Sort papers</label><select id="paper-sort" value={sort} onChange={e=>setSort(e.target.value)} className="bg-raised border border-line rounded px-3 py-2 text-sm"><option value="newest">Newest</option><option value="oldest">Oldest</option><option value="title">Title A–Z</option></select><button type="button" className="text-xs text-amber hover:underline" onClick={()=>fetchPapers(cat,search.trim())}>Refresh results</button></div>
           <div className="grid gap-4 md:grid-cols-2">
             {loading && Array.from({ length: 6 }).map((_, i) => <SkeletonCard key={i} />)}
-            {!loading && papers.map((p) => <PaperCard key={p.id} p={p} />)}
+            {!loading && [...papers].sort((a,b)=>sort==="title"?a.title.localeCompare(b.title):sort==="oldest"?a.published.localeCompare(b.published):b.published.localeCompare(a.published)).map((p) => <PaperCard key={p.id} p={p} />)}
           </div>
 
           {!loading && !error && papers.length === 0 && (
@@ -258,7 +271,7 @@ export default function Research() {
         </div>
 
         <p className="font-mono text-[11px] text-muted mt-10">
-          LIVE FEED: arXiv.org q-fin (open API). CURATED SHELF: hand-selected foundational papers.
+          LIVE FEED: arXiv.org (cross-disciplinary preprints; metadata cached for 24 hours). CURATED SHELF: hand-selected foundational papers.
           SSRN has no public API — those papers are linked individually. RESEARCH &amp; EDUCATION ONLY.
         </p>
       </div>
