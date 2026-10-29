@@ -111,25 +111,32 @@ export default function Research() {
   const [error, setError] = useState(null);
   const [appliedSearch,setAppliedSearch] = useState("");
   const [sort,setSort] = useState("newest");
+  const [page,setPage] = useState(1);
+  const [hasMore,setHasMore] = useState(false);
+  const [indexed,setIndexed] = useState(false);
 
-  const fetchPapers = useCallback(async (category, q) => {
-    setLoading(true);
-    setError(null);
+  const fetchPapers = useCallback(async (category,q,nextPage=1) => {
+    setLoading(true);setError(null);
     try {
-      const params = new URLSearchParams({ cat: category, max: "48" });
-      if (q) params.set("q", q);
-      const r = await fetch(`${API}/api/research/arxiv?${params}`);
-      const json = await r.json();
-      if (!json.success) throw new Error(json.error || "Feed error");
-      setPapers(json.data || []);
-      setAppliedSearch(q);
-    } catch (e) {
-      setError(e.message);
-    } finally {
-      setLoading(false);
-    }
+      const params=new URLSearchParams({cat:category,page:String(nextPage)});
+      if(q)params.set("q",q);
+      let json=null;
+      try {
+        const r=await fetch("/api/research/index?"+params,{cache:"no-store"});
+        const j=await r.json();
+        if(r.ok&&j.success&&j.data.length){json=j;setIndexed(true);}
+      }catch{}
+      if(!json){
+        const live=new URLSearchParams({cat:category,max:"48"});if(q)live.set("q",q);
+        const r=await fetch(`${API}/api/research/arxiv?${live}`);const j=await r.json();
+        if(!j.success)throw Error(j.error||"Research feed unavailable");
+        json=j;setIndexed(false);
+      }
+      setPapers(prev=>nextPage>1&&json.hasMore?[...prev,...json.data]:json.data||[]);
+      setPage(nextPage);setHasMore(Boolean(json.hasMore));setAppliedSearch(q);
+    }catch(e){setError(e.message);}
+    finally{setLoading(false);}
   }, []);
-
   useEffect(() => { fetchPapers(cat, search.trim()); }, [cat, fetchPapers]);
 
   const onSearch = (e) => {
