@@ -58,6 +58,7 @@ export async function GET() {
     }
     const summarize=h=>({
       house: h.house,
+      analystName: h.analystName || null,
       totalCalls: h.total,
       resolvedCalls: h.resolved,
       trustScore: h.resolved >= 5 ? Math.round((h.wins / h.resolved) * 100) : null,
