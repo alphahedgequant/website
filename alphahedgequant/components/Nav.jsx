@@ -16,7 +16,7 @@ const products = [
 ];
 const research = [
   { href: "/research", label: "Research Papers" },
-  { href: "/reports", label: "Market Outlook" },
+  { href: "/reports", label: "Macro Outlook" },
   { href: "/learn", label: "Learn, Interviews & Mental Math 🧩" },
 ];
 const isActive = (path, links) => links.some(l => path === l.href || path.startsWith(l.href + "/"));
@@ -93,7 +93,6 @@ export default function Nav() {
               </div>
             ))}
             {[
-              {href:"/reports",label:"Macro Outlook"},
               {href:"/ipo",label:"IPO Intelligence"},
               {href:"/tracker",label:"Trust Tracker"},
               {href:"/about",label:"About"}
@@ -137,7 +136,6 @@ export default function Nav() {
           <div className="my-4 border-t border-line" />
           <p className="mb-2 font-mono text-[11px] uppercase tracking-widest text-amber">Featured</p>
           {[
-            {href:"/reports",label:"Macro Outlook"},
             {href:"/ipo",label:"IPO Intelligence"},
             {href:"/tracker",label:"Trust Tracker"},
             {href:"/about",label:"About"}
