@@ -3,8 +3,8 @@
 // GET  -> all calls, each auto-scored against the live price (via your Express /api/prices)
 // POST -> add a new call
 import { neon } from "@neondatabase/serverless";
-
-const PRICE_API = process.env.NEXT_PUBLIC_API_URL || "https://zerohedgequant-backend.onrender.com";
+import {fetchHistory,scoreAnalystCall} from "@/lib/trackerScoring";
+import {auth,currentUser} from "@clerk/nextjs/server";
 
 async function ensureTable(sql) {
   await sql`
@@ -23,33 +23,6 @@ async function ensureTable(sql) {
   `;
 }
 
-async function latestClose(symbol) {
-  try {
-    const r = await fetch(`${PRICE_API}/api/prices?symbol=${encodeURIComponent(symbol)}&interval=1d`);
-    const j = await r.json();
-    if (j.success && j.data?.length) return j.data[j.data.length - 1].close;
-  } catch (e) { /* ignore */ }
-  return null;
-}
-
-function scoreCall(call, priceNow) {
-  if (priceNow == null) return { resolved: false };
-  const entry = Number(call.price_at_call);
-  const tgt = Number(call.target_price);
-  const r = (call.rating || "BUY").toUpperCase();
-  let madeMoney, targetHit, retPct;
-  if (r === "SELL") {
-    madeMoney = priceNow < entry;
-    targetHit = priceNow <= tgt;
-    retPct = ((entry - priceNow) / entry) * 100;
-  } else {
-    madeMoney = priceNow >= entry;
-    targetHit = priceNow >= tgt;
-    retPct = ((priceNow - entry) / entry) * 100;
-  }
-  return { resolved: true, madeMoney, targetHit, priceNow, returnPct: +retPct.toFixed(2) };
-}
-
 export async function GET() {
   try {
     if (!process.env.NEON_DATABASE_URL) {
@@ -61,9 +34,9 @@ export async function GET() {
 
     const symbols = [...new Set(rows.map((r) => r.symbol))];
     const priceCache = {};
-    await Promise.all(symbols.map(async (s) => { priceCache[s] = await latestClose(s); }));
+    await Promise.all(symbols.map(async (s) => { priceCache[s] = await fetchHistory(s); }));
 
-    const calls = rows.map((c) => ({ ...c, ...scoreCall(c, priceCache[c.symbol]) }));
+    const calls = rows.map((c) => ({ ...c, ...scoreAnalystCall(c, priceCache[c.symbol] || []) }));
     return Response.json({ success: true, calls });
   } catch (e) {
     console.error("[Tracker GET]", e);
@@ -72,6 +45,14 @@ export async function GET() {
 }
 
 export async function POST(request) {
+  const {userId}=auth();
+  if(!userId)return Response.json({success:false,error:"Sign in required"},{status:401});
+  const allowed=(process.env.AHQ_TRACKER_ADMIN_EMAILS||process.env.AHQ_ANALYTICS_ADMIN_EMAILS||"").split(",").map(x=>x.trim().toLowerCase()).filter(Boolean);
+  if(!allowed.length)return Response.json({success:false,error:"Tracker admin not configured"},{status:403});
+  const user=await currentUser();
+  const verified=(user?.emailAddresses||[]).filter(e=>e.verification?.status==="verified").map(e=>e.emailAddress.toLowerCase());
+  if(!verified.some(e=>allowed.includes(e)))return Response.json({success:false,error:"Only approved editors can add calls"},{status:403});
+
   try {
     if (!process.env.NEON_DATABASE_URL) {
       return Response.json({ success: false, error: "Database not configured." }, { status: 500 });
@@ -81,6 +62,10 @@ export async function POST(request) {
     if (!house || !symbol || !target_price || !price_at_call || !call_date) {
       return Response.json({ success: false, error: "house, symbol, target_price, price_at_call, call_date are required." }, { status: 400 });
     }
+    if(typeof house!=="string"||house.trim().length>120||typeof symbol!=="string"||!/^[A-Za-z0-9.^_-]{1,25}$/.test(symbol)||!["BUY","SELL","HOLD"].includes(String(rating).toUpperCase())||
+      !Number.isFinite(Number(target_price))||Number(target_price)<=0||!Number.isFinite(Number(price_at_call))||Number(price_at_call)<=0||
+      !/^\d{4}-\d{2}-\d{2}$/.test(String(call_date))||!Number.isInteger(Number(horizon_days))||Number(horizon_days)<1||Number(horizon_days)>3650||typeof note!=="string"||note.length>2000)
+      return Response.json({success:false,error:"Invalid call fields"},{status:400});
     const sql = neon(process.env.NEON_DATABASE_URL);
     await ensureTable(sql);
     const rows = await sql`
