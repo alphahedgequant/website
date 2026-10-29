@@ -12,9 +12,11 @@ const products = [
   { href: "/backtest", label: "AI Backtesting", description: "Test and evaluate ideas", glyph: "↗" },
   { href: "/copilot", label: "AI Copilot", description: "Natural-language strategy research", glyph: "✳" },
   { href: "/options", label: "Options Analytics", description: "Option-chain intelligence", glyph: "◈" },
+  { href: "/tracker", label: "Trust Tracker", description: "Analyst calls and accountability", glyph: "◎" },
 ];
 const research = [
   { href: "/research", label: "Research Papers" },
+  { href: "/reports", label: "Market Outlook" },
   { href: "/learn", label: "Learn" },
 ];
 const isActive = (path, links) => links.some(l => path === l.href || path.startsWith(l.href + "/"));
