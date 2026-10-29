@@ -1,107 +1,61 @@
 "use client";
-import { useState } from "react";
+import {useCallback,useEffect,useMemo,useRef,useState} from "react";
 import Link from "next/link";
+import {LESSONS,INTERVIEWS} from "@/lib/academyContent";
 
-// slug present + published:true → card is a clickable link to /learn/[slug]
-const ARTICLES = [
-  { title: "What is quantitative trading?", desc: "Systematic vs discretionary, where edges come from, and why process beats prediction.", level: "beginner", time: "8 min", cat: "Foundations", slug: "what-is-quantitative-trading", published: true },
-  { title: "Reading an option chain", desc: "Strikes, premiums, OI and IV — what each column actually tells you about positioning.", level: "beginner", time: "10 min", cat: "Derivatives", slug: "reading-an-option-chain", published: true },
-  { title: "Candlesticks without the mythology", desc: "What price action genuinely encodes — and which patterns are statistical noise.", level: "beginner", time: "9 min", cat: "Technical", slug: "candlesticks-without-mythology", published: true },
-  { title: "Position sizing before everything", desc: "Why sizing decides survival: fixed fractional, volatility targeting and the Kelly criterion.", level: "intermediate", time: "14 min", cat: "Risk", slug: "position-sizing", published: true },
-  { title: "Mean reversion vs momentum", desc: "The two families of edge, the regimes where each works, and how to detect which one you're in.", level: "intermediate", time: "15 min", cat: "Quant" },
-  { title: "Options Greeks in practice", desc: "Delta, Gamma, Theta, Vega — managed as a portfolio, not memorized as definitions.", level: "intermediate", time: "18 min", cat: "Derivatives", slug: "options-greeks", published: true },
-  { title: "DCF valuation that holds up", desc: "Building a discounted cash flow model with real company numbers and honest assumptions.", level: "intermediate", time: "20 min", cat: "Valuation" },
-  { title: "Risk management frameworks", desc: "Stop losses, drawdown circuit breakers and exposure limits as a coherent system.", level: "intermediate", time: "14 min", cat: "Risk" },
-  { title: "Cointegration & pairs trading", desc: "Engle-Granger and Johansen tests, half-life of mean reversion, and z-score execution.", level: "advanced", time: "24 min", cat: "Quant", slug: "cointegration-pairs-trading", published: true },
-  { title: "The Black-Scholes model", desc: "The mathematics behind option pricing, its assumptions, and where they break in practice.", level: "advanced", time: "25 min", cat: "Quant" },
-  { title: "Monte Carlo simulations", desc: "Random sampling for portfolio returns, VaR and stress testing — with code-level intuition.", level: "advanced", time: "22 min", cat: "Quant" },
-  { title: "Factor investing & smart beta", desc: "Momentum, value, quality and low-volatility factors — building systematic exposure that works.", level: "advanced", time: "20 min", cat: "Quant" },
-  { title: "Regime detection with HMMs", desc: "Hidden Markov models for classifying market states and gating strategies accordingly.", level: "advanced", time: "26 min", cat: "Quant" },
-  { title: "Stochastic calculus for finance", desc: "Brownian motion, Ito's lemma, and the mathematical foundations of modern quant finance.", level: "advanced", time: "30 min", cat: "Quant" },
-];
-
-const LEVELS = ["all", "beginner", "intermediate", "advanced"];
-
-const levelColor = {
-  beginner: "text-gain border-gain/40",
-  intermediate: "text-amber border-amber/40",
-  advanced: "text-loss border-loss/40",
+const TRACKS=[["quant","Learn Quant","From first principles to financial engineering","∑"],["interview","Quant Interviews","Probability, trading, risk and technical reasoning","◇"],["mental","Mental Maths","Fast arithmetic under a clock","↗"]];
+const keyDate=()=>new Date().toISOString().slice(0,10);
+const pick=(items)=>items[Math.floor(Math.random()*items.length)];
+const exercise=(level="Mixed")=>{
+  const range=level==="Easy"?20:level==="Hard"?180:80;
+  const a=1+Math.floor(Math.random()*range),b=1+Math.floor(Math.random()*range);
+  const kind=Math.floor(Math.random()*(level==="Easy"?3:5));
+  if(kind===0)return {q:`${a} + ${b}`,answer:a+b,reason:"Add the two terms."};
+  if(kind===1)return {q:`${a+b} − ${a}`,answer:b,reason:"Subtract the second term from the first."};
+  if(kind===2){let x=2+Math.floor(Math.random()*(level==="Hard"?24:12)),y=2+Math.floor(Math.random()*12);return {q:`${x} × ${y}`,answer:x*y,reason:"Multiply the factors."};}
+  if(kind===3){let divisor=2+Math.floor(Math.random()*18),q=2+Math.floor(Math.random()*18);return {q:`${divisor*q} ÷ ${divisor}`,answer:q,reason:"Division reverses multiplication."};}
+  const pct=pick([5,10,15,20,25,50]),n=20*(2+Math.floor(Math.random()*30));return {q:`${pct}% of ${n}`,answer:pct*n/100,reason:"Percent means parts per hundred."};
 };
-
-export default function Learn() {
-  const [filter, setFilter] = useState("all");
-  const list = filter === "all" ? ARTICLES : ARTICLES.filter((a) => a.level === filter);
-
-  return (
-    <div className="max-w-shell mx-auto px-5 py-12">
-      <p className="eyebrow mb-3">[ AHQ : EDU — LEARNING HUB ]</p>
-      <h1 className="font-display text-3xl font-medium tracking-tight">
-        Learn quantitative finance properly
-      </h1>
-      <p className="text-muted text-sm mt-2 max-w-2xl leading-relaxed">
-        From first principles to stochastic calculus — written by a practitioner
-        who trades these models, not a content farm. Full articles publishing in
-        phases.
-      </p>
-
-      <div className="flex gap-2 mt-8 flex-wrap">
-        {LEVELS.map((l) => (
-          <button
-            key={l}
-            onClick={() => setFilter(l)}
-            className={`text-sm px-4 py-1.5 rounded-full border transition-colors capitalize ${
-              filter === l
-                ? "border-amber text-amber"
-                : "border-line text-muted hover:text-body"
-            }`}
-          >
-            {l}
-          </button>
-        ))}
-      </div>
-
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 mt-8">
-        {list.map((a) => {
-          const inner = (
-            <>
-              <div className="flex items-center justify-between">
-                <span className={`font-mono text-[10px] tracking-wider uppercase border rounded px-2 py-0.5 ${levelColor[a.level]}`}>
-                  {a.level}
-                </span>
-                {a.published ? (
-                  <span className="font-mono text-[10px] tracking-wider uppercase text-gain">● read now</span>
-                ) : (
-                  <span className="font-mono text-[10px] tracking-wider uppercase text-muted">coming soon</span>
-                )}
-              </div>
-              <h2 className="font-display text-lg font-medium mt-3">{a.title}</h2>
-              <p className="text-sm text-muted leading-relaxed mt-1.5">{a.desc}</p>
-              <p className="font-mono text-[11px] text-muted mt-4">
-                {a.time} · {a.cat}
-              </p>
-            </>
-          );
-
-          // Published articles → clickable link card
-          if (a.published && a.slug) {
-            return (
-              <Link
-                key={a.title}
-                href={`/learn/${a.slug}`}
-                className="card p-5 hover:border-amber/60 transition-colors block cursor-pointer"
-              >
-                {inner}
-              </Link>
-            );
-          }
-          // Unpublished → static "coming soon" card
-          return (
-            <article key={a.title} className="card p-5 hover:border-amber/40 transition-colors opacity-90">
-              {inner}
-            </article>
-          );
-        })}
-      </div>
-    </div>
-  );
+const Chip=({children,active,onClick})=><button type="button" onClick={onClick} className={`rounded-lg border px-3 py-2 text-xs transition-colors ${active?"border-amber/70 bg-amber/10 text-amber":"border-line text-muted hover:border-amber/40 hover:text-body"}`}>{children}</button>;
+export default function Learn(){
+ const [tab,setTab]=useState("quant"),[progress,setProgress]=useState({}),[sync,setSync]=useState("Loading progress...");
+ const [topic,setTopic]=useState("All"),[level,setLevel]=useState("All"),[query,setQuery]=useState("");
+ const [selected,setSelected]=useState(null),[answer,setAnswer]=useState(""),[lessonResult,setLessonResult]=useState(null);
+ const [interviewMode,setInterviewMode]=useState("All"),[index,setIndex]=useState(0),[showAnswer,setShowAnswer]=useState(false);
+ const [difficulty,setDifficulty]=useState("Mixed"),[duration,setDuration]=useState(60),[running,setRunning]=useState(false),[seconds,setSeconds]=useState(60),[mathQuestion,setMathQuestion]=useState(null),[mathAnswer,setMathAnswer]=useState(""),[correct,setCorrect]=useState(0),[attempts,setAttempts]=useState(0),[history,setHistory]=useState([]);
+ const endRef=useRef(0),intervalRef=useRef(null),inputRef=useRef(null),activeRef=useRef(false),correctRef=useRef(0),attemptRef=useRef(0);
+ useEffect(()=>{(async()=>{try{const r=await fetch("/api/learn/progress",{cache:"no-store"}),j=await r.json();if(!j.ok)throw Error(j.error||"Unavailable");setProgress(Object.fromEntries(j.progress.map(x=>[x.item_id,x])));setSync("Progress synced with your account");}catch{setSync("Progress sync unavailable — sign in and retry");}})();},[]);
+ const save=useCallback(async(id,score,completed)=>{try{const r=await fetch("/api/learn/progress",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({id,score,completed})});const j=await r.json();if(!j.ok)throw Error();setProgress(p=>({...p,[id]:j.record}));setSync("Progress saved");}catch{setSync("Could not save progress; please retry");}},[]);
+ const totalDone=LESSONS.filter(l=>progress[l.id]?.completed).length;
+ const filtered=useMemo(()=>LESSONS.filter(l=>(topic==="All"||l.topic===topic)&&(level==="All"||l.level===level)&&(`${l.title} ${l.explain} ${l.topic}`).toLowerCase().includes(query.toLowerCase())),[topic,level,query]);
+ const bank=useMemo(()=>INTERVIEWS.filter(i=>interviewMode==="All"||i.level===interviewMode),[interviewMode]);
+ const interview=bank[index%bank.length];
+ const stop=useCallback(()=>{if(!activeRef.current)return;activeRef.current=false;setRunning(false);setSeconds(0);clearInterval(intervalRef.current);const result={date:keyDate(),correct:correctRef.current,attempts:attemptRef.current};setHistory(h=>[result,...h].slice(0,10));save("mental-"+keyDate(),Math.round(100*result.correct/Math.max(1,result.attempts)),true);},[save]);
+ const start=()=>{clearInterval(intervalRef.current);correctRef.current=0;attemptRef.current=0;setCorrect(0);setAttempts(0);setHistory(h=>h);setMathAnswer("");setMathQuestion(exercise(difficulty));setSeconds(duration);endRef.current=Date.now()+duration*1000;activeRef.current=true;setRunning(true);intervalRef.current=setInterval(()=>{const remaining=Math.max(0,Math.ceil((endRef.current-Date.now())/1000));setSeconds(remaining);if(remaining===0){clearInterval(intervalRef.current);activeRef.current=false;setRunning(false);const result={date:keyDate(),correct:correctRef.current,attempts:attemptRef.current};setHistory(h=>[result,...h].slice(0,10));save("mental-"+keyDate(),Math.round(100*result.correct/Math.max(1,result.attempts)),true);}},200);setTimeout(()=>inputRef.current?.focus(),0);};
+ useEffect(()=>()=>clearInterval(intervalRef.current),[]);
+ const submitMath=(e)=>{e.preventDefault();if(!running||!mathQuestion||mathAnswer.trim()==="")return;const ok=Number(mathAnswer)===mathQuestion.answer;attemptRef.current++;setAttempts(attemptRef.current);if(ok){correctRef.current++;setCorrect(correctRef.current);}setMathQuestion(exercise(difficulty));setMathAnswer("");inputRef.current?.focus();};
+ const choose=(l)=>{setSelected(l);setAnswer("");setLessonResult(null);};
+ const interviewDone=(i)=>{save("interview-"+i.id,100,true);setShowAnswer(true);};
+ return <div className="mx-auto max-w-[1280px] px-5 md:px-10 py-14 text-body">
+   <p className="eyebrow mb-3">[ AHQ : ACADEMY ]</p>
+   <h1 className="font-display text-4xl md:text-6xl font-semibold tracking-tight">The Quant Learning Lab<span className="text-amber">.</span></h1>
+   <p className="mt-4 max-w-3xl text-muted leading-relaxed">Start with the mathematics. Build financial intuition. Train for quant interviews. Sharpen mental speed. Original educational material inspired by CFA, FRM and CQF topic frameworks, not affiliated with their credentialing organizations.</p>
+   <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mt-9">
+     <div className="card p-4"><p className="text-xs text-muted">Lesson completion</p><p className="text-2xl text-amber mt-2 font-semibold">{totalDone}/{LESSONS.length}</p><div className="h-1.5 rounded bg-raised mt-3 overflow-hidden"><div className="h-full bg-amber" style={{width:(totalDone/LESSONS.length*100)+"%"}}/></div></div>
+     <div className="card p-4"><p className="text-xs text-muted">Interview questions mastered</p><p className="text-2xl mt-2 font-semibold">{INTERVIEWS.filter(i=>progress["interview-"+i.id]?.completed).length}/{INTERVIEWS.length}</p></div>
+     <div className="card p-4"><p className="text-xs text-muted">Mental maths today</p><p className="text-2xl mt-2 font-semibold">{progress["mental-"+keyDate()]?.score??"—"}<span className="text-xs text-muted ml-1">best %</span></p></div>
+     <div className="card p-4"><p className="text-xs text-muted">Account progress</p><p aria-live="polite" className="text-xs text-amber mt-3 leading-relaxed">{sync}</p></div>
+   </div>
+   <div className="grid gap-3 md:grid-cols-3 mt-8">{TRACKS.map(([id,title,desc,glyph])=><button key={id} onClick={()=>setTab(id)} className={`text-left rounded-xl border p-5 transition-all ${tab===id?"border-amber/70 bg-amber/10":"border-line bg-surface hover:border-amber/30"}`}><span className="text-2xl text-amber">{glyph}</span><h2 className="text-lg font-medium mt-3">{title}</h2><p className="text-sm text-muted mt-1">{desc}</p></button>)}</div>
+   {tab==="quant"&&<section className="mt-10">
+     <div className="flex flex-wrap justify-between gap-3 items-end"><div><p className="eyebrow">01 / CURRICULUM</p><h2 className="text-3xl font-display mt-2">Learn quant, from zero to research</h2></div><span className="text-xs text-muted">Original lessons · Worked examples · Knowledge checks</span></div>
+     <div className="grid gap-3 md:grid-cols-3 mt-5"><input aria-label="Search lessons" value={query} onChange={e=>setQuery(e.target.value)} placeholder="Search lessons, formulas, concepts..." className="md:col-span-1 rounded-lg border border-line bg-raised px-4 py-3 text-sm"/><select aria-label="Filter by topic" value={topic} onChange={e=>setTopic(e.target.value)} className="rounded-lg border border-line bg-raised p-3 text-sm">{["All",...new Set(LESSONS.map(l=>l.topic))].map(x=><option key={x}>{x}</option>)}</select><select aria-label="Filter by difficulty" value={level} onChange={e=>setLevel(e.target.value)} className="rounded-lg border border-line bg-raised p-3 text-sm">{["All","Beginner","Intermediate","Advanced"].map(x=><option key={x}>{x}</option>)}</select></div>
+     <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 mt-5">{filtered.map((l,i)=><button key={l.id} onClick={()=>choose(l)} className={`card text-left p-5 hover:border-amber/50 transition-colors ${selected?.id===l.id?"border-amber/60":""}`}><div className="flex justify-between gap-2 text-[11px] uppercase font-mono text-muted"><span>{l.topic} · {l.level}</span><span className={progress[l.id]?.completed?"text-gain":"text-amber"}>{progress[l.id]?.completed?"✓ Mastered":"Start ↗"}</span></div><h3 className="text-lg font-medium mt-3">{l.title}</h3><p className="text-sm text-muted mt-2 leading-relaxed">{l.lead}</p></button>)}</div>
+     {selected&&<div className="card border-amber/40 p-6 md:p-9 mt-7" id="lesson"><div className="flex justify-between gap-3"><p className="eyebrow">{selected.topic} / {selected.level}</p><button onClick={()=>setSelected(null)} aria-label="Close lesson" className="text-muted hover:text-body">✕</button></div><h3 className="font-display text-3xl mt-2">{selected.title}</h3><p className="text-muted mt-4 leading-8">{selected.explain}</p><div className="rounded-lg border-l-2 border-amber bg-amber/10 p-4 mt-5"><p className="text-xs uppercase text-amber tracking-wider">Core relationship</p><p className="mt-2 text-lg">{selected.formula}</p></div><h4 className="font-medium mt-6">Worked example</h4><p className="text-sm text-muted mt-2 leading-relaxed">{selected.example}</p><h4 className="font-medium mt-5">Practical takeaway</h4><p className="text-sm text-muted mt-2">{selected.takeaway}</p><form className="mt-7 border-t border-line pt-6" onSubmit={e=>{e.preventDefault();if(answer.trim()==="")return;const ok=Math.abs(Number(answer)-selected.answer)<0.001;setLessonResult(ok?"Correct — lesson mastered.":`Not quite. Answer: ${selected.answer}. ${selected.hints[0]}`);if(ok)save(selected.id,100,true);}}><p className="text-amber text-xs mb-2">CHECK YOUR UNDERSTANDING</p><p className="font-medium">{selected.question}</p><div className="flex flex-wrap gap-2 mt-4"><input aria-label="Lesson numerical answer" type="number" step="any" value={answer} onChange={e=>setAnswer(e.target.value)} className="rounded-lg border border-line bg-raised px-4 py-2"/><button type="submit" className="bg-amber text-ink font-medium rounded-lg px-4 py-2">Check answer</button></div>{lessonResult&&<p role="status" className="text-sm text-muted mt-3">{lessonResult}</p>}</form></div>}
+     <div className="mt-8 text-xs text-muted">Explore the longer <Link href="/research" className="text-amber underline">Research Library</Link> or the existing <Link className="text-amber underline" href="/learn/what-is-quantitative-trading">full introductory article</Link>. The curriculum references publicly described CFA/FRM/CQF subject areas; it does not reproduce proprietary exam content.</div>
+   </section>}
+   {tab==="interview"&&<section className="mt-10"><p className="eyebrow">02 / INTERVIEW PRACTICE</p><h2 className="font-display text-3xl mt-2">Think like a quant interviewer</h2><p className="text-muted text-sm mt-3">Practice technical questions, reveal a worked rationale, then mark your mastery. Original questions, not copied interview banks.</p><div className="flex gap-2 flex-wrap mt-5">{["All","Beginner","Intermediate","Advanced"].map(x=><Chip key={x} active={interviewMode===x} onClick={()=>{setInterviewMode(x);setIndex(0);setShowAnswer(false);}}>{x}</Chip>)}</div><div className="card border-amber/30 mt-6 p-7 max-w-3xl"><div className="flex justify-between gap-3 text-xs text-muted font-mono"><span>{interview.topic} · {interview.level}</span><span>{index%bank.length+1} / {bank.length}</span></div><h3 className="font-display text-2xl md:text-3xl mt-7 leading-snug">{interview.question}</h3>{showAnswer?<div className="mt-6 rounded-lg border-l-2 border-amber bg-amber/10 p-5"><p className="font-medium text-amber">{interview.answer}</p><p className="text-sm text-muted mt-2">{interview.explain}</p></div>:<p className="text-sm text-muted mt-6">Try to answer aloud before revealing the explanation.</p>}<div className="flex flex-wrap gap-3 mt-7"><button onClick={()=>setShowAnswer(true)} className="rounded-lg border border-amber/50 px-4 py-2 text-sm text-amber">Reveal explanation</button><button onClick={()=>interviewDone(interview)} className="rounded-lg bg-amber px-4 py-2 text-sm font-semibold text-ink">Mark mastered</button><button onClick={()=>{setIndex(i=>i+1);setShowAnswer(false)}} className="rounded-lg border border-line px-4 py-2 text-sm">Next question →</button></div></div></section>}
+   {tab==="mental"&&<section className="mt-10"><p className="eyebrow">03 / SPEED TRAINING</p><h2 className="font-display text-3xl mt-2">Mental maths arena</h2><p className="text-muted text-sm mt-3">Timed arithmetic drills inspired by the format of fast mental-maths games. Unique question generator, keyboard input, and score saved to your account.</p><div className="flex gap-2 flex-wrap mt-5 items-center"><span className="text-xs text-muted">Difficulty:</span>{["Easy","Mixed","Hard"].map(x=><Chip key={x} active={difficulty===x} onClick={()=>!running&&setDifficulty(x)}>{x}</Chip>)}<span className="ml-3 text-xs text-muted">Round:</span>{[30,60,120].map(x=><Chip key={x} active={duration===x} onClick={()=>!running&&setDuration(x)}>{x}s</Chip>)}</div><div className="grid md:grid-cols-[1fr_280px] gap-5 mt-6"><div className="card border-amber/30 p-7 md:p-10"><div className="flex justify-between text-sm"><span className="text-muted">TIME REMAINING</span><span className="text-amber text-2xl font-mono tabular-nums">{running?seconds:duration}s</span></div><div className="h-2 bg-raised rounded-full mt-4 overflow-hidden"><div className="h-full bg-amber transition-all" style={{width:(running?seconds/duration*100:100)+"%"}}/></div><div className="min-h-[180px] flex items-center justify-center text-center"><p className="font-display text-5xl md:text-7xl font-semibold tracking-tight">{running?mathQuestion?.q:"Ready?"}</p></div><form onSubmit={submitMath} className="flex gap-3"><input ref={inputRef} aria-label="Mental maths answer" type="number" step="any" value={mathAnswer} onChange={e=>setMathAnswer(e.target.value)} disabled={!running} placeholder="Your answer" className="w-full min-w-0 rounded-lg border border-line bg-raised p-3 text-lg"/><button disabled={!running} className="rounded-lg bg-amber text-ink font-semibold px-6 disabled:opacity-40">Enter</button></form><button onClick={running?stop:start} className="mt-5 rounded-lg border border-amber/50 px-6 py-3 text-amber font-medium">{running?"End round":"Start "+duration+"s challenge"}</button></div><div className="card p-6"><p className="eyebrow">ROUND SCORE</p><p className="text-5xl font-semibold mt-5 text-amber tabular-nums">{correct}</p><p className="text-muted text-sm mt-1">Correct answers</p><div className="border-t border-line my-5"/><p className="text-muted text-sm">Attempted: {attempts}</p><p className="text-muted text-sm mt-2">Accuracy: {attempts?Math.round(correct/attempts*100):0}%</p><p className="text-muted text-sm mt-2">Rate: {duration-seconds>0?(correct/(duration-seconds)*60).toFixed(1):"0.0"} correct/min</p><p className="text-xs text-muted mt-7">A completed round is recorded automatically. Results show raw score and accuracy, not a simulated leaderboard.</p></div></div>{history.length>0&&<div className="card mt-5 p-5"><h3 className="font-medium">Recent rounds (this session)</h3><div className="flex gap-3 flex-wrap mt-4">{history.map((h,i)=><div className="rounded-lg border border-line p-3 text-sm" key={i}><span className="text-amber">{h.correct}</span> / {h.attempts} · {h.date}</div>)}</div></div>}</section>}
+   <p className="text-xs text-muted leading-relaxed mt-16 pt-6 border-t border-line">Independent educational material. CFA® is a trademark of CFA Institute; FRM® is a trademark of GARP; CQF® is a trademark of its respective owner. AlphaHedgeQuant is not affiliated with or endorsed by these organizations. Content is not official exam preparation or investment advice.</p>
+ </div>;
 }
