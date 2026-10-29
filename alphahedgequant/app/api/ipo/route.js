@@ -8,7 +8,7 @@
 // AFTER FIRST DEPLOY: hit /api/ipo once and check the JSON. If fields come back
 // empty, adjust the marked lines in normalize() to match the real response keys.
 
-const BASE = "https://stock.indianapi.in"; // confirm exact base from your dashboard
+const BASE = "https://stock.indianapi.in";
 const API_KEY_ENV = "INDIANAPI_KEY";
 
 // In-memory cache so we don't hammer the API (and stay within free-tier limits).
@@ -24,6 +24,20 @@ function num(v) {
 
 // Map ONE raw IPO record to our UI shape.
 // --- The marked lines are the only place field names may need adjusting. ---
+function subscriptionTotal(raw) {
+  const v = raw?.subscription ?? raw?.times_subscribed ?? raw?.subscriptionDetails;
+  if (v == null) return null;
+  if (typeof v === "object") return num(v.total ?? v.Total ?? v.overall ?? v.total_subscription);
+  return num(v);
+}
+
+function gmpValue(raw) {
+  const v = raw?.gmp ?? raw?.grey_market_premium;
+  if (v == null) return null;
+  if (typeof v === "object") return num(v.price ?? v.gmpPrice ?? v?.aggregations?.mean);
+  return num(v);
+}
+
 function normalizeOne(raw) {
   return {
     name:        raw?.name ?? raw?.company_name ?? raw?.ipo_name ?? "—",         // ADJUST
@@ -35,8 +49,8 @@ function normalizeOne(raw) {
     listingDate: raw?.listing_date ?? raw?.listingDate ?? null,
     lotSize:     num(raw?.lot_size ?? raw?.lotSize ?? raw?.min_qty),
     issueSize:   raw?.issue_size ?? raw?.issueSize ?? null,
-    gmp:         num(raw?.gmp ?? raw?.grey_market_premium),                        // optional
-    subscription: raw?.subscription ?? raw?.times_subscribed ?? null,
+    gmp:         gmpValue(raw),                        // optional
+    subscription: subscriptionTotal(raw),
     listingGain: num(raw?.listing_gain ?? raw?.listing_gains ?? raw?.gain),
     docLink:     raw?.prospectus ?? raw?.rhp ?? raw?.drhp ?? raw?.doc_link ?? null,
     segment:     raw?.segment ?? raw?.type ?? null, // mainboard / SME
@@ -49,9 +63,10 @@ function categorize(list) {
     const s = ipo.status;
     if (/open|active|live/.test(s)) buckets.open.push(ipo);
     else if (/upcoming|announced/.test(s)) buckets.upcoming.push(ipo);
-    else if (/listed|allotment|closed/.test(s)) {
+    else if (/listed|allotment|closed|close/.test(s)) {
       (/listed/.test(s) ? buckets.listed : buckets.closed).push(ipo);
-    } else buckets.upcoming.push(ipo);
+    } else if (/upcoming|announced|expected|scheduled|open soon|forthcoming/.test(s)) buckets.upcoming.push(ipo);
+    else buckets.closed.push(ipo); // Unknown lifecycle: do not imply applications are open or upcoming.
   }
   return buckets;
 }
@@ -59,7 +74,7 @@ function categorize(list) {
 export async function GET() {
   const apiKey = process.env[API_KEY_ENV];
   if (!apiKey) {
-    return Response.json({ ok: false, error: "Missing INDIANAPI_KEY" }, { status: 500 });
+    return Response.json({ ok: false, error: "IPO data service is not configured." }, { status: 503 });
   }
 
   // serve cache if fresh
@@ -73,7 +88,7 @@ export async function GET() {
       // Next.js: don't cache at the fetch layer; we manage our own cache
       cache: "no-store",
     });
-    if (!res.ok) throw new Error(`IndianAPI /ipo HTTP ${res.status}`);
+    if (!res.ok) throw new Error(`IPO provider returned HTTP ${res.status}`);
     const json = await res.json();
 
     // The endpoint may return an array, or an object keyed by status.
@@ -97,6 +112,7 @@ export async function GET() {
     if (_cache.data) {
       return Response.json({ ok: true, cached: true, stale: true, ...(_cache.data) });
     }
-    return Response.json({ ok: false, error: String(e.message || e) }, { status: 502 });
+    console.error("[IPO] Provider request failed:", e instanceof Error ? e.message : "Unknown error");
+    return Response.json({ ok: false, error: "IPO data is temporarily unavailable. Please try again later." }, { status: 502, headers: { "Cache-Control": "no-store" } });
   }
 }
