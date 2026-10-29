@@ -183,10 +183,6 @@ export default function OptionsPage() {
       <div className="flex flex-wrap items-end justify-between gap-3">
         <div>
           <h1 className="font-display text-3xl font-medium tracking-tight">Options Desk</h1>
-          <p className="text-muted text-sm mt-1.5 max-w-2xl leading-relaxed">
-            NSE option chains for supported derivatives from Upstox (when connected), with a strategy builder —
-            payoff, breakevens, and net Greeks. Click any LTP in the chain to add it as a leg.
-          </p>
         </div>
         <div className="flex gap-1.5">
           <button onClick={() => setTab("chain")} className={`font-mono text-xs px-3 py-1.5 rounded border transition-colors ${tab === "chain" ? "border-amber text-amber" : "border-line text-muted hover:text-body"}`}>OPTION CHAIN</button>

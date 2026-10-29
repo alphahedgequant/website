@@ -276,11 +276,6 @@ export default function Research() {
             </a>
           ))}
         </div>
-
-        <p className="font-mono text-[11px] text-muted mt-10">
-          LIVE FEED: arXiv.org (cross-disciplinary preprints; metadata cached for 24 hours). CURATED SHELF: hand-selected foundational papers.
-          SSRN has no public API — those papers are linked individually. RESEARCH &amp; EDUCATION ONLY.
-        </p>
       </div>
     </div>
   );

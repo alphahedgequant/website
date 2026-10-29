@@ -211,7 +211,6 @@ export default function IpoScreen() {
           <IpoCard key={i} ipo={ipo} showGain={tab === "listed"} />
         ))}
       </div>
-      <p style={{color:"#888f9b",fontSize:11,lineHeight:1.6,marginTop:24}}>GMP values are unofficial and not exchange-verified. Estimated listing gains are illustrative, not guarantees. Market data attribution: <a href="https://xflot.com" target="_blank" rel="noopener noreferrer" style={{color:"#aab3c0",textDecoration:"underline"}}>Xflot</a>.</p>
     </section>
   );
 }
