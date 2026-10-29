@@ -7,7 +7,6 @@ import { SignedIn, SignedOut, UserButton } from "@clerk/nextjs";
 import ThemeToggle from "./ThemeToggle";
 
 const products = [
-  { href: "/terminal", label: "Quant Terminal", description: "Volume intelligence and live order depth", glyph: "▦" },
   { href: "/screener", label: "Market Intelligence", description: "NSE & US equity screeners", glyph: "▤" },
   { href: "/models", label: "Quant Models", description: "Systematic strategies & signals", glyph: "∑" },
   { href: "/backtest", label: "AI Backtesting", description: "Test and evaluate ideas", glyph: "↗" },
@@ -93,6 +92,7 @@ export default function Nav() {
                 )}
               </div>
             ))}
+            <Link href="/terminal" className={`whitespace-nowrap rounded-md border border-amber/40 bg-amber/10 px-3 py-2 text-[13px] font-semibold transition-colors hover:border-amber hover:bg-amber/20 ${path.startsWith("/terminal")?"text-amber":"text-body"}`}>▦ Quant Terminal</Link>
             {[
               {href:"/ipo",label:"IPO Intelligence"},
               {href:"/learn",label:"Learn, Interviews & Mental Math 🧩"},
@@ -123,6 +123,7 @@ export default function Nav() {
 
       {mobileOpen && (
         <nav id="ahq-mobile-navigation" aria-label="Mobile navigation" className="lg:hidden max-h-[calc(100vh-4.75rem)] overflow-y-auto border-t border-line bg-surface px-5 py-4">
+          <Link href="/terminal" onClick={() => setMobileOpen(false)} className="mb-4 block rounded-lg border border-amber/40 bg-amber/10 px-4 py-3 font-semibold text-amber">▦ Quant Terminal</Link>
           <p className="mb-2 font-mono text-[11px] uppercase tracking-widest text-amber">Products</p>
           <div className="grid grid-cols-1 gap-1">
             {products.map(item => <Link key={item.href} href={item.href} onClick={() => setMobileOpen(false)}
