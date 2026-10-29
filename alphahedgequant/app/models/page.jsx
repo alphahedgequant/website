@@ -5,6 +5,7 @@ import ModelPlayground from "@/components/ModelPlayground";
 import ModelLesson from "@/components/ModelLesson";
 import BeginnerChapter from "@/components/BeginnerChapter";
 import ModelMasterclass from "@/components/ModelMasterclass";
+import "./notebook.css";
 
 // ════════════════════════════════════════════════════════════════════
 //  MODEL LIBRARY — grouped into 4 categories.
@@ -539,9 +540,13 @@ function ModelCard({ m, open, onToggle }) {
 
 
 
+          <div className="ahq-model-notebook" aria-label={m.name+" notebook lesson"}>
+            <p className="model-notebook-kicker">ALPHAHEDGEQUANT / QUANT RESEARCH NOTES / {m.id}</p>
+            <h4 className="model-notebook-headline">{m.name}</h4>
+            <p className="model-notebook-note">Start with intuition, then work through the mathematics ↗</p>
           <BeginnerChapter model={m} />
           {["O1","R1","O2","G4","G5"].includes(m.id) ? <ModelLesson key={m.id} model={m} /> : !["S4","R2"].includes(m.id) ? <ModelMasterclass key={m.id} model={m} /> : null}
-          <ModelPlayground key={m.id+"-lab"} model={m} />
+          <p className="model-notebook-note">Equations & assumptions ✎</p>
           <p className="font-mono text-[10px] text-muted tracking-wider mb-1">THE MATH (OPTIONAL)</p>
           {m.math.map((f, i) => <Formula key={i} label={f.label} lines={f.lines} />)}
 
@@ -575,6 +580,8 @@ function ModelCard({ m, open, onToggle }) {
               </ul>
             </div>
           )}
+          </div>
+          <ModelPlayground key={m.id+"-lab"} model={m} />
         </div>
       )}
     </div>
