@@ -6,33 +6,46 @@ const fmt=n=>Number(n||0).toLocaleString("en-IN",{maximumFractionDigits:2});
 const compact=n=>Number(n||0).toLocaleString("en-IN",{notation:"compact",maximumFractionDigits:1});
 const minute=d=>{const t=new Date(d);if(Number.isNaN(t.getTime()))return null;return t.toLocaleTimeString("en-GB",{timeZone:"Asia/Kolkata",hour:"2-digit",minute:"2-digit",hour12:false})};
 const indianDate=d=>{const t=new Date(d);return Number.isNaN(t.getTime())?null:t.toLocaleDateString("en-CA",{timeZone:"Asia/Kolkata",year:"numeric",month:"2-digit",day:"2-digit"})};
+// NSE regular session contains 75 five-minute bar starts: 09:15–15:25 IST.
+// Require complete, unambiguous and nonnegative data to avoid zero-filled medians.
+const SLOTS=Array.from({length:75},(_,i)=>{const mins=555+i*5;return String(Math.floor(mins/60)).padStart(2,"0")+":"+String(mins%60).padStart(2,"0")});
 function volumeCurve(bars){
  const sessions=new Map();
  for(const bar of bars||[]){
-  const date=indianDate(bar.date),t=minute(bar.date),v=Number(bar.volume);
-  if(!date||!t||t<"09:15"||t>"15:30"||!Number.isFinite(v)||v<0)continue;
+  const date=indianDate(bar.date),time=minute(bar.date),volume=Number(bar.volume);
+  if(!date||!SLOTS.includes(time)||bar.volume==null||!Number.isFinite(volume)||volume<0)continue;
   if(!sessions.has(date))sessions.set(date,new Map());
-  sessions.get(date).set(t,(sessions.get(date).get(t)||0)+v);
+  const day=sessions.get(date);
+  // A duplicated time stamp makes this session ineligible, not double-counted.
+  if(day.has(time))day.set(time,null);else day.set(time,volume);
  }
  const days=[...sessions.keys()].sort();
- if(!days.length)return {points:[],sample:0,todayDate:null};
- // Most recent trading session is plotted as the observed session; reference is preceding 15.
- const day=days[days.length-1],hist=days.slice(-16,-1),current=sessions.get(day);
- const timeKeys=[...new Set([...hist,day].flatMap(d=>[...sessions.get(d).keys()]))].sort();
- const cumulative=d=>{let sum=0;const m=new Map();for(const t of timeKeys){sum+=sessions.get(d).get(t)||0;m.set(t,sum)}return m};
- const curves=hist.map(cumulative),today=cumulative(day);
- const median=vals=>{const sorted=vals.slice().sort((a,b)=>a-b);return sorted.length?sorted[Math.floor((sorted.length-1)/2)]:null};
- return {points:timeKeys.map(time=>({time,today:today.get(time)||0,baseline:median(curves.map(m=>m.get(time)||0))})),sample:hist.length,todayDate:day};
+ if(!days.length)return {points:[],sample:0,todayDate:null,reason:"No historical intraday sessions"};
+ const currentDate=days[days.length-1],current=sessions.get(currentDate);
+ const complete=d=>SLOTS.every(t=>sessions.get(d)?.has(t)&&sessions.get(d).get(t)!==null);
+ const valid=days.slice(0,-1).filter(complete).slice(-15);
+ if(valid.length!==15)return {points:[],sample:valid.length,todayDate:currentDate,reason:"Strict baseline requires 15 complete prior sessions (75 valid five-minute candles per day). Found "+valid.length+"."};
+ const cumulative=d=>{let sum=0;return SLOTS.map(time=>{const v=sessions.get(d)?.get(time);if(v===undefined||v===null)return null;sum+=v;return sum})};
+ const past=valid.map(cumulative),observed=cumulative(currentDate);
+ const median=arr=>{const sorted=[...arr].sort((a,b)=>a-b),mid=sorted.length/2;return (sorted[Math.floor(mid)]+sorted[Math.ceil(mid)-1])/2};
+ // Show only consecutive observed bars; incomplete latest session never silently extends.
+ const points=[];
+ for(let i=0;i<SLOTS.length;i++){
+  if(observed[i]===null)break;
+  const values=past.map(series=>series[i]);
+  points.push({time:SLOTS[i],today:observed[i],baseline:median(values),mean:values.reduce((a,b)=>a+b,0)/values.length});
+ }
+ return {points,sample:15,todayDate:currentDate,reason:points.length?null:"Latest historical session has no complete opening sequence",historical:true};
 }
 function VolumeChart({data}){
  const pts=data.points; if(!pts.length)return <p className="text-muted text-sm py-16 text-center">Intraday candles unavailable. No comparison is displayed.</p>;
- const top=Math.max(1,...pts.flatMap(p=>[p.today,p.baseline||0])),w=840,h=250,left=62,right=18,topPad=22,bottom=36;
+ const top=Math.max(1,...pts.flatMap(p=>[p.today,p.baseline||0,p.mean||0])),w=840,h=250,left=62,right=18,topPad=22,bottom=36;
  const x=i=>left+(w-left-right)*i/Math.max(1,pts.length-1),y=v=>h-bottom-(v/top)*(h-topPad-bottom);
  const path=key=>pts.map((p,i)=>(i?"L":"M")+x(i).toFixed(1)+" "+y(p[key]||0).toFixed(1)).join(" ");
  const tick=[0,.25,.5,.75,1];
  return <svg viewBox={`0 0 ${w} ${h}`} role="img" aria-label="Current latest intraday session cumulative volume compared with previous sessions' median at each time" className="w-full h-auto overflow-visible">
  {tick.map(v=><g key={v}><line x1={left} x2={w-right} y1={y(top*v)} y2={y(top*v)} stroke="currentColor" strokeOpacity=".12"/><text x={left-8} y={y(top*v)+4} textAnchor="end" fill="currentColor" opacity=".6" fontSize="12">{compact(top*v)}</text></g>)}
- <path d={path("baseline")} fill="none" stroke="#4c9fd5" strokeWidth="3" strokeDasharray="7 5"/>
+ <path d={path("baseline")} fill="none" stroke="#4c9fd5" strokeWidth="3" strokeDasharray="7 5"/><path d={path("mean")} fill="none" stroke="#9ca3af" strokeWidth="2.5" strokeDasharray="3 4"/>
  <path d={path("today")} fill="none" stroke="#e4b865" strokeWidth="3.5"/>
  {[0,Math.floor((pts.length-1)/2),pts.length-1].map(i=><text key={i} x={x(i)} y={h-10} fontSize="12" textAnchor="middle" fill="currentColor" opacity=".65">{pts[i].time}</text>)}
  </svg>;
@@ -57,10 +70,10 @@ export default function Terminal(){
    {[["LAST TRADED PRICE",quote?.price!=null&&quote.price>0?"₹"+fmt(quote.price):"—"],["NET CHANGE",quote?.change!=null?"₹"+fmt(quote.change):"—"],["SESSION VOLUME",quote?.volume!=null?compact(quote.volume):"—"],["TOP 5 DEPTH IMBALANCE",imbalance==null?"—":imbalance.toFixed(1)+"%"]].map(([label,value])=><div className="card p-4" key={label}><p className="text-[11px] font-mono text-muted">{label}</p><p className="text-xl sm:text-3xl font-mono text-body mt-3 tabular-nums">{value}</p></div>)}
   </div>
   <div className="grid lg:grid-cols-[minmax(0,1.5fr)_minmax(320px,1fr)] gap-4 mt-4">
-   <section className="card p-5 md:p-6 min-w-0"><div className="flex items-start justify-between flex-wrap gap-2"><div><p className="eyebrow">VOLUME INTELLIGENCE</p><h2 className="font-display text-xl mt-2">Intraday participation vs 15-session median</h2><p className="text-xs text-muted mt-2">Cumulative 5-minute volume at matching IST clock times · session shown: {curve.todayDate||"—"}</p></div><p className="text-amber font-mono text-lg">{rvol==null?"RVOL —":"RVOL "+rvol.toFixed(2)+"×"}</p></div>
-   <div className="flex gap-4 text-xs text-muted mt-5"><span><span className="text-amber">━━</span> Latest session</span><span><span className="text-[#4c9fd5]">┄┄</span> Historical median</span></div><div className="mt-3"><VolumeChart data={curve}/></div>
-   {volumeError&&<p className="text-xs text-amber mt-3">Historical data unavailable: {volumeError}</p>}
-   <p className="text-xs text-muted mt-3">Baseline: {curve.sample} prior trading sessions (up to 15). Latest available historical session may not be today; missing candles and partial trading sessions can distort comparisons. Historical candles are not an Upstox live-volume stream.</p></section>
+   <section className="card p-5 md:p-6 min-w-0"><div className="flex items-start justify-between flex-wrap gap-2"><div><p className="eyebrow">VOLUME INTELLIGENCE</p><h2 className="font-display text-xl mt-2">Intraday participation · 15-session mean & median</h2><p className="text-xs text-muted mt-2">Historical cumulative 5-minute volume at matching IST clock times · latest fetched session: {curve.todayDate||"—"}</p></div><p className="text-amber font-mono text-lg">{rvol==null?"RVOL —":"RVOL "+rvol.toFixed(2)+"×"}</p></div>
+   <div className="flex gap-4 text-xs text-muted mt-5"><span><span className="text-amber">━━</span> Latest session</span><span><span className="text-[#4c9fd5]">┄┄</span> 15-session median</span><span><span className="text-[#9ca3af]">┄┄</span> 15-session mean</span></div><div className="mt-3"><VolumeChart data={curve}/></div>
+   {volumeError&&<p className="text-xs text-amber mt-3">Historical data unavailable: {volumeError}</p>}{curve.reason&&<p className="text-xs text-amber mt-3">{curve.reason}</p>}{end&&<div className="grid grid-cols-3 gap-2 mt-3 text-xs"><div><span className="text-muted">Latest session</span><p className="font-mono text-amber">{compact(end.today)}</p></div><div><span className="text-muted">15-day median</span><p className="font-mono">{compact(end.baseline)}</p></div><div><span className="text-muted">15-day mean</span><p className="font-mono">{compact(end.mean)}</p></div></div>}
+   <p className="text-xs text-muted mt-3">Strict baseline: 15 complete prior sessions, 75 distinct five-minute candles each; duplicate or missing bars invalidate a session. Mean is the arithmetic average; median uses the middle observation. This is fetched historical data, NOT today’s verified live cumulative volume. Genuine live intraday cumulative volume requires a separate Upstox candle/stream connection.</p></section>
    <section className="card p-5 md:p-6 min-w-0"><p className="eyebrow">MARKET MICROSTRUCTURE</p><h2 className="font-display text-xl mt-2">Level 2 · 5 × 5 Depth</h2><p className="text-xs text-muted mt-2">Upstox top-five price levels · snapshot refreshed every 30 seconds, not tick-by-tick</p>
     <div className="grid grid-cols-2 gap-4 mt-6">{[["BIDS",bid,"#51c996"],["ASKS",ask,"#e2797a"]].map(([name,rows,color])=><div key={name}><p className="text-xs font-mono mb-3" style={{color}}>{name}</p><div className="space-y-2">{rows.length?rows.map((d,i)=><div key={i} className="relative overflow-hidden rounded bg-raised px-2 py-2 text-xs font-mono"><div className="absolute inset-y-0 left-0 opacity-15" style={{width:Math.min(100,d.quantity/Math.max(1,...rows.map(z=>z.quantity))*100)+"%",background:color}}/><div className="relative flex flex-wrap gap-1 justify-between"><span>{fmt(d.price)}</span><span>{compact(d.quantity)}</span></div><p className="relative text-[10px] text-muted mt-1">{fmt(d.orders)} orders</p></div>):<p className="text-xs text-muted py-10">No verified depth</p>}</div></div>)}</div>
     <div className="grid grid-cols-2 gap-3 border-t border-line mt-5 pt-5 text-xs"><div><p className="text-muted">Best bid / ask</p><p className="font-mono mt-2">{bid[0]?.price?fmt(bid[0].price):"—"} / {ask[0]?.price?fmt(ask[0].price):"—"}</p></div><div><p className="text-muted">Quoted spread</p><p className="font-mono mt-2">{spread==null?"—":"₹"+fmt(spread)}</p></div><div><p className="text-muted">Visible bid qty</p><p className="font-mono mt-2">{bid.length?compact(buyQty):"—"}</p></div><div><p className="text-muted">Visible ask qty</p><p className="font-mono mt-2">{ask.length?compact(sellQty):"—"}</p></div></div></section>
