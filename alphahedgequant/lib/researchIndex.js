@@ -1,4 +1,4 @@
-import {neon} from "`neondatabase/serverless";
+import {neon} from "@neondatabase/serverless";
 export const DISCIPLINES={quant:"q-fin.ST",math:"math.PR",engineering:"q-fin.CP",finance:"q-fin.PM",economics:"econ.EM",ml:"stat.ML",ai:"cs.AI",llm:"cs.CL"};
 const decode=s=>String(s||"").replace(/&amp;/g,"&").replace(/&lt;/g,"<").replace(/&gt;/g,">").replace(/&quot;/g,'"').replace(/\s+/g," ").trim();
 const one=(s,t)=>decode(s.match(new RegExp("<"+t+"(?:\\s[^>]*)?>([\\s\\S]*?)</"+t+">"))?.[1]);
