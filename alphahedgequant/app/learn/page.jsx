@@ -1,6 +1,7 @@
 "use client";
 import {useCallback,useEffect,useMemo,useRef,useState} from "react";
 import Link from "next/link";
+import "./pencil-reader.css";
 import {LESSONS} from "@/lib/academyContent";
 import {CASES,CAREERS} from "@/lib/academyInterviews";
 import {LESSON_GUIDES} from "@/lib/academyGuides";
@@ -69,7 +70,37 @@ export default function Learn(){
      </div>
      <div className="grid gap-3 md:grid-cols-3 mt-5"><input aria-label="Search lessons" value={query} onChange={e=>setQuery(e.target.value)} placeholder="Search lessons, formulas, concepts..." className="md:col-span-1 rounded-lg border border-line bg-raised px-4 py-3 text-sm"/><select aria-label="Filter by topic" value={topic} onChange={e=>setTopic(e.target.value)} className="rounded-lg border border-line bg-raised p-3 text-sm">{["All",...new Set(LESSONS.map(l=>l.topic))].map(x=><option key={x}>{x}</option>)}</select><select aria-label="Filter by difficulty" value={level} onChange={e=>setLevel(e.target.value)} className="rounded-lg border border-line bg-raised p-3 text-sm">{["All","Beginner","Intermediate","Advanced"].map(x=><option key={x}>{x}</option>)}</select></div>
      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 mt-5">{filtered.map((l,i)=><button key={l.id} onClick={()=>choose(l)} className={`card text-left p-5 hover:border-amber/50 transition-colors ${selected?.id===l.id?"border-amber/60":""}`}><div className="flex justify-between gap-2 text-[11px] uppercase font-mono text-muted"><span>{l.topic} · {l.level}</span><span className={progress[l.id]?.completed?"text-gain":"text-amber"}>{progress[l.id]?.completed?"✓ Mastered":"Start ↗"}</span></div><h3 className="text-lg font-medium mt-3">{l.title}</h3><p className="text-sm text-muted mt-2 leading-relaxed">{l.lead}</p></button>)}</div>
-     {selected&&<div className="card border-amber/40 p-6 md:p-9 mt-7" id="lesson" style={{scrollMarginTop:110}}><div className="flex justify-between gap-3"><p className="eyebrow">{selected.topic} / {selected.level}</p><button onClick={()=>setSelected(null)} aria-label="Close lesson" className="text-muted hover:text-body">✕</button></div><h3 className="font-display text-3xl mt-2">{selected.title}</h3><p className="text-muted mt-4 leading-8">{selected.explain}</p><div className="rounded-lg border-l-2 border-amber bg-amber/10 p-4 mt-5"><p className="text-xs uppercase text-amber tracking-wider">Core relationship</p><p className="mt-2 text-lg">{selected.formula}</p></div>{LESSON_GUIDES[selected.id]&&<div className="mt-7 space-y-5"><div className="rounded-lg border border-line p-5"><p className="eyebrow">THE INTUITION</p><p className="text-sm text-muted mt-3 leading-8">{LESSON_GUIDES[selected.id].intuition}</p></div><div className="rounded-lg border border-line p-5"><p className="eyebrow">STEP-BY-STEP METHOD</p><ol className="list-decimal ml-5 mt-3 text-sm text-muted leading-8">{LESSON_GUIDES[selected.id].steps.map((step,i)=><li key={i}>{step}</li>)}</ol></div></div>}<h4 className="font-medium mt-6">Worked example</h4><p className="text-sm text-muted mt-2 leading-relaxed">{selected.example}</p><div className="mt-6 border border-amber/30 bg-amber/5 rounded-lg p-5"><p className="eyebrow">TRY IT YOURSELF</p><p className="text-sm text-muted mt-2 leading-7">{LESSON_GUIDES[selected.id]?.practice}</p></div><h4 className="font-medium mt-5">Practical takeaway</h4><p className="text-sm text-muted mt-2">{selected.takeaway}</p><div className="mt-6 rounded-lg bg-raised/70 border border-line p-5"><p className="text-xs uppercase tracking-wider text-amber">Learning checkpoint</p><p className="text-sm leading-7 text-muted mt-2">Explain the formula in your own words, reproduce the example without looking, and describe a scenario in which its assumptions fail.</p></div><form className="mt-7 border-t border-line pt-6" onSubmit={e=>{e.preventDefault();if(answer.trim()==="")return;const ok=Math.abs(Number(answer)-selected.answer)<0.001;setLessonResult(ok?"Correct — lesson mastered.":`Not quite. Answer: ${selected.answer}. ${selected.hints[0]}`);if(ok)save(selected.id,100,true);}}><p className="text-amber text-xs mb-2">CHECK YOUR UNDERSTANDING</p><p className="font-medium">{selected.question}</p><div className="flex flex-wrap gap-2 mt-4"><input aria-label="Lesson numerical answer" type="number" step="any" value={answer} onChange={e=>setAnswer(e.target.value)} className="rounded-lg border border-line bg-raised px-4 py-2"/><button type="submit" className="bg-amber text-ink font-medium rounded-lg px-4 py-2">Check answer</button></div>{lessonResult&&<p role="status" className="text-sm text-muted mt-3">{lessonResult}</p>}</form><div className="flex flex-wrap gap-3 mt-6">{LESSONS.indexOf(selected)>0&&<button onClick={()=>choose(LESSONS[LESSONS.indexOf(selected)-1])} className="btn-ghost">← Previous lesson</button>}{LESSONS.indexOf(selected)<LESSONS.length-1&&<button onClick={()=>choose(LESSONS[LESSONS.indexOf(selected)+1])} className="btn-primary">Next lesson →</button>}</div></div>}
+     {selected&&<article className="ahq-pencil-reader mt-8" id="lesson" style={{scrollMarginTop:110}}>
+      <div className="pencil-main">
+       <div className="flex items-start justify-between gap-4"><p className="pencil-kicker">AHQ FIELD NOTES / {selected.topic} / {selected.level}</p><button type="button" onClick={()=>setSelected(null)} className="pencil-close shrink-0" aria-label="Close lesson">×</button></div>
+       <h3 className="pencil-title">{selected.title}<span className="text-[#9b3155]">.</span></h3>
+       <p className="pencil-lead">{selected.explain}</p>
+       <hr className="pencil-divider"/>
+       <p className="pencil-formula-label">01 / Core relationship</p>
+       <div className="pencil-formula"><span className="pencil-highlight">{selected.formula}</span></div>
+       <p className="pencil-handnote">Remember the assumptions ↗</p>
+       {LESSON_GUIDES[selected.id]&&<>
+        <h4 className="pencil-heading">The intuition <span className="text-[#9b3155]">✎</span></h4>
+        <p className="pencil-prose">{LESSON_GUIDES[selected.id].intuition}</p>
+        <h4 className="pencil-heading">Work through it</h4>
+        <ol className="pencil-numbered list-decimal">{LESSON_GUIDES[selected.id].steps.map((step,i)=><li key={i}>{step}</li>)}</ol>
+       </>}
+       <hr className="pencil-divider"/>
+       <h4 className="pencil-heading">Worked example</h4>
+       <p className="pencil-prose">{selected.example}</p>
+       {LESSON_GUIDES[selected.id]&&<div className="mt-5"><p className="pencil-handnote">Your turn →</p><p className="pencil-prose mt-2">{LESSON_GUIDES[selected.id].practice}</p></div>}
+       <h4 className="pencil-heading">Underline this takeaway</h4>
+       <p className="pencil-prose"><span className="pencil-highlight">{selected.takeaway}</span></p>
+       <div className="pencil-note mt-7"><p className="pencil-formula-label">Learning checkpoint</p><p className="pencil-prose mt-2">Explain the relationship in your own words, reproduce the example without looking and describe when its assumptions might fail.</p></div>
+       <form className="mt-8" onSubmit={e=>{e.preventDefault();if(answer.trim()==="")return;const ok=Math.abs(Number(answer)-selected.answer)<0.001;setLessonResult(ok?"Correct — lesson mastered.":`Not quite. Answer: ${selected.answer}. ${selected.hints[0]}`);if(ok)save(selected.id,100,true);}}>
+         <p className="pencil-formula-label mb-3">Test yourself</p>
+         <p className="pencil-prose font-semibold">{selected.question}</p>
+         <div className="flex flex-wrap gap-3 mt-4"><input aria-label="Lesson numerical answer" type="number" step="any" value={answer} onChange={e=>setAnswer(e.target.value)} className="pencil-input"/><button type="submit" className="pencil-action">Check answer ↗</button></div>
+         {lessonResult&&<p role="status" className="pencil-feedback">{lessonResult}</p>}
+       </form>
+       <div className="flex flex-wrap gap-3 mt-9 pt-5 border-t border-[#d6c7b2]">{LESSONS.indexOf(selected)>0&&<button onClick={()=>choose(LESSONS[LESSONS.indexOf(selected)-1])} className="pencil-outline">← Previous lesson</button>}{LESSONS.indexOf(selected)<LESSONS.length-1&&<button onClick={()=>choose(LESSONS[LESSONS.indexOf(selected)+1])} className="pencil-action">Next lesson →</button>}</div>
+      </div>
+     </article>}
      <div className="mt-8 text-xs text-muted">Explore the longer <Link href="/research" className="text-amber underline">Research Library</Link> or the existing <Link className="text-amber underline" href="/learn/what-is-quantitative-trading">full introductory article</Link>. The curriculum references publicly described CFA/FRM/CQF subject areas; it does not reproduce proprietary exam content.</div>
    </section>}
    {tab==="interview"&&<section className="mt-10">
