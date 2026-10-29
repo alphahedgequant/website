@@ -108,6 +108,30 @@ function Field({ label, value }) {
   );
 }
 
+function ListingGainLab() {
+  const [price,setPrice]=useState("");
+  const [premium,setPremium]=useState("");
+  const p=Number(price),g=Number(premium);
+  const valid=price.trim()!==""&&premium.trim()!==""&&Number.isFinite(p)&&p>0&&Number.isFinite(g);
+  const implied=valid ? (g/p)*100 : null;
+  return (
+    <div style={{border:"1px solid #2b3340",borderRadius:12,background:"linear-gradient(120deg,#171d28,#11151d)",padding:"22px",marginBottom:26}}>
+      <div style={{color:"#F0A93B",fontSize:11,letterSpacing:1.6,textTransform:"uppercase"}}>AHQ / Listing Gain Intelligence</div>
+      <h3 style={{color:"#f5f5f5",fontSize:24,margin:"8px 0"}}>IPO Listing Gain Calculator</h3>
+      <p style={{color:"#a7adba",fontSize:13,lineHeight:1.6,maxWidth:760}}>Estimate the GMP-implied listing premium. This is a transparent calculation, not an AI forecast or a guaranteed listing return. Enter a reported GMP from a source you trust.</p>
+      <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(min(100%,190px),1fr))",gap:12,margin:"18px 0"}}>
+        <label style={{color:"#cfcfcf",fontSize:12}}>Final issue price (₹)<input aria-label="Final issue price" inputMode="decimal" type="number" min="0.01" step="any" value={price} onChange={e=>setPrice(e.target.value)} placeholder="300" style={{display:"block",width:"100%",boxSizing:"border-box",padding:12,marginTop:7,background:"#0d1119",color:"#fff",border:"1px solid #343b49",borderRadius:8}} /></label>
+        <label style={{color:"#cfcfcf",fontSize:12}}>Reported GMP (₹)<input aria-label="Reported GMP" inputMode="decimal" type="number" step="any" value={premium} onChange={e=>setPremium(e.target.value)} placeholder="90" style={{display:"block",width:"100%",boxSizing:"border-box",padding:12,marginTop:7,background:"#0d1119",color:"#fff",border:"1px solid #343b49",borderRadius:8}} /></label>
+      </div>
+      <div aria-live="polite" style={{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(min(100%,190px),1fr))",gap:12}}>
+        <div style={{background:"#0d1119",border:"1px solid #28303d",padding:17,borderRadius:8}}><div style={{color:"#939ba9",fontSize:12}}>GMP-implied listing gain</div><div style={{color:"#F0A93B",fontSize:27,fontWeight:700,marginTop:8}}>{valid ? implied.toFixed(2)+"%" : "—"}</div></div>
+        <div style={{background:"#0d1119",border:"1px solid #28303d",padding:17,borderRadius:8}}><div style={{color:"#939ba9",fontSize:12}}>GMP-implied listing price</div><div style={{color:"#f5f5f5",fontSize:27,fontWeight:700,marginTop:8}}>{valid ? "₹"+(p+g).toLocaleString("en-IN",{maximumFractionDigits:2}) : "—"}</div></div>
+      </div>
+      <p style={{color:"#87909e",fontSize:11,lineHeight:1.5,margin:"15px 0 0"}}>Formula: GMP-implied gain = (reported GMP ÷ issue price) × 100. Official listing gain uses actual exchange listing price. GMP is unofficial and may be stale, unreliable, or unavailable. Historical model predictions will only be enabled after out-of-time validation.</p>
+    </div>
+  );
+}
+
 export default function IpoScreen() {
   const [tab, setTab] = useState("open");
   const [data, setData] = useState(null);
@@ -152,6 +176,8 @@ export default function IpoScreen() {
         IPO calendar for NSE & BSE — open, upcoming, closed and recently listed issues
         with price bands, lot sizes, subscription, and listing performance.
       </p>
+
+      <ListingGainLab />
 
       {soon.length > 0 && (
         <div style={{ background: "linear-gradient(135deg,#1a1305,#14161c)", border: "1px solid #3a2e10", borderRadius: 12, padding: "16px 18px", marginBottom: 24 }}>
