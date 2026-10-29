@@ -7,6 +7,7 @@ import { SignedIn, SignedOut, UserButton } from "@clerk/nextjs";
 import ThemeToggle from "./ThemeToggle";
 
 const products = [
+  { href: "/terminal", label: "Quant Terminal", description: "Volume intelligence and live order depth", glyph: "▦" },
   { href: "/screener", label: "Market Intelligence", description: "NSE & US equity screeners", glyph: "▤" },
   { href: "/models", label: "Quant Models", description: "Systematic strategies & signals", glyph: "∑" },
   { href: "/backtest", label: "AI Backtesting", description: "Test and evaluate ideas", glyph: "↗" },
