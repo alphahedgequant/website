@@ -50,7 +50,7 @@ export async function GET() {
       house: h.house,
       totalCalls: h.total,
       resolvedCalls: h.resolved,
-      trustScore: h.resolved ? Math.round((h.wins / h.resolved) * 100) : null,
+      trustScore: h.resolved >= 5 ? Math.round((h.wins / h.resolved) * 100) : null,\n      sampleWarning: h.resolved < 5 ? "Insufficient resolved sample (min 5)" : null,
       targetHitRate: h.resolved ? Math.round((h.targetHits / h.resolved) * 100) : null,
       avgReturn: h.resolved ? +(h.retSum / h.resolved).toFixed(2) : null,
     })).sort((a, b) => (b.trustScore ?? -1) - (a.trustScore ?? -1));
