@@ -18,8 +18,10 @@ async function ensureTable(sql) {
       created_at    TIMESTAMPTZ DEFAULT now()
     )
   `;
+  await sql`ALTER TABLE analyst_calls ADD COLUMN IF NOT EXISTS source_url TEXT`;
+  await sql`ALTER TABLE analyst_calls ADD COLUMN IF NOT EXISTS verification_status TEXT NOT NULL DEFAULT 'unverified'`;
 }
-
+ 
 export async function GET() {
   try {
     if (!process.env.NEON_DATABASE_URL) {
@@ -42,7 +44,7 @@ export async function GET() {
       if (sc.resolved) {
         h.resolved++;
         if (sc.madeMoney) h.wins++;
-        if (sc.targetHit) h.targetHits++;
+        if (sc.targetHit === true) h.targetHits++;
         h.retSum += sc.returnPct;
       }
     }

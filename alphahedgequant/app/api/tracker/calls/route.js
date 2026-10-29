@@ -21,8 +21,10 @@ async function ensureTable(sql) {
       created_at    TIMESTAMPTZ DEFAULT now()
     )
   `;
+  await sql`ALTER TABLE analyst_calls ADD COLUMN IF NOT EXISTS source_url TEXT`;
+  await sql`ALTER TABLE analyst_calls ADD COLUMN IF NOT EXISTS verification_status TEXT NOT NULL DEFAULT 'unverified'`;
 }
-
+ 
 export async function GET() {
   try {
     if (!process.env.NEON_DATABASE_URL) {
@@ -58,7 +60,7 @@ export async function POST(request) {
       return Response.json({ success: false, error: "Database not configured." }, { status: 500 });
     }
     const body = await request.json();
-    const { house, symbol, rating = "BUY", target_price, price_at_call, call_date, horizon_days = 365, note = "" } = body || {};
+    const { house, symbol, rating = "BUY", target_price, price_at_call, call_date, horizon_days = 365, note = "", source_url = "" } = body || {};
     if (!house || !symbol || !target_price || !price_at_call || !call_date) {
       return Response.json({ success: false, error: "house, symbol, target_price, price_at_call, call_date are required." }, { status: 400 });
     }
@@ -66,12 +68,20 @@ export async function POST(request) {
       !Number.isFinite(Number(target_price))||Number(target_price)<=0||!Number.isFinite(Number(price_at_call))||Number(price_at_call)<=0||
       !/^\d{4}-\d{2}-\d{2}$/.test(String(call_date))||!Number.isInteger(Number(horizon_days))||Number(horizon_days)<1||Number(horizon_days)>3650||typeof note!=="string"||note.length>2000)
       return Response.json({success:false,error:"Invalid call fields"},{status:400});
+    let verifiedSource;
+    try {
+      const u=new URL(source_url);
+      if(u.protocol!=="https:"||!u.hostname.includes(".")||u.username||u.password||source_url.length>1200)throw Error();
+      verifiedSource=u.toString();
+    }catch{return Response.json({success:false,error:"An original HTTPS research-report or dated publication URL is required."},{status:400});}
+    const publicationDate=new Date(String(call_date)+"T00:00:00Z");
+    if(!Number.isFinite(publicationDate.valueOf())||publicationDate.toISOString().slice(0,10)!==String(call_date)||publicationDate>new Date())return Response.json({success:false,error:"Invalid or future publication date"},{status:400});
     const sql = neon(process.env.NEON_DATABASE_URL);
     await ensureTable(sql);
     const rows = await sql`
-      INSERT INTO analyst_calls (house, symbol, rating, target_price, price_at_call, call_date, horizon_days, note)
+      INSERT INTO analyst_calls (house, symbol, rating, target_price, price_at_call, call_date, horizon_days, note, source_url, verification_status)
       VALUES (${house.trim()}, ${symbol.toUpperCase().trim()}, ${String(rating).toUpperCase()},
-              ${Number(target_price)}, ${Number(price_at_call)}, ${call_date}, ${Number(horizon_days)}, ${note})
+              ${Number(target_price)}, ${Number(price_at_call)}, ${call_date}, ${Number(horizon_days)}, ${note}, ${verifiedSource}, 'unverified')
       RETURNING *
     `;
     return Response.json({ success: true, call: rows[0] });

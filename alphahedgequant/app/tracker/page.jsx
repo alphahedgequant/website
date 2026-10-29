@@ -24,9 +24,10 @@ export default function TrackerPage() {
   const [leaderboard, setLeaderboard] = useState([]);
   const [calls, setCalls] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [form, setForm] = useState({ house: "", symbol: "", rating: "BUY", target_price: "", price_at_call: "", call_date: "", horizon_days: 365, note: "" });
+  const [form, setForm] = useState({ house: "", symbol: "", rating: "BUY", target_price: "", price_at_call: "", call_date: "", horizon_days: 365, note: "", source_url: "" });
   const [submitting, setSubmitting] = useState(false);
   const [msg, setMsg] = useState(null);
+  const [search,setSearch]=useState("");
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -72,7 +73,7 @@ export default function TrackerPage() {
   };
 
   const setF = (k, v) => setForm((f) => ({ ...f, [k]: v }));
-  const formValid = form.house && form.symbol && form.target_price && form.price_at_call && form.call_date;
+  const formValid = form.house && form.symbol && form.target_price && form.price_at_call && form.call_date && /^https:\/\//.test(form.source_url);
 
   return (
     <div className="max-w-shell mx-auto px-5 py-10">
@@ -97,6 +98,10 @@ export default function TrackerPage() {
         <div className={`mt-4 p-3 rounded-lg border font-mono text-xs ${msg.type === "ok" ? "border-gain/30 bg-gain/10 text-gain" : "border-loss/30 bg-loss/10 text-loss"}`}>{msg.text}</div>
       )}
 
+      {(tab==="leaderboard"||tab==="calls")&&<div className="mt-6 flex flex-wrap items-center gap-3">
+        <input aria-label="Search brokerage or ticker" value={search} onChange={e=>setSearch(e.target.value)} placeholder="Search brokerage / ticker…" className="rounded-lg border border-line bg-surface px-4 py-2.5 text-sm text-body w-full sm:w-[340px]"/>
+        <span className="font-mono text-[11px] text-muted">Verified sources · Published horizon · No fabricated rankings</span>
+      </div>}
       {loading && (
         <div className="mt-8 h-40 rounded-lg border border-line bg-surface flex items-center justify-center">
           <div className="w-8 h-8 border-2 border-amber border-t-transparent rounded-full animate-spin" />
@@ -122,7 +127,7 @@ export default function TrackerPage() {
                   </tr>
                 </thead>
                 <tbody>
-                  {leaderboard.map((h, i) => (
+                  {leaderboard.filter(h=>h.house.toLowerCase().includes(search.toLowerCase())).map((h, i) => (
                     <tr key={h.house} className="border-b border-line/40 hover:bg-raised/20">
                       <td className="py-3 px-4 font-mono text-muted">{i + 1}</td>
                       <td className="py-3 px-4 font-medium text-body">{h.house}</td>
@@ -164,11 +169,12 @@ export default function TrackerPage() {
                     <th className="py-2.5 px-3 text-right font-normal">RETURN</th>
                     <th className="py-2.5 px-3 text-center font-normal">DATE</th>
                     <th className="py-2.5 px-3 text-center font-normal">HORIZON OUTCOME</th>
+                    <th className="py-2.5 px-3 text-center font-normal">SOURCE</th>
                     <th className="py-2.5 px-3 text-center font-normal"></th>
                   </tr>
                 </thead>
                 <tbody>
-                  {calls.map((c) => (
+                  {calls.filter(c=>`${c.house} ${c.symbol}`.toLowerCase().includes(search.toLowerCase())).map((c) => (
                     <tr key={c.id} className="border-b border-line/40 hover:bg-raised/20 font-mono text-xs">
                       <td className="py-2.5 px-3 text-body">{c.house}</td>
                       <td className="py-2.5 px-3 text-body font-semibold">{c.symbol}</td>
@@ -218,12 +224,13 @@ export default function TrackerPage() {
               <Field label="CALL DATE" type="date" value={form.call_date} onChange={(v) => setF("call_date", v)} />
               <Field label="HORIZON (DAYS)" type="number" placeholder="365" value={form.horizon_days} onChange={(v) => setF("horizon_days", v)} />
             </div>
+            <Field label="ORIGINAL RESEARCH REPORT URL (REQUIRED)" type="url" placeholder="https://.../dated-research-report" value={form.source_url} onChange={(v)=>setF("source_url",v)} />
             <Field label="NOTE (OPTIONAL)" placeholder="Source / thesis / link" value={form.note} onChange={(v) => setF("note", v)} />
             <button onClick={submit} disabled={!formValid || submitting} className="w-full py-3 rounded bg-amber text-ink font-display font-semibold text-sm hover:bg-amber/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
               {submitting ? "Adding…" : "Add Call to Tracker"}
             </button>
             <p className="font-mono text-[10px] text-muted leading-relaxed">
-              Only approved editors can add calls. Scores use historical prices at the stated horizon — record exactly what the house said
+              Only approved editors can add calls. New submissions remain unverified until an editor checks the original published report and historical entry price. Scores use historical prices at the stated horizon — record exactly what the house said
               (house, stock, rating, target, the price when they said it, and the date). Use NSE symbols (RELIANCE) or US tickers (AAPL).
             </p>
           </div>
