@@ -248,6 +248,13 @@ export default function Research() {
           )}
         </div>
 
+        {/* Persistent historical archive: searched independently of the fresh feed. */}
+        <section className="mt-14 border-t border-line pt-9">
+          <p className="eyebrow mb-3">[ AHQ : HISTORICAL RESEARCH ARCHIVE ]</p>
+          <h3 className="font-display text-2xl font-medium">Search the full indexed library</h3>
+          <p className="text-sm text-muted mt-2 mb-4 max-w-2xl">Daily-ingested paper metadata, retained beyond the latest-feed window. Search titles and abstracts, then open the original paper.</p>
+          <ArchiveSearch categories={CATEGORIES} />
+        </section>
         {/* Foundational shelf */}
         <h3 className="font-display text-xl font-medium mt-14">Foundational papers</h3>
         <p className="text-muted text-sm mt-1.5 mb-5 max-w-2xl leading-relaxed">
@@ -277,4 +284,44 @@ export default function Research() {
       </div>
     </div>
   );
+}
+
+function ArchiveSearch({categories}) {
+  const [q,setQ]=useState("");
+  const [topic,setTopic]=useState("all");
+  const [rows,setRows]=useState([]);
+  const [offset,setOffset]=useState(null);
+  const [busy,setBusy]=useState(false);
+  const [notice,setNotice]=useState("");
+  const load=async (next=0,query=q,category=topic)=>{
+    setBusy(true);setNotice("");
+    try{
+      const params=new URLSearchParams({q:query,topic:category,offset:String(next)});
+      const r=await fetch("/api/research/archive?"+params,{cache:"no-store"});
+      const body=await r.json();
+      if(!r.ok||!body.ok)throw Error(body.error||"Archive unavailable");
+      setRows(old=>next===0?body.data:[...old,...body.data]);setOffset(body.nextOffset);
+    }catch(e){setNotice(e.message);}
+    finally{setBusy(false);}
+  };
+  useEffect(()=>{load(0,"","all");},[]);
+  return <div>
+    <form className="flex flex-wrap gap-2 mb-4" onSubmit={e=>{e.preventDefault();load(0);}}>
+      <input aria-label="Search historical papers" value={q} onChange={e=>setQ(e.target.value)}
+        placeholder="Search all indexed papers..."
+        className="min-w-[200px] flex-1 bg-raised/40 border border-line rounded px-3 py-2 text-sm text-body focus:outline-none focus:border-amber/40"/>
+      <select aria-label="Archive discipline" value={topic} onChange={e=>{setTopic(e.target.value);load(0,q,e.target.value);}}
+        className="bg-raised border border-line rounded px-3 py-2 text-sm text-body">
+        {categories.map(c=><option value={c.key} key={c.key}>{c.label}</option>)}
+      </select>
+      <button className="px-4 py-2 bg-amber text-ink rounded text-sm font-medium" type="submit">Search archive</button>
+    </form>
+    {notice && <p role="status" className="text-sm text-muted my-4">{notice}</p>}
+    <div className="grid gap-4 md:grid-cols-2">
+      {rows.map(p=><PaperCard key={p.id} p={p}/>)}
+    </div>
+    {!busy && !notice && !rows.length && <p className="text-muted text-sm py-6">No indexed papers yet. Daily ingestion populates the archive once its first run succeeds.</p>}
+    {busy && <p className="text-muted text-xs mt-4">Loading research archive…</p>}
+    {offset!==null && !busy && <button onClick={()=>load(offset)} className="btn-ghost mt-5">Load more papers</button>}
+  </div>;
 }
