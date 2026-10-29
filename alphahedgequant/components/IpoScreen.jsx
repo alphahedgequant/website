@@ -157,7 +157,7 @@ export default function IpoScreen() {
         with price bands, lot sizes, subscription, and listing performance.
       </p>
 
-      <p style={{color:'#aab3c0',fontSize:13,margin:'0 0 22px'}}>Latest reported grey-market premium (GMP), estimated listing gain and subscription. Quotes are unofficial and may differ across sources. <a href="https://xflot.com/api-docs" target="_blank" rel="noopener noreferrer" style={{color:'#F0A93B'}}>Data: Xflot ↗</a></p>
+      <p style={{color:'#aab3c0',fontSize:13,margin:'0 0 22px'}}>Latest reported grey-market premium (GMP), estimated listing gain and subscription. Quotes are unofficial and may differ across sources.</p>
 
       {soon.length > 0 && (
         <div style={{ background: "linear-gradient(135deg,#1a1305,#14161c)", border: "1px solid #3a2e10", borderRadius: 12, padding: "16px 18px", marginBottom: 24 }}>
@@ -178,7 +178,7 @@ export default function IpoScreen() {
         </div>
       )}
 
-      {meta && <p style={{color:"#9a9a9a",fontSize:12,margin:"0 0 16px"}}>Source: <a href="https://xflot.com/api-docs" target="_blank" rel="noopener noreferrer" style={{color:"#F0A93B"}}>Xflot</a> · {meta.fetchedAt ? `Feed fetched ${new Date(meta.fetchedAt).toLocaleString("en-IN")}` : "Update time unavailable"} · GMP unofficial, not exchange-verified; indicative gain is not a prediction.</p>}
+      {meta && <p style={{color:"#9a9a9a",fontSize:12,margin:"0 0 16px"}}>{meta.fetchedAt ? `Feed fetched ${new Date(meta.fetchedAt).toLocaleString("en-IN")}` : "Update time unavailable"} · GMP unofficial, not exchange-verified; indicative gain is not a prediction.</p>}
       <div style={{ display: "flex", flexWrap: "wrap", gap: 8, marginBottom: 20 }}>
         {TABS.map((t) => (
           <button
@@ -211,6 +211,7 @@ export default function IpoScreen() {
           <IpoCard key={i} ipo={ipo} showGain={tab === "listed"} />
         ))}
       </div>
+      <p style={{color:"#888f9b",fontSize:11,lineHeight:1.6,marginTop:24}}>GMP values are unofficial and not exchange-verified. Estimated listing gains are illustrative, not guarantees. Market data attribution: <a href="https://xflot.com" target="_blank" rel="noopener noreferrer" style={{color:"#aab3c0",textDecoration:"underline"}}>Xflot</a>.</p>
     </section>
   );
 }
