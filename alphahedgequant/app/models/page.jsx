@@ -656,10 +656,6 @@ export default function Models() {
         </div>
         <Link href="/scanner" className="btn-primary">Open Scanner →</Link>
       </div>
-
-      <p className="font-mono text-[11px] text-muted mt-6">
-        RESEARCH &amp; EDUCATION ONLY · NOT INVESTMENT ADVICE · MODELS SIMPLIFIED FOR CLARITY
-      </p>
     </div>
   );
 }
