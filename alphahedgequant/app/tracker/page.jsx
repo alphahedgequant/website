@@ -1,5 +1,6 @@
 "use client";
 import { useState, useEffect, useCallback } from "react";
+import Link from "next/link";
 
 // Tracker API routes live in THIS Next.js app (same domain), so use relative paths.
 const RATING_COLORS = { BUY: "text-gain", SELL: "text-loss", HOLD: "text-amber" };
@@ -94,6 +95,7 @@ export default function TrackerPage() {
         </div>
       </div>
 
+      <div className="mt-5 flex flex-wrap items-center justify-between gap-3 rounded-lg border border-line bg-surface/50 px-4 py-3"><p className="text-xs text-muted max-w-2xl">Research-house rankings require source-verified calls and historical price checks. Candidate reports are reviewed before scoring.</p><Link href="/tracker/discovery" className="text-xs font-mono text-amber hover:underline">Original research sources &amp; review queue ↗</Link></div>
       {msg && (
         <div className={`mt-4 p-3 rounded-lg border font-mono text-xs ${msg.type === "ok" ? "border-gain/30 bg-gain/10 text-gain" : "border-loss/30 bg-loss/10 text-loss"}`}>{msg.text}</div>
       )}
