@@ -14,6 +14,7 @@ import { useEffect, useState } from "react";
 const TABS = [
   { key: "open",     label: "Open Now" },
   { key: "upcoming", label: "Upcoming" },
+  { key: "closed",   label: "Closed" },
   { key: "listed",   label: "Recently Listed" },
 ];
 
@@ -39,7 +40,7 @@ function daysUntil(dateStr) {
 }
 
 function IpoCard({ ipo, showGain }) {
-  const href = ipo.symbol ? `/ipo/${encodeURIComponent(ipo.symbol)}` : null;
+  const href = ipo.id ? `/ipo/${encodeURIComponent(ipo.id)}` : null;
   const inner = (
     <div
       style={{
@@ -112,6 +113,7 @@ export default function IpoScreen() {
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [meta, setMeta] = useState(null);
 
   useEffect(() => {
     let alive = true;
@@ -120,7 +122,7 @@ export default function IpoScreen() {
       .then((r) => r.json())
       .then((j) => {
         if (!alive) return;
-        if (j.ok) setData(j.buckets);
+        if (j.ok) { setData(j.buckets); setMeta(j); }
         else setError(j.error || "Failed to load IPOs");
       })
       .catch((e) => alive && setError(String(e)))
@@ -147,7 +149,7 @@ export default function IpoScreen() {
         Latest IPOs
       </h2>
       <p style={{ color: "#9a9a9a", maxWidth: 640, lineHeight: 1.6, margin: "0 0 24px" }}>
-        Live IPO calendar for NSE & BSE — open, upcoming, and recently listed issues
+        IPO calendar for NSE & BSE — open, upcoming, closed and recently listed issues
         with price bands, lot sizes, subscription, and listing performance.
       </p>
 
@@ -158,7 +160,7 @@ export default function IpoScreen() {
           </div>
           <div style={{ display: "flex", flexWrap: "wrap", gap: 10 }}>
             {soon.map(({ ipo, d }, i) => (
-              <a key={i} href={ipo.symbol ? `/ipo/${encodeURIComponent(ipo.symbol)}` : undefined}
+              <a key={i} href={ipo.id ? `/ipo/${encodeURIComponent(ipo.id)}` : undefined}
                  style={{ textDecoration: "none", background: "#14161c", border: "1px solid #232733", borderRadius: 8, padding: "8px 12px", display: "flex", flexDirection: "column", gap: 2 }}>
                 <span style={{ color: "#f5f5f5", fontSize: 13, fontWeight: 600 }}>{fmt(ipo.name)}</span>
                 <span style={{ color: "#F0A93B", fontSize: 11 }}>
@@ -170,7 +172,8 @@ export default function IpoScreen() {
         </div>
       )}
 
-      <div style={{ display: "flex", gap: 8, marginBottom: 20 }}>
+      {meta && <p style={{color:"#9a9a9a",fontSize:12,margin:"0 0 16px"}}>Source: Upstox · {meta.fetchedAt ? `Updated ${new Date(meta.fetchedAt).toLocaleString("en-IN")}` : "Update time unavailable"}{meta.stale ? " · Cached data (stale)" : ""}{meta.partial ? ` · Some categories unavailable: ${(meta.unavailable||[]).join(", ")}` : ""} · GMP unavailable from this source</p>}
+      <div style={{ display: "flex", flexWrap: "wrap", gap: 8, marginBottom: 20 }}>
         {TABS.map((t) => (
           <button
             key={t.key}
@@ -197,7 +200,7 @@ export default function IpoScreen() {
         <div style={{ color: "#8a8a8a", padding: "40px 0" }}>No {tab} IPOs right now.</div>
       )}
 
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(300px, 1fr))", gap: 16 }}>
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(min(100%, 300px), 1fr))", gap: 16 }}>
         {list.map((ipo, i) => (
           <IpoCard key={i} ipo={ipo} showGain={tab === "listed"} />
         ))}
