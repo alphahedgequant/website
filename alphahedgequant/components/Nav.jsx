@@ -16,7 +16,6 @@ const products = [
 const research = [
   { href: "/research", label: "Research Papers" },
   { href: "/learn", label: "Learn" },
-  { href: "/about", label: "About" },
 ];
 const isActive = (path, links) => links.some(l => path === l.href || path.startsWith(l.href + "/"));
 
@@ -94,7 +93,8 @@ export default function Nav() {
             {[
               {href:"/reports",label:"Macro Outlook"},
               {href:"/ipo",label:"IPO Intelligence"},
-              {href:"/tracker",label:"Trust Tracker"}
+              {href:"/tracker",label:"Trust Tracker"},
+              {href:"/about",label:"About"}
             ].map(item=><Link key={item.href} href={item.href}
               className={`whitespace-nowrap text-[13px] xl:text-sm transition-colors hover:text-body ${path===item.href || path.startsWith(item.href+"/") ? "text-amber" : "text-muted"}`}>
               {item.label}
@@ -137,7 +137,8 @@ export default function Nav() {
           {[
             {href:"/reports",label:"Macro Outlook"},
             {href:"/ipo",label:"IPO Intelligence"},
-            {href:"/tracker",label:"Trust Tracker"}
+            {href:"/tracker",label:"Trust Tracker"},
+            {href:"/about",label:"About"}
           ].map(item=><Link key={item.href} href={item.href} onClick={()=>setMobileOpen(false)}
             className={`block rounded-lg px-3 py-2.5 text-sm ${path===item.href?"text-amber":"text-body"} hover:bg-raised`}>{item.label}</Link>)}
           <div className="mt-4 flex items-center gap-3 border-t border-line pt-4">
