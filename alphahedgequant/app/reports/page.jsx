@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { reports } from "@/lib/reports";
+import "../learn/pencil-reader.css";
 
 export const metadata = {
   title: "Reports — AlphaHedgeQuant",
@@ -34,28 +35,28 @@ export default function ReportsPage() {
           <Link
             key={r.slug}
             href={`/reports/${r.slug}`}
-            className="card p-7 block hover:border-amber/40 transition-colors"
+            className="ahq-pencil-reader block transition-transform hover:-translate-y-1"
           >
-            <div className="flex flex-wrap items-center gap-3">
-              <span className="font-mono text-[11px] tracking-[0.2em] text-amber">
+            <div className="pencil-main !py-7"><div className="flex flex-wrap items-center gap-3">
+              <span className="pencil-kicker">
                 {r.tag}
               </span>
-              <span className="font-mono text-[11px] text-muted">
+              <span className="pencil-formula-label">
                 {fmtDate(r.date)} · {r.readMins} min read
               </span>
             </div>
-            <h2 className="font-display text-2xl font-medium mt-3 leading-snug">
+            <h2 className="pencil-heading !text-[27px] !mt-4">
               {r.title}
             </h2>
-            <p className="text-sm text-body/80 leading-relaxed mt-2 max-w-3xl">
+            <p className="pencil-prose mt-2 max-w-3xl">
               {r.dek}
             </p>
-            <p className="text-sm text-muted leading-relaxed mt-3 max-w-3xl">
+            <p className="pencil-prose !text-[14px] mt-3 max-w-3xl">
               {r.summary}
             </p>
-            <span className="font-mono text-xs text-amber mt-4 inline-block">
-              Read report →
-            </span>
+            <span className="pencil-handnote mt-4 inline-block">
+              Read field notes →
+            </span></div>
           </Link>
         ))}
       </div>
