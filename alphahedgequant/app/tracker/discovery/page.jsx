@@ -2,7 +2,7 @@
 import {useEffect,useState} from "react";
 import Link from "next/link";
 import {RESEARCH_PUBLISHERS} from "@/lib/trackerPublishers";
-const initial={publisher_id:"icici-direct",source_url:"",headline:"",published_on:"",symbol:"",rating:"",target_price:"",entry_price:"",horizon_days:"",notes:""};
+const initial={publisher_id:"icici-direct",source_url:"",headline:"",published_on:"",symbol:"",analyst_name:"",rating:"",target_price:"",entry_price:"",horizon_days:"",notes:""};
 export default function Discovery(){
  const [draft,setDraft]=useState(initial),[items,setItems]=useState([]),[status,setStatus]=useState(""),[access,setAccess]=useState("loading"),[busy,setBusy]=useState(false),[filter,setFilter]=useState("all");
  const load=async()=>{
@@ -23,7 +23,7 @@ export default function Discovery(){
  const changeStatus=async(id,next)=>{
   setBusy(true);try{const r=await fetch("/api/tracker/discovery",{method:"PATCH",headers:{"Content-Type":"application/json"},body:JSON.stringify({id,status:next})}),j=await r.json();if(!r.ok)throw Error(j.error||"Update failed");await load()}catch(e){setStatus(e.message)}finally{setBusy(false)}
  };
- const fields=[["headline","Report headline","text"],["source_url","Original publisher URL","url"],["published_on","Published date","date"],["symbol","Ticker","text"],["target_price","Target price","number"],["entry_price","Recommendation/entry price","number"],["horizon_days","Time horizon (days)","number"]];
+ const fields=[["headline","Report headline","text"],["source_url","Original publisher URL","url"],["published_on","Published date","date"],["symbol","Ticker","text"],["analyst_name","Named analyst (as published)","text"],["target_price","Target price","number"],["entry_price","Recommendation/entry price","number"],["horizon_days","Time horizon (days)","number"]];
  const visible=items.filter(x=>filter==="all"||x.review_status===filter);
  return <main className="max-w-shell mx-auto px-5 md:px-10 py-12">
   <Link className="text-amber text-xs font-mono" href="/tracker">← Trust Tracker</Link>
@@ -51,7 +51,7 @@ export default function Discovery(){
     </form>
     <div className="flex flex-wrap justify-between gap-3 items-center mt-7"><h3 className="font-display text-xl">Submitted sources ({items.length})</h3><select aria-label="Filter queue" className="bg-raised border border-line p-2 rounded-lg text-sm" value={filter} onChange={e=>setFilter(e.target.value)}>{["all","pending","reviewing","rejected"].map(x=><option value={x} key={x}>{x}</option>)}</select></div>
     {!visible.length&&<p className="mt-5 text-sm text-muted">No candidate reports in this view. No example recommendations are fabricated.</p>}
-    <div className="space-y-3 mt-4">{visible.map(x=><div className="rounded-lg border border-line p-4" key={x.id}><p className="text-sm font-semibold">{x.headline}</p><p className="text-xs text-muted mt-1">{RESEARCH_PUBLISHERS.find(p=>p.id===x.publisher_id)?.name||x.publisher_id} · {x.published_on?String(x.published_on).slice(0,10):"Publication date pending"} · {x.review_status}</p><p className="text-sm text-muted mt-2">{[x.symbol,x.rating,x.target_price&&"Target "+x.target_price].filter(Boolean).join(" · ")}</p><div className="flex flex-wrap gap-4 items-center mt-3"><a className="text-amber underline text-sm" target="_blank" rel="noopener noreferrer" href={x.source_url}>Original publication ↗</a>{x.review_status!=="reviewing"&&<button disabled={busy} onClick={()=>changeStatus(x.id,"reviewing")} className="text-sm hover:text-amber">Review</button>}{x.review_status!=="rejected"&&<button disabled={busy} onClick={()=>changeStatus(x.id,"rejected")} className="text-sm hover:text-loss">Reject</button>}{x.review_status!=="pending"&&<button disabled={busy} onClick={()=>changeStatus(x.id,"pending")} className="text-sm hover:text-amber">Restore pending</button>}</div></div>)}</div>
+    <div className="space-y-3 mt-4">{visible.map(x=><div className="rounded-lg border border-line p-4" key={x.id}><p className="text-sm font-semibold">{x.headline}</p><p className="text-xs text-muted mt-1">{RESEARCH_PUBLISHERS.find(p=>p.id===x.publisher_id)?.name||x.publisher_id} · {x.published_on?String(x.published_on).slice(0,10):"Publication date pending"} · {x.review_status}</p><p className="text-sm text-muted mt-2">{[x.symbol,x.analyst_name,x.rating,x.target_price&&"Target "+x.target_price].filter(Boolean).join(" · ")}</p><div className="flex flex-wrap gap-4 items-center mt-3"><a className="text-amber underline text-sm" target="_blank" rel="noopener noreferrer" href={x.source_url}>Original publication ↗</a>{x.review_status!=="reviewing"&&<button disabled={busy} onClick={()=>changeStatus(x.id,"reviewing")} className="text-sm hover:text-amber">Review</button>}{x.review_status!=="rejected"&&<button disabled={busy} onClick={()=>changeStatus(x.id,"rejected")} className="text-sm hover:text-loss">Reject</button>}{x.review_status!=="pending"&&<button disabled={busy} onClick={()=>changeStatus(x.id,"pending")} className="text-sm hover:text-amber">Restore pending</button>}</div></div>)}</div>
     <p className="text-xs text-muted mt-6">Review workflow only. Publication into Trust Tracker requires separate approved entry and verification; this queue never auto-publishes a brokerage call.</p>
    </>}
   </div>

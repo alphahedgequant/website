@@ -21,6 +21,7 @@ async function ensureTable(sql) {
       created_at    TIMESTAMPTZ DEFAULT now()
     )
   `;
+  await sql`ALTER TABLE analyst_calls ADD COLUMN IF NOT EXISTS analyst_name TEXT`;
   await sql`ALTER TABLE analyst_calls ADD COLUMN IF NOT EXISTS source_url TEXT`;
   await sql`ALTER TABLE analyst_calls ADD COLUMN IF NOT EXISTS verification_status TEXT NOT NULL DEFAULT 'unverified'`;
 }
@@ -60,13 +61,13 @@ export async function POST(request) {
       return Response.json({ success: false, error: "Database not configured." }, { status: 500 });
     }
     const body = await request.json();
-    const { house, symbol, rating = "BUY", target_price, price_at_call, call_date, horizon_days = 365, note = "", source_url = "" } = body || {};
+    const { house, symbol, rating = "BUY", target_price, price_at_call, call_date, horizon_days = 365, note = "", source_url = "", analyst_name = "" } = body || {};
     if (!house || !symbol || !target_price || !price_at_call || !call_date) {
       return Response.json({ success: false, error: "house, symbol, target_price, price_at_call, call_date are required." }, { status: 400 });
     }
     if(typeof house!=="string"||house.trim().length>120||typeof symbol!=="string"||!/^[A-Za-z0-9.^_-]{1,25}$/.test(symbol)||!["BUY","SELL","HOLD"].includes(String(rating).toUpperCase())||
       !Number.isFinite(Number(target_price))||Number(target_price)<=0||!Number.isFinite(Number(price_at_call))||Number(price_at_call)<=0||
-      !/^\d{4}-\d{2}-\d{2}$/.test(String(call_date))||!Number.isInteger(Number(horizon_days))||Number(horizon_days)<1||Number(horizon_days)>3650||typeof note!=="string"||note.length>2000)
+      !/^\d{4}-\d{2}-\d{2}$/.test(String(call_date))||!Number.isInteger(Number(horizon_days))||Number(horizon_days)<1||Number(horizon_days)>3650||typeof note!=="string"||note.length>2000||typeof analyst_name!=="string"||analyst_name.trim().length>150)
       return Response.json({success:false,error:"Invalid call fields"},{status:400});
     let verifiedSource;
     try {
@@ -79,9 +80,9 @@ export async function POST(request) {
     const sql = neon(process.env.NEON_DATABASE_URL);
     await ensureTable(sql);
     const rows = await sql`
-      INSERT INTO analyst_calls (house, symbol, rating, target_price, price_at_call, call_date, horizon_days, note, source_url, verification_status)
+      INSERT INTO analyst_calls (house, symbol, rating, target_price, price_at_call, call_date, horizon_days, note, analyst_name, source_url, verification_status)
       VALUES (${house.trim()}, ${symbol.toUpperCase().trim()}, ${String(rating).toUpperCase()},
-              ${Number(target_price)}, ${Number(price_at_call)}, ${call_date}, ${Number(horizon_days)}, ${note}, ${verifiedSource}, 'unverified')
+              ${Number(target_price)}, ${Number(price_at_call)}, ${call_date}, ${Number(horizon_days)}, ${note}, ${analyst_name.trim()||null}, ${verifiedSource}, 'unverified')
       RETURNING *
     `;
     return Response.json({ success: true, call: rows[0] });
