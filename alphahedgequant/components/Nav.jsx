@@ -17,7 +17,7 @@ const products = [
 const research = [
   { href: "/research", label: "Research Papers" },
   { href: "/reports", label: "Market Outlook" },
-  { href: "/learn", label: "Learn" },
+  { href: "/learn", label: "Learn, Interviews & Mental Math 🧩" },
 ];
 const isActive = (path, links) => links.some(l => path === l.href || path.startsWith(l.href + "/"));
 
