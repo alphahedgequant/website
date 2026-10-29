@@ -94,7 +94,8 @@ export default function Nav() {
             ))}
             {[
               {href:"/ipo",label:"IPO Intelligence"},
-              {href:"/about",label:"About"}
+            {href:"/learn",label:"Learn, Interviews & Mental Math 🧩"},
+{href:"/about",label:"About"}
             ].map(item=><Link key={item.href} href={item.href}
               className={`whitespace-nowrap text-[13px] xl:text-sm transition-colors hover:text-body ${path===item.href || path.startsWith(item.href+"/") ? "text-amber" : "text-muted"}`}>
               {item.label}
