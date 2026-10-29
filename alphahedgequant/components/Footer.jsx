@@ -9,12 +9,19 @@ export default function Footer() {
             <span className="ahq-logo-mark text-amber border border-amber/60">α</span>
             <span className="font-semibold tracking-tight">alphahedgequant</span>
           </Link>
-          <a href="https://x.com/Shreyy214" target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 text-xs text-muted hover:text-body mb-3" aria-label="Follow AlphaHedgeQuant founder Shreyash on X">
-            
-            <span>Founder: Shreyash</span>
-            <span aria-hidden="true">· 𝕏</span>
-            <span>@Shreyy214</span>
-          </a>
+          <div className="mb-5 flex flex-wrap items-center gap-2.5" aria-label="Founder information">
+            <span className="inline-flex min-h-8 items-center rounded-full border border-[#a12a52]/60 bg-gradient-to-br from-[#a12a52] to-[#6e1837] px-3.5 text-xs font-semibold tracking-wide text-[#f7e8ee] shadow-[0_4px_18px_rgba(161,42,82,0.25)]">
+              Founder
+            </span>
+            <span className="inline-flex min-h-8 items-center rounded-full border border-[#a12a52]/25 bg-[#a12a52]/10 px-3.5 text-xs font-semibold text-body">
+              Shreyash
+            </span>
+            <a href="https://x.com/Shreyy214" target="_blank" rel="noopener noreferrer"
+              className="inline-flex min-h-8 items-center rounded-full border border-[#a12a52]/25 bg-[#a12a52]/10 px-3.5 text-xs font-medium text-body transition-all hover:border-[#a12a52]/60 hover:bg-[#a12a52]/20 hover:shadow-[0_0_18px_rgba(161,42,82,0.22)]"
+              aria-label="Follow AlphaHedgeQuant founder Shreyash on X">
+              𝕏 @Shreyy214
+            </a>
+          </div>
           <p className="max-w-sm font-display text-xl sm:text-2xl font-semibold leading-snug tracking-tight text-body">
             Decoding market inefficiencies by quantifying{" "}
             <span className="text-amber">opportunities.</span>
