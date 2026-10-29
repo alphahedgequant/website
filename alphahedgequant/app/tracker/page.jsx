@@ -167,7 +167,8 @@ export default function TrackerPage() {
                     <th className="py-2.5 px-3 text-right font-normal">NOW</th>
                     <th className="py-2.5 px-3 text-right font-normal">RETURN</th>
                     <th className="py-2.5 px-3 text-center font-normal">DATE</th>
-                    <th className="py-2.5 px-3 text-center font-normal">HORIZON OUTCOME</th>\n                    <th className="py-2.5 px-3 text-center font-normal">SOURCE</th>
+                    <th className="py-2.5 px-3 text-center font-normal">HORIZON OUTCOME</th>
+                    <th className="py-2.5 px-3 text-center font-normal">SOURCE</th>
                     <th className="py-2.5 px-3 text-center font-normal"></th>
                   </tr>
                 </thead>
