@@ -60,6 +60,11 @@ const FOUNDATIONAL = [
   { title: "Statistical Arbitrage Pairs Trading Strategies: Review and Outlook", authors: "Krauss", year: 2017, venue: "J. Economic Surveys", url: "https://onlinelibrary.wiley.com/doi/abs/10.1111/joes.12153" },
   { title: "Coherent Measures of Risk", authors: "Artzner, Delbaen, Eber & Heath", year: 1999, venue: "Mathematical Finance", url: "https://doi.org/10.1111/1467-9965.00068" },
   { title: "Attention Is All You Need", authors: "Vaswani et al.", year: 2017, venue: "NeurIPS (arXiv)", url: "https://arxiv.org/abs/1706.03762" },
+  { title: "Deep Reinforcement Learning for Trading", authors: "Moody & Saffell", year: 2001, venue: "IEEE Transactions on Neural Networks", url: "https://doi.org/10.1109/72.935097" },
+  { title: "BERT: Pre-training of Deep Bidirectional Transformers for Language Understanding", authors: "Devlin et al.", year: 2018, venue: "NAACL / arXiv", url: "https://arxiv.org/abs/1810.04805" },
+  { title: "Language Models are Few-Shot Learners", authors: "Brown et al.", year: 2020, venue: "NeurIPS / arXiv", url: "https://arxiv.org/abs/2005.14165" },
+  { title: "DeepLOB: Deep Convolutional Neural Networks for Limit Order Books", authors: "Zhang, Zohren & Roberts", year: 2018, venue: "IEEE / arXiv", url: "https://arxiv.org/abs/1808.03668" },
+  { title: "The Econometrics of Financial Markets", authors: "Campbell, Lo & MacKinlay", year: 1997, venue: "Princeton University Press", url: "https://press.princeton.edu/books/hardcover/9780691043012/the-econometrics-of-financial-markets" },
   { title: "A Well-Conditioned Estimator for Large-Dimensional Covariance Matrices", authors: "Ledoit & Wolf", year: 2004, venue: "J. Multivariate Analysis", url: "https://doi.org/10.1016/S0047-259X(03)00096-4" },
 ];
 
