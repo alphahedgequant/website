@@ -23,9 +23,11 @@ function scoreBand(s) {
 export default function TrackerPage() {
   const [tab, setTab] = useState("leaderboard");
   const [leaderboard, setLeaderboard] = useState([]);
+  const [analysts,setAnalysts]=useState([]);
+  const [rankingMode,setRankingMode]=useState("firms");
   const [calls, setCalls] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [form, setForm] = useState({ house: "", symbol: "", rating: "BUY", target_price: "", price_at_call: "", call_date: "", horizon_days: 365, note: "", source_url: "" });
+  const [form, setForm] = useState({ house: "", symbol: "", rating: "BUY", target_price: "", price_at_call: "", call_date: "", horizon_days: 365, note: "", source_url: "", analyst_name: "" });
   const [submitting, setSubmitting] = useState(false);
   const [msg, setMsg] = useState(null);
   const [search,setSearch]=useState("");
@@ -37,7 +39,7 @@ export default function TrackerPage() {
         fetch(`/api/tracker/leaderboard`).then((r) => r.json()),
         fetch(`/api/tracker/calls`).then((r) => r.json()),
       ]);
-      if (lb.success) setLeaderboard(lb.leaderboard);
+      if (lb.success){setLeaderboard(lb.leaderboard);setAnalysts(lb.analysts||[]);}
       if (cl.success) setCalls(cl.calls);
     } catch (e) {
       setMsg({ type: "error", text: "Could not load tracker data. The price service may be waking up (cold start ~50s) — try again shortly." });
@@ -115,12 +117,13 @@ export default function TrackerPage() {
           <EmptyState onAdd={() => setTab("add")} />
         ) : (
           <div className="mt-6 rounded-lg border border-line bg-surface overflow-hidden">
+            <div className="flex flex-wrap gap-2 border-b border-line p-3"><button onClick={()=>setRankingMode("firms")} className={`px-3 py-2 text-xs rounded border ${rankingMode==="firms"?"text-amber border-amber":"text-muted border-line"}`}>Brokerage firms</button><button onClick={()=>setRankingMode("analysts")} className={`px-3 py-2 text-xs rounded border ${rankingMode==="analysts"?"text-amber border-amber":"text-muted border-line"}`}>Individual analysts</button></div>
             <div className="overflow-x-auto">
               <table className="w-full border-collapse text-sm">
                 <thead>
                   <tr className="font-mono text-[10px] text-muted tracking-wider border-b border-line">
                     <th className="py-2.5 px-4 text-left font-normal">#</th>
-                    <th className="py-2.5 px-4 text-left font-normal">RESEARCH HOUSE</th>
+                    <th className="py-2.5 px-4 text-left font-normal">{rankingMode==="firms"?"RESEARCH HOUSE":"ANALYST / FIRM"}</th>
                     <th className="py-2.5 px-4 text-center font-normal">TRUST SCORE</th>
                     <th className="py-2.5 px-4 text-center font-normal">RATING</th>
                     <th className="py-2.5 px-4 text-center font-normal">TARGET HIT</th>
@@ -129,10 +132,10 @@ export default function TrackerPage() {
                   </tr>
                 </thead>
                 <tbody>
-                  {leaderboard.filter(h=>h.house.toLowerCase().includes(search.toLowerCase())).map((h, i) => (
+                  {(rankingMode==="firms"?leaderboard:analysts).filter(h=>`${h.house} ${h.analystName||""}`.toLowerCase().includes(search.toLowerCase())).map((h, i) => (
                     <tr key={h.house} className="border-b border-line/40 hover:bg-raised/20">
                       <td className="py-3 px-4 font-mono text-muted">{i + 1}</td>
-                      <td className="py-3 px-4 font-medium text-body">{h.house}</td>
+                      <td className="py-3 px-4 font-medium text-body">{h.analystName?<><span className="block">{h.analystName}</span><span className="block text-[11px] text-muted mt-1">{h.house}</span></>:h.house}</td>
                       <td className="py-3 px-4 text-center">
                         <span className={`font-mono text-2xl font-bold ${scoreColor(h.trustScore)}`}>{h.trustScore ?? "–"}</span>
                         {h.trustScore != null && <span className="font-mono text-[10px] text-muted">/100</span>}
@@ -162,7 +165,7 @@ export default function TrackerPage() {
               <table className="w-full border-collapse text-sm">
                 <thead>
                   <tr className="font-mono text-[10px] text-muted tracking-wider border-b border-line">
-                    <th className="py-2.5 px-3 text-left font-normal">HOUSE</th>
+                    <th className="py-2.5 px-3 text-left font-normal">FIRM / ANALYST</th>
                     <th className="py-2.5 px-3 text-left font-normal">STOCK</th>
                     <th className="py-2.5 px-3 text-center font-normal">CALL</th>
                     <th className="py-2.5 px-3 text-right font-normal">@ PRICE</th>
@@ -178,7 +181,7 @@ export default function TrackerPage() {
                 <tbody>
                   {calls.filter(c=>`${c.house} ${c.symbol}`.toLowerCase().includes(search.toLowerCase())).map((c) => (
                     <tr key={c.id} className="border-b border-line/40 hover:bg-raised/20 font-mono text-xs">
-                      <td className="py-2.5 px-3 text-body">{c.house}</td>
+                      <td className="py-2.5 px-3 text-body">{c.house}<span className="block mt-1 text-muted">{c.analyst_name||"Analyst not identified"}</span></td>
                       <td className="py-2.5 px-3 text-body font-semibold">{c.symbol}</td>
                       <td className={`py-2.5 px-3 text-center font-bold ${RATING_COLORS[c.rating] || "text-muted"}`}>{c.rating}</td>
                       <td className="py-2.5 px-3 text-right text-muted">{Number(c.price_at_call).toFixed(2)}</td>
@@ -227,6 +230,7 @@ export default function TrackerPage() {
               <Field label="HORIZON (DAYS)" type="number" placeholder="365" value={form.horizon_days} onChange={(v) => setF("horizon_days", v)} />
             </div>
             <Field label="ORIGINAL RESEARCH REPORT URL (REQUIRED)" type="url" placeholder="https://.../dated-research-report" value={form.source_url} onChange={(v)=>setF("source_url",v)} />
+            <Field label="ANALYST NAME (IF NAMED IN ORIGINAL REPORT)" placeholder="Exact published analyst name" value={form.analyst_name} onChange={(v)=>setF("analyst_name",v)} />
             <Field label="NOTE (OPTIONAL)" placeholder="Source / thesis / link" value={form.note} onChange={(v) => setF("note", v)} />
             <button onClick={submit} disabled={!formValid || submitting} className="w-full py-3 rounded bg-amber text-ink font-display font-semibold text-sm hover:bg-amber/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
               {submitting ? "Adding…" : "Add Call to Tracker"}
