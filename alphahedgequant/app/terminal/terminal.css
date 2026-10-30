@@ -23,3 +23,52 @@
 .qt-watch-row.selected{background:#18130b}
 .qt-results,.qt-chain-scroll th{background:#0a0a0a}
 .qt-linked-symbol{color:var(--qt-gold);font:11px ui-monospace,monospace;border:1px solid #3e3020;padding:7px 10px}
+
+/* In-terminal company research workbench, isolated from every other page. */
+.qt-intel{padding:12px;background:#000;color:#d6e0ec;min-height:650px;font-size:12px}
+.qt-intel-head{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:14px 16px;margin-bottom:10px;border:1px solid #252525;background:#070707}
+.qt-intel-kicker{font:10px ui-monospace,monospace;letter-spacing:.13em;color:var(--qt-gold)}
+.qt-intel-head h2{font-size:22px;font-weight:600;color:#e5e5e5;margin:6px 0 0}
+.qt-intel-source{font:10px ui-monospace,monospace;color:#bba171;text-align:right}
+.qt-intel-alert{border:1px solid #694e26;background:#19120a;color:#e4bb7e;padding:13px 15px;margin:10px 0;line-height:1.7}
+.qt-company-overview{display:flex;justify-content:space-between;gap:30px;border:1px solid #242424;padding:18px;background:#080808}
+.qt-company-overview h3{font-size:22px;color:#e1e6ea;font-weight:600}.qt-company-overview p{color:#97a8b9;margin:5px 0;line-height:1.75}
+.qt-company-description{max-width:1050px}.qt-intel-quote{display:flex;min-width:170px;flex-direction:column;align-items:end;gap:6px}.qt-intel-quote strong{font:28px ui-monospace,monospace;color:var(--qt-gold)}.qt-intel-quote small{color:#8595a8}
+.qt-intel-grid{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:6px;margin:8px 0}
+.qt-intel-metric{background:#080808;border:1px solid #242424;padding:13px;min-width:0;display:flex;flex-direction:column;gap:8px}
+.qt-intel-metric span{font:10px ui-monospace,monospace;color:#8b9ba8;text-transform:uppercase}.qt-intel-metric b{font:16px ui-monospace,monospace;font-weight:600;color:#e0e4e9;overflow-wrap:anywhere}
+.qt-intel-tables{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin:10px 0;align-items:start}
+.qt-intel .qt-panel{background:#080808!important;border-color:#252525}
+.qt-fin-scroll{overflow-x:auto}
+.qt-financial-table{border-collapse:collapse;width:100%;font:11px ui-monospace,monospace;white-space:nowrap;text-align:right}
+.qt-financial-table th,.qt-financial-table td{border-bottom:1px solid #232323;padding:12px 10px}
+.qt-financial-table th{text-align:right;color:#98a8b8;background:#111}.qt-financial-table td{color:#d2dbe4}
+.qt-financial-table th:first-child,.qt-financial-table td:first-child{text-align:left}
+.qt-financial-table tr:hover td{background:#161616}.qt-financial-table tr .qt-sens-base{background:#463518;color:var(--qt-gold)}
+.qt-intel-note{color:#9aabbb;border:1px solid #242424;background:#080808;padding:13px 15px;margin:10px 0;line-height:1.8}.qt-intel-note a{color:var(--qt-gold);text-decoration:underline}
+.qt-intel-story{padding:15px 17px;border:1px solid #3d311e;background:#0d0b07;margin-bottom:10px}
+.qt-intel-story strong{color:var(--qt-gold);font:12px ui-monospace,monospace}.qt-intel-story p{margin-top:8px;color:#9ea8b5;line-height:1.75}
+.qt-intel-story textarea{width:100%;min-height:95px;resize:vertical;margin-top:12px;background:#050505;border:1px solid #393029;color:#e6e6e6;padding:12px;line-height:1.6;font-size:12px}
+.qt-intel-assumptions{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}
+.qt-assumption{border:1px solid #242424;background:#080808;display:flex;flex-direction:column;gap:8px;padding:13px}
+.qt-assumption>span{color:#e1d2b5;font-weight:600}.qt-assumption input{width:100%;font:16px ui-monospace,monospace!important;padding:9px!important;background:#030303!important}
+.qt-assumption small{color:#8998a9;line-height:1.5}
+.qt-intel-actions{display:flex;align-items:center;flex-wrap:wrap;gap:10px;margin:11px 0;color:#9fb3c2}
+.qt-intel-actions button,.qt-peer-controls button,.qt-network-form button{padding:11px 14px;border:1px solid #705b3a;color:var(--qt-gold);background:#19140a;font-weight:600}
+.qt-intel-actions button:hover,.qt-peer-controls button:hover{background:#302513}
+.qt-valuation-summary{display:grid;grid-template-columns:repeat(4,1fr);gap:7px;margin:10px 0}
+.qt-valuation-summary>div{border:1px solid #332c21;background:#0d0c0a;padding:15px;display:flex;flex-direction:column;gap:10px}
+.qt-valuation-summary small{font-size:11px;color:#9baabd}.qt-valuation-summary strong{color:var(--qt-gold);font:18px ui-monospace,monospace}
+.qt-network-list{max-height:460px;overflow:auto}.qt-network-item{border-bottom:1px solid #252525;padding:16px}
+.qt-network-row{display:flex;align-items:center;justify-content:space-between;gap:8px}.qt-network-row b{color:#e4e8ec;font-size:14px}.qt-network-row strong{color:var(--qt-gold);font:13px ui-monospace,monospace}
+.qt-network-meta{color:#91a1b1;font-size:10px;margin-top:9px}.qt-network-item p{color:#b3bfc9;line-height:1.7;margin-top:10px}.qt-network-item a{display:block;margin-top:11px;color:#78b8e1}
+.qt-network-form{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;padding:16px;border:1px solid #3b3225;background:#080808}
+.qt-network-form>p{grid-column:1/-1;color:#c7b28e}.qt-network-form label{display:flex;flex-direction:column;gap:6px;color:#d1d7df;font-size:11px}
+.qt-network-form input,.qt-network-form select,.qt-network-form textarea{width:100%;min-height:36px;background:#030303!important;border:1px solid #303030;padding:8px!important;color:#e3e6e9}
+.qt-network-form label:has(textarea){grid-column:1/-1}.qt-network-form button{grid-column:1/-1;justify-self:start}
+.qt-peer-controls{display:flex;align-items:end;flex-wrap:wrap;gap:10px;margin-bottom:13px}
+.qt-peer-controls label{display:flex;flex-direction:column;gap:6px;color:#a3b1bf;width:min(420px,100%)}.qt-peer-controls input{font:12px ui-monospace,monospace;padding:12px;background:#090909!important}
+.qt-intel-bottom{color:#788b9c;margin-top:20px;border-top:1px solid #2b2b2b;padding:15px 0;text-align:center;font-size:10px}
+@media(max-width:1120px){.qt-intel-grid{grid-template-columns:repeat(3,1fr)}.qt-intel-assumptions{grid-template-columns:repeat(3,minmax(0,1fr))}}
+@media(max-width:780px){.qt-intel-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.qt-intel-assumptions{grid-template-columns:repeat(2,minmax(0,1fr))}.qt-intel-tables{grid-template-columns:1fr}.qt-valuation-summary{grid-template-columns:1fr 1fr}.qt-company-overview{flex-direction:column}.qt-intel-quote{align-items:start}.qt-network-form{grid-template-columns:1fr}}
+@media(max-width:460px){.qt-intel-grid{grid-template-columns:1fr 1fr}.qt-intel-assumptions{grid-template-columns:1fr}.qt-valuation-summary{grid-template-columns:1fr}}
