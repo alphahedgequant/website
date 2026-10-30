@@ -1,0 +1,40 @@
+name: Annual report disclosure indexing
+on:
+  workflow_dispatch:
+    inputs:
+      symbol:
+        description: NSE ticker (e.g. RELIANCE)
+        required: true
+        type: string
+      fiscal_period:
+        description: Fiscal period (e.g. FY2025-26)
+        required: true
+        type: string
+      annual_report_url:
+        description: Final direct HTTPS URL to a company annual-report PDF
+        required: true
+        type: string
+permissions:
+  contents: read
+jobs:
+  extract-report:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    concurrency:
+      group: report-${{ inputs.symbol }}-${{ inputs.fiscal_period }}
+      cancel-in-progress: false
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install PDF and database tools
+        run: pip install 'PyMuPDF==1.24.14' 'psycopg[binary]==3.2.3' 'requests==2.32.3'
+      - name: Index report passages for editorial review
+        working-directory: alphahedgequant
+        env:
+          NEON_DATABASE_URL: ${{ secrets.NEON_DATABASE_URL }}
+          REPORT_SYMBOL: ${{ inputs.symbol }}
+          REPORT_PERIOD: ${{ inputs.fiscal_period }}
+          REPORT_URL: ${{ inputs.annual_report_url }}
+        run: python scripts/annual_report_ingest.py --symbol "$REPORT_SYMBOL" --period "$REPORT_PERIOD" --url "$REPORT_URL"
