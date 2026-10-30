@@ -1,6 +1,7 @@
 "use client";
 import {useCallback,useEffect,useMemo,useState} from "react";
 import Link from "next/link";
+import TerminalWorkspace from "@/components/TerminalWorkspace";
 const QUICK_SYMBOLS=["RELIANCE","HDFCBANK","ICICIBANK","TCS","INFY","SBIN","ITC","LT"];
 const fmt=n=>Number(n||0).toLocaleString("en-IN",{maximumFractionDigits:2});
 const compact=n=>Number(n||0).toLocaleString("en-IN",{notation:"compact",maximumFractionDigits:1});
@@ -67,6 +68,7 @@ export default function Terminal(){
   <div className="flex flex-wrap items-center gap-2 mb-4"><span className="text-xs text-muted">Quick open:</span>{QUICK_SYMBOLS.map(v=><button type="button" key={v} onClick={()=>selectStock(v)} className={`rounded border px-2 py-1 font-mono text-[11px] ${symbol===v?"border-amber text-amber":"border-line text-muted hover:border-amber/40"}`}>{v}</button>)}<span className="text-xs text-muted">Other NSE cash equities: use search above.</span></div>
   <p className="text-xs text-muted mb-4">1-second mode checks Upstox REST snapshots; it is not an exchange tick-by-tick or WebSocket stream. If quotes stall or rate limits apply, choose 5 or 30 seconds. Polling pauses in background tabs.</p>
   {error&&<div role="status" className="rounded-lg border border-amber/30 bg-amber/5 p-4 text-sm text-amber mb-5">Live Upstox quote unavailable: {error}. Depth and price intentionally remain blank. Reconnect the backend Upstox session if needed.</div>}
+  <TerminalWorkspace symbol={symbol} quote={quote} history={history} refreshMs={refreshMs} error={error} onSelectStock={selectStock}/>
   <div className="grid grid-cols-2 xl:grid-cols-4 gap-3">
    {[["LAST TRADED PRICE",quote?.price!=null&&quote.price>0?"₹"+fmt(quote.price):"—"],["NET CHANGE",quote?.change!=null?"₹"+fmt(quote.change):"—"],["SESSION VOLUME",quote?.volume!=null?compact(quote.volume):"—"],["TOP 5 DEPTH IMBALANCE",imbalance==null?"—":imbalance.toFixed(1)+"%"]].map(([label,value])=><div className="card p-4" key={label}><p className="text-[11px] font-mono text-muted">{label}</p><p className="text-xl sm:text-3xl font-mono text-body mt-3 tabular-nums">{value}</p></div>)}
   </div>
