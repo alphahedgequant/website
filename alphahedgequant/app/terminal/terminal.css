@@ -81,3 +81,9 @@
 .qt-symbol-results button{display:block;padding:8px 11px;width:100%;text-align:left;border-bottom:1px solid #303030}
 .qt-symbol-results strong{display:block;color:var(--qt-gold);font:12px ui-monospace,monospace}
 .qt-symbol-results small{display:block;color:#9baab9;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;margin-top:4px}
+
+.qt-intel-capital{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:8px;margin-top:12px}
+.qt-intel-capital label{display:flex;flex-direction:column;gap:7px;color:#b8bdc2;font:11px ui-monospace,monospace}
+.qt-intel-capital input{width:100%;padding:9px!important;background:#030303!important;color:#e1e6ed;border:1px solid #413b31}
+@media(max-width:1000px){.qt-intel-capital{grid-template-columns:repeat(3,minmax(0,1fr))}}
+@media(max-width:600px){.qt-intel-capital{grid-template-columns:repeat(2,minmax(0,1fr))}}
