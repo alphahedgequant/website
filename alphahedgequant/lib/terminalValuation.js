@@ -47,3 +47,20 @@ export function sensitivity(base){
  const cols=[-.01,-.005,0,.005,.01].map(d=>g+d),rows=[-.02,-.01,0,.01,.02].map(d=>w+d);
  return {growths:cols,discounts:rows,cells:rows.map(rate=>cols.map(growth=>modelValue({...base,wacc:rate,stableGrowth:growth})))};
 }
+
+export function reverseGrowth(base,observedEquityCr){
+ const equity=finite(observedEquityCr),debt=finite(base.netDebtCr);
+ if(equity===null||debt===null||equity<=0)return {ok:false,error:"Observed market cap and analyst-supplied net debt required"};
+ const target=equity+debt;
+ const low=-.25,high=1.0;
+ const bottom=modelValue({...base,growth:low}),top=modelValue({...base,growth:high});
+ if(!bottom.ok||!top.ok)return {ok:false,error:"Model assumptions invalid"};
+ const upward=top.enterpriseValueCr>bottom.enterpriseValueCr;
+ const lo=upward?bottom.enterpriseValueCr:top.enterpriseValueCr,hi=upward?top.enterpriseValueCr:bottom.enterpriseValueCr;
+ if(target<lo||target>hi)return {ok:false,error:"Observed enterprise value is outside the model's tested growth range (−25% to +100%)"};
+ let a=low,b=high,mid=null;
+ for(let i=0;i<65;i++){mid=(a+b)/2;const v=modelValue({...base,growth:mid});if(!v.ok)return {ok:false,error:v.error};
+ if((v.enterpriseValueCr<target)===upward)a=mid;else b=mid;}
+ mid=(a+b)/2;
+ return {ok:true,impliedInitialGrowth:mid,observedEnterpriseCr:target};
+}
