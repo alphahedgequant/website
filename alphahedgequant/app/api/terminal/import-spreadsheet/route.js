@@ -33,9 +33,12 @@ export async function POST(req){
  const sql=neon(process.env.NEON_DATABASE_URL);
  try{
   await sql`CREATE TABLE IF NOT EXISTS terminal_spreadsheet_facts(symbol TEXT NOT NULL,company_name TEXT NOT NULL,section TEXT NOT NULL,period DATE NOT NULL,metric TEXT NOT NULL,value NUMERIC(24,4) NOT NULL,source_type TEXT NOT NULL DEFAULT 'user_uploaded_workbook',verification_status TEXT NOT NULL DEFAULT 'unverified',uploaded_by TEXT NOT NULL,updated_at TIMESTAMPTZ NOT NULL DEFAULT now(),PRIMARY KEY(symbol,section,period,metric))`;
-  for(const [symbol,name,section,period,metric,value] of entries){
-   await sql`INSERT INTO terminal_spreadsheet_facts(symbol,company_name,section,period,metric,value,uploaded_by) VALUES(${symbol},${name},${section},${period},${metric},${value},${userId}) ON CONFLICT(symbol,section,period,metric) DO UPDATE SET value=EXCLUDED.value,company_name=EXCLUDED.company_name,verification_status='unverified',uploaded_by=EXCLUDED.uploaded_by,updated_at=now()`;
-  }
+  const payload=JSON.stringify(entries.map(([symbol,company_name,section,period,metric,value])=>({symbol,company_name,section,period,metric,value})));
+  await sql`INSERT INTO terminal_spreadsheet_facts(symbol,company_name,section,period,metric,value,uploaded_by)
+    SELECT x.symbol,x.company_name,x.section,x.period::date,x.metric,x.value,${userId}
+    FROM jsonb_to_recordset(${payload}::jsonb) AS x(symbol text,company_name text,section text,period text,metric text,value numeric)
+    ON CONFLICT(symbol,section,period,metric) DO UPDATE
+    SET value=EXCLUDED.value,company_name=EXCLUDED.company_name,verification_status='unverified',uploaded_by=EXCLUDED.uploaded_by,updated_at=now()`;
   return Response.json({ok:true,companies:Object.keys(data).length,facts:entries.length,status:"unverified"});
  }catch{return Response.json({error:"Database import failed"},{status:503})}
 }
