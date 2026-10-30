@@ -3,6 +3,7 @@ import {useCallback,useEffect,useMemo,useState} from "react";
 import {modelValue,scenarioCases,sensitivity,reverseGrowth} from "@/lib/terminalValuation";
 import TerminalReportExcerpts from "@/components/TerminalReportExcerpts";
 import TerminalAuditedFinancials from "@/components/TerminalAuditedFinancials";
+import TerminalReviewedFinancialFacts from "@/components/TerminalReviewedFinancialFacts";
 import {VERIFIED_FINANCIAL_SNAPSHOTS} from "@/lib/terminalAuditedSeed";
 
 const FMT=n=>n===null||n===undefined||!Number.isFinite(Number(n))?"—":Number(n).toLocaleString("en-IN",{maximumFractionDigits:2});
@@ -66,6 +67,7 @@ export default function TerminalIntelligence({symbol,tab}){
   <div className="qt-intel-grid">{info.map(([label,key,unit,display])=><div className="qt-intel-metric" key={key}><span>{label}</span><b>{num(f[key])!=null?display(num(f[key])):"—"}</b></div>)}</div>
   <div className="qt-intel-tables"><div className="qt-panel">{panel("ANNUAL FINANCIAL SUMMARY","As supplied by data provider")}<table className="qt-financial-table"><thead><tr><th>Fiscal period</th><th>Revenue (₹ Cr)</th><th>Earnings (₹ Cr)</th><th>Net margin</th></tr></thead><tbody>{annual.length?annual.map((a,i)=>{const rev=num(a.revenue),prof=num(a.profit);return <tr key={i}><td>{a.label}</td><td>{rev!=null?FMT(rev/1e7):"—"}</td><td>{prof!=null?FMT(prof/1e7):"—"}</td><td>{rev>0&&prof!=null?PCT(prof/rev*100):"—"}</td></tr>}):<tr><td colSpan="4">Annual financial history unavailable. No values inferred.</td></tr>}</tbody></table></div><div className="qt-panel">{panel("QUARTERLY FINANCIAL SUMMARY","As supplied by data provider")}<table className="qt-financial-table"><thead><tr><th>Period</th><th>Revenue (₹ Cr)</th><th>Earnings (₹ Cr)</th></tr></thead><tbody>{quarterly.length?quarterly.map((a,i)=><tr key={i}><td>{a.label}</td><td>{num(a.revenue)!=null?FMT(num(a.revenue)/1e7):"—"}</td><td>{num(a.profit)!=null?FMT(num(a.profit)/1e7):"—"}</td></tr>):<tr><td colSpan="3">Quarterly values unavailable.</td></tr>}</tbody></table></div></div>
   <TerminalAuditedFinancials symbol={symbol} view="company"/>
+  <TerminalReviewedFinancialFacts symbol={symbol}/>
   <TerminalReportExcerpts symbol={symbol} scope="financial"/>
   <div className="qt-intel-note">Source: {company?.provider||"Unverified"}. Financial periods may differ by issuer. Yahoo's summarized earnings can differ from audited consolidated statements. Confirm with annual reports before investment modeling. <a href="https://www.nseindia.com/companies-listing/corporate-filings-announcements" target="_blank" rel="noreferrer">NSE corporate filings ↗</a></div>
  </>}
