@@ -20,6 +20,7 @@ on:
       - '.github/workflows/annual-report-ingest.yml'
 permissions:
   contents: read
+  id-token: write
 jobs:
   index-report:
     runs-on: ubuntu-latest
@@ -54,6 +55,13 @@ jobs:
             --period "$REPORT_PERIOD" \
             --url "$REPORT_URL" \
             --emit-json "$RUNNER_TEMP/annual-report-review.json"
+      - name: Submit pending evidence to Vercel Neon via short-lived GitHub OIDC
+        env:
+          INGEST_URL: https://www.alphahedgequant.com/api/terminal/ingest
+        run: |
+          python alphahedgequant/scripts/report_oidc_submit.py \
+            --artifact "$RUNNER_TEMP/annual-report-review.json" \
+            --endpoint "$INGEST_URL"
       - name: Preserve review-only output
         if: always()
         uses: actions/upload-artifact@v4
