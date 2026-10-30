@@ -12,6 +12,8 @@ const isPublicRoute = createRouteMatcher([
   "/disclaimer",
   "/api/waitlist(.*)",
   "/api/cron(.*)",
+  // GitHub Actions uses short-lived OIDC, not Clerk sessions; endpoint validates signed identity itself.
+  "/api/terminal/ingest",
 ]);
 
 export default clerkMiddleware((auth, req) => {
