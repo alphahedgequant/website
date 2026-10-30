@@ -406,7 +406,7 @@ export default function Markets() {
       }
     }
     load();
-    const t = setInterval(load, 30000);
+    const t = setInterval(() => {if(!document.hidden) load();}, 15000);
     return () => { alive = false; clearTimeout(wake); clearInterval(t); };
   }, [market]);
 
@@ -704,7 +704,7 @@ export default function Markets() {
             <p className="text-xs text-muted/50 select-none" title="Coming in v2">
               Open in Compare | Save as Portfolio | Create Alert
             </p>
-            <p className="font-mono text-xs text-muted">Refresh: 30s | Page {safePage + 1} / {pages}</p>
+            <p className="font-mono text-xs text-muted">Refresh check: 15s | Page {safePage + 1} / {pages}</p>
           </div>
 
           <div className="card mt-2 overflow-x-auto">

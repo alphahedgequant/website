@@ -154,7 +154,7 @@ export default function OptionsPage() {
     if (autoRefresh && sessionOpen && status === "live") {
       timerRef.current = setInterval(() => {
         if (!document.hidden) loadChain(underlying, expiry, true);
-      }, 8000);
+      }, 5000);
     }
     return () => timerRef.current && clearInterval(timerRef.current);
   }, [autoRefresh, sessionOpen, status, underlying, expiry, loadChain]);
