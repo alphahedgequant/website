@@ -122,7 +122,7 @@ export default function IpoScreen() {
   useEffect(() => {
     let alive = true;
     setLoading(true);
-    fetch("/api/ipo")
+    const load = () => fetch("/api/ipo", {cache:"no-store"})
       .then((r) => r.json())
       .then((j) => {
         if (!alive) return;
@@ -131,7 +131,11 @@ export default function IpoScreen() {
       })
       .catch((e) => alive && setError(String(e)))
       .finally(() => alive && setLoading(false));
-    return () => { alive = false; };
+    load();
+    const timer = setInterval(() => {if(!document.hidden)load();}, 60000);
+    const onFocus = () => load();
+    window.addEventListener("focus", onFocus);
+    return () => { alive = false; clearInterval(timer);window.removeEventListener("focus",onFocus); };
   }, []);
 
   const list = data ? (data[tab] || []) : [];
