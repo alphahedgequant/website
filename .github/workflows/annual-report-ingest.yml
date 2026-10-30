@@ -1,4 +1,4 @@
-name: Annual report disclosure indexing
+name: Source-linked Annual Report Indexing
 on:
   workflow_dispatch:
     inputs:
@@ -11,30 +11,54 @@ on:
         required: true
         type: string
       annual_report_url:
-        description: Final direct HTTPS URL to a company annual-report PDF
+        description: Direct HTTPS URL to the original issuer annual report PDF
         required: true
         type: string
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/annual-report-ingest.yml'
 permissions:
   contents: read
 jobs:
-  extract-report:
+  index-report:
     runs-on: ubuntu-latest
-    timeout-minutes: 8
+    timeout-minutes: 12
     concurrency:
-      group: report-${{ inputs.symbol }}-${{ inputs.fiscal_period }}
+      group: annual-report-${{ github.event_name }}-${{ github.run_id }}
       cancel-in-progress: false
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
-      - name: Install PDF and database tools
+      - name: Install report reader
         run: pip install 'PyMuPDF==1.24.14' 'psycopg[binary]==3.2.3' 'requests==2.32.3'
-      - name: Index report passages for editorial review
+      - name: Index original issuer report (no automatic publication)
         working-directory: alphahedgequant
         env:
           NEON_DATABASE_URL: ${{ secrets.NEON_DATABASE_URL }}
+          EVENT: ${{ github.event_name }}
           REPORT_SYMBOL: ${{ inputs.symbol }}
           REPORT_PERIOD: ${{ inputs.fiscal_period }}
           REPORT_URL: ${{ inputs.annual_report_url }}
-        run: python scripts/annual_report_ingest.py --symbol "$REPORT_SYMBOL" --period "$REPORT_PERIOD" --url "$REPORT_URL"
+        run: |
+          if [ "$EVENT" = "push" ]; then
+            # Once after this workflow is committed to main: first actual issuer report.
+            REPORT_SYMBOL=RELIANCE
+            REPORT_PERIOD=FY2025-26
+            REPORT_URL=https://www.ril.com/reports/RIL-Integrated-Annual-Report-2025-26.pdf
+          fi
+          python scripts/annual_report_ingest.py \
+            --symbol "$REPORT_SYMBOL" \
+            --period "$REPORT_PERIOD" \
+            --url "$REPORT_URL" \
+            --emit-json "$RUNNER_TEMP/annual-report-review.json"
+      - name: Preserve review-only output
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: report-review-${{ github.run_id }}
+          path: ${{ runner.temp }}/annual-report-review.json
+          retention-days: 14
+          if-no-files-found: warn

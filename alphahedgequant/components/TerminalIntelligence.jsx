@@ -2,6 +2,9 @@
 import {useCallback,useEffect,useMemo,useState} from "react";
 import {modelValue,scenarioCases,sensitivity,reverseGrowth} from "@/lib/terminalValuation";
 import TerminalReportExcerpts from "@/components/TerminalReportExcerpts";
+import TerminalAuditedFinancials from "@/components/TerminalAuditedFinancials";
+import TerminalReviewedFinancialFacts from "@/components/TerminalReviewedFinancialFacts";
+import {VERIFIED_FINANCIAL_SNAPSHOTS} from "@/lib/terminalAuditedSeed";
 
 const FMT=n=>n===null||n===undefined||!Number.isFinite(Number(n))?"—":Number(n).toLocaleString("en-IN",{maximumFractionDigits:2});
 const CR=n=>n===null||n===undefined?"—":"₹"+FMT(n)+" Cr";
@@ -37,7 +40,8 @@ export default function TerminalIntelligence({symbol,tab}){
   try{const saved=JSON.parse(localStorage.getItem("ahq:terminal:valuation:"+symbol)||"null");setAssumptions(saved?.assumptions?{...init(),...saved.assumptions}:init());setStory(typeof saved?.story==="string"?saved.story:"")}catch{setAssumptions(init());setStory("")}
   fetch("/api/terminal/company?symbol="+encodeURIComponent(symbol),{signal:abort.signal,cache:"no-store"}).then(async r=>{const j=await r.json();if(!r.ok||!j.ok)throw Error(j.error||"Financials unavailable");return j}).then(j=>{if(abort.signal.aborted)return;setCompany(j);setStatus("ready");
     const financials=j.data?.fundamentals||{},annual=[...(j.data?.annual||[])].filter(x=>num(x.revenue)>0).sort((a,b)=>String(b.label).localeCompare(String(a.label)));
-    const rv=annual[0]?num(annual[0].revenue)/1e7:null;
+    const audited=VERIFIED_FINANCIAL_SNAPSHOTS[symbol];
+    const rv=audited?.years?.[0]?.income?.revenueFromOperations??(annual[0]?num(annual[0].revenue)/1e7:null);
     setAssumptions(prev=>({...prev,revenueCr:prev.revenueCr|| (rv!=null?String(Math.round(rv*100)/100):""),currentMarginPct:prev.currentMarginPct==="15"&&num(financials.operatingMargin)!=null?String(financials.operatingMargin):prev.currentMarginPct,sharesCr:prev.sharesCr||((num(financials.marketCap)>0&&num(j.data?.price)>0)?String(Math.round(num(financials.marketCap)/num(j.data.price)/1e5)/100):"")}));
   }).catch(e=>{if(!abort.signal.aborted){setStatus("error");setError(e.message)}});
   loadRelations(symbol);
@@ -62,6 +66,8 @@ export default function TerminalIntelligence({symbol,tab}){
   <div className="qt-company-overview"><div><h3>{c?.name||symbol}</h3><p>{[c?.sector,c?.industry].filter(Boolean).join(" / ")||"Sector classification not returned"}</p><p className="qt-company-description">{c?.about||"A verified business description is not available from the connected data provider."}</p></div><div className="qt-intel-quote"><small>Reference price (provider)</small><strong>{num(c?.price)>0?"₹"+FMT(c.price):"—"}</strong><small>{num(c?.priceChangePct)!=null?PCT(c.priceChangePct)+" reported change":"Quote unavailable"}</small></div></div>
   <div className="qt-intel-grid">{info.map(([label,key,unit,display])=><div className="qt-intel-metric" key={key}><span>{label}</span><b>{num(f[key])!=null?display(num(f[key])):"—"}</b></div>)}</div>
   <div className="qt-intel-tables"><div className="qt-panel">{panel("ANNUAL FINANCIAL SUMMARY","As supplied by data provider")}<table className="qt-financial-table"><thead><tr><th>Fiscal period</th><th>Revenue (₹ Cr)</th><th>Earnings (₹ Cr)</th><th>Net margin</th></tr></thead><tbody>{annual.length?annual.map((a,i)=>{const rev=num(a.revenue),prof=num(a.profit);return <tr key={i}><td>{a.label}</td><td>{rev!=null?FMT(rev/1e7):"—"}</td><td>{prof!=null?FMT(prof/1e7):"—"}</td><td>{rev>0&&prof!=null?PCT(prof/rev*100):"—"}</td></tr>}):<tr><td colSpan="4">Annual financial history unavailable. No values inferred.</td></tr>}</tbody></table></div><div className="qt-panel">{panel("QUARTERLY FINANCIAL SUMMARY","As supplied by data provider")}<table className="qt-financial-table"><thead><tr><th>Period</th><th>Revenue (₹ Cr)</th><th>Earnings (₹ Cr)</th></tr></thead><tbody>{quarterly.length?quarterly.map((a,i)=><tr key={i}><td>{a.label}</td><td>{num(a.revenue)!=null?FMT(num(a.revenue)/1e7):"—"}</td><td>{num(a.profit)!=null?FMT(num(a.profit)/1e7):"—"}</td></tr>):<tr><td colSpan="3">Quarterly values unavailable.</td></tr>}</tbody></table></div></div>
+  <TerminalAuditedFinancials symbol={symbol} view="company"/>
+  <TerminalReviewedFinancialFacts symbol={symbol}/>
   <TerminalReportExcerpts symbol={symbol} scope="financial"/>
   <div className="qt-intel-note">Source: {company?.provider||"Unverified"}. Financial periods may differ by issuer. Yahoo's summarized earnings can differ from audited consolidated statements. Confirm with annual reports before investment modeling. <a href="https://www.nseindia.com/companies-listing/corporate-filings-announcements" target="_blank" rel="noreferrer">NSE corporate filings ↗</a></div>
  </>}
@@ -83,6 +89,7 @@ export default function TerminalIntelligence({symbol,tab}){
  {tab==="NETWORK"&&<>
  <div className="qt-intel-story"><strong>DISCLOSED CUSTOMER & SUPPLIER RELATIONSHIPS</strong><p>Source-backed business segments, geographic sales mix, named customers and suppliers. Not all companies name major counterparties. Shares are shown only with a named denominator and fiscal period; unknown percentages stay unknown.</p></div>
  <div className="qt-intel-tables">{["segment","geography","customer","supplier"].map(type=><div className="qt-panel" key={type}>{panel(type==="segment"?"REPORTED BUSINESS SEGMENTS / REVENUE MIX":type==="geography"?"REPORTED GEOGRAPHIC REVENUE MIX":type==="customer"?"MAJOR CUSTOMERS / REVENUE EXPOSURE":"SUPPLIER NETWORK / PROCUREMENT EXPOSURE","Primary-document citations")}<div className="qt-network-list">{relations.filter(x=>x.relation_type===type).length?relations.filter(x=>x.relation_type===type).map(x=><div key={x.id} className="qt-network-item"><div className="qt-network-row"><b>{x.entity_name}</b><strong>{x.share_pct!=null?PCT(x.share_pct):"Share not reported"}</strong></div><div className="qt-network-meta">{x.share_basis.replaceAll("_"," ")} · {x.fiscal_period} · {x.document_title}{x.source_page?" · page "+x.source_page:""}</div><p>{x.evidence}</p><a href={x.source_url} target="_blank" rel="noopener noreferrer">View original source ↗</a></div>):<div className="qt-empty">No source-backed {type} disclosures have been entered for {symbol}. Missing records mean unavailable data, not zero exposure.</div>}</div></div>)}</div>
+ <TerminalAuditedFinancials symbol={symbol} view="network"/>
  <TerminalReportExcerpts symbol={symbol} scope="network"/>
  {relError&&<div className="qt-intel-alert">Relationship database: {relError}</div>}
  <div className="qt-intel-note">Indian Ind AS 108 generally requires disclosure when a single external customer accounts for at least 10% of revenue, but it does not require the customer's identity. Supplier identities, purchasing percentages and complete supply-chain mapping usually require additional licensed datasets or direct company disclosures.</div>

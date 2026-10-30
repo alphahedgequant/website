@@ -141,3 +141,31 @@
 .qt-report-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:11px}
 .qt-report-actions button{padding:10px 12px;border:1px solid #665133;background:#18130a;font-size:13px;color:#ebc27e}
 .qt-report-actions button:last-child{border-color:#494949;color:#e4e4e4;background:#141414}
+
+/* Source-cited audited financial statement tables: isolated to Quant Terminal */
+.qt-audited{margin:16px 0;background:#050505;border:1px solid #303030;color:#f1f3f5;font-size:14px}
+.qt-audited-bar{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;padding:16px 18px;background:#0c0c0c;border-bottom:1px solid #333}
+.qt-audited-bar>div{display:flex;flex-direction:column;gap:7px}
+.qt-audited-bar>div span{font:11px ui-monospace,monospace;color:#ecc079}
+.qt-audited-bar>div strong{font-size:20px;color:#fff}
+.qt-audited-valid{font:11px ui-monospace,monospace;color:#7cdbaf}
+.qt-audited-warning{font:12px ui-monospace,monospace;color:#ffbc87;padding:10px}
+.qt-audited-source,.qt-audited-caution{font-size:13px;line-height:1.75;padding:12px 17px;color:#dce5ef}
+.qt-audited-source a,.qt-audited-caution a,.qt-audited-empty a{color:#9fcaf2;text-decoration:underline}
+.qt-audited-tables{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;padding:8px 12px 13px}
+.qt-audited-tables>.qt-panel:last-child{grid-column:1/-1}
+.qt-audited .qt-panel{background:#080808!important}
+.qt-audited .qt-financial-table{font-size:13px;table-layout:auto}
+.qt-audited .qt-financial-table th,.qt-audited .qt-financial-table td{padding:12px 13px;white-space:normal;color:#f3f4f6}
+.qt-audited .qt-financial-table th{color:#eec885}
+.qt-audited-empty{padding:17px 19px;color:#e1e7ed;font-size:14px;line-height:1.8}
+.qt-audited-mix{padding:15px 18px}
+.qt-audited-mix>p{font-size:13px;line-height:1.65;color:#d9e2eb}
+.qt-mix-row{padding:10px 0}
+.qt-mix-row>div:first-child{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;font-size:13px;color:#e9edf2}
+.qt-mix-row strong{font-weight:600}.qt-mix-row span{color:#e1c48c;font:12px ui-monospace,monospace}
+.qt-mix-track{margin-top:7px;height:8px;background:#1f252d;overflow:hidden;border-radius:3px}
+.qt-mix-track>div{height:100%;background:linear-gradient(90deg,#98713a,#e6b86b)}
+.qt-mix-total{border-top:1px solid #353535;padding:14px 0 5px;display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap}
+.qt-mix-total span{color:#e6be77;font:13px ui-monospace,monospace}
+@media(max-width:1000px){.qt-audited-tables{grid-template-columns:1fr}.qt-audited-tables>.qt-panel:last-child{grid-column:auto}}
