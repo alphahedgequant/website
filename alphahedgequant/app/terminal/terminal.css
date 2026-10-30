@@ -366,3 +366,31 @@
 .qt-reading-clean .qt-intel-bottom{margin:65px 0 0!important;padding-top:24px!important;border-top:1px dashed #d1c5b4!important}
 @media(max-width:850px){.qt-shell>.qt-reading-clean{width:calc(100% - 24px);padding:40px 36px 55px 52px!important;margin:16px auto!important}.qt-shell>.qt-reading-clean:before{left:31px}.qt-reading-clean .qt-intel-grid{grid-template-columns:1fr!important}.qt-reading-clean .qt-company-overview p{font-size:17px!important}}
 @media(max-width:520px){.qt-shell>.qt-reading-clean{width:100%;padding:30px 22px 45px 34px!important;border-radius:0!important}.qt-shell>.qt-reading-clean:before{left:21px}.qt-reading-clean .qt-intel-head h2{font-size:34px!important}.qt-reading-clean .qt-intel-quote{flex-wrap:wrap!important}.qt-reading-clean .qt-intel-metric{align-items:flex-start!important}.qt-reading-clean .qt-financial-table{min-width:520px}}
+
+
+/* Paper-native audited filing and evidence components: no embedded dark terminal surfaces. */
+.qt-reading-clean :is(.qt-audited,.qt-fin-facts,.qt-report-evidence,.qt-report-body,.qt-audited-bar,.qt-audited-source,.qt-audited-caution,.qt-audited-mix,.qt-audited-tables,.qt-report-row,.qt-report-empty,.qt-audited-empty,.qt-intel-alert,.qt-report-review-head,.qt-audited-warning){background:transparent!important;color:#293b54!important;box-shadow:none!important}
+.qt-reading-clean :is(.qt-audited,.qt-fin-facts,.qt-report-evidence){border:0!important;margin:44px 0!important;padding:0!important}
+.qt-reading-clean .qt-audited-bar{padding:14px 0 20px!important;border:0!important;border-bottom:1px dashed #cfc1ad!important}
+.qt-reading-clean .qt-audited-bar>div span{color:#9a6d41!important;letter-spacing:.08em}
+.qt-reading-clean .qt-audited-bar>div strong{color:#263b59!important;font:700 clamp(22px,2.5vw,29px)/1.4 Georgia,serif!important}
+.qt-reading-clean .qt-audited-valid{color:#276b56!important}
+.qt-reading-clean :is(.qt-audited-source,.qt-audited-caution,.qt-report-body,.qt-audited-empty,.qt-report-empty){padding:16px 0!important;font-size:calc(15px * var(--qt-reader-scale))!important;line-height:1.85!important}
+.qt-reading-clean .qt-audited-tables{display:block!important;padding:0!important}
+.qt-reading-clean .qt-audited-tables>.qt-panel{display:block!important;grid-column:auto!important;margin:30px 0!important}
+.qt-reading-clean .qt-audited .qt-panel{background:transparent!important;border:0!important;padding:0!important}
+.qt-reading-clean .qt-audited .qt-financial-table{background:transparent!important;width:100%!important}
+.qt-reading-clean .qt-audited .qt-financial-table :is(td,th){color:#293e5a!important;border-color:#d9cdbb!important;font:500 calc(13px * var(--qt-reader-scale))/1.65 ui-sans-serif,system-ui,sans-serif!important}
+.qt-reading-clean .qt-audited .qt-financial-table th{background:#eee5d5!important;color:#805931!important;font-weight:700!important}
+.qt-reading-clean :is(.qt-report-empty,.qt-audited-empty,.qt-report-row,.qt-intel-alert){border:0!important;border-left:3px solid #c6a16c!important;border-radius:0!important;padding:14px 18px!important;margin:12px 0!important;background:rgba(226,207,171,.19)!important;color:#31435e!important}
+.qt-reading-clean :is(.qt-report-empty,.qt-audited-empty,.qt-report-row,.qt-intel-alert) :is(p,span,strong,b,small){color:#31435e!important}
+.qt-reading-clean .qt-report-row b,.qt-reading-clean .qt-report-review-head strong{color:#815b35!important}
+.qt-reading-clean .qt-report-review-head{border-bottom:1px dashed #cdbca5!important}
+.qt-reading-clean .qt-audited-mix{padding:20px 0!important}
+.qt-reading-clean .qt-audited-mix>p,.qt-reading-clean .qt-audited-source,.qt-reading-clean .qt-audited-caution{color:#41516b!important}
+.qt-reading-clean .qt-mix-row,.qt-reading-clean .qt-mix-total{color:#34445c!important}
+.qt-reading-clean .qt-report-actions button{background:#eae0cc!important;color:#2c405c!important;border-color:#c9b79e!important}
+.qt-reading-clean :is(.qt-report-row,.qt-report-empty,.qt-audited-source,.qt-audited-caution) a{color:#235d94!important}
+.qt-reading-clean .qt-panel-top{background:transparent!important}
+.qt-reading-clean .qt-panel-top strong{color:#293e5d!important}
+@media(max-width:850px){.qt-reading-clean .qt-audited-tables{display:block!important}.qt-reading-clean .qt-audited .qt-financial-table{min-width:480px}.qt-reading-clean .qt-audited .qt-fin-scroll{overflow-x:auto!important}}
