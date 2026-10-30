@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
+import {WORKBOOK_TICKERS} from "@/lib/terminalWorkbookStory";
 import { useRouter } from "next/navigation";
 import { api } from "@/lib/config";
 
@@ -489,7 +490,7 @@ export default function Markets() {
   const cell = (col, r) => {
     const v = r[col];
     switch (col) {
-      case "symbol": return <Link href={`/stock/${encodeURIComponent(v)}?market=${market}`} className="font-mono text-[#5aa9f5] hover:underline cursor-pointer">{v}</Link>;
+      case "symbol": return <span className="inline-flex items-center gap-2"><Link href={`/stock/${encodeURIComponent(v)}?market=${market}`} className="font-mono text-[#5aa9f5] hover:underline cursor-pointer">{v}</Link>{market==="NSE"&&WORKBOOK_TICKERS.includes(v)&&<Link href={`/terminal?symbol=${encodeURIComponent(v)}&tab=COMPANY`} className="rounded border border-amber/50 px-1.5 py-0.5 text-[10px] text-amber hover:bg-amber/10" title="Open uploaded research and historical financial data">Research</Link>}</span>;
       case "name": return <span className="text-body/90">{v || "-"}</span>;
       case "sector": case "industry": case "country": return <span className="text-body/80">{v || "-"}</span>;
       case "marketCap": return <span className="font-mono">{fmtCap(v, market)}</span>;
