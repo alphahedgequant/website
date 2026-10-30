@@ -30,9 +30,12 @@ export async function GET(request){
  try{
   const sql=neon(process.env.NEON_DATABASE_URL);await ensure(sql);
   const items=await sql`SELECT id,symbol,fiscal_period,source_url,source_page,category,evidence,created_at FROM terminal_report_excerpts WHERE symbol=${symbol} AND review_status='verified' ORDER BY fiscal_period DESC,source_page ASC LIMIT 75`;
+  const counts=await sql`SELECT category, COUNT(*)::int AS n FROM terminal_report_excerpts WHERE symbol=${symbol} AND review_status='pending_review' GROUP BY category`;
+  const pendingCount=counts.reduce((n,row)=>n+Number(row.n),0);
+  const pendingCategories=Object.fromEntries(counts.map(row=>[row.category,Number(row.n)]));
   const editorId=searchParams.get("review")==="1"?await editor():null;
   const pending=editorId?await sql`SELECT id,symbol,fiscal_period,source_url,source_page,category,evidence,created_at FROM terminal_report_excerpts WHERE symbol=${symbol} AND review_status='pending_review' ORDER BY created_at DESC LIMIT 80`:[];
-  return output({ok:true,items,pending,canReview:!!editorId});
+  return output({ok:true,items,pending,canReview:!!editorId,pendingCount,pendingCategories});
  }catch{return output({ok:false,error:"Annual-report evidence store unavailable"},503)}
 }
 export async function POST(request){
