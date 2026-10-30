@@ -37,7 +37,9 @@ export default function TerminalIntelligence({symbol,tab}){
  const [record,setRecord]=useState({relation_type:"customer",entity_name:"",share_pct:"",share_basis:"not_reported",fiscal_period:"",document_title:"",source_url:"",source_page:"",evidence:""});
  const loadRelations=useCallback(async(s)=>{setRelStatus("loading");setRelError("");try{const r=await fetch("/api/terminal/relationships?symbol="+encodeURIComponent(s),{cache:"no-store"}),j=await r.json();if(!r.ok||!j.ok)throw Error(j.error||"Unavailable");setRelations(j.items||[]);setRelStatus("ready")}catch(e){setRelations([]);setRelError(e.message);setRelStatus("error")}},[]);
  useEffect(()=>{const abort=new AbortController();setCompany(null);setStatus("loading");setError("");setPeers([]);setPeerList("");
-  try{const saved=JSON.parse(localStorage.getItem("ahq:terminal:valuation:"+symbol)||"null");setAssumptions(saved?.assumptions?{...init(),...saved.assumptions}:init());setStory(typeof saved?.story==="string"?saved.story:"")}catch{setAssumptions(init());setStory("")}
+  const verified=VERIFIED_FINANCIAL_SNAPSHOTS[symbol];
+  const modelDefaults={...init(),revenueCr:verified?.years?.[0]?.income?.revenueFromOperations!=null?String(verified.years[0].income.revenueFromOperations):""};
+  try{const saved=JSON.parse(localStorage.getItem("ahq:terminal:valuation:"+symbol)||"null");setAssumptions(saved?.assumptions?{...modelDefaults,...saved.assumptions}:modelDefaults);setStory(typeof saved?.story==="string"?saved.story:"")}catch{setAssumptions(modelDefaults);setStory("")}
   fetch("/api/terminal/company?symbol="+encodeURIComponent(symbol),{signal:abort.signal,cache:"no-store"}).then(async r=>{const j=await r.json();if(!r.ok||!j.ok)throw Error(j.error||"Financials unavailable");return j}).then(j=>{if(abort.signal.aborted)return;setCompany(j);setStatus("ready");
     const financials=j.data?.fundamentals||{},annual=[...(j.data?.annual||[])].filter(x=>num(x.revenue)>0).sort((a,b)=>String(b.label).localeCompare(String(a.label)));
     const audited=VERIFIED_FINANCIAL_SNAPSHOTS[symbol];
