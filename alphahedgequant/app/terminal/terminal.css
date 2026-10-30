@@ -87,3 +87,40 @@
 .qt-intel-capital input{width:100%;padding:9px!important;background:#030303!important;color:#e1e6ed;border:1px solid #413b31}
 @media(max-width:1000px){.qt-intel-capital{grid-template-columns:repeat(3,minmax(0,1fr))}}
 @media(max-width:600px){.qt-intel-capital{grid-template-columns:repeat(2,minmax(0,1fr))}}
+
+/* Research readability pass: scoped strictly to Quant Terminal. */
+.qt-intel{font-size:14px;line-height:1.7;color:#f5f6f8}
+.qt-intel-head{padding:19px 21px}
+.qt-intel-head h2{font-size:clamp(25px,2.2vw,32px);line-height:1.25;color:#fff;font-weight:700}
+.qt-intel-kicker{font-size:11px;color:#e9bd74}
+.qt-intel-source{font-size:11px;line-height:1.5;color:#dfbf88}
+.qt-intel-story,.qt-intel-note,.qt-intel-alert{padding:17px 19px;line-height:1.8;font-size:14px}
+.qt-intel-story p,.qt-intel-note,.qt-intel-alert,.qt-company-overview p,.qt-company-description,.qt-network-item p,.qt-network-meta,.qt-intel-bottom,.qt-watch-foot{color:#e0e5ed!important}
+.qt-intel-story p,.qt-network-item p,.qt-company-description{font-size:14px;line-height:1.8}
+.qt-intel-story strong,.qt-panel-top strong{font-size:13px;color:#ecc079}
+.qt-intel .qt-panel-top{padding:14px 16px;min-height:49px;align-items:center}
+.qt-intel .qt-panel-top span{color:#cbd5e1!important;font-size:11px;letter-spacing:0}
+.qt-intel .qt-empty{font-size:14px;color:#e1e6ed;padding:24px 19px;text-align:left;line-height:1.8}
+.qt-intel-metric{padding:16px}
+.qt-intel-metric span,.qt-valuation-summary small{font-size:12px;line-height:1.5;color:#d1dbe5}
+.qt-intel-metric b{font-size:19px;color:#fff}
+.qt-intel-quote strong,.qt-valuation-summary strong,.qt-network-row b{color:#fff}
+.qt-company-overview h3{font-size:24px;color:#fff}
+.qt-network-item{padding:19px}
+.qt-network-row b{font-size:16px;line-height:1.5}
+.qt-network-row strong{font-size:15px;color:#eec477}
+.qt-network-meta{font-size:12px;line-height:1.65}
+.qt-network-item a,.qt-intel-note a{color:#9dd4ff}
+.qt-financial-table{font-size:13px}
+.qt-financial-table th{font-size:12px;color:#fff;background:#151515}
+.qt-financial-table td{font-size:13px;color:#f2f4f7}
+.qt-financial-table th,.qt-financial-table td{padding:13px 11px}
+.qt-assumption>span,.qt-peer-controls label,.qt-network-form label,.qt-intel-capital label{font-size:13px;color:#f0f2f4}
+.qt-assumption small,.qt-intel-actions span{font-size:12px;color:#d0d9e4}
+.qt-intel input,.qt-intel select,.qt-intel textarea{font-size:14px!important;color:#fff!important}
+.qt-intel-actions button,.qt-network-form button,.qt-peer-controls button{font-size:13px;min-height:44px}
+.qt-intel-bottom{font-size:12px;line-height:1.8}
+.qt-symbol-bar{font-size:12px;color:#d6dce4}
+.qt-tabs button{font-size:11px}
+.qt-watch-row{font-size:12px}
+@media(max-width:750px){.qt-intel{font-size:14px;padding:9px}.qt-intel-head{padding:16px}.qt-intel-head h2{font-size:26px}.qt-intel-story,.qt-intel-note{padding:15px}.qt-intel .qt-empty{font-size:14px}.qt-intel .qt-panel-top{align-items:start}}
