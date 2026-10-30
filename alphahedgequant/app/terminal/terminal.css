@@ -410,3 +410,14 @@
 .qt-reading-clean .qt-audited-valid{color:#2f7257!important;font-weight:700!important}
 .qt-reading-clean .qt-network-row,.qt-reading-clean .qt-intel-metric{align-items:center!important}
 .qt-reading-clean :is(.qt-audited-warning,.qt-report-empty,.qt-audited-empty){font-family:Georgia,serif!important}
+
+
+/* Spreadsheet history follows the editorial paper reader, not the dark terminal theme. */
+.qt-reading-clean .qt-spreadsheet-history{margin:52px 0;border-top:1px dashed #cbbca6;padding-top:30px;color:#293d5a}
+.qt-reading-clean .qt-spreadsheet-history>h3{font:700 27px/1.4 Georgia,serif!important;color:#273b59!important}
+.qt-reading-clean .qt-spreadsheet-history>p{font:16px/1.9 Georgia,serif!important;color:#4a5670!important;margin:15px 0 25px}
+.qt-reading-clean .qt-spreadsheet-history h4{font:700 21px/1.4 Georgia,serif!important;color:#293d58!important;margin:32px 0 12px}
+.qt-reading-clean .qt-spreadsheet-history .qt-fin-scroll{overflow-x:auto!important;max-width:100%}
+.qt-reading-clean .qt-spreadsheet-history table{min-width:720px}
+.qt-reading-clean .qt-spreadsheet-history th:first-child{text-align:left;min-width:175px;position:sticky;left:0;background:#f0e8db!important;z-index:1}
+.qt-reading-clean .qt-spreadsheet-history td{white-space:nowrap;color:#2c4160!important;text-align:right}
