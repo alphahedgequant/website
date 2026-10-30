@@ -394,3 +394,19 @@
 .qt-reading-clean .qt-panel-top{background:transparent!important}
 .qt-reading-clean .qt-panel-top strong{color:#293e5d!important}
 @media(max-width:850px){.qt-reading-clean .qt-audited-tables{display:block!important}.qt-reading-clean .qt-audited .qt-financial-table{min-width:480px}.qt-reading-clean .qt-audited .qt-fin-scroll{overflow-x:auto!important}}
+
+
+/* Macro Outlook editorial type scale, number emphasis and highlights. */
+.qt-reading-clean{font-family:Georgia,"Iowan Old Style","Times New Roman",serif!important;font-size:calc(17px * var(--qt-reader-scale))!important;letter-spacing:-.006em}
+.qt-reading-clean .qt-intel-head h2{font-family:Georgia,"Iowan Old Style","Times New Roman",serif!important;font-weight:700!important;letter-spacing:-.025em!important}
+.qt-reading-clean :is(.qt-panel-top strong,.qt-intel-story strong,.qt-audited-bar strong,.qt-company-overview h3){font-family:Georgia,"Iowan Old Style","Times New Roman",serif!important;letter-spacing:-.015em!important}
+.qt-reading-clean :is(.qt-company-description,.qt-business-details>p,.qt-network-item p,.qt-report-row p,.qt-report-body>p,.qt-intel-story p){font-size:calc(17px * var(--qt-reader-scale))!important;line-height:1.95!important}
+.qt-reading-clean .qt-intel-metric b{display:inline!important;width:fit-content!important;line-height:1.3!important;box-decoration-break:clone;-webkit-box-decoration-break:clone;background:linear-gradient(to bottom,transparent 63%,#f0d976 63%,#f0d976 89%,transparent 89%)!important;font-family:Georgia,serif!important;font-weight:700!important}
+.qt-reading-clean .qt-intel-quote strong{background:linear-gradient(to bottom,transparent 65%,#f0d976 65%,#f0d976 90%,transparent 90%)!important;font-family:Georgia,serif!important}
+.qt-reading-clean .qt-network-row strong:not(:empty){color:#29415f!important;font-size:18px!important;font-weight:700!important;text-decoration:underline;text-decoration-color:#dfc269;text-decoration-thickness:4px;text-underline-offset:2px}
+.qt-reading-clean .qt-financial-table tbody td:is(:not(:first-child)){font-variant-numeric:tabular-nums}
+.qt-reading-clean .qt-financial-table tbody td:nth-child(2){color:#263b5a!important;font-weight:650!important}
+.qt-reading-clean .qt-financial-table tbody tr:hover{background:rgba(241,215,125,.18)!important}
+.qt-reading-clean .qt-audited-valid{color:#2f7257!important;font-weight:700!important}
+.qt-reading-clean .qt-network-row,.qt-reading-clean .qt-intel-metric{align-items:center!important}
+.qt-reading-clean :is(.qt-audited-warning,.qt-report-empty,.qt-audited-empty){font-family:Georgia,serif!important}
