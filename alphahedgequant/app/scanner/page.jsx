@@ -23,7 +23,7 @@ const STRATEGIES = [
 const SECTORS = ["All Sectors", "Technology", "Financial", "Energy", "Healthcare", "Consumer Cyclical", "Consumer Defensive", "Industrials", "Basic Materials", "Utilities", "Communication"];
 
 const API = process.env.NEXT_PUBLIC_API_URL || "https://zerohedgequant-backend.onrender.com";
-const REFRESH_MS = 5 * 60 * 1000; // 5 min
+const REFRESH_MS = 2 * 60 * 1000; // server-side recomputation budget
 
 function SignalBadge({ direction }) {
   const meta = SIGNAL_META[direction] || SIGNAL_META["HOLD"];
@@ -136,7 +136,7 @@ export default function ScannerPage() {
         <div>
           <h1 className="font-display text-3xl font-medium tracking-tight">Signal Scanner</h1>
           <p className="text-muted text-sm mt-1.5">
-            5-strategy composite signals across 50 NSE stocks · refreshes every 5 min
+            5-strategy composite signals across 50 NSE stocks · refreshes approximately every 2 min
           </p>
         </div>
         <div className="flex items-center gap-3">
