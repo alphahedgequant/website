@@ -7,6 +7,7 @@ explicitly provided by a repository maintainer; no speculative relationships are
 """
 import argparse
 import hashlib
+import json
 import ipaddress
 import os
 import re
@@ -18,7 +19,7 @@ import fitz
 import psycopg
 import requests
 
-MAX_BYTES = 25_000_000
+MAX_BYTES = 60_000_000
 CATEGORIES = {
     "financial_statements": [
         r"statement of profit and loss", r"consolidated balance sheet",
@@ -78,7 +79,7 @@ def download_pdf(url):
     response.raise_for_status()
     size = int(response.headers.get("Content-Length", 0))
     if size > MAX_BYTES:
-        raise ValueError("Annual report exceeds 25 MB limit")
+        raise ValueError("Annual report exceeds 60 MB limit")
     chunks, total = [], 0
     for chunk in response.iter_content(256 * 1024):
         total += len(chunk)
@@ -182,6 +183,7 @@ def main():
     parser.add_argument("--symbol", required=True)
     parser.add_argument("--period", required=True)
     parser.add_argument("--url", required=True)
+    parser.add_argument("--emit-json", help="Write candidate excerpts to a review artifact even when Neon is not configured")
     args = parser.parse_args()
     symbol = args.symbol.strip().upper()
     if not re.fullmatch(r"[A-Z0-9&_.-]{1,40}", symbol):
@@ -189,15 +191,27 @@ def main():
     if not re.fullmatch(r"[A-Za-z0-9 /-]{4,32}", args.period):
         parser.error("Invalid fiscal-period label")
     database_url = os.environ.get("NEON_DATABASE_URL")
-    if not database_url:
-        parser.error("Set NEON_DATABASE_URL in GitHub Actions secrets")
+    if not database_url and not args.emit_json:
+        parser.error("Configure NEON_DATABASE_URL or provide --emit-json for an offline review artifact")
     url = safe_source(args.url)
     pdf = download_pdf(url)
     with fitz.open(stream=pdf, filetype="pdf") as document:
         records = identify_candidates(document, url, symbol, args.period)
-        added = persist(database_url, records, symbol, args.period, url, document)
-        print(f"Indexed {len(document)} PDF pages. Found {len(records)} candidate passages; "
-              f"{added} newly added. All candidates require editorial verification.")
+        if args.emit_json:
+            artifact = {"symbol":symbol,"fiscal_period":args.period,"source_url":url,
+                        "page_count":len(document), "verification":"PENDING_REVIEW",
+                        "candidates":[{"symbol":row[0],"fiscal_period":row[1],"source_url":row[2],
+                                       "page":row[3],"category":row[4],"evidence":row[5],
+                                       "checksum":row[6]} for row in records]}
+            with open(args.emit_json,"w",encoding="utf-8") as output:
+                json.dump(artifact,output,ensure_ascii=False,indent=2)
+            print(f"Wrote {len(records)} pending excerpts to review artifact: {args.emit_json}")
+        if database_url:
+            added = persist(database_url, records, symbol, args.period, url, document)
+            print(f"Indexed {len(document)} PDF pages. Found {len(records)} candidate passages; "
+                  f"{added} newly added to Neon review queue.")
+        else:
+            print(f"Indexed {len(document)} pages; Neon secret absent, no database writes.")
     print("Nothing has been automatically published as audited figures or verified relationships.")
 
 
