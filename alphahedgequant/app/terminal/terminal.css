@@ -282,3 +282,45 @@
 .qt-reading-clean button:focus-visible,.qt-reading-clean summary:focus-visible{outline:3px solid #91bfff;outline-offset:3px}
 @media(max-width:850px){.qt-reader-toolbar{align-items:stretch}.qt-reader-tools{width:100%}.qt-reader-tools button{flex:1}.qt-reader-focus{max-width:100%}.qt-reading-clean .qt-intel-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(prefers-reduced-motion:reduce){.qt-reading-clean *{scroll-behavior:auto!important;transition:none!important}}
+
+
+/* AHQ paper research edition: scoped to COMPANY, NETWORK and PEERS */
+.qt-reading-clean{--paper:#faf7ef;--ink:#253651;--rule:rgba(99,126,164,.13);position:relative;max-width:1080px;margin:24px auto 45px!important;padding:62px clamp(25px,6.6vw,94px) 76px!important;border:1px solid #ddcfb9!important;border-radius:20px!important;color:var(--ink)!important;background:repeating-linear-gradient(to bottom,transparent 0,transparent 39px,var(--rule) 40px),var(--paper)!important;box-shadow:0 24px 80px #0007!important;font-family:Georgia,"Times New Roman",serif;line-height:1.9!important;overflow:visible}
+.qt-reading-clean:before{content:"";position:absolute;top:0;bottom:0;left:clamp(17px,4vw,68px);border-left:1px solid #e1aaa8;pointer-events:none}
+.qt-reading-clean .qt-intel-head{background:transparent!important;border:0!important;border-bottom:1px dashed #d9cdbb!important;border-radius:0!important;padding:0 0 26px!important;margin:0 0 35px!important;display:flex;align-items:flex-start}
+.qt-reading-clean .qt-intel-kicker{color:#a67445!important;font:700 12px/1.7 ui-monospace,monospace!important;letter-spacing:.14em}
+.qt-reading-clean .qt-intel-head h2{color:var(--ink)!important;font-family:ui-sans-serif,system-ui,sans-serif!important;font-weight:650!important;font-size:clamp(32px,4vw,48px)!important;letter-spacing:-.045em;line-height:1.18!important}
+.qt-reading-clean .qt-intel-source{color:#80684d!important}
+.qt-reading-clean .qt-company-overview,.qt-reading-clean .qt-intel-story,.qt-reading-clean .qt-panel,.qt-reading-clean .qt-network-item,.qt-reading-clean .qt-intel-metric,.qt-reading-clean .qt-peer-reading-card{background:rgba(255,253,247,.78)!important;color:var(--ink)!important;border:1px solid #e1d8ca!important;border-radius:8px!important;box-shadow:none!important}
+.qt-reading-clean .qt-company-overview{padding:26px!important}
+.qt-reading-clean .qt-company-overview h3{font:650 29px/1.25 ui-sans-serif,system-ui,sans-serif!important;color:var(--ink)!important}
+.qt-reading-clean :is(p,small,span,label,.qt-company-description,.qt-business-details>p,.qt-network-item p,.qt-network-meta,.qt-intel-story p,.qt-intel-note,.qt-report-body>p,.qt-report-row p,.qt-empty,.qt-intel-bottom,.qt-report-empty,.qt-audited-empty){color:#364762!important}
+.qt-reading-clean :is(.qt-company-description,.qt-business-details>p,.qt-network-item p,.qt-intel-story p,.qt-report-body>p,.qt-report-row p){font-family:Georgia,"Times New Roman",serif!important;font-size:calc(17px * var(--qt-reader-scale))!important;line-height:1.95!important}
+.qt-reading-clean :is(h3,h4,.qt-panel-top strong,.qt-intel-story strong,.qt-network-row b,.qt-network-row strong){color:#263b5c!important}
+.qt-reading-clean .qt-intel-metric span{color:#735c43!important;font:600 calc(12px * var(--qt-reader-scale))/1.5 ui-sans-serif,system-ui,sans-serif!important}
+.qt-reading-clean .qt-intel-metric b,.qt-reading-clean .qt-intel-quote strong{color:#253651!important}
+.qt-reading-clean .qt-intel-grid{grid-template-columns:repeat(3,minmax(0,1fr))!important;gap:12px!important}
+.qt-reading-clean .qt-intel-tables{grid-template-columns:1fr!important;gap:20px!important}
+.qt-reading-clean .qt-panel-top{background:#f1eadf!important}
+.qt-reading-clean .qt-panel-top strong{color:#8c5c2e!important}
+.qt-reading-clean .qt-panel-top span{color:#665f58!important}
+.qt-reading-clean .qt-financial-table{background:#fffcf5!important}
+.qt-reading-clean .qt-financial-table th{background:#eee7da!important;color:#74502a!important}
+.qt-reading-clean .qt-financial-table td{color:#263c5b!important;border-color:#e7dcc9!important}
+.qt-reading-clean .qt-intel-note,.qt-reading-clean .qt-comps-disclaimer{background:#f2ecdf!important;border-color:#e1d4be!important;color:#41506a!important}
+.qt-reading-clean :is(input,textarea,select){background:#fffcf5!important;color:#233651!important;border-color:#bcae95!important}
+.qt-reading-clean :is(button,.qt-business-details summary){background:#e9dfcc!important;color:#283f60!important;border-color:#c8b79a!important}
+.qt-reading-clean a{color:#24578a!important}
+.qt-reading-clean .qt-reader-toolbar{background:#f0e7d7!important;border-color:#ddcbb0!important}
+.qt-reading-clean .qt-reader-toolbar-title strong{color:#9d6739!important}
+.qt-reading-clean .qt-reader-toolbar-title span,.qt-reading-clean .qt-reader-tip{color:#6e6256!important}
+.qt-reading-clean .qt-reader-notes{background:#f7f1e5!important;border-color:#d1bfa6!important}
+.qt-reading-clean .qt-reader-notes-head,.qt-reading-clean .qt-reader-notes>label,.qt-reading-clean .qt-reader-note p{color:#263651!important}
+.qt-reading-clean .qt-reader-notes blockquote{background:#f0e6d6!important;color:#2f405c!important}
+.qt-reading-clean .qt-reader-focus{max-width:100%}
+.qt-reading-clean .qt-peer-reading-cards{display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}
+.qt-reading-clean .qt-peer-legacy-table{display:block!important}
+.qt-reading-clean .qt-peer-reading-card header strong,.qt-reading-clean .qt-peer-reading-metrics b{color:#253651!important}
+.qt-reading-clean .qt-peer-reading-metrics>div{border-color:#ded1bf!important}
+@media(max-width:780px){.qt-reading-clean{margin:10px auto!important;padding:35px 22px 52px 36px!important;border-radius:10px!important}.qt-reading-clean:before{left:24px}.qt-reading-clean .qt-intel-grid{grid-template-columns:repeat(2,minmax(0,1fr))!important}.qt-reading-clean .qt-peer-reading-cards{grid-template-columns:1fr}.qt-reading-clean .qt-company-overview{padding:18px!important}}
+@media(max-width:450px){.qt-reading-clean .qt-intel-grid{grid-template-columns:1fr!important}}
