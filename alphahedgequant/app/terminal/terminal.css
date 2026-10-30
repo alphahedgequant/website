@@ -421,3 +421,30 @@
 .qt-reading-clean .qt-spreadsheet-history table{min-width:720px}
 .qt-reading-clean .qt-spreadsheet-history th:first-child{text-align:left;min-width:175px;position:sticky;left:0;background:#f0e8db!important;z-index:1}
 .qt-reading-clean .qt-spreadsheet-history td{white-space:nowrap;color:#2c4160!important;text-align:right}
+
+
+/* Ticker-linked financial story, integrated into the paper research reading flow. */
+.qt-reading-clean .qt-workbook-story{margin:52px 0;padding:36px 0;border-top:1px dashed #cabaa3;color:#283b58}
+.qt-reading-clean .qt-workbook-source{font:700 11px/1.7 ui-monospace,monospace;color:#986a3d;letter-spacing:.09em;margin-bottom:14px}
+.qt-reading-clean .qt-workbook-story h3{font:700 clamp(24px,3vw,32px)/1.35 Georgia,serif;color:#253a5a;margin:0 0 23px}
+.qt-reading-clean .qt-workbook-story h4{font:700 22px/1.5 Georgia,serif;color:#293d59;margin:34px 0 12px}
+.qt-reading-clean .qt-workbook-story p{font:calc(17px * var(--qt-reader-scale))/1.95 Georgia,serif;color:#344863!important;max-width:900px}
+.qt-reading-clean .qt-workbook-story mark{color:#243954;background:linear-gradient(to bottom,transparent 55%,#f0d681 55%,#f0d681 92%,transparent 92%);padding:0 2px;font-weight:700}
+.qt-reading-clean .qt-workbook-kpis{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:0 20px;border-block:1px dashed #cbbba5;margin:27px 0}
+.qt-reading-clean .qt-workbook-kpis>div{padding:18px 3px;border-bottom:1px solid #dfd3c2}
+.qt-reading-clean .qt-workbook-kpis small{display:block;font:600 12px/1.6 ui-sans-serif,system-ui,sans-serif;color:#795c40!important}
+.qt-reading-clean .qt-workbook-kpis strong{font:700 clamp(20px,2.2vw,26px)/1.5 Georgia,serif;color:#273d60}
+.qt-reading-clean .qt-workbook-scenarios{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px;margin:23px 0}
+.qt-reading-clean .qt-workbook-scenarios article{padding:20px 16px;border:1px solid #d4c5ab;background:rgba(255,251,238,.65);border-radius:8px;display:flex;flex-direction:column;gap:8px}
+.qt-reading-clean .qt-workbook-scenarios small{color:#866137!important;font:700 13px ui-sans-serif,system-ui,sans-serif}
+.qt-reading-clean .qt-workbook-scenarios strong{color:#263e61;font:700 24px Georgia,serif}
+.qt-reading-clean .qt-workbook-scenarios span{color:#59657a!important;font:13px/1.5 ui-sans-serif,system-ui,sans-serif}
+.qt-reading-clean .qt-workbook-years{display:flex;align-items:center;gap:15px;color:#31455e!important;font:600 14px ui-sans-serif,system-ui,sans-serif;margin:12px 0}
+.qt-reading-clean .qt-workbook-years select{padding:9px 13px;border-radius:6px}
+.qt-reading-clean .qt-workbook-caution{font-size:14px!important;color:#645f57!important;border-left:3px solid #c6a16c;padding:9px 0 9px 16px;margin:17px 0!important}
+.qt-reading-clean .qt-workbook-story>button{padding:13px 18px;border-radius:7px;min-height:44px;font-weight:700;cursor:pointer}
+.qt-reading-clean .qt-workbook-tickers{display:flex;flex-wrap:wrap;gap:9px}
+.qt-reading-clean .qt-workbook-tickers button{font:700 12px ui-sans-serif,system-ui,sans-serif;letter-spacing:.02em;border:1px solid #c4b79e;border-radius:7px;padding:11px 13px;min-height:44px;cursor:pointer}
+.qt-reading-clean .qt-workbook-tickers button[aria-current=page]{background:#e9d69e!important;border-color:#aa8a50!important}
+@media(max-width:800px){.qt-reading-clean .qt-workbook-kpis{grid-template-columns:repeat(2,minmax(0,1fr))}.qt-reading-clean .qt-workbook-scenarios{grid-template-columns:1fr}.qt-reading-clean .qt-workbook-scenarios article{gap:4px}}
+@media(max-width:480px){.qt-reading-clean .qt-workbook-kpis{grid-template-columns:1fr}}
