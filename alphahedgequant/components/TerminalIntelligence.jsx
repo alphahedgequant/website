@@ -4,6 +4,7 @@ import {modelValue,scenarioCases,sensitivity,reverseGrowth} from "@/lib/terminal
 import TerminalReportExcerpts from "@/components/TerminalReportExcerpts";
 import TerminalAuditedFinancials from "@/components/TerminalAuditedFinancials";
 import TerminalSpreadsheetHistory from "@/components/TerminalSpreadsheetHistory";
+import TerminalWorkbookStory from "@/components/TerminalWorkbookStory";
 import TerminalReviewedFinancialFacts from "@/components/TerminalReviewedFinancialFacts";
 import {VERIFIED_FINANCIAL_SNAPSHOTS} from "@/lib/terminalAuditedSeed";
 
@@ -31,7 +32,7 @@ const fields=[
  ["sharesCr","Shares outstanding (crore)","Required for value per share; verify diluted share count"]
 ];
 function NumberField({id,title,explain,value,onChange}){return <label className="qt-assumption"><span>{title}</span><input type="number" step="any" value={value} onChange={e=>onChange(id,e.target.value)} aria-label={title}/><small>{explain}</small></label>}
-export default function TerminalIntelligence({symbol,tab}){
+export default function TerminalIntelligence({symbol,tab,onChoose=()=>{},onForecast=()=>{}}){
  const [company,setCompany]=useState(null),[status,setStatus]=useState("loading"),[error,setError]=useState("");
  const [relations,setRelations]=useState([]),[relStatus,setRelStatus]=useState("loading"),[relError,setRelError]=useState("");
  const [assumptions,setAssumptions]=useState(init),[story,setStory]=useState(""),[peerList,setPeerList]=useState(""),[peers,setPeers]=useState([]),[peerBusy,setPeerBusy]=useState(false),[editing,setEditing]=useState(false),[saving,setSaving]=useState(false),[saveMessage,setSaveMessage]=useState("");
@@ -100,6 +101,7 @@ export default function TerminalIntelligence({symbol,tab}){
   <div className="qt-company-overview"><div><h3>{c?.name||symbol}</h3><p>{[c?.sector,c?.industry].filter(Boolean).join(" / ")||"Sector classification not returned"}</p><div className="qt-business-summary"><p className="qt-company-description">{c?.about?(c.about.length>460?c.about.slice(0,420).replace(/\s+\S*$/,"")+"…":c.about):"Business description is unavailable from the connected provider."}</p>{c?.about?.length>460&&<details className="qt-business-details"><summary>Read full company business description</summary><p>{c.about}</p></details>}</div></div><div className="qt-intel-quote"><small>Reference price (provider)</small><strong>{num(c?.price)>0?"₹"+FMT(c.price):"—"}</strong><small>{num(c?.priceChangePct)!=null?PCT(c.priceChangePct)+" reported change":"Quote unavailable"}</small></div></div>
   <div className="qt-intel-grid">{info.map(([label,key,unit,display])=><div className="qt-intel-metric" key={key}><span>{label}</span><b>{num(f[key])!=null?display(num(f[key])):"—"}</b></div>)}</div>
   <div className="qt-intel-tables"><div className="qt-panel">{panel("ANNUAL FINANCIAL SUMMARY","As supplied by data provider")}<table className="qt-financial-table"><thead><tr><th>Fiscal period</th><th>Revenue (₹ Cr)</th><th>Earnings (₹ Cr)</th><th>Net margin</th></tr></thead><tbody>{annual.length?annual.map((a,i)=>{const rev=num(a.revenue),prof=num(a.profit);return <tr key={i}><td>{a.label}</td><td>{rev!=null?FMT(rev/1e7):"—"}</td><td>{prof!=null?FMT(prof/1e7):"—"}</td><td>{rev>0&&prof!=null?PCT(prof/rev*100):"—"}</td></tr>}):<tr><td colSpan="4">Annual financial history unavailable. No values inferred.</td></tr>}</tbody></table></div><div className="qt-panel">{panel("QUARTERLY FINANCIAL SUMMARY","As supplied by data provider")}<table className="qt-financial-table"><thead><tr><th>Period</th><th>Revenue (₹ Cr)</th><th>Earnings (₹ Cr)</th></tr></thead><tbody>{quarterly.length?quarterly.map((a,i)=><tr key={i}><td>{a.label}</td><td>{num(a.revenue)!=null?FMT(num(a.revenue)/1e7):"—"}</td><td>{num(a.profit)!=null?FMT(num(a.profit)/1e7):"—"}</td></tr>):<tr><td colSpan="3">Quarterly values unavailable.</td></tr>}</tbody></table></div></div>
+  <TerminalWorkbookStory symbol={symbol} onChoose={onChoose} onForecast={onForecast}/>
   <TerminalSpreadsheetHistory symbol={symbol}/>
   <TerminalAuditedFinancials symbol={symbol} view="company"/>
   <TerminalReviewedFinancialFacts symbol={symbol}/>
