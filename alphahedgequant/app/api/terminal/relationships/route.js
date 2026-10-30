@@ -8,7 +8,7 @@ async function prepare(sql){
  await sql`CREATE TABLE IF NOT EXISTS terminal_company_relationships (
   id BIGSERIAL PRIMARY KEY,
   symbol TEXT NOT NULL,
-  relation_type TEXT NOT NULL CHECK (relation_type IN ('customer','supplier')),
+  relation_type TEXT NOT NULL CHECK (relation_type IN ('customer','supplier','segment','geography')),
   entity_name TEXT NOT NULL,
   share_pct NUMERIC(6,3),
   share_basis TEXT NOT NULL CHECK (share_basis IN ('company_revenue','segment_revenue','procurement','not_reported')),
@@ -52,7 +52,7 @@ export async function POST(req){
  const basis=String(b.share_basis||"not_reported"),rawPct=b.share_pct;
  const pct=rawPct==null||rawPct===""?null:Number(rawPct);
  let source;try{source=new URL(String(b.source_url||""))}catch{}
- if(!validateSymbol(symbol)||!["customer","supplier"].includes(type)||entity.length<2||entity.length>160||
+ if(!validateSymbol(symbol)||!["customer","supplier","segment","geography"].includes(type)||entity.length<2||entity.length>160||
  !["company_revenue","segment_revenue","procurement","not_reported"].includes(basis)||
  (pct!==null&&(!Number.isFinite(pct)||pct<0||pct>100))||
  (pct===null&&basis!=="not_reported")||(pct!==null&&basis==="not_reported")||
