@@ -24,18 +24,20 @@ function render(canvas,strokes){
  if(!canvas)return;
  const rect=canvas.getBoundingClientRect(),w=Math.max(1,Math.floor(rect.width)),h=HEIGHT;
  const dpi=Math.min(3,window.devicePixelRatio||1);
- canvas.width=Math.round(w*dpi);canvas.height=Math.round(h*dpi);
+ const pw=Math.round(w*dpi),ph=Math.round(h*dpi);
+ if(canvas.width!==pw)canvas.width=pw;
+ if(canvas.height!==ph)canvas.height=ph;
  const ctx=canvas.getContext("2d");if(!ctx)return;
  ctx.setTransform(dpi,0,0,dpi,0,0);ctx.clearRect(0,0,w,h);
  strokes.forEach(s=>drawStroke(ctx,s,w,h));
 }
 export default function TerminalPencilNotebook({symbol,section}){
  const canvasRef=useRef(null),activeRef=useRef(null),historyRef=useRef([]),readyKeyRef=useRef(null);
- const [strokes,setStrokes]=useState([]),[text,setText]=useState(""),[writing,setWriting]=useState(false);
+ const [strokes,setStrokes]=useState([]),[text,setText]=useState(""),[writing,setWriting]=useState(false),[hydratedKey,setHydratedKey]=useState(null);
  const [color,setColor]=useState("#1f2937"),[size,setSize]=useState(2.4),[status,setStatus]=useState("Opening notes…");
  const key=storageKey(symbol,section);
  useEffect(()=>{
-  readyKeyRef.current=null;activeRef.current=null;setWriting(false);
+  readyKeyRef.current=null;activeRef.current=null;setWriting(false);setHydratedKey(null);
   let loaded={strokes:[],text:""};
   try{
    const parsed=JSON.parse(localStorage.getItem(key)||"null");
@@ -43,15 +45,15 @@ export default function TerminalPencilNotebook({symbol,section}){
    if(typeof parsed?.text==="string")loaded.text=parsed.text.slice(0,12000);
   }catch{}
   historyRef.current=loaded.strokes;setStrokes(loaded.strokes);setText(loaded.text);
-  readyKeyRef.current=key;setStatus("Notes stored privately in this browser");
+  readyKeyRef.current=key;setHydratedKey(key);setStatus("Notes stored privately in this browser");
  },[key]);
  useEffect(()=>{
-  if(readyKeyRef.current!==key)return;
+  if(readyKeyRef.current!==key||hydratedKey!==key)return;
   try{
    localStorage.setItem(key,JSON.stringify({strokes:strokes.slice(-300),text}));
    setStatus("Saved locally · not shared or synced");
   }catch{setStatus("Local browser storage unavailable")}
- },[strokes,text,key]);
+ },[strokes,text,key,hydratedKey]);
  useEffect(()=>{
   if(!canvasRef.current)return;
   const canvas=canvasRef.current;const update=()=>render(canvas,historyRef.current);
