@@ -2,8 +2,8 @@
 // Deterministic metadata checks; not a substitute for a researcher checking the linked source.
 export const STAGES = Object.freeze(["idea","research","fact_check","creative","editor_review","owner_review","approved","scheduled","published","measured"]);
 const VALID_PLATFORMS = new Set(["website","x","linkedin","reddit","valuepickr","email"]);
-const urlOk = value => { try { const u = new URL(value); return u.protocol === "https:" && Boolean(u.hostname) && !/^(localhost|127\\.|10\\.|192\\.168\\.)/.test(u.hostname); } catch { return false; } };
-const dateOk = value => typeof value === "string" && /^\\d{4}-\\d{2}-\\d{2}$/.test(value) && Number.isFinite(Date.parse(value));
+const urlOk = value => { try { const u = new URL(value); return u.protocol === "https:" && Boolean(u.hostname) && !/^(localhost|127\.|10\.|192\.168\.)/.test(u.hostname); } catch { return false; } };
+const dateOk = value => typeof value === "string" && /^\d{4}-\d{2}-\d{2}$/.test(value) && Number.isFinite(Date.parse(value));
 const filled = value => typeof value === "string" && value.trim().length > 0;
 const uniq = arr => [...new Set(arr)];
 export function checkEditorialPacket(packet) {
