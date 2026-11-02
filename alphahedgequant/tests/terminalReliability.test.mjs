@@ -57,3 +57,12 @@ test("company story summaries match the authoritative uploaded annual history",a
   assert.ok(complete.every(row=>row.sales>0),symbol+" revenue should be positive for growth calculations");
  }
 });
+
+test("PostgreSQL company graph retains source provenance and verification status",async()=>{
+ const schema=await readFile(new URL("../db/001_company_graph.sql",import.meta.url),"utf8");
+ for(const table of ["ahq_company","ahq_security","ahq_source","ahq_company_fact","ahq_company_relationship"])
+  assert.match(schema,new RegExp("CREATE TABLE IF NOT EXISTS "+table+"\\b"));
+ for(const col of ["company_id","source_id","period_end","reporting_scope","verification_status","relationship_type"])
+  assert.match(schema,new RegExp("\\b"+col+"\\b"));
+ assert.doesNotMatch(schema,/DROP TABLE|TRUNCATE TABLE|DELETE FROM/i);
+});
