@@ -49,7 +49,7 @@ def run():
                 cur.execute("""
                   INSERT INTO ahq_source(source_kind,document_title,source_checksum,verification_status)
                   VALUES('uploaded_workbook',%s,%s,'unverified')
-                  ON CONFLICT(source_checksum) DO UPDATE
+                  ON CONFLICT(source_checksum) WHERE source_checksum IS NOT NULL DO UPDATE
                     SET document_title=EXCLUDED.document_title
                   RETURNING id
                 """, (f"{symbol} source workbook — user supplied; unaudited",digest))
