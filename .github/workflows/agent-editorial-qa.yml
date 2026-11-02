@@ -5,11 +5,15 @@ on:
     paths:
       - "alphahedgequant/lib/editorialQuality.mjs"
       - "alphahedgequant/tests/editorialQuality.test.mjs"
+      - "alphahedgequant/tests/editorialPoster.test.mjs"
+      - "alphahedgequant/lib/editorialPoster.mjs"
       - ".github/workflows/agent-editorial-qa.yml"
   pull_request:
     paths:
       - "alphahedgequant/lib/editorialQuality.mjs"
       - "alphahedgequant/tests/editorialQuality.test.mjs"
+      - "alphahedgequant/tests/editorialPoster.test.mjs"
+      - "alphahedgequant/lib/editorialPoster.mjs"
       - ".github/workflows/agent-editorial-qa.yml"
   workflow_dispatch:
 permissions:
@@ -25,4 +29,4 @@ jobs:
           node-version: "22"
       - name: Test editorial evidence and human publishing approval gates
         working-directory: alphahedgequant
-        run: node --test tests/editorialQuality.test.mjs
+        run: node --test tests/editorialQuality.test.mjs tests/editorialPoster.test.mjs
