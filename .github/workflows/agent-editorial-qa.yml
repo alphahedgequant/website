@@ -1,0 +1,28 @@
+name: AHQ Editorial Agent QA
+on:
+  push:
+    branches: [main]
+    paths:
+      - "alphahedgequant/lib/editorialQuality.mjs"
+      - "alphahedgequant/tests/editorialQuality.test.mjs"
+      - ".github/workflows/agent-editorial-qa.yml"
+  pull_request:
+    paths:
+      - "alphahedgequant/lib/editorialQuality.mjs"
+      - "alphahedgequant/tests/editorialQuality.test.mjs"
+      - ".github/workflows/agent-editorial-qa.yml"
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  editorial-policy-checks:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Test editorial evidence and human publishing approval gates
+        working-directory: alphahedgequant
+        run: node --test tests/editorialQuality.test.mjs
