@@ -46,3 +46,14 @@ test("all uploaded financial records have valid ticker IDs and fiscal periods",(
   }
  }
 });
+
+test("company story summaries match the authoritative uploaded annual history",async()=>{
+ const raw=await readFile(new URL("../lib/terminalWorkbookStory.js",import.meta.url),"utf8");
+ assert.match(raw,/terminalWorkbookData\.json/,"Narratives must use uploaded financial source");
+ assert.doesNotMatch(raw,/years:\s*\[\[20\d\d,/,"No disconnected hardcoded annual narratives");
+ for(const [symbol,company] of Object.entries(workbook)){
+  const complete=company.annual.filter(row=>Number.isFinite(row.sales)&&Number.isFinite(row.pat));
+  assert.ok(complete.length>=2,symbol+" needs two annual observations");
+  assert.ok(complete.every(row=>row.sales>0),symbol+" revenue should be positive for growth calculations");
+ }
+});
