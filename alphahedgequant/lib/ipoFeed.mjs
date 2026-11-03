@@ -31,14 +31,14 @@ export function normalizeIpo(x){
  return ipo;
 }
 export function buildIpoBuckets(rows){
- const buckets={open:[],upcoming:[],closed:[],listed:[]};
+ const buckets={open:[],upcoming:[],closed:[],listed:[],other:[]};
  const unknownStatuses={};let invalid=0,duplicates=0;const seen=new Set();
  for(const row of rows){
   const ipo=normalizeIpo(row);
   if(!/^[a-z0-9][a-z0-9-]{1,119}$/.test(ipo.id)){invalid++;continue;}
   if(seen.has(ipo.id)){duplicates++;continue;}seen.add(ipo.id);
   if(ipo.status) buckets[ipo.status].push(ipo);
-  else { const key=ipo.rawStatus||"(missing)";unknownStatuses[key]=(unknownStatuses[key]||0)+1; }
+  else { const key=ipo.rawStatus||"(missing)";unknownStatuses[key]=(unknownStatuses[key]||0)+1; buckets.other.push(ipo); }
  }
  return {buckets,unknownStatuses,invalid,duplicates,accepted:Object.values(buckets).reduce((n,x)=>n+x.length,0)};
 }
