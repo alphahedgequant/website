@@ -1,0 +1,31 @@
+name: IPO Feed Reliability
+on:
+  push:
+    branches: [main]
+    paths:
+      - "alphahedgequant/lib/ipoFeed.mjs"
+      - "alphahedgequant/app/api/ipo/**"
+      - "alphahedgequant/components/IpoScreen.jsx"
+      - "alphahedgequant/tests/ipoFeed.test.mjs"
+      - ".github/workflows/ipo-reliability.yml"
+  pull_request:
+    paths:
+      - "alphahedgequant/lib/ipoFeed.mjs"
+      - "alphahedgequant/app/api/ipo/**"
+      - "alphahedgequant/components/IpoScreen.jsx"
+      - "alphahedgequant/tests/ipoFeed.test.mjs"
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  ipo-contract-checks:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: IPO status and GMP calculation tests
+        working-directory: alphahedgequant
+        run: node --test tests/ipoFeed.test.mjs
