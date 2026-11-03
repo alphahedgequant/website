@@ -1,13 +1,13 @@
 // IPO detail gateway for the same attributed GMP provider used by the list.
 // The detail page never accepts arbitrary external URLs.
 export const runtime="nodejs";
-export const revalidate=600;
+export const revalidate=60;
 const n=x=>x===null||x===undefined||x===""?null:Number.isFinite(Number(x))?Number(x):null;
 export async function GET(_req,{params}) {
   const slug=String(params.symbol||"");
   if(!/^[a-z0-9][a-z0-9-]{1,119}$/.test(slug))return Response.json({ok:false,error:"Invalid IPO identifier"},{status:400});
   try {
-    const res=await fetch("https://xflot.com/api/public/market/ipos/"+encodeURIComponent(slug),{next:{revalidate:600},signal:AbortSignal.timeout(10000),headers:{Accept:"application/json"}});
+    const res=await fetch("https://www.xflot.com/api/public/market/ipos/"+encodeURIComponent(slug),{next:{revalidate:60},signal:AbortSignal.timeout(10000),headers:{Accept:"application/json"}});
     if(!res.ok)throw Error("Provider unavailable");
     const data=await res.json();
     if(!data.ok||!data.ipo)throw Error("IPO data unavailable");
@@ -28,6 +28,6 @@ export async function GET(_req,{params}) {
       source:"Xflot",sourceUrl:"https://xflot.com/api-docs",
       about:null,strengths:null,risks:null,prospectus:null,nseInfo:null
     };
-    return Response.json({ok:true,ipo,source:"Xflot",disclaimer:data.disclaimer||"GMP is unofficial and cannot guarantee listing performance."},{headers:{"Cache-Control":"public, s-maxage=600"}});
-  }catch(e){return Response.json({ok:false,error:"IPO details are temporarily unavailable."},{status:503});}
+    return Response.json({ok:true,ipo,source:"Xflot",disclaimer:data.disclaimer||"GMP is unofficial and cannot guarantee listing performance."},{headers:{"Cache-Control":"public, s-maxage=60, stale-while-revalidate=30"}});
+  }catch(e){return Response.json({ok:false,error:"IPO details are temporarily unavailable."},{status:503,headers:{"Cache-Control":"no-store"}});}
 }
