@@ -16,6 +16,7 @@ const TABS = [
   { key: "upcoming", label: "Upcoming" },
   { key: "closed",   label: "Closed" },
   { key: "listed",   label: "Recently Listed" },
+  { key: "other",    label: "Other statuses" },
 ];
 
 function fmt(v, dash = "—") {
@@ -118,6 +119,7 @@ export default function IpoScreen() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [meta, setMeta] = useState(null);
+  const [lastRefresh, setLastRefresh] = useState(null);
 
   useEffect(() => {
     let alive = true;
@@ -126,7 +128,7 @@ export default function IpoScreen() {
       .then((r) => r.json())
       .then((j) => {
         if (!alive) return;
-        if (j.ok) { setData(j.buckets); setMeta(j); setError(null); }
+        if (j.ok) { setData(j.buckets); setMeta(j); setLastRefresh(new Date().toISOString()); setError(null); }
         else setError(j.error || "Failed to load IPOs");
       })
       .catch((e) => alive && setError(String(e)))
@@ -182,7 +184,13 @@ export default function IpoScreen() {
         </div>
       )}
 
-      {meta && <p style={{color:"#9a9a9a",fontSize:12,margin:"0 0 16px"}}>{meta.fetchedAt ? `Feed fetched ${new Date(meta.fetchedAt).toLocaleString("en-IN")}` : "Update time unavailable"} · GMP unofficial, not exchange-verified; indicative gain is not a prediction.</p>}
+      {meta && <p style={{color:"#9a9a9a",fontSize:12,margin:"0 0 16px"}}>
+        {meta.upstreamUpdatedAt ? `Source updated ${new Date(meta.upstreamUpdatedAt).toLocaleString("en-IN",{timeZone:"Asia/Kolkata"})} IST · ` : ""}
+        {meta.fetchedAt ? `Feed checked ${new Date(meta.fetchedAt).toLocaleString("en-IN",{timeZone:"Asia/Kolkata"})} IST` : "Update time unavailable"}
+        {" · "}<a href="https://www.xflot.com/ipo" target="_blank" rel="noopener noreferrer" style={{color:"#F0A93B"}}>GMP data: Xflot</a>
+        {" · "}GMP is unofficial, not exchange-verified; indicative gain is not a prediction.
+        {meta.partial ? " · Some source records use unrecognized statuses or have missing identifiers." : ""}
+      </p>}
       <div style={{ display: "flex", flexWrap: "wrap", gap: 8, marginBottom: 20 }}>
         {TABS.map((t) => (
           <button
@@ -205,14 +213,14 @@ export default function IpoScreen() {
       </div>
 
       {loading && <div style={{ color: "#8a8a8a", padding: "40px 0" }}>Loading IPOs…</div>}
-      {error && <div style={{ color: "#f87171", padding: "20px 0" }}>Couldn’t load IPOs: {error}</div>}
+      {error && <div role="alert" style={{ color: "#f87171", padding: "20px 0" }}>Couldn’t load IPOs: {error}. Last successfully fetched information may be outdated.</div>}
       {!loading && !error && list.length === 0 && (
         <div style={{ color: "#8a8a8a", padding: "40px 0" }}>No {tab} IPOs right now.</div>
       )}
 
       <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(min(100%, 300px), 1fr))", gap: 16 }}>
         {list.map((ipo, i) => (
-          <IpoCard key={i} ipo={ipo} showGain={tab === "listed"} />
+          <IpoCard key={ipo.id || i} ipo={ipo} showGain={tab === "listed"} />
         ))}
       </div>
     </section>
