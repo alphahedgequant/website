@@ -16,6 +16,14 @@ async function db(){
   price NUMERIC(22,4) NOT NULL CHECK(price>0),quote_asof TIMESTAMPTZ NOT NULL,
   source TEXT NOT NULL DEFAULT 'MANUAL_PAPER',created_at TIMESTAMPTZ NOT NULL DEFAULT now())`;
  await sql`CREATE INDEX IF NOT EXISTS ahq_cash_paper_user_idx ON ahq_cash_paper_fills(user_id,created_at DESC)`;
+ await sql`CREATE TABLE IF NOT EXISTS ahq_cash_paper_inventory (
+  user_id TEXT NOT NULL, symbol TEXT NOT NULL,
+  quantity BIGINT NOT NULL DEFAULT 0 CHECK(quantity>=0),
+  PRIMARY KEY(user_id,symbol)
+ )`;
+ await sql`CREATE TABLE IF NOT EXISTS ahq_cash_paper_requests (
+  id TEXT PRIMARY KEY, user_id TEXT NOT NULL, created_at TIMESTAMPTZ NOT NULL DEFAULT now()
+ )`;
  return sql;
 }
 function session(){
@@ -69,7 +77,7 @@ export async function POST(req){
  const {userId}=auth();if(!userId)return reply({ok:false,error:"Sign in is required"},401);
  let body;try{body=await req.json()}catch{return reply({ok:false,error:"Invalid JSON"},400)}
  const symbol=String(body?.symbol||"").toUpperCase(),model=String(body?.modelId||""),side=String(body?.side||""),quantity=Number(body?.quantity),id=String(body?.idempotencyKey||"");
- if(!/^[A-Z0-9&_.-]{1,30}$/.test(symbol)||!CASH_MODELS.some(x=>x.id===model)||!["BUY","SELL"].includes(side)||
+ if(!/^[A-Z0-9&_.-]{1,30}$/.test(symbol)||!CASH_MODELS.some(x=>x.id===model&&x.universe.includes(symbol))||!["BUY","SELL"].includes(side)||
  !Number.isSafeInteger(quantity)||quantity<1||quantity>100000||!/^[a-zA-Z0-9-]{12,90}$/.test(id))
  return reply({ok:false,error:"Invalid cash symbol, model, quantity or idempotency key"},400);
  if(!session())return reply({ok:false,error:"Paper fills are enabled only during the nominal 09:15–15:30 IST weekday cash session. Exchange holiday calendar is not yet integrated."},409);
@@ -77,14 +85,25 @@ export async function POST(req){
  if(!quote)return reply({ok:false,error:"No fresh source-timestamped cash quote (≤120 seconds). Cannot record an observed-price paper fill."},503);
  try{
   const sql=await db();
-  const rows=await sql`WITH holdings AS (
-    SELECT COALESCE(SUM(CASE WHEN side='BUY' THEN quantity ELSE -quantity END),0) AS held
-    FROM ahq_cash_paper_fills WHERE user_id=${userId} AND symbol=${symbol}
+  const rows=await sql`WITH ticket AS (
+    INSERT INTO ahq_cash_paper_requests(id,user_id) VALUES (${id},${userId})
+    ON CONFLICT(id) DO NOTHING RETURNING id
+  ), inventory AS (
+    INSERT INTO ahq_cash_paper_inventory(user_id,symbol,quantity)
+    SELECT ${userId},${symbol}, CASE WHEN ${side}='BUY' THEN ${quantity} ELSE -${quantity} END
+    FROM ticket
+    WHERE ${side}='BUY' OR EXISTS(
+      SELECT 1 FROM ahq_cash_paper_inventory WHERE user_id=${userId} AND symbol=${symbol} AND quantity>=${quantity}
+    )
+    ON CONFLICT(user_id,symbol) DO UPDATE SET
+      quantity=ahq_cash_paper_inventory.quantity+EXCLUDED.quantity
+    WHERE ahq_cash_paper_inventory.quantity+EXCLUDED.quantity>=0
+    RETURNING quantity
   )
   INSERT INTO ahq_cash_paper_fills(id,user_id,symbol,model_id,side,quantity,price,quote_asof,source)
   SELECT ${id},${userId},${symbol},${model},${side},${quantity},${quote.price},${quote.asOf},'MANUAL_PAPER'
-  FROM holdings WHERE ${side}='BUY' OR held>=${quantity}
-  ON CONFLICT(id) DO NOTHING RETURNING id,side,symbol,quantity,price,quote_asof,created_at,source`;
+  FROM inventory INNER JOIN ticket ON TRUE
+  RETURNING id,side,symbol,quantity,price,quote_asof,created_at,source`;
   if(!rows.length)return reply({ok:false,error:"Insufficient paper holdings or duplicate request"},409);
   return reply({ok:true,mode:"PAPER ONLY",trade:rows[0],brokerOrder:false},201);
  }catch{return reply({ok:false,error:"Unable to persist the paper fill"},503)}
