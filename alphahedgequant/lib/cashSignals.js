@@ -36,6 +36,20 @@ export function normalizeBars(raw){
  .sort((a,b)=>a.time.localeCompare(b.time))
  .filter((x,i,a)=>i===a.length-1||x.time!==a[i+1].time);
 }
+// Align on the actual observation dates. Never pair unrelated returns by array length.
+function aligned(a,b,n){if(a.length<n||b.length<n)return false;const x=tail(a,n),y=tail(b,n);return x.every((v,i)=>v.time.slice(0,10)===y[i].time.slice(0,10))}
+function fitLinear(y,xs){
+ const n=y.length,k=xs.length;if(n<30||xs.some(x=>x.length!==n))return null;
+ const columns=[new Array(n).fill(1),...xs],mat=columns.map((a,i)=>[...columns.map(b=>a.reduce((s,v,t)=>s+v*b[t],0)),a.reduce((s,v,t)=>s+v*y[t],0)]);
+ for(let i=0;i<k+1;i++){
+  let pivot=i;for(let j=i+1;j<k+1;j++)if(Math.abs(mat[j][i])>Math.abs(mat[pivot][i]))pivot=j;
+  if(Math.abs(mat[pivot][i])<1e-10)return null;
+  [mat[i],mat[pivot]]=[mat[pivot],mat[i]];const div=mat[i][i];
+  for(let col=i;col<=k+1;col++)mat[i][col]/=div;
+  for(let j=0;j<k+1;j++)if(j!==i){const factor=mat[j][i];for(let col=i;col<=k+1;col++)mat[j][col]-=factor*mat[i][col]}
+ }
+ return mat.map(row=>row[k+1]);
+}
 function atr(b,n=14){if(b.length<n+1)return null;const tr=b.slice(1).map((x,i)=>Math.max(x.high-x.low,Math.abs(x.high-b[i].close),Math.abs(x.low-b[i].close)));return mean(tail(tr,n))}
 function rsi(cl,n=3){if(cl.length<n+1)return null;const delta=tail(cl,n+1).slice(1).map((c,i)=>c-tail(cl,n+1)[i]);const gain=mean(delta.map(x=>Math.max(0,x))),loss=mean(delta.map(x=>Math.max(0,-x)));return loss===0?100:100-100/(1+gain/loss)}
 function beta(a,b){const m=mean(a),n=mean(b);const denominator=b.reduce((s,x)=>s+(x-n)**2,0);return denominator>0?a.reduce((s,x,i)=>s+(x-m)*(b[i]-n),0)/denominator:null}
@@ -66,15 +80,16 @@ export function evaluateCashModel(id,bars=[],context={}){
  if(!model)return {status:"INVALID",explanation:"Unknown model"};
  const b=normalizeBars(bars),last=b.at(-1),c=closes(b),r=changeSeries(b);
  const enough=(n)=>b.length>=n;
+ const issue=(why,entry=null,extra={})=>issue(why,entry,{dailyAtr:atr(b),...extra});
  if(id==="residual"){
   const sector=normalizeBars(context.sectorBars),market=normalizeBars(context.marketBars);
-  if(!enough(145)||sector.length<b.length||market.length<b.length)return notReady(model);
+  if(!enough(145)||!aligned(b,sector,145)||!aligned(b,market,145))return notReady(model,"Need 145 date-aligned stock, sector and market daily bars");
   const sr=changeSeries(tail(sector,b.length)),mr=changeSeries(tail(market,b.length));
-  const bi=beta(tail(r,120),tail(mr,120)),bs=beta(tail(r,120),tail(sr,120));
-  if(bi==null||bs==null)return notReady(model,"Risk-factor regression could not be estimated");
-  const residuals=r.map((x,i)=>x-bi*mr[i]-bs*sr[i]);
+  const coeff=fitLinear(tail(r,120),[tail(mr,120),tail(sr,120)]);
+  if(!coeff)return notReady(model,"Market/sector regression is singular or incomplete");
+  const residuals=r.map((x,i)=>x-coeff[0]-coeff[1]*mr[i]-coeff[2]*sr[i]);
   const momentum=mean(residuals.slice(-25,-5));
-  return momentum>0&&percentage(c.at(-1),c.at(-61))>0?proposal(model,last,"Positive 20-session residual momentum excluding the last five sessions; market and sector beta adjusted"):noSetup(model);
+  return momentum>0&&percentage(c.at(-1),c.at(-61))>0?issue("Positive 20-session residual momentum excluding the last five sessions; market and sector beta adjusted"):noSetup(model);
  }
  if(id==="delivery"){
   const delivery=context.deliveryBars;
@@ -83,19 +98,19 @@ export function evaluateCashModel(id,bars=[],context={}){
   if(d.some(x=>x==null))return notReady(model,"Delivery quantities were incomplete");
   const hits=tail(d,5).filter(x=>zscore(x,d.slice(0,-5))>1.5).length;
   const clv=last.high>last.low?(last.close-last.low)/(last.high-last.low):null;
-  return hits>=3&&clv>.70&&percentage(last.close,b.at(-6).close)>0?proposal(model,last,"Three of five abnormal delivery sessions, positive five-day return, strong closing location"):noSetup(model);
+  return hits>=3&&clv>.70&&percentage(last.close,b.at(-6).close)>0?issue("Three of five abnormal delivery sessions, positive five-day return, strong closing location"):noSetup(model);
  }
  if(id==="rotation"){
   const sb=context.sectorBreadth,sector=normalizeBars(context.sectorBars),market=normalizeBars(context.marketBars);
   if(!valid(sb)||sector.length<61||market.length<61||!enough(61))return notReady(model);
   const rel=percentage(sector.at(-1).close,sector.at(-61).close)-percentage(market.at(-1).close,market.at(-61).close);
-  return rel>0&&Number(sb)>55?proposal(model,last,"Sector 60-day relative momentum is positive, with majority constituent participation"):noSetup(model);
+  return rel>0&&Number(sb)>55?issue("Sector 60-day relative momentum is positive, with majority constituent participation"):noSetup(model);
  }
  if(id==="earnings"){
   const e=context.earningsEvent;
   if(!enough(21)||!e||!valid(e.actualEPS)||!valid(e.expectedEPS)||!valid(e.announcementVolumeZ)||!valid(e.sectorAdjustedReturn))return notReady(model);
   const lag=(Date.now()-new Date(e.publishedAt))/86400000;
-  return lag>=0&&lag<=15&&Number(e.actualEPS)>Number(e.expectedEPS)&&e.announcementVolumeZ>2&&e.sectorAdjustedReturn>0?proposal(model,last,"Sourced earnings surprise and positive abnormal announcement reaction"):noSetup(model);
+  return lag>=0&&lag<=15&&Number(e.actualEPS)>Number(e.expectedEPS)&&e.announcementVolumeZ>2&&e.sectorAdjustedReturn>0?issue("Sourced earnings surprise and positive abnormal announcement reaction"):noSetup(model);
  }
  if(id==="shock"){
   const market=normalizeBars(context.marketBars);
@@ -106,17 +121,17 @@ export function evaluateCashModel(id,bars=[],context={}){
   const avgTurn=average(b.slice(-22,-2),"volume",20);
   const m=market.at(-1).close,ma=mean(tail(closes(market),100));
   return returnZ!=null&&returnZ<=-2&&avgTurn>0&&prev.volume>avgTurn*1.8&&rsi(closes(b.slice(0,-1)),3)<15&&last.close>prev.low&&m>ma?
-   proposal(model,last,"Prior session's abnormal selling followed by price stabilization; market trend positive"):noSetup(model);
+   issue("Prior session's abnormal selling followed by price stabilization; market trend positive"):noSetup(model);
  }
  if(id==="breadth"){
   const breadth=context.breadthHistory,market=normalizeBars(context.marketBars);
-  if(!Array.isArray(breadth)||breadth.length<21||market.length<100)return notReady(model);
+  if(!enough(100)||!Array.isArray(breadth)||breadth.length<21||market.length<100)return notReady(model);
   const recent=breadth.slice(-20).map(Number);if(recent.some(x=>!Number.isFinite(x)||x<0||x>100))return notReady(model);
-  return market.at(-1).close>mean(tail(closes(market),100))&&recent.at(-1)-Math.min(...recent)>=10?proposal(model,last,"Breadth recovered 10 percentage points from recent low; index trend confirmed"):noSetup(model);
+  return market.at(-1).close>mean(tail(closes(market),100))&&recent.at(-1)-Math.min(...recent)>=10?issue("Breadth recovered 10 percentage points from recent low; index trend confirmed"):noSetup(model);
  }
  if(id==="goldSilver"){
   const gold=normalizeBars(context.goldBars),silver=normalizeBars(context.silverBars);
-  if(gold.length<125||silver.length<125)return notReady(model);
+  if(!aligned(gold,silver,125))return notReady(model,"Gold and silver ETF daily bars are not date-aligned for 125 sessions");
   // ETF units differ; compare BASE-100 normalized returns, not raw price ratios.
   const gg=tail(gold,125),ss=tail(silver,125),ratio=gg.map((x,i)=>x.close/gg[0].close/(ss[i].close/ss[0].close));
   const zz=zscore(ratio.at(-1),ratio.slice(-121,-1));
@@ -134,24 +149,23 @@ export function evaluateCashModel(id,bars=[],context={}){
   const high20=Math.max(...highs(b.slice(-21,-1)));
   const sma100=mean(tail(c,100));
   return rv10!=null&&rv60>0&&rv10/rv60<.65&&last.close>high20&&last.close>sma100?
-   proposal(model,last,"Ten-day realized volatility below 65% of 60-day; close above previous 20-bar high and SMA100",high20,{dailyAtr:atr(b)}):noSetup(model);
+   issue("Ten-day realized volatility below 65% of 60-day; close above previous 20-bar high and SMA100",high20,{dailyAtr:atr(b)}):noSetup(model);
  }
  if(id==="metalBeta"){
   const spot=normalizeBars(context.commodityBars),market=normalizeBars(context.marketBars);
-  if(!enough(125)||spot.length<125||market.length<125)return notReady(model);
+  if(!enough(125)||!aligned(b,spot,125)||!aligned(b,market,125))return notReady(model,"Need 125 aligned producer, verified commodity-spot and market sessions");
   const a=tail(r,120),b1=tail(changeSeries(spot),120),b2=tail(changeSeries(market),120);
-  const betaC=beta(a,b1),betaM=beta(a,b2);if(betaC==null||betaM==null)return notReady(model);
-  const res=a.map((v,i)=>v-betaC*b1[i]-betaM*b2[i]),zz=zscore(mean(tail(res,10)),res.slice(0,-10));
-  return zz< -1.5&&percentage(spot.at(-1).close,spot.at(-21).close)>0?proposal(model,last,"Underreaction versus commodity spot factor with positive spot trend"):noSetup(model);
+  const coeff=fitLinear(a,[b1,b2]);if(!coeff)return notReady(model,"Commodity/market factor regression is singular");
+  const res=a.map((v,i)=>v-coeff[0]-coeff[1]*b1[i]-coeff[2]*b2[i]),zz=zscore(mean(tail(res,10)),res.slice(0,-10));
+  return zz< -1.5&&percentage(spot.at(-1).close,spot.at(-21).close)>0?issue("Underreaction versus commodity spot factor with positive spot trend"):noSetup(model);
  }
  if(id==="crude"){
   const crude=normalizeBars(context.crudeBars),fx=normalizeBars(context.fxBars),market=normalizeBars(context.marketBars);
-  if(!enough(125)||crude.length<125||fx.length<125||market.length<125)return notReady(model);
+  if(!enough(125)||!aligned(b,crude,125)||!aligned(b,fx,125)||!aligned(b,market,125))return notReady(model,"Need 125 aligned stock, Brent spot, FX and index sessions");
   const a=tail(r,120),oil=tail(changeSeries(crude),120),currency=tail(changeSeries(fx),120),mkt=tail(changeSeries(market),120);
-  const bo=beta(a,oil),bf=beta(a,currency),bm=beta(a,mkt);
-  if([bo,bf,bm].some(x=>x===null))return notReady(model);
-  const expected=bo*oil.at(-1)+bf*currency.at(-1)+bm*mkt.at(-1),gap=expected-a.at(-1);
-  return Math.abs(oil.at(-1))>2*sd(oil.slice(0,-1))&&gap>0.015?proposal(model,last,"Spot crude shock and lagged positive residual catch-up hypothesis"):noSetup(model);
+  const coeff=fitLinear(a,[oil,currency,mkt]);if(!coeff)return notReady(model,"Crude/FX/market factor regression is singular");
+  const expected=coeff[0]+coeff[1]*oil.at(-1)+coeff[2]*currency.at(-1)+coeff[3]*mkt.at(-1),gap=expected-a.at(-1);
+  return Math.abs(oil.at(-1))>2*sd(oil.slice(0,-1))&&gap>0.015?issue("Spot crude shock and lagged positive residual catch-up hypothesis"):noSetup(model);
  }
  return notReady(model);
 }
