@@ -53,18 +53,27 @@ export async function GET(req){
  const market=feeds[3].ok?extractBars(feeds[3].data):[];
  const other=isMetal&&feeds[4]?.ok?extractBars(feeds[4].data):[];
  const context={symbol,marketBars:market,goldBars:symbol==="GOLDBEES"?daily:other,silverBars:symbol==="HDFCSILVER"?daily:other};
- const strategies=CASH_MODELS.map(model=>evaluateCashModel(model.id,daily,context));
+ const checkedAt=new Date();
+ const lastDaily=daily.at(-1);
+ const dailyAgeDays=lastDaily?(+checkedAt-new Date(lastDaily.time))/86400000:null;
+ const oneBarPerSession=daily.length===new Set(daily.map(b=>b.time.slice(0,10))).size;
+ const dailyUsable=dailyAgeDays!==null&&dailyAgeDays>=0&&dailyAgeDays<=7&&oneBarPerSession;
+ const strategies=CASH_MODELS.map(model=>dailyUsable?evaluateCashModel(model.id,daily,context):{
+  modelId:model.id,status:"DATA STALE / INVALID",direction:"NONE",
+  explanation:!daily.length?"No verified daily candles":!oneBarPerSession?"Feed is not one daily bar per trading session":"Newest daily candle is older than 7 calendar days or future dated",
+  entry:null,stop:null,target:null,horizon:model.horizon,confidence:null,updatedAt:lastDaily?.time??null
+ });
  const sessionWindow=nominalSession(new Date());
  const near=sessionWindow&&quote.verifiedFresh?intradayWatch(intraday,quote.price,quote.asOf):{
   status:"NOT ACTIVE",reason:!sessionWindow?"Outside nominal NSE equity session (exchange holiday calendar not checked)":quote.price&&!quote.verifiedFresh?"Quote time unavailable or older than 120 seconds":"No verified quote"
  };
  const diagnostics={
   quote:feeds[0].ok?"CONNECTED":"UNAVAILABLE",
-  daily:daily.length?"AVAILABLE":"MISSING",
+  daily:dailyUsable?"AVAILABLE":daily.length?"STALE / INVALID":"MISSING",
   intraday:intraday.length?"AVAILABLE":"MISSING",
   benchmark:market.length?"AVAILABLE":"MISSING",
   goldSilverPair:isMetal&&other.length?"AVAILABLE":"MISSING",
-  dailyBars:daily.length,intradayBars:intraday.length,benchmarkBars:market.length,
+  dailyBars:daily.length,intradayBars:intraday.length,benchmarkBars:market.length,dailyAgeDays:dailyAgeDays===null?null:Math.round(dailyAgeDays*100)/100,
  };
  return reply({ok:true,kind:"OBSERVED / RESEARCH ONLY",symbol,checkedAt:new Date().toISOString(),
   sessionWindow,source:"Existing AHQ market-data service",quote,strategies,near,diagnostics,
