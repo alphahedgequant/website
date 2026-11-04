@@ -158,15 +158,19 @@ export function evaluateCashModel(id,bars=[],context={}){
   const spot=normalizeBars(context.commodityBars),market=normalizeBars(context.marketBars);
   if(!enough(125)||!aligned(b,spot,125)||!aligned(b,market,125))return notReady(model,"Need 125 aligned producer, verified commodity-spot and market sessions");
   const a=tail(r,120),b1=tail(changeSeries(spot),120),b2=tail(changeSeries(market),120);
-  const coeff=fitLinear(a,[b1,b2]);if(!coeff)return notReady(model,"Commodity/market factor regression is singular");
-  const res=a.map((v,i)=>v-coeff[0]-coeff[1]*b1[i]-coeff[2]*b2[i]),zz=zscore(mean(tail(res,10)),res.slice(0,-10));
+  const coeff=fitLinear(a.slice(0,-1),[b1.slice(0,-1),b2.slice(0,-1)]);
+  if(!coeff)return notReady(model,"Commodity/market factor regression is singular");
+  const res=a.map((v,i)=>v-coeff[0]-coeff[1]*b1[i]-coeff[2]*b2[i]);
+  const rolling10=[];for(let i=9;i<res.length-10;i++)rolling10.push(mean(res.slice(i-9,i+1)));
+  const zz=zscore(mean(tail(res,10)),rolling10);
   return zz< -1.5&&percentage(spot.at(-1).close,spot.at(-21).close)>0?issue("Underreaction versus commodity spot factor with positive spot trend"):noSetup(model);
  }
  if(id==="crude"){
   const crude=normalizeBars(context.crudeBars),fx=normalizeBars(context.fxBars),market=normalizeBars(context.marketBars);
   if(!enough(125)||!aligned(b,crude,125)||!aligned(b,fx,125)||!aligned(b,market,125))return notReady(model,"Need 125 aligned stock, Brent spot, FX and index sessions");
   const a=tail(r,120),oil=tail(changeSeries(crude),120),currency=tail(changeSeries(fx),120),mkt=tail(changeSeries(market),120);
-  const coeff=fitLinear(a,[oil,currency,mkt]);if(!coeff)return notReady(model,"Crude/FX/market factor regression is singular");
+  const coeff=fitLinear(a.slice(0,-1),[oil.slice(0,-1),currency.slice(0,-1),mkt.slice(0,-1)]);
+  if(!coeff)return notReady(model,"Crude/FX/market factor regression is singular");
   const expected=coeff[0]+coeff[1]*oil.at(-1)+coeff[2]*currency.at(-1)+coeff[3]*mkt.at(-1),gap=expected-a.at(-1);
   return Math.abs(oil.at(-1))>2*sd(oil.slice(0,-1))&&gap>0.015?issue("Spot crude shock and lagged positive residual catch-up hypothesis"):noSetup(model);
  }
