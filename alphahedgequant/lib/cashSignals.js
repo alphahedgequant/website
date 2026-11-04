@@ -32,7 +32,7 @@ export function normalizeBars(raw){
   const time=x.date??x.timestamp??x.datetime??x.time;
   const date=new Date(typeof time==="number"&&time<1e11?time*1000:time);
   return {time:Number.isFinite(+date)?date.toISOString():null,open:num(x.open),high:num(x.high),low:num(x.low),close:num(x.close),volume:num(x.volume)};
- }).filter(x=>x.time&&x.close>0&&x.high>=x.low&&x.high>0&&x.low>0&&x.volume!==null&&x.volume>=0)
+ }).filter(x=>x.time&&x.close>0&&x.high>=x.low&&x.high>0&&x.low>0&&(x.volume===null||x.volume>=0))
  .sort((a,b)=>a.time.localeCompare(b.time))
  .filter((x,i,a)=>i===a.length-1||x.time!==a[i+1].time);
 }
@@ -99,7 +99,7 @@ export function evaluateCashModel(id,bars=[],context={}){
  }
  if(id==="shock"){
   const market=normalizeBars(context.marketBars);
-  if(!enough(100)||market.length<100)return notReady(model);
+  if(!enough(100)||market.length<100||b.slice(-62).some(x=>x.volume===null))return notReady(model);
   const prev=b.at(-2),lastReturn=percentage(prev.close,b.at(-3).close);
   const sampled=r.slice(-62,-2);
   const returnZ=zscore(lastReturn/100,sampled);
@@ -125,7 +125,7 @@ export function evaluateCashModel(id,bars=[],context={}){
   const chosen=zz>1.5&&silverMom>0?"HDFCSILVER":zz< -1.5&&goldMom>0?"GOLDBEES":null;
   if(!chosen||sym!==chosen)return noSetup(model,chosen?"Relative rotation favors "+chosen+"; selected instrument differs":"No confirmed relative-value rotation");
   const chosenBar=chosen==="GOLDBEES"?gg.at(-1):ss.at(-1);
-  return proposal(model,chosenBar,"Base-100 ETF relative-performance spread has normalized Z beyond ±1.5; positive chosen-metal momentum",{...({})}.close??chosenBar.close,{dailyAtr:atr(chosen==="GOLDBEES"?gg:ss)});
+  return proposal(model,chosenBar,"Base-100 ETF relative-performance spread has normalized Z beyond ±1.5; positive chosen-metal momentum",chosenBar.close,{dailyAtr:atr(chosen==="GOLDBEES"?gg:ss)});
  }
  if(id==="metalBreak"){
   if(!["GOLDBEES","HDFCSILVER"].includes(String(context.symbol||"").toUpperCase()))return notReady(model,"Model is restricted to verified gold / silver cash ETFs");
