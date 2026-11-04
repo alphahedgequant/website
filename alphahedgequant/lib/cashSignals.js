@@ -61,6 +61,7 @@ function proposal(model,bar,why,anchor=null,extra={}){
  if(!(a>0)||!Number.isFinite(entry)||entry<=0)return notReady(model,"Unable to calculate a reliable ATR-based stop and scenario target");
  const stop=round(entry-1.5*a);
  const target=round(entry+2.5*a);
+ if(!(stop>0&&target>entry&&stop<entry))return notReady(model,"ATR scenario cannot provide a valid positive stop and upside target");
  return {modelId:model.id,status:"QUALIFIED / AWAITING ENTRY",direction:"LONG CASH",explanation:why,entry:round(entry),stop,target,horizon:model.horizon,confidence:null,updatedAt:bar.time,...extra};
 }
 export function intradayWatch(raw,quote,quoteTime=null,now=new Date()){
