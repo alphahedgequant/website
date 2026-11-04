@@ -58,8 +58,9 @@ const noSetup=(model,reason)=>({modelId:model.id,status:"NO SETUP",direction:"NO
 function proposal(model,bar,why,anchor=null,extra={}){
  const a=extra.dailyAtr??null;
  const entry=anchor??bar.close;
- const stop=a>0?round(entry-1.5*a):null;
- const target=a>0?round(entry+2.5*a):null;
+ if(!(a>0)||!Number.isFinite(entry)||entry<=0)return notReady(model,"Unable to calculate a reliable ATR-based stop and scenario target");
+ const stop=round(entry-1.5*a);
+ const target=round(entry+2.5*a);
  return {modelId:model.id,status:"QUALIFIED / AWAITING ENTRY",direction:"LONG CASH",explanation:why,entry:round(entry),stop,target,horizon:model.horizon,confidence:null,updatedAt:bar.time,...extra};
 }
 export function intradayWatch(raw,quote,quoteTime=null,now=new Date()){
@@ -94,7 +95,7 @@ export function evaluateCashModel(id,bars=[],context={}){
  if(id==="delivery"){
   const delivery=context.deliveryBars;
   if(!Array.isArray(delivery)||delivery.length<60||!enough(62))return notReady(model);
-  if(delivery.slice(-60).some((x,i)=>!x.date||new Date(x.date).toISOString().slice(0,10)!==b.slice(-60)[i].time.slice(0,10)))return notReady(model,"Delivery observations must match the last 60 equity trading dates");
+  if(delivery.slice(-60).some((x,i)=>!x.date||!Number.isFinite(+new Date(x.date))||new Date(x.date).toISOString().slice(0,10)!==b.slice(-60)[i].time.slice(0,10)))return notReady(model,"Delivery observations must match the last 60 equity trading dates");
   const d=delivery.slice(-60).map(x=>num(x.deliveryQty));
   if(d.some(x=>x==null))return notReady(model,"Delivery quantities were incomplete");
   const hits=tail(d,5).filter(x=>zscore(x,d.slice(0,-5))>1.5).length;
