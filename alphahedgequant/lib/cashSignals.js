@@ -80,20 +80,21 @@ export function evaluateCashModel(id,bars=[],context={}){
  if(!model)return {status:"INVALID",explanation:"Unknown model"};
  const b=normalizeBars(bars),last=b.at(-1),c=closes(b),r=changeSeries(b);
  const enough=(n)=>b.length>=n;
- const issue=(why,entry=null,extra={})=>issue(why,entry,{dailyAtr:atr(b),...extra});
+ const issue=(why,entry=null,extra={})=>proposal(model,last,why,entry,{dailyAtr:atr(b),...extra});
  if(id==="residual"){
   const sector=normalizeBars(context.sectorBars),market=normalizeBars(context.marketBars);
   if(!enough(145)||!aligned(b,sector,145)||!aligned(b,market,145))return notReady(model,"Need 145 date-aligned stock, sector and market daily bars");
-  const sr=changeSeries(tail(sector,b.length)),mr=changeSeries(tail(market,b.length));
-  const coeff=fitLinear(tail(r,120),[tail(mr,120),tail(sr,120)]);
+  const rr=changeSeries(tail(b,145)),sr=changeSeries(tail(sector,145)),mr=changeSeries(tail(market,145));
+  const coeff=fitLinear(tail(rr,120),[tail(mr,120),tail(sr,120)]);
   if(!coeff)return notReady(model,"Market/sector regression is singular or incomplete");
-  const residuals=r.map((x,i)=>x-coeff[0]-coeff[1]*mr[i]-coeff[2]*sr[i]);
+  const residuals=rr.map((x,i)=>x-coeff[0]-coeff[1]*mr[i]-coeff[2]*sr[i]);
   const momentum=mean(residuals.slice(-25,-5));
   return momentum>0&&percentage(c.at(-1),c.at(-61))>0?issue("Positive 20-session residual momentum excluding the last five sessions; market and sector beta adjusted"):noSetup(model);
  }
  if(id==="delivery"){
   const delivery=context.deliveryBars;
   if(!Array.isArray(delivery)||delivery.length<60||!enough(62))return notReady(model);
+  if(delivery.slice(-60).some((x,i)=>!x.date||new Date(x.date).toISOString().slice(0,10)!==b.slice(-60)[i].time.slice(0,10)))return notReady(model,"Delivery observations must match the last 60 equity trading dates");
   const d=delivery.slice(-60).map(x=>num(x.deliveryQty));
   if(d.some(x=>x==null))return notReady(model,"Delivery quantities were incomplete");
   const hits=tail(d,5).filter(x=>zscore(x,d.slice(0,-5))>1.5).length;
