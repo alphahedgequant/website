@@ -6,6 +6,9 @@ function isValidEmail(email) {
 }
 
 const recentIPs = new Map();
+const MAX_BODY_BYTES = 8192;
+const MAX_EMAIL_LENGTH = 254;
+const MAX_SOURCE_LENGTH = 80;
 const RATE_LIMIT = 3;
 const WINDOW_MS  = 60 * 60 * 1000;
 
@@ -29,14 +32,23 @@ export async function POST(request) {
       );
     }
 
-    const body = await request.json();
-    const { email, source = "landing" } = body;
+    const declaredSize = Number(request.headers.get("content-length") || 0);
+    if (declaredSize > MAX_BODY_BYTES) return Response.json({success:false,error:"Request too large."},{status:413});
+    const raw = await request.text();
+    if (raw.length > MAX_BODY_BYTES) return Response.json({success:false,error:"Request too large."},{status:413});
+    let body;
+    try { body = JSON.parse(raw); } catch { return Response.json({success:false,error:"Invalid JSON."},{status:400}); }
+    if (!body || typeof body !== "object" || Array.isArray(body)) return Response.json({success:false,error:"Invalid request."},{status:400});
+    const { email } = body;
+    const source = body.source == null ? "landing" : body.source;
+    if(typeof source !== "string" || source.length > MAX_SOURCE_LENGTH || !/^[a-zA-Z0-9 _./:-]{1,80}$/.test(source))
+      return Response.json({success:false,error:"Invalid signup source."},{status:400});
 
     if (!email || typeof email !== "string") {
       return Response.json({ success: false, error: "Email is required." }, { status: 400 });
     }
     const cleaned = email.trim().toLowerCase();
-    if (!isValidEmail(cleaned)) {
+    if (cleaned.length > MAX_EMAIL_LENGTH || !isValidEmail(cleaned)) {
       return Response.json({ success: false, error: "Invalid email address." }, { status: 400 });
     }
 
