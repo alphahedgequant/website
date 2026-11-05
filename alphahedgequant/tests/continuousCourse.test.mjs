@@ -33,3 +33,9 @@ test("completion messaging requires save success rather than assuming database w
  assert.match(page,/setSync\("Progress saved"\);return true/);
  assert.match(page,/return false/);
 });
+
+test("Learn Quant avoids duplicate dashboard metrics and giant selection cards",()=>{
+ assert.match(page,/tab!=="quant"&&<div className="grid grid-cols-2/);
+ assert.match(page,/aria-label="Academy areas"/);
+ assert.doesNotMatch(page,/className="grid gap-3 md:grid-cols-3 mt-8"/);
+});
