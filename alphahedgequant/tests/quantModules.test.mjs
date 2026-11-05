@@ -1,6 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import {MODULE_GUIDES,MODULE_TOPICS,topicProgress} from "../lib/quantModuleGuides.mjs";
+import {TOPIC_DEEP_DIVES} from "../lib/quantDeepDives.mjs";
 import {QUANT_LESSONS,QUANT_SECTIONS} from "../lib/quantCourse.mjs";
 test("six module headings and syllabus topics are structured in the required order",()=>{
  assert.equal(MODULE_GUIDES.length,6);
@@ -36,4 +37,18 @@ test("topic and coding progress IDs match Clerk/Neon progress API contract",()=>
  const pattern=/^(math-|prob-|stats-|markets-|econ-|calc-|risk-|deriv-|portfolio-|quant-|ml-|stochastic-|options-|llm-|interview-|mental-)[a-z0-9-]{1,75}$/;
  for(const t of MODULE_TOPICS)assert.match(t.id,pattern);
  for(let i=1;i<=6;i++)assert.match("quant-lab-"+i,pattern);
+});
+
+test("advanced chapters have individual analogies, math and non-overstated limits",()=>{
+ const keys=Object.keys(TOPIC_DEEP_DIVES);
+ assert.ok(keys.length>=30);
+ const known=new Set(MODULE_TOPICS.map(x=>x.id));
+ for(const key of keys){
+  assert.ok(known.has(key),key+" missing chapter");
+  const d=TOPIC_DEEP_DIVES[key];
+  assert.ok(d.intuition.length>=100,key+" intuition too short");
+  assert.ok(d.worked.length>=100,key+" worked example too short");
+  assert.ok(d.formula.length>=20,key+" formula missing");
+  assert.ok(d.pitfall.length>=70,key+" caution missing");
+ }
 });
