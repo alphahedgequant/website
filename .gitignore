@@ -1,0 +1,40 @@
+# Dependencies and generated application output
+**/node_modules/
+**/.next/
+**/.turbo/
+**/out/
+**/dist/
+**/build/
+.vercel/
+**/.vercel/
+# Never check environment secrets into a public repository
+.env
+.env.*
+**/.env
+**/.env.*
+!.env.example
+!**/.env.example
+# Credentials and private exports
+*.pem
+*.p12
+*.pfx
+*.key
+*.crt
+*.sqlite
+*.sqlite3
+*.db
+*.dump
+*.bak
+*.backup
+# Local user spreadsheets / data extracts (commit only reviewed normalized samples)
+*.xls
+*.xlsx
+*.csv
+# Developer files
+.DS_Store
+*.log
+npm-debug.log*
+yarn-debug.log*
+.pnpm-debug.log*
+__pycache__/
+*.pyc
