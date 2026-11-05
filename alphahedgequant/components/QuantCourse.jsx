@@ -1,6 +1,7 @@
 "use client";
 import {useEffect,useMemo,useState} from "react";
 import {QUANT_SECTIONS,QUANT_LESSONS,sectionProgress,isCorrect} from "@/lib/quantCourse.mjs";
+import {QUANT_TEACHING} from "@/lib/quantTeaching.mjs";
 import "./quant-course.css";
 
 const GLOSSARY=[
@@ -76,6 +77,7 @@ export default function QuantCourse({progress={},save,sync}){
  const selectSection=(i)=>{setSection(i);setSearch("");const next=QUANT_LESSONS.find(l=>l.section===i);if(next)choose(next);};
  const idx=QUANT_LESSONS.findIndex(l=>l.id===lesson.id);
  const deep=DEEP[lesson.id];
+ const teaching=QUANT_TEACHING[lesson.id];
  const score=sectionProgress(progress,section);
  const submit=async(e)=>{e.preventDefault();if(answer.trim()==="")return;const ok=isCorrect(lesson,answer);setResult(ok?{ok:true,text:"Correct. You can now explain the mechanism, not just remember the number."}:{ok:false,text:"Not yet. Read the worked example again, identify the starting value and unit, then retry."});if(ok)await save(lesson.id,100,true)};
  return <section className="qcourse-shell mt-10" aria-label="Six-stage quant finance curriculum" id="quant-lesson">
@@ -92,12 +94,14 @@ export default function QuantCourse({progress={},save,sync}){
     <p className="pencil-kicker">ALPHAHEDGEQUANT / LESSON {String(idx+1).padStart(2,"0")} OF 74 / {QUANT_SECTIONS[section].title.toUpperCase()}</p><h3 id="qcourse-heading" className="pencil-title">{lesson.title}<span className="text-[#9b3155]">.</span></h3>
     <p className="pencil-lead">{lesson.explain}</p>
     <div className="qcourse-guided"><strong>Start here · What are we trying to understand?</strong><p>{deep?.question||"The question is not just what a formula says. It is what each number represents, when it was known, and how this changes a real decision."}</p></div>
+    <h4 className="pencil-heading">The essential relationship</h4><div className="qcourse-formula"><span className="pencil-formula-label">READ THIS IN PLAIN ENGLISH FIRST</span><p>{teaching?.formula}</p><small>Every symbol refers to a quantity explained in the lesson. Keep units and reporting periods consistent.</small></div>
     <h4 className="pencil-heading">See the idea, not just the notation</h4><ConceptFigure lesson={lesson}/>
     <h4 className="pencil-heading">Follow a real-world style example</h4><p className="pencil-prose">{lesson.example}</p>
     {deep&&<><h4 className="pencil-heading">Work through it slowly</h4><ol className="pencil-numbered">{deep.steps.map((x,i)=><li key={i}>{x}</li>)}</ol><div className="pencil-note mt-5"><strong>Important limitation</strong><p className="pencil-prose mt-2">{deep.counter}</p></div></>}
     {!deep&&<div className="qcourse-guided"><strong>Before using this idea in markets</strong><p>Identify the starting amount and unit. Work out the relationship on paper. Then ask what assumption could change in real conditions: price availability, interest rates, sample size, costs, or human behavior. A worked example teaches a mechanism; it does not predict a future trade.</p></div>}
+    <div className="qcourse-mistake"><strong>Common mistake to avoid</strong><p>{teaching?.pitfall}</p></div>
     <h4 className="pencil-heading">Words worth understanding</h4><dl className="qcourse-glossary">{GLOSSARY[section].map(g=><div key={g.term}><dt>{g.term}</dt><dd>{g.definition}</dd></div>)}</dl>
-    <form className="qcourse-assessment" onSubmit={submit}><p className="pencil-formula-label">QUICK CHECK · LEARN BY DOING</p><p className="pencil-prose font-semibold mt-3">{lesson.question}</p><div className="qcourse-input-row"><input type="number" step="any" aria-label="Your numerical answer" value={answer} onChange={e=>setAnswer(e.target.value)} placeholder="Your answer"/><button type="submit">Check answer</button></div>{result&&<p role="status" className={result.ok?"qcourse-ok":"qcourse-wrong"}>{result.text}{result.ok?" ✓":""}</p>}{!result?.ok&&<details className="qcourse-hint"><summary>Need a hint?</summary><p>Restate the given quantities in the same units. Find the difference, proportion, or multiplication shown in the example above before entering your number.</p></details>}</form>
+    <form className="qcourse-assessment" onSubmit={submit}><p className="pencil-formula-label">QUICK CHECK · LEARN BY DOING</p><p className="pencil-prose font-semibold mt-3">{lesson.question}</p><div className="qcourse-input-row"><input type="number" step="any" aria-label="Your numerical answer" value={answer} onChange={e=>setAnswer(e.target.value)} placeholder="Your answer"/><button type="submit">Check answer</button></div>{result&&<div role="status" className={result.ok?"qcourse-ok":"qcourse-wrong"}><p>{result.text}{result.ok?" ✓":""}</p><p className="qcourse-solution"><strong>Step-by-step answer:</strong> {teaching?.solution}</p></div>}{!result?.ok&&<details className="qcourse-hint"><summary>Need a hint?</summary><p>Restate the given quantities in the same units. Find the difference, proportion, or multiplication shown in the example above before entering your number.</p></details>}</form>
     <p className="qcourse-feedback-note">A correct check records completion against your signed-in account. The example and chart are for learning; financial prices shown here are illustrative unless explicitly identified otherwise.</p>
     <nav className="qcourse-next" aria-label="Lesson navigation"><button disabled={idx===0} onClick={()=>choose(QUANT_LESSONS[idx-1])} type="button">← Previous</button><button disabled={idx===QUANT_LESSONS.length-1} onClick={()=>choose(QUANT_LESSONS[idx+1])} type="button">Next lesson →</button></nav>
    </div></article>
