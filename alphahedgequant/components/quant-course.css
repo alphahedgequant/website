@@ -94,3 +94,84 @@
 .qcourse-solution strong{font-family:Archivo,Arial,sans-serif;font-size:13px}
 .qcourse-option-table tbody th{background:#f0e8d4}
 .qcourse-option-table tbody tr:nth-child(2) th{background:#eed482}
+
+/* Black/white progress system — no yellow or gold in the course navigation. */
+.qcourse-shell .qcourse-sidebar{background:#101114!important;color:#f7f7f7!important;border:1px solid #34363b!important;box-shadow:0 12px 36px rgba(0,0,0,.18)}
+.qcourse-shell .qcourse-sidebar-label{color:#f5f5f5!important}
+.qcourse-shell .qcourse-side-item{color:#e5e5e5!important}
+.qcourse-shell .qcourse-side-item:hover{background:#24262a!important;border-color:#54565a!important}
+.qcourse-shell .qcourse-side-item.selected{background:#f5f5f5!important;color:#101114!important;border-color:#fff!important}
+.qcourse-shell .qcourse-side-head small,.qcourse-shell .qcourse-side-head em{color:#bfc0c2!important}
+.qcourse-shell .qcourse-side-item.selected .qcourse-side-head small,.qcourse-shell .qcourse-side-item.selected .qcourse-side-head em{color:#36383b!important}
+.qcourse-shell .qcourse-sidebar-subprogress{font-size:11px;line-height:1.5;display:block;color:#9e9fa4;margin:0 0 10px}
+.qcourse-shell .qcourse-side-item.selected .qcourse-sidebar-subprogress{color:#55585b}
+.qcourse-shell .qcourse-mini-track{background:#4b4e54!important}
+.qcourse-shell .qcourse-side-item.selected .qcourse-mini-track{background:#c6c6c6!important}
+.qcourse-shell .qcourse-mini-track span{background:#fff!important}
+.qcourse-shell .qcourse-side-item.selected .qcourse-mini-track span{background:#141414!important}
+.qcourse-shell .qcourse-sync{color:#c9c9c9!important;border-color:#35363a!important}
+.qcourse-shell .qcourse-total{background:#161719!important;color:white!important;border-color:#33363a!important}
+.qcourse-shell .qcourse-total strong{color:#fff!important}
+.qcourse-shell .qcourse-total small{color:#c3c4c5!important}
+.qcourse-shell .qcourse-total .qcourse-track{background:#414349!important}
+.qcourse-shell .qcourse-total .qcourse-track span{background:white!important}
+.qcourse-shell .qcourse-lesson-nav button.active{border-color:#a4a4a4;background:rgba(125,125,125,.09)}
+.qcourse-shell .qcourse-lesson-nav button span{color:#a8a8a8}
+
+/* Chapter-length syllabus, designed to read like a course rather than a dashboard. */
+.qmodule-course{margin:25px 0 34px}
+.qmodule-intro{padding:clamp(22px,3vw,32px);border:1px solid #d8d2c8;border-radius:16px;color:#29384b;background:#faf8f3}
+.qmodule-kicker{font:750 10px/1.4 ui-monospace,monospace;letter-spacing:.12em;color:#666;text-transform:uppercase}
+.qmodule-intro h3{font:650 clamp(22px,2.3vw,30px)/1.2 Archivo,Arial,sans-serif;color:#202933;margin:9px 0 14px}
+.qmodule-intro>p:not(.qmodule-kicker){font:16px/1.85 Georgia,serif;color:#37465a;margin:14px 0}
+.qmodule-progress{display:flex;align-items:center;gap:12px;margin-top:20px;flex-wrap:wrap;color:#454545;font:650 12px Archivo,Arial,sans-serif}
+.qmodule-progress>div{flex:1;min-width:120px;height:7px;border-radius:10px;overflow:hidden;background:#d6d7d8}
+.qmodule-progress>div span{height:100%;display:block;background:#303236;border-radius:10px}
+.qmodule-grid{display:grid;grid-template-columns:minmax(180px,220px) minmax(0,1fr);gap:12px;margin-top:15px;align-items:start}
+.qmodule-topic-list{background:#f2f2f2;border:1px solid #dadada;border-radius:12px;padding:13px;color:#1d1d1d}
+.qmodule-topic-top{display:flex;justify-content:space-between;gap:7px;align-items:center;font:700 10px ui-monospace,monospace;color:#343434;margin:4px 0 10px}
+.qmodule-topic-top span{font-weight:400;color:#6c6c6c}
+.qmodule-topic-list input{width:100%;padding:10px;background:#fff;border:1px solid #c9c9c9;border-radius:6px;color:#222;font:12px Archivo,Arial,sans-serif}
+.qmodule-topic-scroller{max-height:500px;overflow:auto;margin-top:12px}
+.qmodule-topic-scroller button{width:100%;display:flex;gap:8px;align-items:start;padding:11px 8px;text-align:left;border-radius:7px;color:#2b2b2b;background:transparent;font:500 12px/1.45 Archivo,Arial,sans-serif}
+.qmodule-topic-scroller button small{font:700 10px ui-monospace,monospace;color:#777}
+.qmodule-topic-scroller button span{flex:1}
+.qmodule-topic-scroller button strong{font-size:13px;color:#888}
+.qmodule-topic-scroller button.is-current{background:#222;color:#fff}
+.qmodule-topic-scroller button.is-current small,.qmodule-topic-scroller button.is-current strong{color:#ddd}
+.qmodule-topic-scroller button:hover:not(.is-current){background:#e2e2e2}
+.qmodule-reading{background:#fffdfa;border:1px solid #e0dbd2;border-radius:13px;padding:clamp(20px,3vw,30px);color:#303c4b;min-width:0}
+.qmodule-reading h4{font:650 clamp(21px,2.5vw,29px)/1.25 Archivo,Arial,sans-serif;color:#263449;margin:12px 0 22px;scroll-margin-top:95px}
+.qmodule-reading h5{font:650 17px/1.4 Georgia,serif;color:#233851;margin:25px 0 8px}
+.qmodule-reading>p:not(.qmodule-kicker):not(.qmodule-status){font:15px/1.9 Georgia,serif;color:#344258;margin:8px 0 16px}
+.qmodule-concept-flow{display:flex;gap:6px;align-items:center;margin:24px 0}
+.qmodule-concept-flow>div{flex:1;min-width:0;background:#f4f2ed;border:1px solid #ded9d0;border-radius:8px;padding:13px 9px}
+.qmodule-concept-flow>span{flex:0;color:#575757}
+.qmodule-concept-flow small{font:700 10px ui-monospace,monospace;color:#686868;display:block}
+.qmodule-concept-flow strong{font:650 13px/1.4 Archivo,Arial,sans-serif;color:#202b3a;display:block;margin:7px 0}
+.qmodule-concept-flow div span{font:12px/1.6 Georgia,serif;color:#626262;display:block}
+.qmodule-check-note{border-left:3px solid #404040;background:#f1f1f1;color:#333;padding:15px 18px;margin:23px 0}
+.qmodule-check-note strong{font:700 13px Archivo,Arial,sans-serif}
+.qmodule-check-note p{font:14px/1.8 Georgia,serif;margin-top:9px}
+.qmodule-reading textarea,.qmodule-lab textarea:not(.qmodule-code){width:100%;border:1px solid #b9b9b9;background:white;color:#202020;border-radius:8px;font:14px/1.6 Archivo,Arial,sans-serif;padding:12px;resize:vertical}
+.qmodule-reading-actions,.qmodule-lab-actions{display:flex;flex-wrap:wrap;gap:10px;margin:12px 0}
+.qmodule-reading-actions button,.qmodule-lab-actions button,.qmodule-submit{border-radius:7px;padding:11px 14px;border:1px solid #454545;background:#222;color:#fff;font:650 12px Archivo,Arial,sans-serif}
+.qmodule-reading-actions button:last-child,.qmodule-lab-actions button:last-child{background:#fff;color:#252525}
+.qmodule-reading-actions button:disabled,.qmodule-submit:disabled{opacity:.55;cursor:not-allowed}
+.qmodule-status{font:13px/1.6 Archivo,Arial,sans-serif;color:#484848;margin:12px 0}
+.qmodule-lab{margin-top:18px;background:#f6f6f6;border:1px solid #d7d7d7;border-radius:13px;color:#242424;padding:clamp(19px,3vw,30px)}
+.qmodule-lab header{display:flex;justify-content:space-between;gap:15px;align-items:start;margin-bottom:15px}
+.qmodule-lab h4{font:650 clamp(19px,2.2vw,25px)/1.35 Archivo,Arial,sans-serif;margin-top:9px}
+.qmodule-lab header>span{white-space:nowrap;border:1px solid #aaa;border-radius:5px;padding:8px;color:#333;font:700 10px ui-monospace,monospace}
+.qmodule-lab>p,.qmodule-lab ol{font:14px/1.85 Georgia,serif;color:#424242}
+.qmodule-lab h5{font:650 17px Georgia,serif;margin:25px 0 10px}
+.qmodule-lab ol{margin-left:23px;list-style:decimal}
+.qmodule-lab li{padding-left:4px;margin-bottom:7px}
+.qmodule-code-label{font:700 11px/1.6 ui-monospace,monospace;color:#4a4a4a;letter-spacing:.045em;display:block;margin:24px 0 10px}
+.qmodule-lab textarea.qmodule-code{display:block;width:100%;min-height:220px;resize:vertical;background:#151618;color:#f1f1f1;border:1px solid #454545;border-radius:9px;padding:17px;font:12.5px/1.6 ui-monospace,monospace;tab-size:4}
+.qmodule-disclaimer{font-size:12px!important;color:#686868!important;margin-top:22px}
+.qcourse-core-heading{border-top:1px solid #c9c9c9;margin:35px 0 18px;padding-top:24px}
+.qcourse-core-heading h3{font:650 24px Archivo,Arial,sans-serif;margin:8px 0;color:var(--ahq-body)}
+.qcourse-core-heading>p:last-child{font:13px/1.7 Archivo,Arial,sans-serif;color:var(--ahq-muted)}
+@media(max-width:1100px){.qmodule-grid{display:block}.qmodule-topic-scroller{max-height:200px}.qmodule-topic-list{margin-bottom:12px}}
+@media(max-width:640px){.qmodule-concept-flow{flex-direction:column;align-items:stretch}.qmodule-concept-flow>span{text-align:center;transform:rotate(90deg)}.qmodule-lab header{flex-direction:column}.qcourse-layout{display:block}}
