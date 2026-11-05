@@ -83,3 +83,14 @@
 .qcourse-next button:disabled{opacity:.35;cursor:not-allowed}
 @media(max-width:900px){.qcourse-layout{grid-template-columns:minmax(190px,220px) minmax(0,1fr)}.qcourse-diagram{flex-direction:column}.qcourse-diagram-node:not(:last-child):after{display:none}.qcourse-glossary{grid-template-columns:1fr}}
 @media(max-width:720px){.qcourse-top{flex-direction:column;align-items:stretch}.qcourse-layout{display:block}.qcourse-sidebar{position:static;max-height:none;margin-bottom:22px}.qcourse-side-item{display:inline-block;vertical-align:top;width:calc(50% - 6px);margin:3px}.qcourse-glossary{grid-template-columns:1fr}.qcourse-bond-flow{flex-direction:column}.qcourse-side-by-side{flex-direction:column}.qcourse-ml-timeline{flex-direction:column}.qcourse-paper .pencil-main{padding-left:39px}}
+
+.qcourse-formula{border:1px solid #d8c4a5;border-radius:10px;background:#fff9e9;padding:16px 22px;margin:18px 0 25px;text-align:center}
+.qcourse-formula p{font:italic 600 clamp(17px,2vw,24px)/1.65 Georgia,serif;color:#244866;margin:10px auto;overflow-wrap:anywhere}
+.qcourse-formula small{display:block;font:12px/1.65 Archivo,Arial,sans-serif;color:#6c6559}
+.qcourse-mistake{margin:27px 0;border-left:3px solid #bd6b55;padding:15px 20px;background:rgba(225,186,148,.20)}
+.qcourse-mistake strong{font:700 13px Archivo,Arial,sans-serif;color:#9a473c}
+.qcourse-mistake p{font:15px/1.85 Georgia,serif;color:#394863;margin-top:7px}
+.qcourse-solution{padding-top:10px;font:14px/1.75 Georgia,serif;color:#29415e}
+.qcourse-solution strong{font-family:Archivo,Arial,sans-serif;font-size:13px}
+.qcourse-option-table tbody th{background:#f0e8d4}
+.qcourse-option-table tbody tr:nth-child(2) th{background:#eed482}
