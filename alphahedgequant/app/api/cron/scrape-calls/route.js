@@ -17,7 +17,9 @@
 import { neon } from "@neondatabase/serverless";
 import { fetchConsensus } from "../../../../lib/fetchConsensus";
 
-const sql = neon(process.env.NEON_DATABASE_URL);
+// Construct the database client only after cron authentication and env validation.
+// Creating it at module scope fails Next build when CI has no production secrets.
+let sql;
 
 async function ensureTable() {
   await sql`
@@ -45,7 +47,9 @@ export async function GET(request) {
     });
   }
 
+  if (!process.env.NEON_DATABASE_URL) return Response.json({ok:false,error:"Database not configured"},{status:503});
   try {
+    sql = neon(process.env.NEON_DATABASE_URL);
     await ensureTable();
     const { valid, report } = await fetchConsensus();
 
