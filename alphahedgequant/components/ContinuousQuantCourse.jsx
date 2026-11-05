@@ -36,7 +36,7 @@ function Chapter({topic,section,progress,save}){
  const [message,setMessage]=useState("");
  const deep=TOPIC_DEEP_DIVES[topic.id];
  const done=Boolean(progress[topic.id]?.completed);
- const submit=async()=>{if(note.trim().length<25){setMessage("Explain the idea in at least one sentence before marking this chapter studied.");return}await save(topic.id,100,true);setMessage("Study recorded. Revisit this chapter whenever you need to.");};
+ const submit=async()=>{if(note.trim().length<25){setMessage("Explain the idea in at least one sentence before marking this chapter studied.");return}const saved=await save(topic.id,100,true);setMessage(saved?"Study recorded. Revisit this chapter whenever you need to.":"Could not save progress. Retry after checking your account connection.");};
  return <section className="ac-chapter" id={"ac-"+topic.id} aria-labelledby={"ac-title-"+topic.id}>
   <div className="ac-chapter-meta"><span>CHAPTER {lpad(topic.index)}</span><span>{done?"STUDIED ✓":"READ · UNDERSTAND · APPLY"}</span></div>
   <h3 id={"ac-title-"+topic.id}>{topic.title}</h3>
@@ -57,13 +57,13 @@ function Foundation({lesson,progress,save}){
  const [value,setValue]=useState("");
  const [result,setResult]=useState(null);
  const t=QUANT_TEACHING[lesson.id];const done=Boolean(progress[lesson.id]?.completed);
- async function check(e){e.preventDefault();if(!value.trim())return;const ok=isCorrect(lesson,value);setResult(ok);if(ok)await save(lesson.id,100,true)}
+ async function check(e){e.preventDefault();if(!value.trim())return;const ok=isCorrect(lesson,value);setResult(ok);if(ok){const saved=await save(lesson.id,100,true);if(!saved)setResult("save-failed")}}
  return <section className="ac-foundation" id={"ac-found-"+lesson.id}>
   <div className="ac-found-title"><h4>{lesson.title}</h4><span>{done?"COMPLETED ✓":"PRACTICE"}</span></div>
   <p>{lesson.explain} {lesson.example}</p>
   <div className="ac-equation"><small>IN ONE LINE</small><p>{t?.formula}</p></div>
   <form onSubmit={check} className="ac-question"><label htmlFor={"ac-answer-"+lesson.id}>{lesson.question}</label><div><input id={"ac-answer-"+lesson.id} type="number" step="any" value={value} onChange={e=>{setValue(e.target.value);setResult(null)}} placeholder="Your answer" disabled={done}/><button type="submit" disabled={done}>{done?"Completed ✓":"Check answer"}</button></div>
-  {result!==null&&<p role="status" className="ac-answer-feedback">{result?"Correct. ":"Review and try again. "}{t?.solution}</p>}
+  {result!==null&&<p role="status" className="ac-answer-feedback">{result==="save-failed"?"Correct calculation, but progress could not be saved. Retry. ":result?"Correct. ":"Review and try again. "}{t?.solution}</p>}
   </form>
  </section>
 }
@@ -71,7 +71,7 @@ function Coding({section,progress,save}){
  const guide=MODULE_GUIDES[section];const id="quant-lab-"+(section+1);const done=Boolean(progress[id]?.completed);
  const [code,setCode]=useState(guide.code);const [reflection,setReflection]=useState("");const [feedback,setFeedback]=useState("");
  useEffect(()=>{setCode(guide.code);setReflection("");setFeedback("");},[guide]);
- const record=async()=>{if(reflection.trim().length<40){setFeedback("Write what you ran, changed and learned (at least 40 characters).");return}await save(id,100,true);setFeedback("Practice recorded. This is self-reported, not an automatically graded submission.")};
+ const record=async()=>{if(reflection.trim().length<40){setFeedback("Write what you ran, changed and learned (at least 40 characters).");return}const saved=await save(id,100,true);setFeedback(saved?"Practice recorded. This is self-reported, not an automatically graded submission.":"Could not save practice to your account; please retry.")};
  return <section id="ac-coding" className="ac-coding">
   <p className="ac-overline">FINAL PRACTICE · MODULE {lpad(section+1)}</p><h3>Try the mathematics with Python</h3><p>{guide.assignment}. Run the code on your own computer or a Python notebook, then explain what happened. The website does not execute arbitrary code.</p>
   <label htmlFor="ac-code">Editable starter code</label><textarea id="ac-code" className="ac-code" spellCheck={false} rows={Math.max(12,guide.code.split("\n").length+2)} value={code} onChange={e=>setCode(e.target.value)}/>
