@@ -96,8 +96,7 @@ export async function POST(request) {
       }),
     });
     if (!aiRes.ok) {
-      const detail = await aiRes.text().catch(() => "");
-      return Response.json({ ok: false, error: `Model call failed (HTTP ${aiRes.status}).`, detail: detail.slice(0, 200) }, { status: 502 });
+      return Response.json({ ok: false, error: "The model provider is temporarily unavailable." }, { status: 502 });
     }
     const aiJson = await aiRes.json();
     const raw = (aiJson.candidates?.[0]?.content?.parts?.[0]?.text || "").replace(/```json|```/g, "").trim();
@@ -123,6 +122,6 @@ export async function POST(request) {
     const results = runBacktest(spec, pj.data);
     return Response.json({ ok: true, spec, results });
   } catch (e) {
-    return Response.json({ ok: false, error: String(e.message || e) }, { status: 500 });
+    return Response.json({ ok: false, error: "Could not process the request." }, { status: 500 });
   }
 }
