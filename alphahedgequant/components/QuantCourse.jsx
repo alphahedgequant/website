@@ -4,7 +4,7 @@ import {QUANT_SECTIONS,QUANT_LESSONS,sectionProgress,isCorrect} from "@/lib/quan
 import {QUANT_TEACHING} from "@/lib/quantTeaching.mjs";
 import "./quant-course.css";
 import ModuleCourse from "@/components/ModuleCourse";
-import {topicProgress} from "@/lib/quantModuleGuides.mjs";
+import {MODULE_TOPICS,topicProgress} from "@/lib/quantModuleGuides.mjs";
 
 const GLOSSARY=[
  [{term:"Return",definition:"The gain or loss divided by your starting investment."},{term:"Probability",definition:"A fraction between zero and one describing uncertainty."},{term:"Spread",definition:"The displayed difference between the best ask and bid."}],
@@ -103,6 +103,10 @@ export default function QuantCourse({progress={},save,sync}){
  const [section,setSection]=useState(0),[active,setActive]=useState(QUANT_LESSONS[0].id),[answer,setAnswer]=useState(""),[result,setResult]=useState(null),[search,setSearch]=useState("");
  const lesson=QUANT_LESSONS.find(x=>x.id===active)||QUANT_LESSONS[0];
  const allDone=QUANT_LESSONS.filter(x=>progress[x.id]?.completed).length;
+ const allTopicsDone=MODULE_TOPICS.filter(x=>progress[x.id]?.completed).length;
+ const labsDone=Array.from({length:6},(_,i)=>"quant-lab-"+(i+1)).filter(id=>progress[id]?.completed).length;
+ const fullCompleted=allDone+allTopicsDone+labsDone;
+ const allActivities=QUANT_LESSONS.length+MODULE_TOPICS.length+6;
  const currentLessons=useMemo(()=>QUANT_LESSONS.filter(x=>x.section===section&&x.title.toLowerCase().includes(search.toLowerCase())),[section,search]);
  const choose=(l)=>{setActive(l.id);setSection(l.section);setAnswer("");setResult(null);if(typeof window!=="undefined"){if(window.location.hash!=="#quant-lesson")window.location.hash="quant-lesson";setTimeout(()=>document.getElementById("qcourse-heading")?.scrollIntoView({behavior:"smooth",block:"start"}),80);}};
  const selectSection=(i)=>{setSection(i);setSearch("");const next=QUANT_LESSONS.find(l=>l.section===i);if(next)choose(next);};
@@ -112,10 +116,10 @@ export default function QuantCourse({progress={},save,sync}){
  const score=sectionProgress(progress,section);
  const submit=async(e)=>{e.preventDefault();if(answer.trim()==="")return;const ok=isCorrect(lesson,answer);setResult(ok?{ok:true,text:"Correct. You can now explain the mechanism, not just remember the number."}:{ok:false,text:"Not yet. Read the worked example again, identify the starting value and unit, then retry."});if(ok)await save(lesson.id,100,true)};
  return <section className="qcourse-shell mt-10" aria-label="Six-stage quant finance curriculum" id="quant-lesson">
-  <header className="qcourse-top"><div><p className="eyebrow">01 / LEARN QUANT · GUIDED PATH</p><h2 className="font-display text-3xl mt-2">Six modules. From the very beginning.</h2><p className="text-muted text-sm mt-3 max-w-3xl">74 foundation lessons, 74 additional specialist chapters and six coding projects. Start with basic maths; advanced topics introduce their prerequisites and assumptions before the formal models.</p></div><div className="qcourse-total"><strong>{allDone}/74</strong><small>Lessons completed</small><div className="qcourse-track"><span style={{width:(allDone/74*100)+"%"}}/></div></div></header>
+  <header className="qcourse-top"><div><p className="eyebrow">01 / LEARN QUANT · GUIDED PATH</p><h2 className="font-display text-3xl mt-2">Six modules. From the very beginning.</h2><p className="text-muted text-sm mt-3 max-w-3xl">74 foundation lessons, 74 additional specialist chapters and six coding projects. Start with basic maths; advanced topics introduce their prerequisites and assumptions before the formal models.</p></div><div className="qcourse-total"><strong>{fullCompleted}/{allActivities}</strong><small>Chapters + foundation lessons + coding labs</small><div className="qcourse-track"><span style={{width:(fullCompleted/allActivities*100)+"%"}}/></div></div></header>
   <div className="qcourse-layout"><aside className="qcourse-sidebar" aria-label="Course sections and progress">
-   <p className="qcourse-sidebar-label">COURSE PROGRESS</p>{QUANT_SECTIONS.map((s,i)=>{const p=sectionProgress(progress,i);const topic=topicProgress(progress,i);return <button key={s.id} type="button" onClick={()=>selectSection(i)} className={"qcourse-side-item "+(section===i?"selected":"")} aria-current={section===i?"step":undefined}>
-    <span className="qcourse-side-head"><small>MODULE {String(i+1).padStart(2,"0")}</small><em>{topic.done}/{topic.total}</em></span><strong>{s.title}</strong><span className="qcourse-sidebar-subprogress">Chapters {topic.done}/{topic.total} · Maths {p.done}/{p.total}</span><span className="qcourse-mini-track"><span style={{width:(topic.done/topic.total*100)+"%"}}/></span></button>})}
+   <p className="qcourse-sidebar-label">COURSE PROGRESS</p>{QUANT_SECTIONS.map((s,i)=>{const p=sectionProgress(progress,i);const topic=topicProgress(progress,i);const lab=Boolean(progress["quant-lab-"+(i+1)]?.completed);const completed=p.done+topic.done+(lab?1:0);const total=p.total+topic.total+1;return <button key={s.id} type="button" onClick={()=>selectSection(i)} className={"qcourse-side-item "+(section===i?"selected":"")} aria-current={section===i?"step":undefined}>
+    <span className="qcourse-side-head"><small>MODULE {String(i+1).padStart(2,"0")}</small><em>{completed}/{total}</em></span><strong>{s.title}</strong><span className="qcourse-sidebar-subprogress">Topics {topic.done}/{topic.total} · Maths {p.done}/{p.total} · Code {lab?"✓":"—"}</span><span className="qcourse-mini-track"><span style={{width:(completed/total*100)+"%"}}/></span></button>})}
    <p className="qcourse-sync" aria-live="polite">{sync||"Progress sync pending"}</p>
   </aside><div className="qcourse-content">
    <div className="qcourse-section-intro"><p className="eyebrow">SECTION {String(section+1).padStart(2,"0")} · {score.done}/{score.total} COMPLETED</p><h3>{QUANT_SECTIONS[section].title}</h3><p>{QUANT_SECTIONS[section].description}</p><div className="qcourse-track"><span style={{width:(score.done/score.total*100)+"%"}}/></div></div>
