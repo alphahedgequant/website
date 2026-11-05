@@ -1,6 +1,7 @@
 "use client";
 import {useEffect,useMemo,useState} from "react";
 import {MODULE_GUIDES,MODULE_TOPICS,topicProgress} from "@/lib/quantModuleGuides.mjs";
+import {TOPIC_DEEP_DIVES} from "@/lib/quantDeepDives.mjs";
 
 const REFLECTIONS=[
  "In your own words, why do models need assumptions? Explain what a simulated price cannot tell you about tomorrow.",
@@ -32,6 +33,7 @@ export default function ModuleCourse({moduleIndex,progress,save}){
  const [showSolution,setShowSolution]=useState(false);
  useEffect(()=>{setSelected(MODULE_TOPICS.find(t=>t.module===moduleIndex)?.id);setReflection("");setCode(MODULE_GUIDES[moduleIndex].code);setFeedback("");setLabFeedback("");setAssignmentNotes("");setShowSolution(false);setFilter("");},[moduleIndex]);
  const active=topics.find(t=>t.id===selected)||topics[0];
+ const deep=TOPIC_DEEP_DIVES[active.id];
  const count=topicProgress(progress,moduleIndex);
  const completedLab=Boolean(progress["quant-lab-"+(moduleIndex+1)]?.completed);
  async function completeTopic(){
@@ -70,6 +72,7 @@ export default function ModuleCourse({moduleIndex,progress,save}){
     <h5>Begin with the meaning</h5><p>{active.concept}</p>
     <p>Rather than memorizing a technical name, first identify the input, the outcome, and why a researcher needs the relationship. A useful model should clarify a decision; a complicated equation is not evidence that it will predict markets correctly.</p>
     <InstructionFlow topic={active}/>
+    {deep&&<div className="qmodule-deep"><h5>The intuition, without advanced maths</h5><p>{deep.intuition}</p><h5>The mathematical relationship</h5><div className="qmodule-formula">{deep.formula}</div><h5>Follow the numbers</h5><p>{deep.worked}</p><p className="qmodule-deep-limit"><strong>Model limitation:</strong> {deep.pitfall}</p></div>}
     <h5>Imagine this happening in the real world</h5><p>{active.example}</p>
     <div className="qmodule-check-note"><strong>What could go wrong?</strong><p>{active.caution}</p></div>
     <h5>Think it through yourself</h5><p>{REFLECTIONS[moduleIndex]}</p>
