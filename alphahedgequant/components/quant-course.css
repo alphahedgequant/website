@@ -1,0 +1,85 @@
+/* Six-section quant course. Scope every selector to this component. */
+.qcourse-shell{color:var(--ahq-body);scroll-margin-top:100px}
+.qcourse-top{display:flex;justify-content:space-between;align-items:end;gap:24px;padding-bottom:26px;border-bottom:1px solid var(--ahq-line)}
+.qcourse-total{border:1px solid var(--ahq-line);border-radius:14px;padding:14px 18px;min-width:172px;background:var(--ahq-surface)}
+.qcourse-total strong{display:block;font-size:28px;color:#e3be4f;font-weight:700}
+.qcourse-total small{display:block;margin:2px 0 12px;font-size:12px;color:var(--ahq-muted)}
+.qcourse-track,.qcourse-mini-track{display:block;width:100%;background:#313945;border-radius:100px;height:6px;overflow:hidden}
+.qcourse-track span,.qcourse-mini-track span{display:block;background:#e3be4f;height:100%;border-radius:100px;transition:width .2s ease}
+.qcourse-layout{display:grid;grid-template-columns:minmax(238px,260px) minmax(0,1fr);gap:20px;margin-top:26px;align-items:start}
+.qcourse-sidebar{position:sticky;top:92px;max-height:calc(100vh - 110px);overflow-y:auto;border:1px solid var(--ahq-line);border-radius:16px;background:var(--ahq-surface);padding:14px}
+.qcourse-sidebar-label{font:700 11px/1.5 ui-monospace,monospace;letter-spacing:.15em;color:#d0b25d;padding:8px 8px 15px}
+.qcourse-side-item{display:block;width:100%;text-align:left;padding:13px 11px;margin-bottom:7px;border:1px solid transparent;border-radius:11px;color:var(--ahq-body);background:transparent;cursor:pointer}
+.qcourse-side-item:hover{background:var(--ahq-raised);border-color:var(--ahq-line)}
+.qcourse-side-item.selected{background:rgba(227,190,79,.08);border-color:rgba(227,190,79,.65)}
+.qcourse-side-head{display:flex;justify-content:space-between;gap:8px;margin-bottom:8px}
+.qcourse-side-head small,.qcourse-side-head em{font:700 10px/1.3 ui-monospace,monospace;color:#e3be4f;letter-spacing:.04em;font-style:normal}
+.qcourse-side-item strong{display:block;font-weight:650;font-size:13px;line-height:1.45;margin-bottom:11px}
+.qcourse-mini-track{height:4px}
+.qcourse-sync{font-size:11px;line-height:1.5;color:var(--ahq-muted);border-top:1px solid var(--ahq-line);padding:13px 8px 4px}
+.qcourse-content{min-width:0}
+.qcourse-section-intro{border:1px solid var(--ahq-line);background:var(--ahq-surface);border-radius:15px;padding:20px 23px;margin-bottom:18px}
+.qcourse-section-intro h3{font:600 clamp(24px,2.5vw,32px)/1.2 Archivo,system-ui,sans-serif;margin:8px 0}
+.qcourse-section-intro p:not(.eyebrow){font-size:13px;color:var(--ahq-muted);line-height:1.65;margin-bottom:17px}
+.qcourse-search{width:100%;border:1px solid var(--ahq-line);background:var(--ahq-raised);color:var(--ahq-body);border-radius:10px;padding:12px 14px;margin-bottom:12px;font-size:14px}
+.qcourse-lesson-nav{display:flex;gap:8px;overflow-x:auto;padding-bottom:15px;scrollbar-width:thin}
+.qcourse-lesson-nav button{display:flex;flex-shrink:0;align-items:center;gap:8px;border:1px solid var(--ahq-line);border-radius:9px;padding:10px 12px;background:var(--ahq-surface);font-size:12px;line-height:1.3;text-align:left;max-width:230px;color:var(--ahq-body)}
+.qcourse-lesson-nav button.active{border-color:#e3be4f;background:rgba(227,190,79,.08)}
+.qcourse-lesson-nav button span{color:#e3be4f;font:700 10px ui-monospace,monospace}
+.qcourse-lesson-nav button b{color:#35bc90}
+.qcourse-paper{margin:0;border-radius:17px;min-width:0}
+.qcourse-paper .pencil-main{padding-top:clamp(30px,4vw,55px)}
+.qcourse-guided{margin:25px 0;padding:17px 20px;border-left:3px solid #ba8056;background:rgba(248,224,183,.26);border-radius:0 9px 9px 0}
+.qcourse-guided strong{font:700 13px Archivo,Arial,sans-serif;color:#874853}
+.qcourse-guided p{font:16px/1.85 Georgia,serif;color:#394863;margin-top:8px}
+.qcourse-diagram{display:flex;gap:5px;align-items:stretch;margin:20px 0 26px}
+.qcourse-diagram-node{flex:1;border:1px solid #d5c5ac;background:#fff9e8;padding:15px 9px;border-radius:9px;text-align:center;min-width:0}
+.qcourse-diagram-node span{display:block;color:#a65d4a;font:700 11px ui-monospace,monospace}
+.qcourse-diagram-node strong{display:block;margin-top:8px;font:600 13px/1.35 Archivo,Arial,sans-serif;color:#2c425a}
+.qcourse-diagram-node:not(:last-child):after{content:"→";position:absolute;color:#99713a;transform:translate(12px,-18px)}
+.qcourse-market-box{border:1px solid #d9caaa;border-radius:11px;padding:18px;background:rgba(255,251,240,.78);margin:18px 0 27px;color:#243b56}
+.qcourse-figure-label{color:#7b5d46;font:700 10px/1.5 ui-monospace,monospace;letter-spacing:.075em;margin:0 0 14px}
+.qcourse-figure-caption{font:12px/1.65 Archivo,Arial,sans-serif;color:#705e4d;margin-top:12px}
+.qcourse-scroll{overflow:auto}
+.qcourse-option-table{width:100%;border-collapse:collapse;min-width:550px;font:12px Archivo,Arial,sans-serif;font-variant-numeric:tabular-nums}
+.qcourse-option-table th,.qcourse-option-table td{text-align:center;border-bottom:1px solid #d9cdb7;padding:11px 6px}
+.qcourse-option-table thead th{font-size:10px;white-space:nowrap;color:#6f5c45;text-transform:uppercase}
+.qcourse-option-table tbody th{background:#eedba3;color:#28405e}
+.qcourse-option-table tbody td:nth-child(-n+3){color:#087f83}
+.qcourse-bond-flow{display:flex;gap:6px;position:relative;padding-top:18px;border-top:3px solid #b88947}
+.qcourse-bond-flow>div{flex:1;min-width:0;padding:8px;border-radius:8px;background:#f1e8d4;text-align:center}
+.qcourse-bond-flow small,.qcourse-bond-flow strong,.qcourse-bond-flow span{display:block;line-height:1.5}
+.qcourse-bond-flow small{font:700 10px ui-monospace,monospace;color:#936141}
+.qcourse-bond-flow strong{font-size:17px;color:#087f83}
+.qcourse-bond-flow span{font:11px/1.5 Archivo,Arial,sans-serif;color:#42516a}
+.qcourse-risk-bars{display:flex;gap:5px;align-items:end;height:145px;padding-top:15px}
+.qcourse-risk-bars>div{flex:1;min-width:0;border-radius:5px 5px 0 0;display:flex;align-items:start;justify-content:center;font:600 10px ui-monospace,monospace;padding-top:6px}
+.qcourse-risk-bars>div.win{height:48px;background:#2d958b;color:white}
+.qcourse-risk-bars>div.loss{height:135px;background:#aa443b;color:white}
+.qcourse-side-by-side{display:flex;gap:12px}
+.qcourse-side-by-side>div{flex:1;padding:15px;background:#f0e5cf;border-radius:9px;font:13px Archivo,Arial,sans-serif}
+.qcourse-side-by-side strong{display:block;margin:9px 0;font-size:25px;color:#204e59}
+.qcourse-side-by-side small{display:block;color:#745b48}
+.qcourse-ml-timeline{display:flex;gap:2px;font:700 12px Archivo,Arial,sans-serif;color:white}
+.qcourse-ml-timeline span{flex:1;padding:24px 8px;background:#275674;text-align:center}
+.qcourse-ml-timeline span:nth-child(2){background:#16847f}
+.qcourse-ml-timeline span:nth-child(3){background:#b06242}
+.qcourse-glossary{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin:18px 0 28px}
+.qcourse-glossary>div{padding:13px;background:rgba(238,224,192,.4);border:1px solid rgba(170,145,103,.25);border-radius:8px}
+.qcourse-glossary dt{font:700 13px Archivo,Arial,sans-serif;color:#27415e;margin-bottom:6px}
+.qcourse-glossary dd{font:13px/1.65 Georgia,serif;color:#42526b}
+.qcourse-assessment{padding:20px;background:rgba(241,232,206,.65);border:1px solid #cdbf9f;border-radius:11px;margin-top:30px}
+.qcourse-input-row{display:flex;flex-wrap:wrap;gap:10px;margin-top:14px}
+.qcourse-input-row input{max-width:240px;min-width:0;flex:1;border:1px solid #bba889;border-radius:8px;padding:12px;background:#fffdf5;color:#23334d}
+.qcourse-input-row button{border-radius:8px;padding:12px 18px;background:#29415e;color:white;font:600 13px Archivo,Arial,sans-serif}
+.qcourse-ok{color:#14664d;margin-top:12px;font:600 13px Archivo,sans-serif}
+.qcourse-wrong{color:#a34235;margin-top:12px;font:600 13px Archivo,sans-serif}
+.qcourse-hint{margin-top:16px;color:#765044;font:13px/1.6 Georgia,serif}
+.qcourse-hint summary{cursor:pointer}
+.qcourse-feedback-note{font:12px/1.7 Archivo,Arial,sans-serif;color:#776755;margin:25px 0}
+.qcourse-next{display:flex;justify-content:space-between;gap:12px;border-top:1px solid #d9c9ac;padding-top:22px}
+.qcourse-next button{padding:11px 15px;border:1px solid #bbb09c;color:#274260;border-radius:8px;background:#fffbf1;font:600 12px Archivo,Arial,sans-serif}
+.qcourse-next button:last-child{color:white;background:#29415e}
+.qcourse-next button:disabled{opacity:.35;cursor:not-allowed}
+@media(max-width:900px){.qcourse-layout{grid-template-columns:minmax(190px,220px) minmax(0,1fr)}.qcourse-diagram{flex-direction:column}.qcourse-diagram-node:not(:last-child):after{display:none}.qcourse-glossary{grid-template-columns:1fr}}
+@media(max-width:720px){.qcourse-top{flex-direction:column;align-items:stretch}.qcourse-layout{display:block}.qcourse-sidebar{position:static;max-height:none;margin-bottom:22px}.qcourse-side-item{display:inline-block;vertical-align:top;width:calc(50% - 6px);margin:3px}.qcourse-glossary{grid-template-columns:1fr}.qcourse-bond-flow{flex-direction:column}.qcourse-side-by-side{flex-direction:column}.qcourse-ml-timeline{flex-direction:column}.qcourse-paper .pencil-main{padding-left:39px}}
