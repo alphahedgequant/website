@@ -2,6 +2,7 @@
 import {useMemo,useState,useEffect} from "react";
 import {MODULE_GUIDES,MODULE_TOPICS,topicProgress} from "@/lib/quantModuleGuides.mjs";
 import {TOPIC_DEEP_DIVES} from "@/lib/quantDeepDives.mjs";
+import {CHAPTER_CONNECTIONS,MODULE_LEARNING_BRIDGES} from "@/lib/quantLearningConnections.mjs";
 import {QUANT_SECTIONS,QUANT_LESSONS,sectionProgress,isCorrect} from "@/lib/quantCourse.mjs";
 import {QUANT_TEACHING} from "@/lib/quantTeaching.mjs";
 import "./continuous-course.css";
@@ -42,6 +43,7 @@ function Chapter({topic,section,progress,save}){
   <h3 id={"ac-title-"+topic.id}>{topic.title}</h3>
   <p className="ac-lead">{deep?.intuition||topic.concept}</p>
   {deep&&<p>{topic.concept}</p>}
+  <p className="ac-explanation-bridge">{CHAPTER_CONNECTIONS[topic.id]}</p>
   <h4>Make it concrete</h4><p>{deep?.worked||topic.example}</p>
   {deep&&<p>{topic.example}</p>}
   <MiniFigure section={section} topic={topic}/>
@@ -100,7 +102,7 @@ export default function ContinuousQuantCourse({progress={},save,sync}){
    </aside>
    <article className="ac-paper" id="ac-module-top">
     <div className="ac-paper-inner">
-     <header className="ac-module-head"><p className="ac-overline">ALPHAHEDGEQUANT · MODULE {lpad(section+1)} OF 06</p><h2>{MODULE_GUIDES[section].title}</h2><p className="ac-lead">{MODULE_GUIDES[section].intro}</p><p>{MODULE_GUIDES[section].bridge}</p>
+     <header className="ac-module-head"><p className="ac-overline">ALPHAHEDGEQUANT · MODULE {lpad(section+1)} OF 06</p><h2>{MODULE_GUIDES[section].title}</h2><p className="ac-lead">{MODULE_GUIDES[section].intro}</p><p>{MODULE_GUIDES[section].bridge}</p><p className="ac-module-bridge">{MODULE_LEARNING_BRIDGES[section]}</p>
       <nav className="ac-toc" aria-label="In this module"><strong>On this page</strong><a href="#ac-chapter-start">Chapters 01–{lpad(topics.length)}</a><a href="#ac-foundations">Worked practice</a><a href="#ac-coding">Coding assignment</a></nav></header>
      <div id="ac-chapter-start" className="ac-chapters">
       {topics.map(topic=><Chapter key={topic.id} topic={topic} section={section} progress={progress} save={save}/>)}
