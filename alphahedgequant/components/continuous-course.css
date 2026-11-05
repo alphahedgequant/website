@@ -90,3 +90,8 @@
 @media(max-width:920px){.ac-layout{grid-template-columns:190px minmax(0,1fr);gap:13px}.ac-paper-inner{padding:30px 20px 30px 40px}}
 @media(max-width:700px){.ac-layout{display:block}.ac-sidebar{position:static;max-height:none;margin-bottom:20px}.ac-sidebar-item{display:inline-block;vertical-align:top;width:calc(50% - 5px);margin:3px 1px}.ac-paper-inner{padding:27px 19px 32px 35px}.ac-paper:before{left:17px}.ac-chapter{padding:30px 0}.ac-paper p,.ac-paper li{font-size:15px}.ac-paper p.ac-lead{font-size:16px}.ac-module-footer{flex-direction:column;align-items:stretch}}
 @media(max-width:410px){.ac-sidebar-item{width:100%}.ac-toc{gap:8px}}
+
+/* Additional contextual explanation remains ordinary reading prose, not a nested card. */
+.ac-paper p.ac-explanation-bridge{margin:17px 0 22px;font:16px/1.98 Georgia,"Times New Roman",serif;color:#3c4b5a}
+.ac-paper p.ac-module-bridge{margin:17px 0 7px;font:16px/1.95 Georgia,"Times New Roman",serif;color:#3c4b5a}
+@media(max-width:700px){.ac-paper p.ac-explanation-bridge,.ac-paper p.ac-module-bridge{font-size:15px}}
