@@ -48,7 +48,7 @@ export async function GET() {
 }
 
 export async function POST(request) {
-  const {userId}=auth();
+  const {userId}=await auth();
   if(!userId)return Response.json({success:false,error:"Sign in required"},{status:401});
   const allowed=(process.env.AHQ_TRACKER_ADMIN_EMAILS||process.env.AHQ_ANALYTICS_ADMIN_EMAILS||"").split(",").map(x=>x.trim().toLowerCase()).filter(Boolean);
   if(!allowed.length)return Response.json({success:false,error:"Tracker admin not configured"},{status:403});
