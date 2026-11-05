@@ -1,0 +1,33 @@
+name: AHQ Security Baseline
+on:
+  push:
+    branches: [main]
+    paths:
+      - ".gitignore"
+      - "alphahedgequant/next.config.mjs"
+      - "alphahedgequant/app/api/**"
+      - "alphahedgequant/middleware.js"
+      - "alphahedgequant/tests/securityBaseline.test.mjs"
+      - ".github/workflows/security-baseline.yml"
+  pull_request:
+    paths:
+      - ".gitignore"
+      - "alphahedgequant/next.config.mjs"
+      - "alphahedgequant/app/api/**"
+      - "alphahedgequant/middleware.js"
+      - "alphahedgequant/tests/securityBaseline.test.mjs"
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  security-regressions:
+    runs-on: ubuntu-latest
+    timeout-minutes: 6
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Check auth, input, cron, HTTP headers, secret hygiene
+        working-directory: alphahedgequant
+        run: node --test tests/securityBaseline.test.mjs
