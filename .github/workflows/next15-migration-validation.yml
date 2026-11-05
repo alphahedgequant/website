@@ -30,6 +30,9 @@ jobs:
       - name: Test security baseline and course code
         run: node --test tests/securityBaseline.test.mjs tests/quantCourse.test.mjs tests/quantModules.test.mjs tests/continuousCourse.test.mjs
       - name: Build full Next application
+        env:
+          # Nonfunctional public key for build-time rendering only; this is NOT a real Clerk instance.
+          NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY: "pk_test_ZXhhbXBsZS5jbGVyay5hY2NvdW50cy5kZXYk"
         run: npm run build
       - name: Commit reviewed lockfile to security branch only
         if: success()
