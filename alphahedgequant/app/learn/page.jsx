@@ -4,7 +4,7 @@ import Link from "next/link";
 import "./pencil-reader.css";
 import {LESSONS} from "@/lib/academyContent";
 import {QUANT_LESSONS} from "@/lib/quantCourse.mjs";
-import QuantCourse from "@/components/QuantCourse";
+import ContinuousQuantCourse from "@/components/ContinuousQuantCourse";
 import {CASES,CAREERS} from "@/lib/academyInterviews";
 import {LESSON_GUIDES} from "@/lib/academyGuides";
 import {MATH_TYPES,QUESTIONS_PER_TYPE,nextMentalExercise} from "@/lib/mentalMathBank";
@@ -42,7 +42,7 @@ export default function Learn(){
      <div className="card p-4"><p className="text-xs text-muted">Account progress</p><p aria-live="polite" className="text-xs text-amber mt-3 leading-relaxed">{sync}</p></div>
    </div>
    <div className="grid gap-3 md:grid-cols-3 mt-8">{TRACKS.map(([id,title,desc,glyph])=><button key={id} onClick={()=>setTab(id)} className={`text-left rounded-xl border p-5 transition-all ${tab===id?"border-amber/70 bg-amber/10":"border-line bg-surface hover:border-amber/30"}`}><span className="text-2xl text-amber">{glyph}</span><h2 className="text-lg font-medium mt-3">{title}</h2><p className="text-sm text-muted mt-1">{desc}</p></button>)}</div>
-   {tab==="quant"&&<QuantCourse progress={progress} save={save} sync={sync}/>}
+   {tab==="quant"&&<ContinuousQuantCourse progress={progress} save={save} sync={sync}/>}
    {tab==="interview"&&<section className="mt-10">
      <p className="eyebrow">02 / ROLE-SPECIFIC INTERVIEWS</p>
      <h2 className="font-display text-3xl mt-2">Prepare for your actual quant role</h2>
