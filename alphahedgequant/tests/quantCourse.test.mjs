@@ -1,6 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import {QUANT_SECTIONS,QUANT_LESSONS,sectionProgress,isCorrect} from "../lib/quantCourse.mjs";
+import {QUANT_TEACHING} from "../lib/quantTeaching.mjs";
 test("exactly six sequential sections have requested lesson totals",()=>{
  assert.equal(QUANT_SECTIONS.length,6);
  assert.deepEqual(Array.from({length:6},(_,i)=>QUANT_LESSONS.filter(l=>l.section===i).length),[10,10,13,12,15,14]);
@@ -36,4 +37,15 @@ test("numerical checks do not treat blank or nonnumeric input as zero",()=>{
  const option=QUANT_LESSONS.find(x=>x.id==="markets-12");
  assert.equal(isCorrect(option,"14"),true);
  assert.equal(isCorrect(option,"15"),false);
+});
+
+test("every lesson has its own formula, step-by-step solution and important limitation",()=>{
+ assert.equal(Object.keys(QUANT_TEACHING).length,74);
+ for(const lesson of QUANT_LESSONS){
+  const note=QUANT_TEACHING[lesson.id];
+  assert.ok(note,lesson.id+" has no tutorial");
+  assert.ok(note.formula.length>=12,lesson.id+" relationship missing");
+  assert.ok(note.solution.length>=27,lesson.id+" full worked answer missing");
+  assert.ok(note.pitfall.length>=28,lesson.id+" misconception missing");
+ }
 });
