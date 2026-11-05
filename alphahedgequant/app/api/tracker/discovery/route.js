@@ -5,7 +5,7 @@ export const runtime="nodejs";
 export const dynamic="force-dynamic";
 const respond=(data,status=200)=>Response.json(data,{status,headers:{"Cache-Control":"private, no-store"}});
 async function requireEditor(){
- const {userId}=auth();
+ const {userId}=await auth();
  if(!userId)return {error:respond({success:false,error:"Sign in required"},401)};
  const allowed=(process.env.AHQ_TRACKER_ADMIN_EMAILS||process.env.AHQ_ANALYTICS_ADMIN_EMAILS||"").split(",").map(x=>x.trim().toLowerCase()).filter(Boolean);
  if(!allowed.length)return {error:respond({success:false,error:"Tracker editor allowlist missing"},403)};
