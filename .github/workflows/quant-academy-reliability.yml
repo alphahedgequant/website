@@ -4,6 +4,9 @@ on:
     branches: [main]
     paths:
       - "alphahedgequant/lib/quantCourse.mjs"
+      - "alphahedgequant/tests/quantModules.test.mjs"
+      - "alphahedgequant/components/ModuleCourse.jsx"
+      - "alphahedgequant/lib/quantModuleGuides.mjs"
       - "alphahedgequant/lib/quantTeaching.mjs"
       - "alphahedgequant/components/QuantCourse.jsx"
       - "alphahedgequant/components/quant-course.css"
@@ -13,6 +16,9 @@ on:
   pull_request:
     paths:
       - "alphahedgequant/lib/quantCourse.mjs"
+      - "alphahedgequant/tests/quantModules.test.mjs"
+      - "alphahedgequant/components/ModuleCourse.jsx"
+      - "alphahedgequant/lib/quantModuleGuides.mjs"
       - "alphahedgequant/lib/quantTeaching.mjs"
       - "alphahedgequant/components/QuantCourse.jsx"
       - "alphahedgequant/components/quant-course.css"
@@ -32,4 +38,4 @@ jobs:
           node-version: "22"
       - name: Check six sections, content integrity and lesson progress
         working-directory: alphahedgequant
-        run: node --test tests/quantCourse.test.mjs
+        run: node --test tests/quantCourse.test.mjs tests/quantModules.test.mjs
