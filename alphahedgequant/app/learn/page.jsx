@@ -3,6 +3,8 @@ import {useCallback,useEffect,useMemo,useRef,useState} from "react";
 import Link from "next/link";
 import "./pencil-reader.css";
 import {LESSONS} from "@/lib/academyContent";
+import {QUANT_LESSONS} from "@/lib/quantCourse.mjs";
+import QuantCourse from "@/components/QuantCourse";
 import {CASES,CAREERS} from "@/lib/academyInterviews";
 import {LESSON_GUIDES} from "@/lib/academyGuides";
 import {MATH_TYPES,QUESTIONS_PER_TYPE,nextMentalExercise} from "@/lib/mentalMathBank";
@@ -19,14 +21,14 @@ export default function Learn(){
  const countersRef=useRef(Array(MATH_TYPES.length).fill(0)),endRef=useRef(0),intervalRef=useRef(null),inputRef=useRef(null),activeRef=useRef(false),correctRef=useRef(0),attemptRef=useRef(0);
  useEffect(()=>{(async()=>{try{const r=await fetch("/api/learn/progress",{cache:"no-store"}),j=await r.json();if(!j.ok)throw Error(j.error||"Unavailable");setProgress(Object.fromEntries(j.progress.map(x=>[x.item_id,x])));setSync("Progress synced with your account");}catch{setSync("Progress sync unavailable — sign in and retry");}})();},[]);
  const save=useCallback(async(id,score,completed)=>{try{const r=await fetch("/api/learn/progress",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({id,score,completed})});const j=await r.json();if(!j.ok)throw Error();setProgress(p=>({...p,[id]:j.record}));setSync("Progress saved");}catch{setSync("Could not save progress; please retry");}},[]);
- const totalDone=LESSONS.filter(l=>progress[l.id]?.completed).length;
+ const totalDone=QUANT_LESSONS.filter(l=>progress[l.id]?.completed).length;
  const filtered=useMemo(()=>LESSONS.filter(l=>(topic==="All"||l.topic===topic)&&(level==="All"||l.level===level)&&(`${l.title} ${l.explain} ${l.topic}`).toLowerCase().includes(query.toLowerCase())),[topic,level,query]);
  const bank=useMemo(()=>CASES.filter(i=>i.role===interviewMode&&(interviewLevel==="All"||i.level===interviewLevel)),[interviewMode,interviewLevel]);
  const interview=bank[index%bank.length];
  const stop=useCallback(()=>{if(!activeRef.current)return;activeRef.current=false;setRunning(false);setSeconds(0);clearInterval(intervalRef.current);const result={date:keyDate(),correct:correctRef.current,attempts:attemptRef.current};setHistory(h=>[result,...h].slice(0,10));save("mental-"+keyDate(),Math.round(100*result.correct/Math.max(1,result.attempts)),true);},[save]);
  const start=()=>{clearInterval(intervalRef.current);correctRef.current=0;attemptRef.current=0;setCorrect(0);setAttempts(0);setHistory(h=>h);setMathAnswer("");setMathQuestion(nextMentalExercise(mathType,difficulty,countersRef.current));setSeconds(duration);endRef.current=Date.now()+duration*1000;activeRef.current=true;setRunning(true);intervalRef.current=setInterval(()=>{const remaining=Math.max(0,Math.ceil((endRef.current-Date.now())/1000));setSeconds(remaining);if(remaining===0){clearInterval(intervalRef.current);activeRef.current=false;setRunning(false);const result={date:keyDate(),correct:correctRef.current,attempts:attemptRef.current};setHistory(h=>[result,...h].slice(0,10));save("mental-"+keyDate(),Math.round(100*result.correct/Math.max(1,result.attempts)),true);}},200);setTimeout(()=>inputRef.current?.focus(),0);};
  useEffect(()=>()=>clearInterval(intervalRef.current),[]);
- const submitMath=(e)=>{e.preventDefault();if(!running||!mathQuestion||mathAnswer.trim()==="")return;const ok=Number(mathAnswer)===mathQuestion.answer;attemptRef.current++;setAttempts(attemptRef.current);if(ok){correctRef.current++;setCorrect(correctRef.current);}setMathQuestion(exercise(difficulty));setMathAnswer("");inputRef.current?.focus();};
+ const submitMath=(e)=>{e.preventDefault();if(!running||!mathQuestion||mathAnswer.trim()==="")return;const ok=Number(mathAnswer)===mathQuestion.answer;attemptRef.current++;setAttempts(attemptRef.current);if(ok){correctRef.current++;setCorrect(correctRef.current);}setMathQuestion(nextMentalExercise(mathType,difficulty,countersRef.current));setMathAnswer("");inputRef.current?.focus();};
  const choose=(l)=>{setSelected(l);setAnswer("");setLessonResult(null);setTimeout(()=>document.getElementById("lesson")?.scrollIntoView({behavior:"smooth",block:"start"}),80);};
  const interviewDone=(i)=>{save("interview-"+i.id,100,true);setShowAnswer(true);};
  return <div className="mx-auto max-w-[1280px] px-5 md:px-10 py-14 text-body">
@@ -34,58 +36,13 @@ export default function Learn(){
    <h1 className="font-display text-4xl md:text-6xl font-semibold tracking-tight">The Quant Learning Lab<span className="text-amber">.</span></h1>
    <p className="mt-4 max-w-3xl text-muted leading-relaxed">Start with the mathematics. Build financial intuition. Train for quant interviews. Sharpen mental speed.</p>
    <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mt-9">
-     <div className="card p-4"><p className="text-xs text-muted">Lesson completion</p><p className="text-2xl text-amber mt-2 font-semibold">{totalDone}/{LESSONS.length}</p><div className="h-1.5 rounded bg-raised mt-3 overflow-hidden"><div className="h-full bg-amber" style={{width:(totalDone/LESSONS.length*100)+"%"}}/></div></div>
+     <div className="card p-4"><p className="text-xs text-muted">Lesson completion</p><p className="text-2xl text-amber mt-2 font-semibold">{totalDone}/{QUANT_LESSONS.length}</p><div className="h-1.5 rounded bg-raised mt-3 overflow-hidden"><div className="h-full bg-amber" style={{width:(totalDone/QUANT_LESSONS.length*100)+"%"}}/></div></div>
      <div className="card p-4"><p className="text-xs text-muted">Interview questions mastered</p><p className="text-2xl mt-2 font-semibold">{CASES.filter(i=>progress["interview-"+i.id]?.completed).length}/{CASES.length}</p></div>
      <div className="card p-4"><p className="text-xs text-muted">Mental maths today</p><p className="text-2xl mt-2 font-semibold">{progress["mental-"+keyDate()]?.score??"—"}<span className="text-xs text-muted ml-1">best %</span></p></div>
      <div className="card p-4"><p className="text-xs text-muted">Account progress</p><p aria-live="polite" className="text-xs text-amber mt-3 leading-relaxed">{sync}</p></div>
    </div>
    <div className="grid gap-3 md:grid-cols-3 mt-8">{TRACKS.map(([id,title,desc,glyph])=><button key={id} onClick={()=>setTab(id)} className={`text-left rounded-xl border p-5 transition-all ${tab===id?"border-amber/70 bg-amber/10":"border-line bg-surface hover:border-amber/30"}`}><span className="text-2xl text-amber">{glyph}</span><h2 className="text-lg font-medium mt-3">{title}</h2><p className="text-sm text-muted mt-1">{desc}</p></button>)}</div>
-   {tab==="quant"&&<section className="mt-10">
-     <div className="flex flex-wrap justify-between gap-3 items-end"><div><p className="eyebrow">01 / CURRICULUM</p><h2 className="text-3xl font-display mt-2">Learn quant, from zero to research</h2></div><span className="text-xs text-muted">Original lessons · Worked examples · Knowledge checks</span></div>
-     <div className="mt-6 border border-amber/30 bg-amber/5 rounded-xl p-5">
-       <p className="text-amber font-mono text-xs tracking-widest">YOUR ZERO → ONE COURSE PATH</p>
-       <p className="text-sm text-muted mt-2">Begin at Module 01 and move in order from arithmetic and markets to financial engineering and AI. Complete each lesson's understanding check to record progress.</p>
-       <div className="mt-4 flex flex-wrap gap-2">
-        {LESSONS.map((l,i)=><button key={l.id} onClick={()=>choose(l)} className={`border rounded-md px-3 py-2 text-xs ${progress[l.id]?.completed?"border-green-500/40 text-green-400":"border-line text-muted hover:border-amber/70"}`}>
-          {String(i+1).padStart(2,"0")} · {l.title} {progress[l.id]?.completed?"✓":""}
-        </button>)}
-       </div>
-     </div>
-     <div className="grid gap-3 md:grid-cols-3 mt-5"><input aria-label="Search lessons" value={query} onChange={e=>setQuery(e.target.value)} placeholder="Search lessons, formulas, concepts..." className="md:col-span-1 rounded-lg border border-line bg-raised px-4 py-3 text-sm"/><select aria-label="Filter by topic" value={topic} onChange={e=>setTopic(e.target.value)} className="rounded-lg border border-line bg-raised p-3 text-sm">{["All",...new Set(LESSONS.map(l=>l.topic))].map(x=><option key={x}>{x}</option>)}</select><select aria-label="Filter by difficulty" value={level} onChange={e=>setLevel(e.target.value)} className="rounded-lg border border-line bg-raised p-3 text-sm">{["All","Beginner","Intermediate","Advanced"].map(x=><option key={x}>{x}</option>)}</select></div>
-     <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 mt-5">{filtered.map((l,i)=><button key={l.id} onClick={()=>choose(l)} className={`card text-left p-5 hover:border-amber/50 transition-colors ${selected?.id===l.id?"border-amber/60":""}`}><div className="flex justify-between gap-2 text-[11px] uppercase font-mono text-muted"><span>{l.topic} · {l.level}</span><span className={progress[l.id]?.completed?"text-gain":"text-amber"}>{progress[l.id]?.completed?"✓ Mastered":"Start ↗"}</span></div><h3 className="text-lg font-medium mt-3">{l.title}</h3><p className="text-sm text-muted mt-2 leading-relaxed">{l.lead}</p></button>)}</div>
-     {selected&&<article className="ahq-pencil-reader mt-8" id="lesson" style={{scrollMarginTop:110}}>
-      <div className="pencil-main">
-       <div className="flex items-start justify-between gap-4"><p className="pencil-kicker">AHQ FIELD NOTES / {selected.topic} / {selected.level}</p><button type="button" onClick={()=>setSelected(null)} className="pencil-close shrink-0" aria-label="Close lesson">×</button></div>
-       <h3 className="pencil-title">{selected.title}<span className="text-[#9b3155]">.</span></h3>
-       <p className="pencil-lead">{selected.explain}</p>
-       <hr className="pencil-divider"/>
-       <p className="pencil-formula-label">01 / Core relationship</p>
-       <div className="pencil-formula"><span className="pencil-highlight">{selected.formula}</span></div>
-       <p className="pencil-handnote">Remember the assumptions ↗</p>
-       {LESSON_GUIDES[selected.id]&&<>
-        <h4 className="pencil-heading">The intuition <span className="text-[#9b3155]">✎</span></h4>
-        <p className="pencil-prose">{LESSON_GUIDES[selected.id].intuition}</p>
-        <h4 className="pencil-heading">Work through it</h4>
-        <ol className="pencil-numbered list-decimal">{LESSON_GUIDES[selected.id].steps.map((step,i)=><li key={i}>{step}</li>)}</ol>
-       </>}
-       <hr className="pencil-divider"/>
-       <h4 className="pencil-heading">Worked example</h4>
-       <p className="pencil-prose">{selected.example}</p>
-       {LESSON_GUIDES[selected.id]&&<div className="mt-5"><p className="pencil-handnote">Your turn →</p><p className="pencil-prose mt-2">{LESSON_GUIDES[selected.id].practice}</p></div>}
-       <h4 className="pencil-heading">Underline this takeaway</h4>
-       <p className="pencil-prose"><span className="pencil-highlight">{selected.takeaway}</span></p>
-       <div className="pencil-note mt-7"><p className="pencil-formula-label">Learning checkpoint</p><p className="pencil-prose mt-2">Explain the relationship in your own words, reproduce the example without looking and describe when its assumptions might fail.</p></div>
-       <form className="mt-8" onSubmit={e=>{e.preventDefault();if(answer.trim()==="")return;const ok=Math.abs(Number(answer)-selected.answer)<0.001;setLessonResult(ok?"Correct — lesson mastered.":`Not quite. Answer: ${selected.answer}. ${selected.hints[0]}`);if(ok)save(selected.id,100,true);}}>
-         <p className="pencil-formula-label mb-3">Test yourself</p>
-         <p className="pencil-prose font-semibold">{selected.question}</p>
-         <div className="flex flex-wrap gap-3 mt-4"><input aria-label="Lesson numerical answer" type="number" step="any" value={answer} onChange={e=>setAnswer(e.target.value)} className="pencil-input"/><button type="submit" className="pencil-action">Check answer ↗</button></div>
-         {lessonResult&&<p role="status" className="pencil-feedback">{lessonResult}</p>}
-       </form>
-       <div className="flex flex-wrap gap-3 mt-9 pt-5 border-t border-[#d6c7b2]">{LESSONS.indexOf(selected)>0&&<button onClick={()=>choose(LESSONS[LESSONS.indexOf(selected)-1])} className="pencil-outline">← Previous lesson</button>}{LESSONS.indexOf(selected)<LESSONS.length-1&&<button onClick={()=>choose(LESSONS[LESSONS.indexOf(selected)+1])} className="pencil-action">Next lesson →</button>}</div>
-      </div>
-     </article>}
-     <div className="mt-8 text-xs text-muted">Explore the longer <Link href="/research" className="text-amber underline">Research Library</Link> or the existing <Link className="text-amber underline" href="/learn/what-is-quantitative-trading">full introductory article</Link>. The curriculum references publicly described CFA/FRM/CQF subject areas; it does not reproduce proprietary exam content.</div>
-   </section>}
+   {tab==="quant"&&<QuantCourse progress={progress} save={save} sync={sync}/>}
    {tab==="interview"&&<section className="mt-10">
      <p className="eyebrow">02 / ROLE-SPECIFIC INTERVIEWS</p>
      <h2 className="font-display text-3xl mt-2">Prepare for your actual quant role</h2>
