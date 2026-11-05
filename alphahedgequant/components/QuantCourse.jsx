@@ -3,6 +3,8 @@ import {useEffect,useMemo,useState} from "react";
 import {QUANT_SECTIONS,QUANT_LESSONS,sectionProgress,isCorrect} from "@/lib/quantCourse.mjs";
 import {QUANT_TEACHING} from "@/lib/quantTeaching.mjs";
 import "./quant-course.css";
+import ModuleCourse from "@/components/ModuleCourse";
+import {topicProgress} from "@/lib/quantModuleGuides.mjs";
 
 const GLOSSARY=[
  [{term:"Return",definition:"The gain or loss divided by your starting investment."},{term:"Probability",definition:"A fraction between zero and one describing uncertainty."},{term:"Spread",definition:"The displayed difference between the best ask and bid."}],
@@ -110,13 +112,15 @@ export default function QuantCourse({progress={},save,sync}){
  const score=sectionProgress(progress,section);
  const submit=async(e)=>{e.preventDefault();if(answer.trim()==="")return;const ok=isCorrect(lesson,answer);setResult(ok?{ok:true,text:"Correct. You can now explain the mechanism, not just remember the number."}:{ok:false,text:"Not yet. Read the worked example again, identify the starting value and unit, then retry."});if(ok)await save(lesson.id,100,true)};
  return <section className="qcourse-shell mt-10" aria-label="Six-stage quant finance curriculum" id="quant-lesson">
-  <header className="qcourse-top"><div><p className="eyebrow">01 / LEARN QUANT · GUIDED PATH</p><h2 className="font-display text-3xl mt-2">Six sections. From the very beginning.</h2><p className="text-muted text-sm mt-3 max-w-3xl">74 lessons. Every idea starts with everyday language, moves to a worked financial example, and ends with a question. Nothing here requires more than basic maths to begin.</p></div><div className="qcourse-total"><strong>{allDone}/74</strong><small>Lessons completed</small><div className="qcourse-track"><span style={{width:(allDone/74*100)+"%"}}/></div></div></header>
+  <header className="qcourse-top"><div><p className="eyebrow">01 / LEARN QUANT · GUIDED PATH</p><h2 className="font-display text-3xl mt-2">Six modules. From the very beginning.</h2><p className="text-muted text-sm mt-3 max-w-3xl">74 foundation lessons, 74 additional specialist chapters and six coding projects. Start with basic maths; advanced topics introduce their prerequisites and assumptions before the formal models.</p></div><div className="qcourse-total"><strong>{allDone}/74</strong><small>Lessons completed</small><div className="qcourse-track"><span style={{width:(allDone/74*100)+"%"}}/></div></div></header>
   <div className="qcourse-layout"><aside className="qcourse-sidebar" aria-label="Course sections and progress">
-   <p className="qcourse-sidebar-label">YOUR LEARNING MAP</p>{QUANT_SECTIONS.map((s,i)=>{const p=sectionProgress(progress,i);return <button key={s.id} type="button" onClick={()=>selectSection(i)} className={"qcourse-side-item "+(section===i?"selected":"")} aria-current={section===i?"step":undefined}>
-    <span className="qcourse-side-head"><small>SECTION {String(i+1).padStart(2,"0")}</small><em>{p.done}/{p.total}</em></span><strong>{s.title}</strong><span className="qcourse-mini-track"><span style={{width:(p.done/p.total*100)+"%"}}/></span></button>})}
+   <p className="qcourse-sidebar-label">COURSE PROGRESS</p>{QUANT_SECTIONS.map((s,i)=>{const p=sectionProgress(progress,i);const topic=topicProgress(progress,i);return <button key={s.id} type="button" onClick={()=>selectSection(i)} className={"qcourse-side-item "+(section===i?"selected":"")} aria-current={section===i?"step":undefined}>
+    <span className="qcourse-side-head"><small>MODULE {String(i+1).padStart(2,"0")}</small><em>{topic.done}/{topic.total}</em></span><strong>{s.title}</strong><span className="qcourse-sidebar-subprogress">Chapters {topic.done}/{topic.total} · Maths {p.done}/{p.total}</span><span className="qcourse-mini-track"><span style={{width:(topic.done/topic.total*100)+"%"}}/></span></button>})}
    <p className="qcourse-sync" aria-live="polite">{sync||"Progress sync pending"}</p>
   </aside><div className="qcourse-content">
    <div className="qcourse-section-intro"><p className="eyebrow">SECTION {String(section+1).padStart(2,"0")} · {score.done}/{score.total} COMPLETED</p><h3>{QUANT_SECTIONS[section].title}</h3><p>{QUANT_SECTIONS[section].description}</p><div className="qcourse-track"><span style={{width:(score.done/score.total*100)+"%"}}/></div></div>
+   <ModuleCourse moduleIndex={section} progress={progress} save={save}/>
+   <div className="qcourse-core-heading"><p className="qmodule-kicker">FOUNDATION LESSONS / PRACTICE YOUR BASICS</p><h3>Build the maths behind this module</h3><p>Work through these guided numerical lessons alongside the longer chapter readings and Python assignments above.</p></div>
    <label htmlFor="qcourse-search" className="sr-only">Search lessons in this section</label><input id="qcourse-search" type="search" className="qcourse-search" placeholder="Find a lesson within this section…" value={search} onChange={e=>setSearch(e.target.value)}/>
    <div className="qcourse-lesson-nav">{currentLessons.map(l=><button type="button" onClick={()=>choose(l)} key={l.id} className={l.id===lesson.id?"active":""}><span>{String(QUANT_LESSONS.filter(x=>x.section===l.section).indexOf(l)+1).padStart(2,"0")}</span>{l.title}{progress[l.id]?.completed&&<b aria-label="completed">✓</b>}</button>)}{currentLessons.length===0&&<p className="text-muted text-sm">No matching lesson in this section.</p>}</div>
    <article className="ahq-pencil-reader qcourse-paper" aria-labelledby="qcourse-heading"><div className="pencil-main">
