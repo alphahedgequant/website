@@ -1,0 +1,33 @@
+name: Quant Academy Reliability
+on:
+  push:
+    branches: [main]
+    paths:
+      - "alphahedgequant/lib/quantCourse.mjs"
+      - "alphahedgequant/components/QuantCourse.jsx"
+      - "alphahedgequant/components/quant-course.css"
+      - "alphahedgequant/app/learn/page.jsx"
+      - "alphahedgequant/tests/quantCourse.test.mjs"
+      - ".github/workflows/quant-academy-reliability.yml"
+  pull_request:
+    paths:
+      - "alphahedgequant/lib/quantCourse.mjs"
+      - "alphahedgequant/components/QuantCourse.jsx"
+      - "alphahedgequant/components/quant-course.css"
+      - "alphahedgequant/app/learn/page.jsx"
+      - "alphahedgequant/tests/quantCourse.test.mjs"
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  course-contract-checks:
+    runs-on: ubuntu-latest
+    timeout-minutes: 6
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Check six sections, content integrity and lesson progress
+        working-directory: alphahedgequant
+        run: node --test tests/quantCourse.test.mjs
