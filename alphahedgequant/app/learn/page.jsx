@@ -35,13 +35,13 @@ export default function Learn(){
    <p className="eyebrow mb-3">[ AHQ : ACADEMY ]</p>
    <h1 className="font-display text-4xl md:text-6xl font-semibold tracking-tight">The Quant Learning Lab<span className="text-amber">.</span></h1>
    <p className="mt-4 max-w-3xl text-muted leading-relaxed">Start with the mathematics. Build financial intuition. Train for quant interviews. Sharpen mental speed.</p>
-   <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mt-9">
+   {tab!=="quant"&&<div className="grid grid-cols-2 md:grid-cols-4 gap-3 mt-9">
      <div className="card p-4"><p className="text-xs text-muted">Lesson completion</p><p className="text-2xl text-amber mt-2 font-semibold">{totalDone}/{QUANT_LESSONS.length}</p><div className="h-1.5 rounded bg-raised mt-3 overflow-hidden"><div className="h-full bg-amber" style={{width:(totalDone/QUANT_LESSONS.length*100)+"%"}}/></div></div>
      <div className="card p-4"><p className="text-xs text-muted">Interview questions mastered</p><p className="text-2xl mt-2 font-semibold">{CASES.filter(i=>progress["interview-"+i.id]?.completed).length}/{CASES.length}</p></div>
      <div className="card p-4"><p className="text-xs text-muted">Mental maths today</p><p className="text-2xl mt-2 font-semibold">{progress["mental-"+keyDate()]?.score??"—"}<span className="text-xs text-muted ml-1">best %</span></p></div>
      <div className="card p-4"><p className="text-xs text-muted">Account progress</p><p aria-live="polite" className="text-xs text-amber mt-3 leading-relaxed">{sync}</p></div>
-   </div>
-   <div className="grid gap-3 md:grid-cols-3 mt-8">{TRACKS.map(([id,title,desc,glyph])=><button key={id} onClick={()=>setTab(id)} className={`text-left rounded-xl border p-5 transition-all ${tab===id?"border-amber/70 bg-amber/10":"border-line bg-surface hover:border-amber/30"}`}><span className="text-2xl text-amber">{glyph}</span><h2 className="text-lg font-medium mt-3">{title}</h2><p className="text-sm text-muted mt-1">{desc}</p></button>)}</div>
+   </div>}
+   <nav aria-label="Academy areas" className="flex flex-wrap gap-2 mt-6 border-b border-line pb-3">{TRACKS.map(([id,title])=><button key={id} type="button" onClick={()=>setTab(id)} aria-current={tab===id?"page":undefined} className={`px-4 py-2.5 rounded-lg border text-sm font-medium transition-colors ${tab===id?"bg-white text-black border-white":"bg-transparent text-body border-line hover:border-white/60"}`}>{title}</button>)}</nav>
    {tab==="quant"&&<ContinuousQuantCourse progress={progress} save={save} sync={sync}/>}
    {tab==="interview"&&<section className="mt-10">
      <p className="eyebrow">02 / ROLE-SPECIFIC INTERVIEWS</p>
