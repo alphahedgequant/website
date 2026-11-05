@@ -3,6 +3,7 @@ import assert from "node:assert/strict";
 import {readFileSync} from "node:fs";
 import {MODULE_TOPICS,MODULE_GUIDES} from "../lib/quantModuleGuides.mjs";
 import {QUANT_LESSONS} from "../lib/quantCourse.mjs";
+import {CHAPTER_CONNECTIONS,MODULE_LEARNING_BRIDGES} from "../lib/quantLearningConnections.mjs";
 const view=readFileSync(new URL("../components/ContinuousQuantCourse.jsx",import.meta.url),"utf8");
 const page=readFileSync(new URL("../app/learn/page.jsx",import.meta.url),"utf8");
 const css=readFileSync(new URL("../components/continuous-course.css",import.meta.url),"utf8");
@@ -38,4 +39,16 @@ test("Learn Quant avoids duplicate dashboard metrics and giant selection cards",
  assert.match(page,/tab!=="quant"&&<div className="grid grid-cols-2/);
  assert.match(page,/aria-label="Academy areas"/);
  assert.doesNotMatch(page,/className="grid gap-3 md:grid-cols-3 mt-8"/);
+});
+
+test("all 74 chapters have a distinct substantive connection to adjacent concepts",()=>{
+ assert.equal(Object.keys(CHAPTER_CONNECTIONS).length,74);
+ for(const t of MODULE_TOPICS){
+  assert.ok(CHAPTER_CONNECTIONS[t.id],t.id+" missing context");
+  assert.ok(CHAPTER_CONNECTIONS[t.id].length>=125,t.id+" context too brief");
+ }
+ assert.equal(MODULE_LEARNING_BRIDGES.length,6);
+ assert.ok(MODULE_LEARNING_BRIDGES.every(s=>s.length>=180));
+ assert.match(view,/CHAPTER_CONNECTIONS\[topic\.id\]/);
+ assert.match(view,/MODULE_LEARNING_BRIDGES\[section\]/);
 });
