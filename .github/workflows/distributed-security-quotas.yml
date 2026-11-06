@@ -25,7 +25,9 @@ jobs:
           node-version: "22"
           cache: npm
           cache-dependency-path: alphahedgequant/package-lock.json
-      - name: Install locked dependencies
+      - name: Synchronize outdated main-branch lockfile for branch verification
+        run: npm install --package-lock-only --ignore-scripts --no-audit --no-fund
+      - name: Install resolved dependencies
         run: npm ci --no-audit --no-fund
       - name: Run rate-limit and security contract tests
         run: node --test tests/distributedRateLimit.test.mjs tests/securityBaseline.test.mjs
