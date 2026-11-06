@@ -4,7 +4,7 @@ import {usePathname} from "next/navigation";
 import {analyticsAllowed,sendInsightsEvent} from "@/lib/insightsClient.mjs";
 
 const exposedFeatures=new Set([
-  "option_chain_opened","strategy_builder_opened","screener_viewed",
+  "option_chain_opened","options_page_viewed","strategy_builder_opened","screener_viewed",
   "model_lesson_opened","backtest_viewed","quant_terminal_opened",
   "ipo_page_opened","article_opened","waitlist_opened"
 ]);
@@ -23,7 +23,7 @@ export default function AnalyticsTracker(){
     send("pageview");
     if(path==="/screener")send("screener_viewed");
     if(path==="/backtest")send("backtest_viewed");
-    if(path==="/options")send("option_chain_opened");
+    if(path==="/options")send("options_page_viewed");
     if(path==="/ipo")send("ipo_page_opened");
     if(path==="/terminal")send("quant_terminal_opened");
     if(path.startsWith("/models/")||path.startsWith("/learn/"))send("model_lesson_opened");
@@ -43,7 +43,7 @@ export default function AnalyticsTracker(){
       lastTick=now;
       // Time spent on a background tab is excluded. Prolonged inactivity is
       // not counted as reading after 90 seconds without interaction.
-      if(document.visibilityState==="visible"&&document.hasFocus()&&now-lastInteraction<90000)
+      if(document.visibilityState==="visible"&&document.hasFocus()&&now-lastInteraction<180000)
         pending+=delta;
       if(pending>=10)flush();
     };
