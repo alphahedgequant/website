@@ -22,13 +22,21 @@ test("private account progress is bound to authenticated user and never stored w
  assert.match(s,/VALUES \(\$\{userId\}/);
  assert.match(s,/Cache-Control.*private/);
 });
-test("admin analytics and spreadsheet ingestion require verified admin allowlist",()=>{
- for(const f of ["app/api/admin/analytics/route.js","app/api/terminal/import-spreadsheet/route.js"]){
-  const s=read(f);
-  assert.match(s,/currentUser\(\)/,f);
-  assert.match(s,/verification\?\.status==="verified"/,f);
-  assert.match(s,/ADMIN_EMAILS/,f);
- }
+test("owner analytics deny all other sessions while spreadsheet ingestion checks admin identity",()=>{
+ const api=read("app/api/admin/analytics/route.js");
+ const page=read("app/admin/analytics/page.jsx");
+ const owner=read("lib/insightsOwnerAccess.mjs");
+ assert.match(api,/await isInsightsOwner\(\)/);
+ assert.match(page,/await isInsightsOwner\(\)/);
+ assert.match(page,/notFound\(\)/);
+ assert.match(owner,/AHQ_INSIGHTS_OWNER_USER_ID/);
+ assert.match(owner,/AHQ_INSIGHTS_OWNER_EMAIL/);
+ assert.match(owner,/currentUser\(\)/);
+ assert.match(owner,/verification\?\.status==="verified"/);
+ const ingestor=read("app/api/terminal/import-spreadsheet/route.js");
+ assert.match(ingestor,/currentUser\(\)/);
+ assert.match(ingestor,/verification\?\.status==="verified"/);
+ assert.match(ingestor,/ADMIN_EMAILS/);
 });
 test("scheduled jobs and ingestion writes reject missing credentials",()=>{
  for(const f of ["app/api/cron/ingest-research/route.js","app/api/cron/scrape-calls/route.js","app/api/cron/discover-nse-documents/route.js"]){
