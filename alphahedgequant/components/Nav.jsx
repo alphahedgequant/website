@@ -8,6 +8,7 @@ import ThemeToggle from "./ThemeToggle";
 
 const products = [
   { href: "/screener", label: "Market Intelligence", description: "NSE & US equity screeners", glyph: "▤" },
+  { href: "/cash-desk", label: "Cash Quant Desk", description: "10 cash strategies · signal monitor · paper book", glyph: "▦" },
   { href: "/models", label: "Quant Models", description: "Systematic strategies & signals", glyph: "∑" },
   { href: "/backtest", label: "AI Backtesting", description: "Test and evaluate ideas", glyph: "↗" },
   { href: "/copilot", label: "AI Copilot", description: "Natural-language strategy research", glyph: "✳" },
