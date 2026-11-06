@@ -29,7 +29,20 @@ for part in DIRECTORIES:
    stripped=line.strip()
    if stripped.startswith("//") or stripped.startswith("*"):continue
    for name,pattern in PATTERNS.items():
-    if pattern.search(line):issues.append((str(path.relative_to(ROOT)),n,name))
+    if not pattern.search(line):continue
+    relative=str(path.relative_to(ROOT))
+    # Reviewed constant-only client theme initialization: no interpolation,
+    # user-controlled HTML, or dynamic script values. Keep narrowly scoped.
+    if (name=="raw_html_injection" and relative=="app/layout.jsx"
+        and 'dangerouslySetInnerHTML={{ __html: `(function(){try{var theme=localStorage.getItem("ahq-theme")' in line
+        and '${' not in line):
+     continue
+    # PostHog's project ingestion token is intentionally public and write-only.
+    # POSTHOG_PERSONAL_API_KEY is distinct and remains server-only.
+    if (name=="public_secret_env" and relative=="components/AnalyticsTracker.jsx"
+        and stripped=="const key=process.env.NEXT_PUBLIC_POSTHOG_PROJECT_TOKEN;"):
+     continue
+    issues.append((relative,n,name))
 print(f"Static sink scan: inspected {scanned} source files.")
 for path,n,name in issues:
  print(f"REVIEW {path}:{n} category={name}")
