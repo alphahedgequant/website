@@ -2,7 +2,8 @@
 import {useEffect,useMemo,useState} from "react";
 
 const eventNames={
- option_chain_opened:"Option chains",
+ option_chain_opened:"Option chain opened",
+ options_page_viewed:"Options analytics viewed",
  strategy_builder_opened:"Strategy builder",
  screener_viewed:"Market screener",
  model_lesson_opened:"Quant lessons",
