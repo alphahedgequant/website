@@ -52,7 +52,12 @@ def main():
         body=res["body"]
         print(f"GET {path}: HTTP {code}")
         if path=="/":
-            if code!=200: fails.append("Homepage did not return HTTP 200")
+            if code!=200:
+                location_host=(urlparse(h.get("location","")).hostname or "").lower()
+                if code in (301,302,303,307,308) and location_host.endswith(".clerk.accounts.dev"):
+                    fails.append("Homepage redirected through Clerk development browser handshake; production instance not yet configured")
+                else:
+                    fails.append("Homepage did not return HTTP 200")
             for key in SECURITY:
                 if not h.get(key): fails.append("Missing "+key+" on homepage")
             if "pk_test_" in body:
@@ -65,6 +70,9 @@ def main():
             if code==404 and h.get("x-clerk-auth-reason"):
                 warnings.append("Clerk middleware returned 404 to anonymous reader; needs browser verification")
         elif path=="/api/waitlist":
+            redirect_host=(urlparse(h.get("location","")).hostname or "").lower()
+            if code in (301,302,303,307,308) and redirect_host.endswith(".clerk.accounts.dev"):
+                fails.append("Public waitlist route is redirected via development-auth handshake")
             if code==200 and "email" in body.lower():
                 fails.append("Waitlist GET may expose data (manual review required)")
             if code not in (403,404,405):
