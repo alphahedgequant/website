@@ -1,0 +1,43 @@
+name: Owner-Only First-Party Insights Verification
+on:
+  push:
+    branches:
+      - feature/first-party-owner-insights
+  pull_request:
+    paths:
+      - "alphahedgequant/app/admin/analytics/**"
+      - "alphahedgequant/app/api/admin/analytics/**"
+      - "alphahedgequant/app/api/insights/**"
+      - "alphahedgequant/components/AnalyticsTracker.jsx"
+      - "alphahedgequant/components/OwnerInsightsDashboard.jsx"
+      - "alphahedgequant/components/WaitlistForm.jsx"
+      - "alphahedgequant/lib/firstPartyInsights.mjs"
+      - "alphahedgequant/lib/insightsClient.mjs"
+      - "alphahedgequant/lib/insightsOwnerAccess.mjs"
+      - "alphahedgequant/tests/firstPartyInsights.test.mjs"
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  tests-and-build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    defaults:
+      run:
+        working-directory: alphahedgequant
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: alphahedgequant/package-lock.json
+      - name: Install locked dependencies
+        run: npm ci --no-audit --no-fund
+      - name: Verify owner authorization, event integrity and website security
+        run: node --test tests/firstPartyInsights.test.mjs tests/securityBaseline.test.mjs tests/distributedRateLimit.test.mjs
+      - name: Compile complete Next.js app
+        env:
+          # Invalid/nonfunctional, used only to satisfy Clerk build-time parser.
+          NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY: "pk_test_ZXhhbXBsZS5jbGVyay5hY2NvdW50cy5kZXYk"
+        run: npm run build

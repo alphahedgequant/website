@@ -1,3 +1,4 @@
+import InsightsPrivacyControl from "@/components/InsightsPrivacyControl";
 export const metadata = {
   title: "Privacy Policy — AlphaHedgeQuant",
   description: "How AlphaHedgeQuant collects, uses, and protects your personal data.",
@@ -17,7 +18,7 @@ export default function Privacy() {
     <div className="max-w-3xl mx-auto px-5 py-12">
       <p className="eyebrow mb-3">[ AHQ : LEGAL — PRIVACY ]</p>
       <h1 className="font-display text-3xl font-medium tracking-tight">Privacy Policy</h1>
-      <p className="text-muted text-sm mt-2">Last updated: October 2026</p>
+      <p className="text-muted text-sm mt-2">Last updated: November 2026</p>
 
       <div className="mt-10">
         <Section title="1. Who We Are">
@@ -33,7 +34,7 @@ export default function Privacy() {
             <li className="flex gap-2"><span className="text-amber">→</span><span><strong className="text-body">Email address</strong> — when you voluntarily join our waitlist.</span></li>
             <li className="flex gap-2"><span className="text-amber">→</span><span><strong className="text-body">Signup source &amp; timestamp</strong> — which page you signed up from and when, to understand interest.</span></li>
             <li className="flex gap-2"><span className="text-amber">→</span><span><strong className="text-body">Approximate IP / network info</strong> — used only for rate limiting and abuse prevention.</span></li>
-            <li className="flex gap-2"><span className="text-amber">→</span><span><strong className="text-body">Basic analytics</strong> — aggregated, non-identifying usage data (pages viewed, device type) if analytics is enabled.</span></li>
+            <li className="flex gap-2"><span className="text-amber">→</span><span><strong className="text-body">Basic analytics</strong> — first-party page visits, broad feature-use counts and estimated active reading time where your browser permits analytics.</span></li>
           </ul>
           <p>
             We do <strong>not</strong> collect financial account details, trading credentials, or
@@ -58,14 +59,16 @@ export default function Privacy() {
           </p>
         </Section>
 
-        <Section title="5. Product Analytics">
-          <p>If enabled, we use PostHog to measure page visits, pseudonymous unique visitors, active time spent on pages and broad feature-use events. We assign a random browser identifier stored locally to distinguish repeat visits. We do not send option symbols, strategy legs, trades, financial account details or search terms in these events.</p>
-          <p>Tracking respects browser Do Not Track and Global Privacy Control signals where available. Analytics may be processed by PostHog outside your country of residence. For privacy requests, contact us at the address below.</p>
+        <Section title="5. First-Party Product Analytics">
+          <p>AlphaHedgeQuant uses its own first-party analytics collector and our managed PostgreSQL database. We do not send website usage events to PostHog or other third-party analytics services. The private, owner-only dashboard summarizes daily, weekly and monthly pseudonymous browser visits, most visited pages, approximate active reading time, coarse feature use and source categories such as X, LinkedIn or search.</p>
+          <p>Where browser settings permit, a random browser identifier is stored locally to estimate distinct and returning visitors. Identifiers are transformed into a keyed hash before being stored. We record only the page pathname (not its query or search terms), whitelisted event names, measured active seconds and sanitized campaign labels. We do not log the visitor's raw IP address, email, portfolio holdings, searched tickers, strategy parameters or individual financial account details as analytics events. Server-confirmed waitlist registrations are counted separately without storing email in the analytics events table.</p>
+          <p>We honor Global Privacy Control and Do Not Track where available. You can opt out and request removal of your browser identifier's analytics records using the control below. Analytics events are retained for up to approximately 180 days and then automatically removed during subsequent collection. Records collected by the previous provider, where applicable, are subject to that provider's separate retention controls.</p>
+          <InsightsPrivacyControl/>
         </Section>
         <Section title="6. Cookies">
           <p>
             We use minimal cookies — primarily those strictly necessary for the site to function and,
-            if enabled, privacy-respecting analytics. We do not use advertising or cross-site tracking
+            if enabled, the first-party analytics identifier described above. We do not use advertising or cross-site tracking
             cookies.
           </p>
         </Section>

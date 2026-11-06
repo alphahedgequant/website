@@ -11,6 +11,8 @@ const isPublicRoute = createRouteMatcher([
   "/terms",
   "/disclaimer",
   "/api/waitlist(.*)",
+  // Only the bounded event collector is public; dashboard/admin endpoints stay private.
+  "/api/insights/event",
   "/api/cron(.*)",
   // GitHub Actions uses short-lived OIDC, not Clerk sessions; endpoint validates signed identity itself.
   "/api/terminal/ingest",

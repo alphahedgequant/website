@@ -1,6 +1,7 @@
 // app/api/waitlist/route.js
 import { neon } from "@neondatabase/serverless";
 import {useRequestQuota,quotaResponse,trustedClientIp} from "@/lib/serverRateLimit.mjs";
+import {recordConfirmedWaitlistSignup} from "@/lib/firstPartyInsights.mjs";
 
 function isValidEmail(email) {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
@@ -49,11 +50,23 @@ export async function POST(request) {
     if (!quota.allowed) return quotaResponse(quota);
 
     const sql = neon(process.env.NEON_DATABASE_URL);
-    await sql`
+    const inserted = await sql`
       INSERT INTO waitlist (email, source)
       VALUES (${cleaned}, ${source})
-      ON CONFLICT (email) DO NOTHING
+      ON CONFLICT (email) DO NOTHING RETURNING email
     `;
+
+    if(inserted.length>0){
+      // This conversion represents a confirmed NEW waitlist row, never a
+      // user-submitted "signup successful" event. Analytics errors cannot
+      // invalidate an otherwise successful user registration.
+      try{
+        await recordConfirmedWaitlistSignup({
+          visitor:body.analyticsVisitor,session:body.analyticsSession,
+          source:body.analyticsSource||source,campaign:body.analyticsUtmCampaign
+        });
+      }catch{/* Independent optional telemetry must not break waitlist signup. */}
+    }
 
     return Response.json({
       success: true,
