@@ -107,7 +107,7 @@ export async function recordConfirmedWaitlistSignup({visitor,session,source="lan
   // still counting an operationally verified new waitlist registration.
   const visitorHash=hashIdentity("insights-visitor",validAnonymousId(visitor)?visitor:randomUUID());
   const sessionHash=hashIdentity("insights-session",validAnonymousId(session)?session:randomUUID());
-  const channel=safeCampaign(source)||"landing";
+  const channel=(safeCampaign(source)||"landing").slice(0,40);
   await sql`INSERT INTO ahq_insights_events
     (event_type,visitor_hash,session_hash,path,ref_source,utm_campaign)
     VALUES ('waitlist_signup',${visitorHash},${sessionHash},'/waitlist',${channel},${safeCampaign(campaign)})`;
