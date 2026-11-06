@@ -60,6 +60,7 @@ export async function GET(request) {
             FROM jsonb_to_recordset(${payload}::jsonb)
               AS x(id text,title text,summary text,authors jsonb,categories jsonb,
                    published text,updated text,abs text,pdf text)
+            WHERE true -- Disambiguate INSERT SELECT from ON CONFLICT in PostgreSQL.
             ON CONFLICT (arxiv_id) DO UPDATE SET
               title=EXCLUDED.title,summary=EXCLUDED.summary,
               authors=EXCLUDED.authors,categories=EXCLUDED.categories,
