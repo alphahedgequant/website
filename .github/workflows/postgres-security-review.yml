@@ -1,0 +1,37 @@
+name: Read-only Neon PostgreSQL Security Review
+on:
+  push:
+    branches: [main]
+    paths:
+      - "alphahedgequant/scripts/auditPostgresSecurity.mjs"
+      - ".github/workflows/postgres-security-review.yml"
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  inspect-current-db-role:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    defaults:
+      run:
+        working-directory: alphahedgequant
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: alphahedgequant/package-lock.json
+      - name: Install locked dependencies
+        run: npm ci --ignore-scripts --no-audit --no-fund
+      - name: Inspect role privileges with read-only SQL
+        env:
+          NEON_DATABASE_URL: ${{ secrets.NEON_DATABASE_URL }}
+        run: |
+          if [ -z "$NEON_DATABASE_URL" ]; then
+            echo "::warning::PostgreSQL role audit BLOCKED — configure NEON_DATABASE_URL as a GitHub Actions repository secret (do not paste it into logs)."
+            echo "## PostgreSQL security audit" >> "$GITHUB_STEP_SUMMARY"
+            echo "Blocked: database secret is not available to GitHub Actions. Nothing was queried or changed." >> "$GITHUB_STEP_SUMMARY"
+          else
+            node scripts/auditPostgresSecurity.mjs
+          fi
