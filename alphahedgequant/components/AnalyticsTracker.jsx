@@ -33,8 +33,8 @@ export default function AnalyticsTracker(){
       const secs=Math.floor(pending);
       if(secs>0){
         pending-=secs;
-        // Divide unexpectedly long intervals into validated <=20s events.
-        for(let remaining=secs;remaining>0;remaining-=20)send("engagement",Math.min(20,remaining));
+        // Batch active seconds to reduce serverless database writes.
+        for(let remaining=secs;remaining>0;remaining-=60)send("engagement",Math.min(60,remaining));
       }
     };
     const tick=()=>{
@@ -45,7 +45,7 @@ export default function AnalyticsTracker(){
       // not counted as reading after 90 seconds without interaction.
       if(document.visibilityState==="visible"&&document.hasFocus()&&now-lastInteraction<180000)
         pending+=delta;
-      if(pending>=10)flush();
+      if(pending>=45)flush();
     };
     const activity=()=>{lastInteraction=Date.now()};
     const change=()=>{tick();if(document.visibilityState==="hidden")flush()};
@@ -54,7 +54,7 @@ export default function AnalyticsTracker(){
       const name=event?.detail?.name;
       if(exposedFeatures.has(name))send(name);
     };
-    const timer=setInterval(tick,10000);
+    const timer=setInterval(tick,15000);
     document.addEventListener("visibilitychange",change);
     window.addEventListener("focus",activity);
     window.addEventListener("blur",change);
