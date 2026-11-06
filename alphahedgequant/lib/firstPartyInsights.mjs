@@ -6,7 +6,7 @@ import {randomUUID} from "node:crypto";
 import {hashQuotaIdentity} from "./serverRateLimit.mjs";
 
 export const CLIENT_EVENTS=Object.freeze([
-  "pageview","engagement","option_chain_opened","strategy_builder_opened",
+  "pageview","engagement","option_chain_opened","options_page_viewed","strategy_builder_opened",
   "screener_viewed","model_lesson_opened","backtest_viewed","quant_terminal_opened",
   "ipo_page_opened","article_opened","waitlist_opened"
 ]);
