@@ -46,8 +46,9 @@ try {
   };
   console.log("PostgreSQL role/security audit (booleans and counts only):",JSON.stringify(checks));
   console.log("RLS count is diagnostic; it does not prove a vulnerability when app queries enforce authenticated tenant filtering.");
-  if(checks.superuser||checks.bypass_row_level_security||!checks.connection_ssl){
-    console.error("FAIL: role has elevated bypass privileges or connection is not using SSL.");
+  console.log("pg_stat_ssl reflects the database-backend connection, not necessarily the external TLS hop through Neon serverless infrastructure.");
+  if(checks.superuser||checks.bypass_row_level_security){
+    console.error("FAIL: application role has superuser or row-security bypass privileges.");
     process.exitCode=1;
   }else if(checks.can_create_roles||checks.can_create_database||checks.can_create_public_tables){
     console.warn("REVIEW: runtime database credentials can administer objects. Consider a separate least-privilege application role after migration.");
