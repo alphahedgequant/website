@@ -13,6 +13,20 @@ jobs:
   test-and-build:
     runs-on: ubuntu-latest
     timeout-minutes: 13
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: test
+          POSTGRES_PASSWORD: test
+          POSTGRES_DB: postgres
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U test"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 12
     defaults:
       run:
         working-directory: alphahedgequant
@@ -27,6 +41,13 @@ jobs:
         run: npm ci --no-audit --no-fund
       - name: Run regression tests
         run: node --test tests/researchIngestRuntime.test.mjs tests/securityBaseline.test.mjs
+      - name: Run isolated PostgreSQL JSONB upsert integration test
+        env:
+          PGPASSWORD: test
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq postgresql-client
+          psql -h localhost -p 5432 -U test -d postgres -v ON_ERROR_STOP=1 -f tests/researchIngestBatch.sql
       - name: Build website
         env:
           NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY: "pk_test_ZXhhbXBsZS5jbGVyay5hY2NvdW50cy5kZXYk"
