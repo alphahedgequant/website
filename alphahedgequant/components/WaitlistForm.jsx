@@ -3,7 +3,7 @@
 // Usage: <WaitlistForm source="landing" />
 
 import { useState } from "react";
-import {getInsightsContext,sendInsightsEvent} from "@/lib/insightsClient.mjs";
+import {getInsightsContext} from "@/lib/insightsClient.mjs";
 
 export default function WaitlistForm({ source = "landing", compact = false }) {
   const [email,   setEmail]   = useState("");
