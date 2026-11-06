@@ -1,0 +1,37 @@
+name: Distributed Security Quota Verification
+on:
+  push:
+    branches: [security/distributed-rate-limits]
+  pull_request:
+    paths:
+      - "alphahedgequant/lib/serverRateLimit.mjs"
+      - "alphahedgequant/app/api/waitlist/route.js"
+      - "alphahedgequant/app/api/copilot/route.js"
+      - "alphahedgequant/tests/distributedRateLimit.test.mjs"
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  test-and-build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    defaults:
+      run:
+        working-directory: alphahedgequant
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: alphahedgequant/package-lock.json
+      - name: Synchronize outdated main-branch lockfile for branch verification
+        run: npm install --package-lock-only --ignore-scripts --no-audit --no-fund
+      - name: Install resolved dependencies
+        run: npm ci --no-audit --no-fund
+      - name: Run rate-limit and security contract tests
+        run: node --test tests/distributedRateLimit.test.mjs tests/securityBaseline.test.mjs
+      - name: Build website
+        env:
+          NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY: "pk_test_ZXhhbXBsZS5jbGVyay5hY2NvdW50cy5kZXYk"
+        run: npm run build
