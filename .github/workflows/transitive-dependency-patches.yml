@@ -1,0 +1,44 @@
+name: Transitive Dependency Patch Validation
+on:
+  push:
+    branches: [security/transitive-dependency-patches]
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 17
+    defaults:
+      run:
+        working-directory: alphahedgequant
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: alphahedgequant/package-lock.json
+      - name: Resolve patched transitive dependency tree
+        run: npm install --package-lock-only --ignore-scripts --no-audit --no-fund
+      - name: Install exactly pinned dependency tree
+        run: npm ci --no-fund --no-audit
+      - name: Audit high severity production vulnerabilities
+        run: npm audit --omit=dev --audit-level=high
+      - name: Run core security and site regression checks
+        run: node --test tests/securityBaseline.test.mjs tests/distributedRateLimit.test.mjs tests/quantCourse.test.mjs tests/quantModules.test.mjs tests/continuousCourse.test.mjs
+      - name: Compile Next 15 release
+        env:
+          NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY: "pk_test_ZXhhbXBsZS5jbGVyay5hY2NvdW50cy5kZXYk"
+        run: npm run build
+      - name: Commit audited lockfile to isolated security branch
+        if: success()
+        working-directory: .
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add alphahedgequant/package-lock.json
+          if ! git diff --cached --quiet; then
+            git commit -m "chore(security): pin non-vulnerable transitive dependency versions"
+            git push origin HEAD:security/transitive-dependency-patches
+          fi
