@@ -76,7 +76,9 @@ export async function optOutAndDeleteInsights(){
     }catch{deleted=false}
   }
   try{
-    localStorage.removeItem(VISITOR_KEY);
+    // Retain the random visitor ID if deletion failed so the browser can
+    // retry erasure later, while OPTOUT_KEY prevents any further collection.
+    if(deleted)localStorage.removeItem(VISITOR_KEY);
     sessionStorage.removeItem(SESSION_KEY);
     sessionStorage.removeItem(ATTRIBUTION_KEY);
   }catch{}
