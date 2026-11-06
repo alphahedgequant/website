@@ -3,6 +3,7 @@
 // Usage: <WaitlistForm source="landing" />
 
 import { useState } from "react";
+import {getInsightsContext,sendInsightsEvent} from "@/lib/insightsClient.mjs";
 
 export default function WaitlistForm({ source = "landing", compact = false }) {
   const [email,   setEmail]   = useState("");
@@ -13,14 +14,19 @@ export default function WaitlistForm({ source = "landing", compact = false }) {
     if (!email.trim()) return;
     setStatus("loading");
     try {
+      const ctx = getInsightsContext();
       const r = await fetch("/api/waitlist", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email: email.trim(), source }),
+        body: JSON.stringify({ email: email.trim(), source,
+          analyticsVisitor:ctx?.visitor,analyticsSession:ctx?.session,
+          analyticsSource:ctx?.source,analyticsUtmCampaign:ctx?.utmCampaign }),
       });
       const json = await r.json();
       if (json.success) {
         setStatus("success");
+        // No client-side fake signup event: only newly inserted rows are
+        // counted by the server after PostgreSQL confirms success.
         setMessage(json.message || "You're on the list.");
         setEmail("");
       } else {
