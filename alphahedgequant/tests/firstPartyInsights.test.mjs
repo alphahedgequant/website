@@ -39,7 +39,8 @@ test("URL pathname collection rejects personal account, admin, API and search in
  assert.equal(safePagePath("/learn/"),"/learn");
 });
 test("event durations and short campaign labels are validated",()=>{
- assert.equal(validClientEvent({...base,event:"engagement",activeSeconds:8}).activeSeconds,8);\n assert.equal(validClientEvent({...base,event:"engagement",activeSeconds:60}).activeSeconds,60);
+ assert.equal(validClientEvent({...base,event:"engagement",activeSeconds:8}).activeSeconds,8);
+ assert.equal(validClientEvent({...base,event:"engagement",activeSeconds:60}).activeSeconds,60);
  assert.equal(validClientEvent({...base,event:"engagement",activeSeconds:300}),null);
  assert.equal(validClientEvent({...base,event:"engagement",activeSeconds:0}),null);
  assert.equal(validClientEvent({...base,activeSeconds:9}),null);
