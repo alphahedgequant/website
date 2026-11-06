@@ -1,0 +1,22 @@
+name: AHQ Production Security Smoke
+on:
+  push:
+    branches: [main]
+    paths:
+      - "scripts/production_security_smoke.py"
+      - ".github/workflows/production-security-smoke.yml"
+  schedule:
+    - cron: "30 3 * * *"
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  live-security-check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - name: Probe public pages and protected endpoints safely (GET only)
+        env:
+          AHQ_PUBLIC_BASE_URL: "https://www.alphahedgequant.com"
+        run: python3 scripts/production_security_smoke.py
