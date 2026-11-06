@@ -14,27 +14,12 @@
 //   GEMINI_API_KEY   (free key from https://aistudio.google.com/apikey)
 //   GEMINI_MODEL     (optional, defaults to "gemini-2.0-flash")
 
+import {auth} from "@clerk/nextjs/server";
+import {useRequestQuota,quotaResponse} from "@/lib/serverRateLimit.mjs";
 const { validateSpec, runBacktest } = require("../../../lib/quantEngine");
 
 const API = process.env.NEXT_PUBLIC_API_URL || "https://zerohedgequant-backend.onrender.com";
 const MODEL = process.env.GEMINI_MODEL || "gemini-2.0-flash";
-
-const HOUR = 3600 * 1000;
-const ipHits = new Map(); // ip -> { count, resetAt }
-let day = { date: "", count: 0 };
-
-function rateLimited(ip) {
-  const now = Date.now();
-  const today = new Date().toISOString().slice(0, 10);
-  if (day.date !== today) day = { date: today, count: 0 };
-  if (day.count >= 150) return "Daily Copilot budget (150 runs) is used up — try again tomorrow.";
-  let rec = ipHits.get(ip);
-  if (!rec || now > rec.resetAt) { rec = { count: 0, resetAt: now + HOUR }; ipHits.set(ip, rec); }
-  if (rec.count >= 5) return "Rate limit: 5 Copilot runs per hour per user. Take a breather.";
-  rec.count++;
-  day.count++;
-  return null;
-}
 
 const SYSTEM = `You translate a trading idea written in plain English into a JSON strategy spec. Output ONLY minified JSON, no prose, no code fences.
 
@@ -56,24 +41,41 @@ Rules of thumb:
 Only JSON. Nothing else.`;
 
 export async function POST(request) {
+  const {userId}=await auth();
+  if (!userId) return Response.json({ok:false,error:"Sign in required."},{status:401,headers:{"Cache-Control":"private,no-store"}});
   const key = process.env.GEMINI_API_KEY;
   if (!key) {
     return Response.json({ ok: false, code: "not-configured", error: "Copilot is not configured yet (missing API key)." }, { status: 503 });
   }
 
-  const ip = (request.headers.get("x-forwarded-for") || "unknown").split(",")[0].trim();
-  const limited = rateLimited(ip);
-  if (limited) return Response.json({ ok: false, code: "rate-limited", error: limited }, { status: 429 });
-
   let prompt;
   try {
-    const body = await request.json();
-    prompt = String(body.prompt || "").slice(0, 600);
+    const declaredSize = Number(request.headers.get("content-length") || 0);
+    if(declaredSize>8192)return Response.json({ok:false,error:"Request too large."},{status:413});
+    const raw = await request.text();
+    if(raw.length>8192)return Response.json({ok:false,error:"Request too large."},{status:413});
+    const body = JSON.parse(raw);
+    if(!body || Array.isArray(body) || typeof body!=="object" || typeof body.prompt!=="string")
+      return Response.json({ok:false,error:"Invalid prompt."},{status:400});
+    prompt = body.prompt.trim().slice(0,600);
   } catch {
     return Response.json({ ok: false, error: "Bad request body." }, { status: 400 });
   }
   if (!prompt || prompt.trim().length < 8) {
     return Response.json({ ok: false, error: "Describe your strategy in a sentence or two." }, { status: 400 });
+  }
+
+  try {
+    const userQuota = await useRequestQuota({
+      namespace:"copilot-user-hour", identity:userId,limit:5,windowSeconds:3600
+    });
+    if(!userQuota.allowed)return quotaResponse(userQuota);
+    const globalQuota = await useRequestQuota({
+      namespace:"copilot-site-day",identity:"all-users",limit:150,windowSeconds:86400
+    });
+    if(!globalQuota.allowed)return quotaResponse(globalQuota);
+  }catch{
+    return Response.json({ok:false,error:"Copilot temporarily unavailable."},{status:503,headers:{"Cache-Control":"no-store"}});
   }
 
   try {
@@ -85,6 +87,7 @@ export async function POST(request) {
         "content-type": "application/json",
         "x-goog-api-key": key,
       },
+      signal: AbortSignal.timeout(25000),
       body: JSON.stringify({
         system_instruction: { parts: [{ text: SYSTEM }] },
         contents: [{ role: "user", parts: [{ text: prompt }] }],
@@ -112,10 +115,10 @@ export async function POST(request) {
     spec = v.spec;
 
     // 3) fetch candles
-    const pr = await fetch(`${API}/api/prices?symbol=${encodeURIComponent(spec.symbol)}&interval=${spec.interval}`, { cache: "no-store" });
+    const pr = await fetch(`${API}/api/prices?symbol=${encodeURIComponent(spec.symbol)}&interval=${spec.interval}`, { cache: "no-store",signal:AbortSignal.timeout(16000) });
     const pj = await pr.json().catch(() => null);
     if (!pr.ok || !pj?.success || !Array.isArray(pj.data) || pj.data.length < 60) {
-      return Response.json({ ok: false, error: pj?.error || `Not enough price data for ${spec.symbol}. (Backend may be waking from cold start — retry in ~1 min.)` }, { status: 502 });
+      return Response.json({ ok: false, error: `Price data is temporarily unavailable for ${spec.symbol}.` }, { status: 502 });
     }
 
     // 4) deterministic backtest
