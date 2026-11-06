@@ -2,7 +2,7 @@ import {neon} from "@neondatabase/serverless";
 import {auth,currentUser} from "@clerk/nextjs/server";
 import {fetchHistory,utcDay} from "@/lib/trackerScoring";
 async function editorError(){
- const {userId}=auth();
+ const {userId}=await auth();
  if(!userId)return Response.json({success:false,error:"Sign in required"},{status:401});
  const allowed=(process.env.AHQ_TRACKER_ADMIN_EMAILS||process.env.AHQ_ANALYTICS_ADMIN_EMAILS||"").split(",").map(x=>x.trim().toLowerCase()).filter(Boolean);
  if(!allowed.length)return Response.json({success:false,error:"Tracker admin not configured"},{status:403});

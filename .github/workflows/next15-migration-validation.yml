@@ -1,0 +1,54 @@
+name: Next 15 Security Migration Verification
+on:
+  push:
+    branches:
+      - security/next15-upgrade-audit
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  validate-upgrade:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    defaults:
+      run:
+        working-directory: alphahedgequant
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: alphahedgequant/package-lock.json
+      - name: Regenerate lockfile from requested patched versions
+        run: npm install --package-lock-only --ignore-scripts --no-audit --no-fund
+      - name: Ensure Next is patched (15.5.28 or later in 15.x)
+        run: |
+          node -e "const p=require('./package-lock.json');const v=p.packages['node_modules/next']?.version;if(!v||!v.startsWith('15.5.'))throw Error('Expected patched Next 15.5.x, found '+v);if(Number(v.split('.')[2])<28)throw Error('Next.js patch is not sufficiently recent: '+v);console.log('Next.js: '+v)"
+      - name: Reproducible install with regenerated lock
+        run: npm ci --no-audit --no-fund
+      - name: Test security baseline and course code
+        run: node --test tests/securityBaseline.test.mjs tests/quantCourse.test.mjs tests/quantModules.test.mjs tests/continuousCourse.test.mjs
+      - name: Build full Next application
+        env:
+          # Nonfunctional public key for build-time rendering only; this is NOT a real Clerk instance.
+          NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY: "pk_test_ZXhhbXBsZS5jbGVyay5hY2NvdW50cy5kZXYk"
+        run: npm run build
+      - name: Commit reviewed lockfile to security branch only
+        if: success()
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add alphahedgequant/package-lock.json
+          if ! git diff --cached --quiet; then
+            git commit -m "chore(security): lock patched Next.js and transitive dependencies"
+            git push origin HEAD:security/next15-upgrade-audit
+          fi
+        working-directory: .
+      - name: Upload regenerated lockfile for review
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: next15-reviewed-lock
+          path: alphahedgequant/package-lock.json
+          retention-days: 7

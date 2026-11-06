@@ -13,13 +13,13 @@ async function db(){
   return sql;
 }
 export async function GET(){
-  const {userId}=auth();if(!userId)return response({error:"Sign in required"},401);
+  const {userId}=await auth();if(!userId)return response({error:"Sign in required"},401);
   try{const sql=await db();const rows=await sql`SELECT item_id,score,completed,attempts,updated_at FROM ahq_learn_progress WHERE user_id=${userId}`;
     return response({ok:true,progress:rows});}
   catch{return response({error:"Progress temporarily unavailable"},503);}
 }
 export async function POST(request){
-  const {userId}=auth();if(!userId)return response({error:"Sign in required"},401);
+  const {userId}=await auth();if(!userId)return response({error:"Sign in required"},401);
   let body;try{body=await request.json();}catch{return response({error:"Invalid body"},400);}
   const id=String(body?.id||"");
   if(!/^(math-|prob-|stats-|markets-|econ-|calc-|risk-|deriv-|portfolio-|quant-|ml-|stochastic-|options-|llm-|interview-|mental-)[a-z0-9-]{1,75}$/.test(id))return response({error:"Invalid activity"},400);

@@ -3,7 +3,7 @@ import {NextResponse} from "next/server";
 export const dynamic="force-dynamic";
 const reply=(data,status=200)=>NextResponse.json(data,{status,headers:{"Cache-Control":"private, no-store"}});
 export async function GET(req){
- const {userId}=auth();
+ const {userId}=await auth();
  if(!userId)return reply({error:"Sign in required"},401);
  const allow=(process.env.AHQ_ANALYTICS_ADMIN_EMAILS||"").split(",").map(x=>x.trim().toLowerCase()).filter(Boolean);
  if(!allow.length)return reply({error:"Admin allowlist not configured",code:"ADMIN_NOT_CONFIGURED"},403);
