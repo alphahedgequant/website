@@ -17,7 +17,7 @@ test("Next.js responses include baseline security headers and no framework signa
 });
 test("private account progress is bound to authenticated user and never stored with a client-supplied user id",()=>{
  const s=read("app/api/learn/progress/route.js");
- assert.match(s,/const \{userId\}=auth\(\)/);
+ assert.match(s,/const \{userId\}=(?:await )?auth\(\)/);
  assert.match(s,/WHERE user_id=\$\{userId\}/);
  assert.match(s,/VALUES \(\$\{userId\}/);
  assert.match(s,/Cache-Control.*private/);
