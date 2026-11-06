@@ -26,26 +26,57 @@ export async function GET(request) {
   const sql=researchDb();
   try {
     await ensureResearchTable(sql);
-    let processed=0;const failures=[];
-    // Sequential requests respect arXiv API usage; each broad query returns up to 75 recent records.
-    let requestIndex=0;
-    for(const [topic,query] of Object.entries(TOPICS)){
-      if(requestIndex++>0) await new Promise(resolve=>setTimeout(resolve,3200));
-      try {
-        const params=new URLSearchParams({search_query:query,start:"0",max_results:"75",sortBy:"submittedDate",sortOrder:"descending"});
-        const response=await fetch("https://export.arxiv.org/api/query?"+params,{cache:"no-store",headers:{"User-Agent":"AlphaHedgeQuantResearch/1.0 (research indexing)"},signal:AbortSignal.timeout(12000)});
+    let processed=0,checked=0;
+    const failures=[];
+    // arXiv asks clients to space API queries. A previous single invocation
+    // requested all six categories and individually UPSERTed hundreds of rows,
+    // eventually exceeding Vercel's 60-second hard timeout.
+    //
+    // Rotate three categories per daily run so each category is revisited
+    // every second day without sacrificing safe upstream request spacing.
+    const entries=Object.entries(TOPICS);
+    const day=Math.floor(Date.now()/86_400_000);
+    const offset=(day*3)%entries.length;
+    const selected=entries.slice(offset).concat(entries.slice(0,offset)).slice(0,3);
+    for(const [index,[topic,query]] of selected.entries()){
+      if(index>0)await new Promise(resolve=>setTimeout(resolve,3200));
+      try{
+        const params=new URLSearchParams({search_query:query,start:"0",max_results:"50",sortBy:"submittedDate",sortOrder:"descending"});
+        const response=await fetch("https://export.arxiv.org/api/query?"+params,{
+          cache:"no-store",headers:{"User-Agent":"AlphaHedgeQuantResearch/1.0 (research indexing)"},
+          signal:AbortSignal.timeout(12000)
+        });
         if(!response.ok)throw Error("Upstream HTTP "+response.status);
-        for(const paper of parse(await response.text())){
-          await sql`INSERT INTO ahq_research_archive (arxiv_id,title,summary,authors,categories,published_at,updated_at,abstract_url,pdf_url)
-            VALUES (${paper.id},${paper.title},${paper.summary},${JSON.stringify(paper.authors)}::jsonb,${JSON.stringify(paper.categories)}::jsonb,
-            ${paper.published},${paper.updated},${paper.abs},${paper.pdf})
-            ON CONFLICT (arxiv_id) DO UPDATE SET title=EXCLUDED.title,summary=EXCLUDED.summary,
-            authors=EXCLUDED.authors,categories=EXCLUDED.categories,updated_at=EXCLUDED.updated_at,
-            last_seen=now()`;
-          processed++;
+        const papers=parse(await response.text());
+        if(papers.length){
+          // One parameterized INSERT per category instead of 50-75 network
+          // roundtrips per category to PostgreSQL, preserving source metadata.
+          const payload=JSON.stringify(papers);
+          await sql`INSERT INTO ahq_research_archive
+            (arxiv_id,title,summary,authors,categories,published_at,updated_at,abstract_url,pdf_url)
+            SELECT x.id,x.title,x.summary,x.authors,x.categories,
+              NULLIF(x.published,'')::timestamptz,NULLIF(x.updated,'')::timestamptz,
+              x.abs,x.pdf
+            FROM jsonb_to_recordset(${payload}::jsonb)
+              AS x(id text,title text,summary text,authors jsonb,categories jsonb,
+                   published text,updated text,abs text,pdf text)
+            ON CONFLICT (arxiv_id) DO UPDATE SET
+              title=EXCLUDED.title,summary=EXCLUDED.summary,
+              authors=EXCLUDED.authors,categories=EXCLUDED.categories,
+              updated_at=EXCLUDED.updated_at,last_seen=now()`;
+          processed+=papers.length;
         }
-      }catch(error){failures.push(topic+": "+String(error.message).slice(0,80));}
+        checked++;
+      }catch(error){
+        failures.push(topic+": "+String(error.message).slice(0,80));
+      }
     }
-    return Response.json({status:processed?"ok":"unavailable",processed,failures},{status:processed?200:503});
+    return Response.json({
+      status:processed?"ok":"unavailable",
+      processed,topics_checked:checked,topics_attempted:selected.length,
+      topic_rotation:"three topics daily; all six every two days",
+      failures
+    },{status:processed?200:503});
+
   }catch(error){return Response.json({error:"Research ingestion unavailable"},{status:503});}
 }
