@@ -33,7 +33,7 @@ export function validClientEvent(raw){
   const path=safePagePath(raw.path);
   if(!path)return null;
   const seconds=raw.event==="engagement"?raw.activeSeconds:0;
-  if(raw.event==="engagement" && (!Number.isInteger(seconds)||seconds<1||seconds>20))return null;
+  if(raw.event==="engagement" && (!Number.isInteger(seconds)||seconds<1||seconds>60))return null;
   if(raw.event!=="engagement" && raw.activeSeconds!=null && raw.activeSeconds!==0)return null;
   return {
     event:raw.event,visitor:raw.visitor,session:raw.session,path,
