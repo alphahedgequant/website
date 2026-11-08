@@ -1,0 +1,27 @@
+name: Analyst Consensus Accuracy Guard
+on:
+  pull_request:
+    paths:
+      - "alphahedgequant/lib/fetchConsensus.js"
+      - "alphahedgequant/tests/consensusQuality.test.mjs"
+      - ".github/workflows/consensus-quality.yml"
+  push:
+    branches: [main]
+    paths:
+      - "alphahedgequant/lib/fetchConsensus.js"
+      - "alphahedgequant/tests/consensusQuality.test.mjs"
+      - ".github/workflows/consensus-quality.yml"
+permissions:
+  contents: read
+jobs:
+  consensus-arithmetic:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Check source ratings, targets, numeric sanity and timeouts
+        working-directory: alphahedgequant
+        run: node --test tests/consensusQuality.test.mjs
