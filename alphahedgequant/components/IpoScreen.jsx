@@ -184,6 +184,9 @@ export default function IpoScreen() {
         </div>
       )}
 
+      {meta && meta.freshness!=="timestamp_within_48h" && <p role="status" style={{color:"#e2b877",fontSize:12,margin:"0 0 12px"}}>
+        {meta.freshness==="possibly_stale" ? "Source timestamps indicate this IPO feed may be outdated. Verify before relying on it." : "The IPO provider's latest update time could not be verified. A recent feed check does not guarantee fresh GMP data."}
+      </p>}
       {meta && <p style={{color:"#9a9a9a",fontSize:12,margin:"0 0 16px"}}>
         {meta.upstreamUpdatedAt ? `Source updated ${new Date(meta.upstreamUpdatedAt).toLocaleString("en-IN",{timeZone:"Asia/Kolkata"})} IST · ` : ""}
         {meta.fetchedAt ? `Feed checked ${new Date(meta.fetchedAt).toLocaleString("en-IN",{timeZone:"Asia/Kolkata"})} IST` : "Update time unavailable"}
