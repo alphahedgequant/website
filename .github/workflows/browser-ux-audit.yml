@@ -1,0 +1,69 @@
+name: AHQ Browser UX Production Audit
+on:
+  pull_request:
+    paths:
+      - "alphahedgequant/scripts/audit-public-ux.mjs"
+      - "alphahedgequant/scripts/audit-market-backend.mjs"
+      - ".github/workflows/browser-ux-audit.yml"
+  push:
+    branches: [main]
+    paths:
+      - "alphahedgequant/scripts/audit-public-ux.mjs"
+      - "alphahedgequant/scripts/audit-market-backend.mjs"
+      - ".github/workflows/browser-ux-audit.yml"
+  schedule:
+    # Daily 10:30 AM Asia/Kolkata, during Indian market hours.
+    - cron: '0 5 * * 1-5'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  chromium-public-ux:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Install browser runner
+        working-directory: alphahedgequant
+        run: |
+          npm install --no-save --package-lock=false playwright@1.56.1
+          npx playwright install --with-deps chromium
+      - name: Check live public UX and unauthenticated protected routes
+        working-directory: alphahedgequant
+        env:
+          AHQ_AUDIT_URL: https://www.alphahedgequant.com
+        run: node scripts/audit-public-ux.mjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: ahq-public-ux-audit
+          path: alphahedgequant/ahq-audit
+          retention-days: 7
+
+  backend-readonly:
+    # Data-source availability is a separate production readiness signal;
+    # don't block unrelated UI-only PR validation on expiring broker tokens.
+    if: github.event_name == 'workflow_dispatch' || github.event_name == 'schedule'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Sample six market API contract endpoints
+        working-directory: alphahedgequant
+        run: node scripts/audit-market-backend.mjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: ahq-backend-audit
+          path: alphahedgequant/ahq-backend-audit
+          retention-days: 7
