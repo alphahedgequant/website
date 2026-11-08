@@ -1,4 +1,5 @@
 import {buildIpoBuckets} from "@/lib/ipoFeed.mjs";
+import {ipoFreshness} from "@/lib/ipoFreshness.mjs";
 export const runtime="nodejs";
 export const dynamic="force-dynamic";
 // Provider permits no more than one origin request per minute; fetch cache is shared by Next.
@@ -12,13 +13,14 @@ export async function GET(){
   const payload=await res.json();
   if(payload?.ok!==true||!Array.isArray(payload.ipos))throw Error("Invalid IPO feed response");
   const {buckets,unknownStatuses,invalid,duplicates,accepted}=buildIpoBuckets(payload.ipos);
+  const freshness=ipoFreshness(payload.updatedAt??payload.lastUpdated);
   if(payload.ipos.length>0&&accepted===0)throw Error("No recognized IPO records in source response");
   // If a provider introduces a new state, preserve those issues in 'other' rather than dropping.
   if(Object.keys(unknownStatuses).length)console.warn("[IPO] Provider has additional statuses",Object.keys(unknownStatuses));
   return Response.json({
    ok:true,buckets,count:accepted,source:"Xflot",sourceUrl:"https://www.xflot.com/api-docs",
-   fetchedAt:new Date().toISOString(),upstreamUpdatedAt:payload.updatedAt||payload.lastUpdated||null,
-   stale:false,partial:invalid>0||duplicates>0||Object.keys(unknownStatuses).length>0,
+   fetchedAt:new Date().toISOString(),upstreamUpdatedAt:freshness.upstreamUpdatedAt,
+   stale:freshness.stale,freshness:freshness.freshness,partial:invalid>0||duplicates>0||Object.keys(unknownStatuses).length>0,
    unknownStatusCounts:unknownStatuses,
    disclaimer:payload.disclaimer||"GMP is unofficial and not exchange verified. An implied listing price is not a prediction."
   },{headers:{"Cache-Control":"public,s-maxage=60,stale-while-revalidate=30"}});
