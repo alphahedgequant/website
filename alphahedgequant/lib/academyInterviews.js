@@ -1,3 +1,4 @@
+import {SCENARIO_CASES} from "./interviewScenarioBank.mjs";
 export const CAREERS = [
 {key:"Researcher",desc:"Statistical inference, modeling and scientific validation"},
 {key:"Trader",desc:"Market making, execution, options and decision-making"},
@@ -29,4 +30,4 @@ export const CASES = [
 ["Market Risk","Intermediate","How would you stress an options book after a volatility shock?",["Revalue positions with spot, volatility and time shocks jointly.","Include skew changes, liquidity and correlated moves.","Report nonlinear gamma and vega responses, not only first-order Greeks."],"A sudden selloff with volatility spike can overwhelm a delta-only sensitivity estimate.","Linearly extrapolating Greeks for large moves."],
 ["Market Risk","Advanced","Differentiate expected shortfall from VaR for tail management.",["Expected shortfall averages losses beyond a quantile threshold.","It provides information about tail severity.","Reliable estimation still needs sufficient tail data and sound scenarios."],"Two books with identical VaR may have radically different losses beyond VaR; expected shortfall helps distinguish them.","Concluding that matching VaR implies matching tail risk."],
 ["Market Risk","Advanced","How would you establish risk limits for a systematic strategy?",["Specify exposure, leverage, liquidity, concentration and drawdown controls.","Stress correlated failures, data outages and overnight gaps.","Define governance, escalation, independent validation and kill switches."],"A short-vol model needs per-symbol limits, event limits and fail-closed behavior when quotes become stale.","Using backtested Sharpe as the only risk control."]
-].map(([role,level,question,points,example,trap],i)=>({id:"case-"+i,role,level,question,points,example,trap}));
+].map(([role,level,question,points,example,trap],i)=>({id:"case-"+i,role,level,topic:"Core reasoning",concept:"Verbal explanation",kind:"theory",question,points,example,trap,hint:points[0]})).concat(SCENARIO_CASES);
