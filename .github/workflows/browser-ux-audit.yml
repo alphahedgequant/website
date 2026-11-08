@@ -3,11 +3,13 @@ on:
   pull_request:
     paths:
       - "alphahedgequant/scripts/audit-public-ux.mjs"
+      - "alphahedgequant/scripts/audit-market-backend.mjs"
       - ".github/workflows/browser-ux-audit.yml"
   push:
     branches: [main]
     paths:
       - "alphahedgequant/scripts/audit-public-ux.mjs"
+      - "alphahedgequant/scripts/audit-market-backend.mjs"
       - ".github/workflows/browser-ux-audit.yml"
   workflow_dispatch:
 permissions:
@@ -38,4 +40,24 @@ jobs:
         with:
           name: ahq-public-ux-audit
           path: alphahedgequant/ahq-audit
+          retention-days: 7
+
+  backend-readonly:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Sample six market API contract endpoints
+        working-directory: alphahedgequant
+        run: node scripts/audit-market-backend.mjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: ahq-backend-audit
+          path: alphahedgequant/ahq-backend-audit
           retention-days: 7
