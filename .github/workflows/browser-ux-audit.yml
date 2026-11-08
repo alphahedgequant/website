@@ -37,5 +37,5 @@ jobs:
         if: always()
         with:
           name: ahq-public-ux-audit
-          path: alphahedgequant/.ahq-audit
+          path: alphahedgequant/ahq-audit
           retention-days: 7
