@@ -32,7 +32,7 @@ export default function Learn(){
    <p className="eyebrow mb-3">[ AHQ : ACADEMY ]</p>
    <h1 className="font-display text-4xl md:text-6xl font-semibold tracking-tight">The Quant Learning Lab<span className="text-amber">.</span></h1>
    <p className="mt-4 max-w-3xl text-muted leading-relaxed">Start with the mathematics. Build financial intuition. Train for quant interviews. Sharpen mental speed.</p>
-   {tab!=="quant"&&<div className="grid grid-cols-2 md:grid-cols-4 gap-3 mt-9">
+   {tab==="mental"&&<div className="grid grid-cols-2 md:grid-cols-4 gap-3 mt-9">
      <div className="card p-4"><p className="text-xs text-muted">Lesson completion</p><p className="text-2xl text-amber mt-2 font-semibold">{totalDone}/{QUANT_LESSONS.length}</p><div className="h-1.5 rounded bg-raised mt-3 overflow-hidden"><div className="h-full bg-amber" style={{width:(totalDone/QUANT_LESSONS.length*100)+"%"}}/></div></div>
      <div className="card p-4"><p className="text-xs text-muted">Interview questions mastered</p><p className="text-2xl mt-2 font-semibold">{CASES.filter(i=>progress["interview-"+i.id]?.completed).length}/{CASES.length}</p></div>
      <div className="card p-4"><p className="text-xs text-muted">Mental maths today</p><p className="text-2xl mt-2 font-semibold">{progress["mental-"+keyDate()]?.score??"—"}<span className="text-xs text-muted ml-1">best %</span></p></div>
