@@ -3,7 +3,7 @@
 import {chromium} from "playwright";
 import {mkdir,writeFile} from "node:fs/promises";
 const root=process.env.AHQ_AUDIT_URL||"https://www.alphahedgequant.com";
-const out=".ahq-audit";
+const out="ahq-audit";
 const pages=["/","/about","/privacy","/terms","/disclaimer","/sign-in","/sign-up"];
 const protectedPages=["/terminal","/learn","/screener","/ipo","/research"];
 const results=[];
