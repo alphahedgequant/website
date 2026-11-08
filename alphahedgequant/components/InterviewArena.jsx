@@ -58,6 +58,7 @@ export default function InterviewArena({progress={},save=async()=>false,sync=""}
  const practiceQuestion=filtered.find(q=>q.id===activeId)||filtered[0]||null;
  const mockQuestion=mockQueue[mockPos]||null;
  const question=session==="mock"?mockQuestion:practiceQuestion;
+ useEffect(()=>{setChoice(null);setChecked(false);setRevealed(false);setGrade(null);setNotice("");},[question?.id]);
  const totalMastered=CASES.filter(q=>isMastered(q.id)).length;
  const roleMastered=roleCases.filter(q=>isMastered(q.id)).length;
  const numericCount=roleCases.filter(isNumeric).length;
@@ -66,7 +67,7 @@ export default function InterviewArena({progress={},save=async()=>false,sync=""}
  const mockAttempted=mockAnswers.filter(a=>a.choice!==null).length;
  const resetResponse=()=>{setChoice(null);setChecked(false);setRevealed(false);setGrade(null);setNotice("");};
  const switchQuestion=(id)=>{setActiveId(id);resetResponse();};
- const switchRole=(r)=>{setRole(r);setLevel("All");setTopic("All topics");setScope("all");setQuery("");setActiveId(null);resetResponse();};
+ const switchRole=(r)=>{setRole(r);setLevel("All");setTopic("All topics");setScope("all");setQuery("");setActiveId(null);setSession("practice");setMockQueue([]);setMockComplete(false);resetResponse();};
  const nextPractice=()=>{if(!filtered.length)return;switchQuestion(filtered[(currentIndex+1)%filtered.length].id);};
  const prevPractice=()=>{if(!filtered.length)return;switchQuestion(filtered[(currentIndex-1+filtered.length)%filtered.length].id);};
  const rememberGrade=async(q,value)=>{
