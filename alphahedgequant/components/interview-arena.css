@@ -195,3 +195,233 @@
  .ia-root .ia-hero-meta{gap:6px 16px}
 }
 @media(prefers-reduced-motion:reduce){.ia-root *{scroll-behavior:auto}}
+
+
+/* ─── AHQ pencil-paper interview reader (November 2026) ─────────────
+   Deliberately scoped to the InterviewArena, preserving its 1,224 cases,
+   answer grading, bookmarks, mock exam, progress and responsive controls.
+   Shares the paper/ink/highlighter palette of Learn and Macro Outlook.
+   No floating dark sidebar, separate hero dashboard, or oversized cards.
+────────────────────────────────────────────────────────────────── */
+.ia-root{
+  --ia-deep:#fbf8ef;--ia-panel:transparent;--ia-border:rgba(41,71,109,.22);
+  --ia-blue:#29476d;--ia-muted:#52627b;--ia-cream:#263449;
+  position:relative;isolation:isolate;margin-top:30px;
+  padding:clamp(18px,3.2vw,50px) clamp(21px,5.7vw,76px) 28px;
+  color:#263449;background-color:#fbf8ef;
+  background-image:repeating-linear-gradient(to bottom,transparent 0px,transparent 37px,rgba(73,119,169,.08) 38px,transparent 39px);
+  border:1px solid #d7cbb8;border-radius:18px;
+  box-shadow:0 18px 52px rgba(0,0,0,.15),inset 0 0 0 6px rgba(255,255,255,.48);
+  font-family:Georgia,"Times New Roman",serif;
+}
+.ia-root::before{
+  content:"";position:absolute;z-index:-1;top:0;bottom:0;left:clamp(12px,2.1vw,30px);
+  width:1px;background:rgba(175,55,72,.22);pointer-events:none;
+}
+.ia-root .ia-hero{
+  min-height:0;display:block;border:0;border-radius:0;background:transparent;
+  overflow:visible;padding:4px 0 22px;box-shadow:none;
+}
+.ia-root .ia-grid-decoration,.ia-root .ia-orbit{display:none}
+.ia-root .ia-hero-copy{max-width:810px}
+.ia-root .ia-eyebrow{
+  color:#956737;font-family:"JetBrains Mono",ui-monospace,monospace;
+  font-size:10px;letter-spacing:.14em;
+}
+.ia-root .ia-hero h2{
+  font:500 clamp(31px,3.2vw,46px)/1.22 Georgia,serif;
+  letter-spacing:-.035em;color:#25324a;margin:13px 0 12px;
+}
+.ia-root .ia-hero h2 em{
+  color:#29476d;font-family:inherit;font-style:normal;font-weight:500;
+  background:linear-gradient(transparent 62%,rgba(244,221,123,.82) 62%,rgba(244,221,123,.82) 92%,transparent 92%);
+  padding:0 2px;
+}
+.ia-root .ia-hero-copy>p:not(.ia-eyebrow){
+  color:#43536a;font:16px/1.88 Georgia,serif;max-width:74ch;
+}
+.ia-root .ia-hero-meta{gap:7px 19px;margin-top:19px}
+.ia-root .ia-hero-meta span{color:#67758a;font:600 10px/1.7 ui-monospace,monospace;letter-spacing:.05em}
+.ia-root .ia-hero-meta b{font:600 14px Georgia,serif;color:#384a63}
+.ia-root .ia-stats{
+  display:flex;flex-wrap:wrap;align-items:stretch;gap:0;
+  margin:5px 0 15px;background:transparent;border:0;
+  border-top:1px dashed rgba(41,71,109,.23);border-bottom:1px dashed rgba(41,71,109,.23);
+  border-radius:0;
+}
+.ia-root .ia-stats>div{
+  flex:1 1 160px;min-height:0;padding:14px 14px 15px 0;background:transparent;
+}
+.ia-root .ia-stats small{color:#786c59;font:700 10px ui-monospace,monospace}
+.ia-root .ia-stats strong{color:#29476d;font:600 23px Georgia,serif;margin-top:6px}
+.ia-root .ia-stats strong span{font-size:12px;color:#65738a}
+.ia-root .ia-stats p{color:#52627b;font:12px/1.65 Georgia,serif;margin:6px 0 0}
+.ia-root .ia-role-grid{
+  display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:0;
+  margin:8px 0 24px;border-bottom:1px solid #cbd3d9;
+}
+.ia-root .ia-role{
+  min-height:0;padding:13px 13px 16px;border:0;border-bottom:3px solid transparent;
+  border-radius:0;background:transparent;box-shadow:none;
+  color:#3d526a;transition:background .15s,border-color .15s;
+}
+.ia-root .ia-role:hover{transform:none;border-color:rgba(146,45,80,.35);background:rgba(244,221,123,.15)}
+.ia-root .ia-role.active{
+  border-color:#922d50;background:rgba(244,221,123,.23);box-shadow:none;color:#253a55;
+}
+.ia-root .ia-role-symbol{color:#922d50;font:italic 24px Georgia,serif;height:28px}
+.ia-root .ia-role strong{color:#253a55;font:600 15px Georgia,serif;margin:5px 0 2px}
+.ia-root .ia-role small{color:#52627b;font:12px/1.55 Georgia,serif;min-height:0}
+.ia-root .ia-role-count{color:#835047;font:700 10px ui-monospace,monospace;padding-top:10px}
+.ia-root .ia-lab{
+  border:0;border-radius:0;background:transparent;box-shadow:none;overflow:visible;
+}
+.ia-root .ia-lab-top{
+  padding:17px 0 20px;align-items:center;border-bottom:1px dashed rgba(41,71,109,.2);
+}
+.ia-root .ia-lab-top h3{
+  color:#253a55;font:500 clamp(23px,2.5vw,31px)/1.33 Georgia,serif;
+  margin-top:5px;letter-spacing:-.02em;
+}
+.ia-root .ia-mode-switch{
+  background:rgba(255,255,255,.45);border:1px solid #bac8d5;border-radius:8px;
+  padding:3px;
+}
+.ia-root .ia-mode-switch button{color:#3d526a;background:transparent}
+.ia-root .ia-mode-switch button.selected{color:#fffaf0;background:#29476d}
+.ia-root .ia-controls{
+  padding:19px 0 22px;border-bottom:1px dashed rgba(41,71,109,.2);
+}
+.ia-root .ia-levels button,.ia-root .ia-scopes button{
+  color:#3e506a;background:#fffdf7;border:1px solid #c7cfce;border-radius:7px;
+}
+.ia-root .ia-levels button.selected,.ia-root .ia-scopes button.selected{
+  color:#fffaf0;background:#29476d;border-color:#29476d;
+}
+.ia-root .ia-field-label{color:#7e5945}
+.ia-root .ia-field-label select,.ia-root .ia-field-label input{
+  color:#263449;background:#fffdf8;border:1px solid #b2bfd0;min-width:0;
+}
+.ia-root .ia-field-label option{color:#263449;background:#fffdf8}
+.ia-root .ia-question-layout{display:block;border:0}
+.ia-root .ia-question{padding:24px 0 28px}
+.ia-root .ia-q-number{color:#8d6351}
+.ia-root .ia-q-tags span{
+  color:#45617c;border:1px solid #b7c7d5;background:rgba(255,255,255,.45);
+}
+.ia-root .ia-bookmark{color:#29476d;border:1px solid #b5c6d2;background:#fffdf7}
+.ia-root .ia-bookmark.saved{color:#922d50;border-color:#b77789}
+.ia-root .ia-concept{margin:22px 0 9px;color:#8c6a40;font:700 10px ui-monospace,monospace}
+.ia-root .ia-question h4{
+  font:500 clamp(22px,2.8vw,32px)/1.58 Georgia,serif;
+  color:#25324a;max-width:78ch;letter-spacing:-.013em;
+}
+.ia-root .ia-choices{margin-top:22px;gap:10px}
+.ia-root .ia-choice{
+  color:#2e435d;background:#fffdf7;border:1px solid #c7d3d8;
+  border-radius:7px;box-shadow:none;padding:15px 17px;
+  transition:background .15s,border-color .15s;
+}
+.ia-root .ia-choice:hover:not(:disabled){
+  transform:none;border-color:#7897b2;background:rgba(222,236,247,.55);
+}
+.ia-root .ia-choice>span:first-child{
+  color:#922d50;background:rgba(244,221,123,.34);border-radius:4px;
+}
+.ia-root .ia-choice b{color:#273d53;font:500 14px/1.6 Georgia,serif}
+.ia-root .ia-choice.chosen{border-color:#527fab;background:#e7f0f8}
+.ia-root .ia-choice.correct{border-color:#74a18a;background:#e4f1e7}
+.ia-root .ia-choice.wrong{border-color:#c48f96;background:#fae9e8}
+.ia-root .ia-choice:disabled{color:#263449}
+.ia-root .ia-open-answer p{color:#54637a;font-size:14px}
+.ia-root .ia-open-answer textarea{
+  color:#263449;background:#fffdf8;border:1px solid #a7b8cd;border-radius:6px;
+}
+.ia-root .ia-feedback{
+  margin-top:27px;background:rgba(249,229,168,.25);
+  border-left:3px solid #b28c45;border-radius:0 5px 5px 0;
+  color:#334862;font:15px/1.95 Georgia,serif;
+}
+.ia-root .ia-feedback.needs-work{border-color:#922d50;background:rgba(244,221,123,.17)}
+.ia-root .ia-feedback-label{color:#865433}
+.ia-root .ia-answer strong,.ia-root .ia-feedback b{color:#29476d}
+.ia-root .ia-self-grade{border-color:#cbd3d9}
+.ia-root .ia-self-grade small{color:#52627b}
+.ia-root .ia-self-grade button{
+  color:#29476d;background:#fffdf8;border:1px solid #b5bfd0;
+}
+.ia-root .ia-self-grade button.selected{color:#fffdf8;background:#29476d}
+.ia-root .ia-notice{color:#922d50}
+.ia-root .ia-actions{margin-top:24px}
+.ia-root .ia-actions button,.ia-root .ia-results-actions button,.ia-root .ia-empty button{border-radius:7px}
+.ia-root .ia-main-button{
+  background:#29476d!important;color:#fffdf8!important;border:1px solid #29476d!important;
+}
+.ia-root .ia-main-button:hover:not(:disabled){background:#3a5f83!important}
+.ia-root .ia-minor-button,.ia-root .ia-results-actions button:not(.ia-main-button){
+  background:#fffdf8;color:#29476d;border:1px solid #aebdc9;
+}
+.ia-root .ia-aside{
+  border:0;border-top:1px dashed rgba(41,71,109,.3);background:transparent;
+  padding:24px 0 18px;max-width:82ch;
+}
+.ia-root .ia-aside .ia-eyebrow{color:#956737}
+.ia-root .ia-aside-visual{display:none}
+.ia-root .ia-aside-topic{color:#922d50;margin:13px 0 8px}
+.ia-root .ia-aside h5{font:500 23px Georgia,serif;color:#29476d}
+.ia-root .ia-aside>p:not(.ia-aside-topic){font:15px/1.85 Georgia,serif;color:#52627b;margin-top:10px}
+.ia-root .ia-aside details{margin-top:20px;border-color:#c5d0d9;color:#29476d}
+.ia-root .ia-aside details p{color:#52627b;font:15px/1.8 Georgia,serif}
+.ia-root .ia-aside-foot{border-color:#c5d0d9;margin-top:23px}
+.ia-root .ia-aside-foot small{color:#956737}
+.ia-root .ia-aside-foot p{color:#65738a}
+.ia-root .ia-mock-bar{padding:14px 0 22px;border-bottom:1px dashed #cbd3d9}
+.ia-root .ia-mock-bar small{color:#845b40}
+.ia-root .ia-mock-bar b{color:#29476d}
+.ia-root .ia-mock-bar button{color:#29476d;border:1px solid #afc1cc}
+.ia-root .ia-results{border-top:0;padding:26px 0 35px}
+.ia-root .ia-results h3{color:#253a55}
+.ia-root .ia-results>strong{color:#29476d}
+.ia-root .ia-results>strong span,.ia-root .ia-results>p:not(.ia-eyebrow){color:#52627b}
+.ia-root .ia-result-item{border:0;border-bottom:1px dashed #c7d1d8;background:transparent;padding:16px 0;border-radius:0}
+.ia-root .ia-result-item b{color:#29476d}
+.ia-root .ia-result-item p{color:#52627b}
+.ia-root .ia-result-item .ia-good{color:#256b48}
+.ia-root .ia-result-item .ia-bad{color:#922d50}
+.ia-root .ia-empty{border:0}
+.ia-root .ia-empty h4{color:#29476d}
+.ia-root .ia-empty p{color:#52627b}
+.ia-root .ia-empty button{color:#29476d;background:#fffdf8;border:1px solid #b7c7d5}
+.ia-root .ia-foot{
+  background:transparent;border-top:1px dashed #c9d1db;padding:20px 0 4px;
+  color:#7e6858;font:700 10px/1.65 ui-monospace,monospace;
+}
+.ia-root button:focus-visible,.ia-root select:focus-visible,.ia-root input:focus-visible,.ia-root textarea:focus-visible{outline-color:#922d50}
+@media(max-width:850px){
+ .ia-root .ia-role-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+ .ia-root .ia-role{padding:11px 10px 15px}
+ .ia-root .ia-stats>div{flex-basis:48%}
+}
+@media(max-width:640px){
+ .ia-root{padding:22px 17px 23px 36px;border-radius:12px}
+ .ia-root::before{left:21px}
+ .ia-root .ia-hero{padding:0 0 15px}
+ .ia-root .ia-hero h2{font-size:29px}
+ .ia-root .ia-hero-copy>p:not(.ia-eyebrow){font-size:15px}
+ .ia-root .ia-stats>div{flex-basis:48%;padding:11px 5px 13px 0}
+ .ia-root .ia-stats strong{font-size:21px}
+ .ia-root .ia-role strong{font-size:14px}
+ .ia-root .ia-role small{font-size:11px}
+ .ia-root .ia-lab-top{padding:13px 0 17px}
+ .ia-root .ia-controls{padding:14px 0 18px}
+ .ia-root .ia-question{padding:21px 0}
+ .ia-root .ia-question h4{font-size:22px}
+ .ia-root .ia-choices{grid-template-columns:1fr}
+ .ia-root .ia-choice{padding:13px}
+ .ia-root .ia-aside{padding:21px 0}
+ .ia-root .ia-mock-bar{padding:12px 0}
+ .ia-root .ia-results{padding:20px 0}
+ .ia-root .ia-q-tags{margin-left:0}
+ .ia-root .ia-question-top{flex-wrap:wrap}
+}
+@media(prefers-reduced-motion:reduce){.ia-root .ia-role,.ia-root .ia-choice{transition:none}}
