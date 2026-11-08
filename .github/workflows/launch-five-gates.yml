@@ -1,0 +1,33 @@
+name: AHQ Five Launch Gates
+on:
+  pull_request:
+    paths:
+      - "alphahedgequant/app/api/ipo/route.js"
+      - "alphahedgequant/lib/ipoFreshness.mjs"
+      - "alphahedgequant/components/IpoScreen.jsx"
+      - "alphahedgequant/tests/launchGates.test.mjs"
+      - ".github/workflows/launch-five-gates.yml"
+  push:
+    branches: [main]
+    paths:
+      - "alphahedgequant/app/api/ipo/route.js"
+      - "alphahedgequant/lib/ipoFreshness.mjs"
+      - "alphahedgequant/components/IpoScreen.jsx"
+      - "alphahedgequant/tests/launchGates.test.mjs"
+      - ".github/workflows/launch-five-gates.yml"
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  five-gates-static:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Security, data labeling, routes, legal and recovery contracts
+        working-directory: alphahedgequant
+        run: |
+          node --test tests/launchGates.test.mjs tests/securityBaseline.test.mjs tests/ipoFeed.test.mjs tests/interviewArena.test.mjs tests/ga4Privacy.test.mjs tests/consensusQuality.test.mjs tests/trackerOwnerAccess.test.mjs
