@@ -5,7 +5,8 @@ import "./pencil-reader.css";
 import {LESSONS} from "@/lib/academyContent";
 import {QUANT_LESSONS} from "@/lib/quantCourse.mjs";
 import ContinuousQuantCourse from "@/components/ContinuousQuantCourse";
-import {CASES,CAREERS} from "@/lib/academyInterviews";
+import {CASES} from "@/lib/academyInterviews";
+import InterviewArena from "@/components/InterviewArena";
 import {LESSON_GUIDES} from "@/lib/academyGuides";
 import {MATH_TYPES,QUESTIONS_PER_TYPE,nextMentalExercise} from "@/lib/mentalMathBank";
 
@@ -16,21 +17,17 @@ export default function Learn(){
  const [tab,setTab]=useState("quant"),[progress,setProgress]=useState({}),[sync,setSync]=useState("Loading progress...");
  const [topic,setTopic]=useState("All"),[level,setLevel]=useState("All"),[query,setQuery]=useState("");
  const [selected,setSelected]=useState(null),[answer,setAnswer]=useState(""),[lessonResult,setLessonResult]=useState(null);
- const [interviewMode,setInterviewMode]=useState("Researcher"),[interviewLevel,setInterviewLevel]=useState("All"),[index,setIndex]=useState(0),[showAnswer,setShowAnswer]=useState(false);
  const [mathType,setMathType]=useState("all"),[difficulty,setDifficulty]=useState("Mixed"),[duration,setDuration]=useState(60),[running,setRunning]=useState(false),[seconds,setSeconds]=useState(60),[mathQuestion,setMathQuestion]=useState(null),[mathAnswer,setMathAnswer]=useState(""),[correct,setCorrect]=useState(0),[attempts,setAttempts]=useState(0),[history,setHistory]=useState([]);
  const countersRef=useRef(Array(MATH_TYPES.length).fill(0)),endRef=useRef(0),intervalRef=useRef(null),inputRef=useRef(null),activeRef=useRef(false),correctRef=useRef(0),attemptRef=useRef(0);
  useEffect(()=>{(async()=>{try{const r=await fetch("/api/learn/progress",{cache:"no-store"}),j=await r.json();if(!j.ok)throw Error(j.error||"Unavailable");setProgress(Object.fromEntries(j.progress.map(x=>[x.item_id,x])));setSync("Progress synced with your account");}catch{setSync("Progress sync unavailable — sign in and retry");}})();},[]);
  const save=useCallback(async(id,score,completed)=>{try{const r=await fetch("/api/learn/progress",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({id,score,completed})});const j=await r.json();if(!j.ok)throw Error();setProgress(p=>({...p,[id]:j.record}));setSync("Progress saved");return true;}catch{setSync("Could not save progress; please retry");return false;}},[]);
  const totalDone=QUANT_LESSONS.filter(l=>progress[l.id]?.completed).length;
  const filtered=useMemo(()=>LESSONS.filter(l=>(topic==="All"||l.topic===topic)&&(level==="All"||l.level===level)&&(`${l.title} ${l.explain} ${l.topic}`).toLowerCase().includes(query.toLowerCase())),[topic,level,query]);
- const bank=useMemo(()=>CASES.filter(i=>i.role===interviewMode&&(interviewLevel==="All"||i.level===interviewLevel)),[interviewMode,interviewLevel]);
- const interview=bank[index%bank.length];
  const stop=useCallback(()=>{if(!activeRef.current)return;activeRef.current=false;setRunning(false);setSeconds(0);clearInterval(intervalRef.current);const result={date:keyDate(),correct:correctRef.current,attempts:attemptRef.current};setHistory(h=>[result,...h].slice(0,10));save("mental-"+keyDate(),Math.round(100*result.correct/Math.max(1,result.attempts)),true);},[save]);
  const start=()=>{clearInterval(intervalRef.current);correctRef.current=0;attemptRef.current=0;setCorrect(0);setAttempts(0);setHistory(h=>h);setMathAnswer("");setMathQuestion(nextMentalExercise(mathType,difficulty,countersRef.current));setSeconds(duration);endRef.current=Date.now()+duration*1000;activeRef.current=true;setRunning(true);intervalRef.current=setInterval(()=>{const remaining=Math.max(0,Math.ceil((endRef.current-Date.now())/1000));setSeconds(remaining);if(remaining===0){clearInterval(intervalRef.current);activeRef.current=false;setRunning(false);const result={date:keyDate(),correct:correctRef.current,attempts:attemptRef.current};setHistory(h=>[result,...h].slice(0,10));save("mental-"+keyDate(),Math.round(100*result.correct/Math.max(1,result.attempts)),true);}},200);setTimeout(()=>inputRef.current?.focus(),0);};
  useEffect(()=>()=>clearInterval(intervalRef.current),[]);
  const submitMath=(e)=>{e.preventDefault();if(!running||!mathQuestion||mathAnswer.trim()==="")return;const ok=Number(mathAnswer)===mathQuestion.answer;attemptRef.current++;setAttempts(attemptRef.current);if(ok){correctRef.current++;setCorrect(correctRef.current);}setMathQuestion(nextMentalExercise(mathType,difficulty,countersRef.current));setMathAnswer("");inputRef.current?.focus();};
  const choose=(l)=>{setSelected(l);setAnswer("");setLessonResult(null);setTimeout(()=>document.getElementById("lesson")?.scrollIntoView({behavior:"smooth",block:"start"}),80);};
- const interviewDone=(i)=>{save("interview-"+i.id,100,true);setShowAnswer(true);};
  return <div className="mx-auto max-w-[1280px] px-5 md:px-10 py-14 text-body">
    <p className="eyebrow mb-3">[ AHQ : ACADEMY ]</p>
    <h1 className="font-display text-4xl md:text-6xl font-semibold tracking-tight">The Quant Learning Lab<span className="text-amber">.</span></h1>
@@ -43,31 +40,7 @@ export default function Learn(){
    </div>}
    <nav aria-label="Academy areas" className="flex flex-wrap gap-2 mt-6 border-b border-line pb-3">{TRACKS.map(([id,title])=><button key={id} type="button" onClick={()=>setTab(id)} aria-current={tab===id?"page":undefined} className={`px-4 py-2.5 rounded-lg border text-sm font-medium transition-colors ${tab===id?"bg-white text-black border-white":"bg-transparent text-body border-line hover:border-white/60"}`}>{title}</button>)}</nav>
    {tab==="quant"&&<ContinuousQuantCourse progress={progress} save={save} sync={sync}/>}
-   {tab==="interview"&&<section className="mt-10">
-     <p className="eyebrow">02 / ROLE-SPECIFIC INTERVIEWS</p>
-     <h2 className="font-display text-3xl mt-2">Prepare for your actual quant role</h2>
-     <p className="text-muted text-sm mt-3 max-w-3xl">Choose a role and practice with realistic examples, step-by-step sample answers and common mistakes.</p>
-     <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4 mt-6">
-       {CAREERS.map(c=><button key={c.key} onClick={()=>{setInterviewMode(c.key);setInterviewLevel("All");setIndex(0);setShowAnswer(false)}} className={`p-5 border rounded-xl text-left ${interviewMode===c.key?"border-amber bg-amber/10":"border-line bg-surface hover:border-amber/40"}`}>
-         <span className="text-amber font-medium">{c.key}</span><p className="text-muted text-xs mt-2">{c.desc}</p>
-       </button>)}
-     </div>
-     <div className="flex gap-2 flex-wrap mt-6">{["All","Beginner","Intermediate","Advanced"].map(x=><Chip key={x} active={interviewLevel===x} onClick={()=>{setInterviewLevel(x);setIndex(0);setShowAnswer(false)}}>{x}</Chip>)}</div>
-     <div className="card border-amber/30 mt-6 p-7 max-w-4xl">
-       <div className="flex justify-between gap-3 text-xs text-muted font-mono"><span>{interview.role} · {interview.level}</span><span>Case {index%bank.length+1} / {bank.length}</span></div>
-       <h3 className="font-display text-2xl md:text-3xl mt-7 leading-snug">{interview.question}</h3>
-       {showAnswer?<div className="mt-6 space-y-5">
-         <div className="rounded-lg border-l-2 border-amber bg-amber/10 p-5"><h4 className="text-amber font-medium">Model answer</h4><ol className="list-decimal ml-5 mt-3 space-y-2 text-sm leading-7">{interview.points.map((p,i)=><li key={i}>{p}</li>)}</ol></div>
-         <div className="border border-line rounded-lg p-5"><h4 className="font-medium">Worked example</h4><p className="mt-2 text-muted leading-7 text-sm">{interview.example}</p></div>
-         <div className="border border-line rounded-lg p-5"><h4 className="font-medium">Common mistake</h4><p className="mt-2 text-muted text-sm">{interview.trap}</p></div>
-       </div>:<p className="text-sm text-muted mt-6">Try answering aloud: definition, mechanism, practical example.</p>}
-       <div className="flex flex-wrap gap-3 mt-7">
-         <button onClick={()=>setShowAnswer(true)} className="rounded-lg border border-amber/50 px-4 py-2 text-sm text-amber">Show worked answer</button>
-         <button onClick={()=>{setShowAnswer(true);save("interview-"+interview.id,100,true)}} className="rounded-lg bg-amber px-4 py-2 text-sm font-semibold text-ink">Mark practiced</button>
-         <button onClick={()=>{setIndex(i=>i+1);setShowAnswer(false)}} className="rounded-lg border border-line px-4 py-2 text-sm">Next case →</button>
-       </div>
-     </div>
-   </section>}
+   {tab==="interview"&&<InterviewArena progress={progress} save={save} sync={sync}/>}
    {tab==="mental"&&<section className="mt-10"><p className="eyebrow">03 / SPEED TRAINING</p><h2 className="font-display text-3xl mt-2">Mental maths arena</h2><p className="text-muted text-sm mt-3">Timed arithmetic drills inspired by the format of fast mental-maths games. Twelve categories with at least 1,200 distinct questions in each (14,400 total). Choose a type or mix them all. Keyboard input and account-linked scores.</p><div className="flex gap-2 flex-wrap mt-5 items-center"><span className="text-xs text-muted">Difficulty:</span>{["Easy","Mixed","Hard"].map(x=><Chip key={x} active={difficulty===x} onClick={()=>!running&&setDifficulty(x)}>{x}</Chip>)}<span className="ml-3 text-xs text-muted">Round:</span>{[30,60,120].map(x=><Chip key={x} active={duration===x} onClick={()=>!running&&setDuration(x)}>{x}s</Chip>)}</div><div className="mt-5 flex flex-wrap items-center gap-3"><label htmlFor="mental-category" className="text-xs text-muted">Question category:</label><select id="mental-category" disabled={running} value={mathType} onChange={e=>setMathType(e.target.value)} className="min-w-[230px] rounded-lg border border-line bg-raised text-body px-3 py-2 text-sm"><option value="all">All 12 categories (mixed)</option>{MATH_TYPES.map(t=><option key={t.id} value={t.id}>{t.label} — {QUESTIONS_PER_TYPE.toLocaleString()} questions</option>)}</select><span className="text-xs text-muted">{(MATH_TYPES.length*QUESTIONS_PER_TYPE).toLocaleString()} total practice questions · no repeats within each category&apos;s 1,200-question cycle</span></div><div className="grid md:grid-cols-[1fr_280px] gap-5 mt-6"><div className="card border-amber/30 p-7 md:p-10"><div className="flex justify-between text-sm"><span className="text-muted">TIME REMAINING</span><span className="text-amber text-2xl font-mono tabular-nums">{running?seconds:duration}s</span></div><div className="h-2 bg-raised rounded-full mt-4 overflow-hidden"><div className="h-full bg-amber transition-all" style={{width:(running?seconds/duration*100:100)+"%"}}/></div><div className="min-h-[180px] flex items-center justify-center text-center"><p className="font-display text-5xl md:text-7xl font-semibold tracking-tight">{running?mathQuestion?.q:"Ready?"}</p></div><form onSubmit={submitMath} className="flex gap-3"><input ref={inputRef} aria-label="Mental maths answer" type="number" step="any" value={mathAnswer} onChange={e=>setMathAnswer(e.target.value)} disabled={!running} placeholder="Your answer" className="w-full min-w-0 rounded-lg border border-line bg-raised p-3 text-lg"/><button disabled={!running} className="rounded-lg bg-amber text-ink font-semibold px-6 disabled:opacity-40">Enter</button></form><button onClick={running?stop:start} className="mt-5 rounded-lg border border-amber/50 px-6 py-3 text-amber font-medium">{running?"End round":"Start "+duration+"s challenge"}</button></div><div className="card p-6"><p className="eyebrow">ROUND SCORE</p><p className="text-5xl font-semibold mt-5 text-amber tabular-nums">{correct}</p><p className="text-muted text-sm mt-1">Correct answers</p><div className="border-t border-line my-5"/><p className="text-muted text-sm">Attempted: {attempts}</p><p className="text-muted text-sm mt-2">Accuracy: {attempts?Math.round(correct/attempts*100):0}%</p><p className="text-muted text-sm mt-2">Rate: {duration-seconds>0?(correct/(duration-seconds)*60).toFixed(1):"0.0"} correct/min</p><p className="text-xs text-muted mt-7">A completed round is recorded automatically. Results show raw score and accuracy, not a simulated leaderboard.</p></div></div>{history.length>0&&<div className="card mt-5 p-5"><h3 className="font-medium">Recent rounds (this session)</h3><div className="flex gap-3 flex-wrap mt-4">{history.map((h,i)=><div className="rounded-lg border border-line p-3 text-sm" key={i}><span className="text-amber">{h.correct}</span> / {h.attempts} · {h.date}</div>)}</div></div>}</section>}
  </div>;
 }
