@@ -11,6 +11,9 @@ on:
       - "alphahedgequant/scripts/audit-public-ux.mjs"
       - "alphahedgequant/scripts/audit-market-backend.mjs"
       - ".github/workflows/browser-ux-audit.yml"
+  schedule:
+    # Daily 10:30 AM Asia/Kolkata, during Indian market hours.
+    - cron: '0 5 * * 1-5'
   workflow_dispatch:
 permissions:
   contents: read
@@ -43,6 +46,9 @@ jobs:
           retention-days: 7
 
   backend-readonly:
+    # Data-source availability is a separate production readiness signal;
+    # don't block unrelated UI-only PR validation on expiring broker tokens.
+    if: github.event_name == 'workflow_dispatch' || github.event_name == 'schedule'
     runs-on: ubuntu-24.04
     timeout-minutes: 8
     steps:
