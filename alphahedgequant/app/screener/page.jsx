@@ -9,7 +9,7 @@ import { api } from "@/lib/config";
 // ── markets ─────────────────────────────────────────────
 const MARKETS = {
   NSE: { scr: "/api/screener", idx: "/api/indices", cur: "₹", label: "NSE · India", delay: "provider feed · quote freshness not verified" },
-  US: { scr: "/api/us-screener", idx: "/api/us-indices", cur: "$", label: "US · NYSE/NASDAQ", delay: "Yahoo/provider feed · potentially delayed" },
+  US: { scr: "/api/us-screener", idx: "/api/us-indices", cur: "$", label: "US · NYSE/NASDAQ", delay: "Yahoo Finance chart · timestamped, delayed quotes" },
 };
 
 // ── formatting ──────────────────────────────────────────
@@ -496,7 +496,7 @@ export default function Markets() {
       case "marketCap": return <span className="font-mono">{fmtCap(v, market)}</span>;
       case "changePct": return <span className={`font-mono ${pctCls(v)}`}>{v == null ? "-" : fmt(v) + "%"}</span>;
       case "volume": return <span className="font-mono">{fmtVol(v)}</span>;
-      case "price": return <span className="font-mono text-gain">{MARKETS[market].cur}{fmt(v)}</span>;
+      case "price": return <span className="font-mono text-gain" title={market === "US" && r.priceAsOf ? `Provider quote time (UTC): ${r.priceAsOf}${r.stale ? " · older quote" : ""}` : undefined}>{MARKETS[market].cur}{fmt(v)}</span>;
       case "distSma50": case "distSma200": {
         const sma = col === "distSma50" ? r.sma50 : r.sma200;
         if (!sma || !r.price) return <span className="font-mono text-muted">-</span>;
@@ -611,6 +611,11 @@ export default function Markets() {
       )}
       {status === "error" && (
         <div className="card mb-4 p-4 text-sm text-loss/90">Stock list could not be refreshed. Check the backend connection and market-data provider. Any displayed rows may be stale; no prices are confirmed live.</div>
+      )}
+      {market === "US" && status === "live" && (
+        <p className="text-xs leading-relaxed text-muted mb-4" role="note">
+          US equity quotes are indicative and delayed, not live exchange prices. Hover over a price to see its provider timestamp (UTC). Unavailable fundamentals are shown as dashes, not estimated values.
+        </p>
       )}
 
       {/* ── TOP CONTROL BAR (Finviz) ─────────────────── */}
@@ -778,7 +783,7 @@ export default function Markets() {
       )}
 
       <p className="font-mono text-[11px] text-muted mt-6">
-        DATA: {market === "US" ? "YAHOO FINANCE · ~15 MIN DELAYED" : "UPSTOX (LIVE) + YAHOO FINANCE"} · RESEARCH &amp; EDUCATION ONLY · NOT INVESTMENT ADVICE
+        DATA: {market === "US" ? "YAHOO FINANCE CHART · DELAYED, NOT REAL-TIME" : "UPSTOX (LIVE) + YAHOO FINANCE"} · RESEARCH &amp; EDUCATION ONLY · NOT INVESTMENT ADVICE
       </p>
     </div>
   );
