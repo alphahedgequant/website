@@ -1,0 +1,42 @@
+name: Interview pencil-reader visual regression
+on:
+  pull_request:
+    paths:
+      - "alphahedgequant/components/interview-arena.css"
+      - "alphahedgequant/app/learn/page.jsx"
+      - "alphahedgequant/scripts/audit-interview-paper.mjs"
+      - ".github/workflows/interview-presentation.yml"
+  push:
+    branches: [main]
+    paths:
+      - "alphahedgequant/components/interview-arena.css"
+      - "alphahedgequant/app/learn/page.jsx"
+      - "alphahedgequant/scripts/audit-interview-paper.mjs"
+      - ".github/workflows/interview-presentation.yml"
+permissions:
+  contents: read
+jobs:
+  paper-layout:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Install isolated browser runner
+        working-directory: alphahedgequant
+        run: |
+          npm install --no-save --package-lock=false playwright@1.56.1
+          npx playwright install --with-deps chromium
+      - name: Verify paper styles at mobile, tablet and desktop
+        working-directory: alphahedgequant
+        run: node scripts/audit-interview-paper.mjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: interview-paper-css-evidence
+          path: alphahedgequant/ahq-interview-style
+          retention-days: 7
