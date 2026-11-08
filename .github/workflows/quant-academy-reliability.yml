@@ -16,6 +16,11 @@ on:
       - "alphahedgequant/components/continuous-course.css"
       - "alphahedgequant/tests/continuousCourse.test.mjs"
       - "alphahedgequant/app/learn/page.jsx"
+      - "alphahedgequant/lib/academyInterviews.js"
+      - "alphahedgequant/lib/interviewScenarioBank.mjs"
+      - "alphahedgequant/components/InterviewArena.jsx"
+      - "alphahedgequant/components/interview-arena.css"
+      - "alphahedgequant/tests/interviewArena.test.mjs"
       - "alphahedgequant/tests/quantCourse.test.mjs"
       - ".github/workflows/quant-academy-reliability.yml"
   pull_request:
@@ -33,6 +38,11 @@ on:
       - "alphahedgequant/components/continuous-course.css"
       - "alphahedgequant/tests/continuousCourse.test.mjs"
       - "alphahedgequant/app/learn/page.jsx"
+      - "alphahedgequant/lib/academyInterviews.js"
+      - "alphahedgequant/lib/interviewScenarioBank.mjs"
+      - "alphahedgequant/components/InterviewArena.jsx"
+      - "alphahedgequant/components/interview-arena.css"
+      - "alphahedgequant/tests/interviewArena.test.mjs"
       - "alphahedgequant/tests/quantCourse.test.mjs"
   workflow_dispatch:
 permissions:
@@ -48,4 +58,4 @@ jobs:
           node-version: "22"
       - name: Check six sections, content integrity and lesson progress
         working-directory: alphahedgequant
-        run: node --test tests/quantCourse.test.mjs tests/quantModules.test.mjs tests/continuousCourse.test.mjs
+        run: node --test tests/quantCourse.test.mjs tests/quantModules.test.mjs tests/continuousCourse.test.mjs tests/interviewArena.test.mjs
