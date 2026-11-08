@@ -28,6 +28,12 @@ for(const [path,label] of targets){
   row.fields=data&&typeof data==="object"?Object.keys(data).slice(0,24):[];
   row.dataShape=Array.isArray(val)?"array":typeof val;
   if(Array.isArray(val))row.dataLength=val.length;
+  if(path==="/api/us-screener"&&Array.isArray(val)){
+    row.timestampedQuotes=val.filter(x=>Number.isFinite(Date.parse(x.priceAsOf))&&Number(x.price)>0).length;
+    row.delayedSources=val.filter(x=>typeof x.priceSource==="string"&&/delayed/i.test(x.priceSource)).length;
+    row.validity=row.timestampedQuotes>0 && row.timestampedQuotes===val.length?"timestamped delayed quotes":"missing quote metadata";
+    if(row.validity!=="timestamped delayed quotes"){row.ok=false;row.error="Some US quotes lack positive price or timestamp";}
+  }
   else if(val&&typeof val==="object")row.dataLength=Object.keys(val).length;
   if(!row.ok)row.error=safeError(data?.errorCode||data?.error||data?.message||"non-success status");
   if(row.ok&&row.dataLength===0)row.note="Response valid but dataset empty";
