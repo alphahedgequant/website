@@ -1,0 +1,37 @@
+name: GA4 Privacy & Tracking Contract
+on:
+  pull_request:
+    paths:
+      - "alphahedgequant/lib/ga4Client.mjs"
+      - "alphahedgequant/components/Ga4Tracker.jsx"
+      - "alphahedgequant/components/Ga4PrivacyControl.jsx"
+      - "alphahedgequant/components/InsightsPrivacyControl.jsx"
+      - "alphahedgequant/app/layout.jsx"
+      - "alphahedgequant/app/privacy/page.jsx"
+      - "alphahedgequant/tests/ga4Privacy.test.mjs"
+      - ".github/workflows/ga4-privacy-checks.yml"
+  push:
+    branches: [main]
+    paths:
+      - "alphahedgequant/lib/ga4Client.mjs"
+      - "alphahedgequant/components/Ga4Tracker.jsx"
+      - "alphahedgequant/components/Ga4PrivacyControl.jsx"
+      - "alphahedgequant/components/InsightsPrivacyControl.jsx"
+      - "alphahedgequant/app/layout.jsx"
+      - "alphahedgequant/app/privacy/page.jsx"
+      - "alphahedgequant/tests/ga4Privacy.test.mjs"
+      - ".github/workflows/ga4-privacy-checks.yml"
+permissions:
+  contents: read
+jobs:
+  tracking-privacy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Verify GA4 opt-in, routing privacy and layout integration
+        working-directory: alphahedgequant
+        run: node --test tests/ga4Privacy.test.mjs
