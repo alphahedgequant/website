@@ -1,6 +1,6 @@
 "use client";
 import {useEffect,useState} from "react";
-import {GA4_ID,GA4_CONSENT_KEY,validGa4Id,hasGa4Consent,setGa4Consent} from "@/lib/ga4Client.mjs";
+import {GA4_ID,validGa4Id,hasGa4Consent,setGa4Consent} from "@/lib/ga4Client.mjs";
 
 export default function Ga4PrivacyControl(){
   const [enabled,setEnabled]=useState(false),[note,setNote]=useState("");
