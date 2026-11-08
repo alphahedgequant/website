@@ -1,4 +1,5 @@
 import InsightsPrivacyControl from "@/components/InsightsPrivacyControl";
+import Ga4PrivacyControl from "@/components/Ga4PrivacyControl";
 export const metadata = {
   title: "Privacy Policy — AlphaHedgeQuant",
   description: "How AlphaHedgeQuant collects, uses, and protects your personal data.",
@@ -60,10 +61,14 @@ export default function Privacy() {
         </Section>
 
         <Section title="5. First-Party Product Analytics">
-          <p>AlphaHedgeQuant uses its own first-party analytics collector and our managed PostgreSQL database. We do not send website usage events to PostHog or other third-party analytics services. The private, owner-only dashboard summarizes daily, weekly and monthly pseudonymous browser visits, most visited pages, approximate active reading time, coarse feature use and source categories such as X, LinkedIn or search.</p>
+          <p>AlphaHedgeQuant uses its own first-party analytics collector and our managed PostgreSQL database. The first-party collector is separate from the optional, consent-gated Google Analytics 4 integration described below. We do not send these first-party collector records to PostHog. The private, owner-only dashboard summarizes daily, weekly and monthly pseudonymous browser visits, most visited pages, approximate active reading time, coarse feature use and source categories such as X, LinkedIn or search.</p>
           <p>Where browser settings permit, a random browser identifier is stored locally to estimate distinct and returning visitors. Identifiers are transformed into a keyed hash before being stored. We record only the page pathname (not its query or search terms), whitelisted event names, measured active seconds and sanitized campaign labels. We do not log the visitor's raw IP address, email, portfolio holdings, searched tickers, strategy parameters or individual financial account details as analytics events. Server-confirmed waitlist registrations are counted separately without storing email in the analytics events table.</p>
           <p>We honor Global Privacy Control and Do Not Track where available. You can opt out and request removal of your browser identifier's analytics records using the control below. Analytics events are retained for up to approximately 180 days and then automatically removed during subsequent collection. Records collected by the previous provider, where applicable, are subject to that provider's separate retention controls.</p>
           <InsightsPrivacyControl/>
+        </Section>
+        <Section title="5A. Optional Google Analytics 4">
+          <p>Google Analytics 4 (Google LLC) is a separate, optional service. It remains off until we configure a valid measurement property and you explicitly opt in below. When enabled, the Google tag processes coarse page groups and selected feature-use events. We exclude sensitive routes, query strings, searched tickers, strategy parameters and account identifiers from custom events. Google may process analytics identifiers and use analytics cookies under its own service and retention terms. Advertising personalization and Google Signals are not enabled in our integration. You may revoke future collection here; revoking consent does not automatically delete data previously held by Google.</p>
+          <Ga4PrivacyControl/>
         </Section>
         <Section title="6. Cookies">
           <p>
