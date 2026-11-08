@@ -5,6 +5,7 @@
 import { neon } from "@neondatabase/serverless";
 import {fetchHistory,scoreAnalystCall} from "@/lib/trackerScoring";
 import {auth,currentUser} from "@clerk/nextjs/server";
+import {isInsightsOwner} from "@/lib/insightsOwnerAccess.mjs";
 
 async function ensureTable(sql) {
   await sql`
@@ -51,10 +52,15 @@ export async function POST(request) {
   const {userId}=await auth();
   if(!userId)return Response.json({success:false,error:"Sign in required"},{status:401});
   const allowed=(process.env.AHQ_TRACKER_ADMIN_EMAILS||process.env.AHQ_ANALYTICS_ADMIN_EMAILS||"").split(",").map(x=>x.trim().toLowerCase()).filter(Boolean);
-  if(!allowed.length)return Response.json({success:false,error:"Tracker admin not configured"},{status:403});
-  const user=await currentUser();
-  const verified=(user?.emailAddresses||[]).filter(e=>e.verification?.status==="verified").map(e=>e.emailAddress.toLowerCase());
-  if(!verified.some(e=>allowed.includes(e)))return Response.json({success:false,error:"Only approved editors can add calls"},{status:403});
+  if(allowed.length){
+    const user=await currentUser();
+    const verified=(user?.emailAddresses||[]).filter(e=>e.verification?.status==="verified").map(e=>e.emailAddress.toLowerCase());
+    if(!verified.some(e=>allowed.includes(e)))return Response.json({success:false,error:"Only approved editors can add calls"},{status:403});
+  }else if(!await isInsightsOwner()){
+    // No dedicated editor list: fail closed for everyone except the
+    // separately configured, verified first-party Insights owner.
+    return Response.json({success:false,error:"Only the verified owner can add calls"},{status:403});
+  }
 
   try {
     if (!process.env.NEON_DATABASE_URL) {
