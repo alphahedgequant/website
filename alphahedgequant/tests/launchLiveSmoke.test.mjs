@@ -8,7 +8,9 @@ async function check(path) {
    headers:{"User-Agent":"AlphaHedgeQuant-Launch-Smoketest/1.0","Accept":"text/html,application/json"},
    signal:AbortSignal.timeout(15000)
  });
- console.log(path, "HTTP",r.status);
+ const redirect=r.headers.get("location");
+ if(redirect){try{const u=new URL(redirect,BASE);console.log(path,"HTTP",r.status,"redirect host/path",u.origin+u.pathname);}catch{console.log(path,"HTTP",r.status,"redirect: invalid URL");}}
+ else console.log(path,"HTTP",r.status);
  return r;
 }
 test("public home and legal pages respond without login",async()=>{
