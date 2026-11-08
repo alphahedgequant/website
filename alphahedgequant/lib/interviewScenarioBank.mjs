@@ -70,7 +70,7 @@ function makeInterviewScenarios(){
       const data=f.fn(i),v=Number(data.value.toFixed(2));
       if(!Number.isFinite(v))throw Error("nonfinite "+t+" "+i);
       const {options,correctIndex}=distract(v,data.unit,i+t);
-      bank.push({id:`scenario-${String(t+1).padStart(2,"0")}-${String(i+1).padStart(2,"0")}`,role:f.role,level:f.level,topic:f.topic,concept:f.concept,question:data.question,points:[data.formula,"State the underlying assumptions and check the units of the result.","Explain how execution costs, data quality or market regime could change the practical interpretation."],example:`Calculated answer: ${show(v,data.unit)}. ${data.formula}`,trap:data.trap,hint:data.hint,answer:show(v,data.unit),options,correctIndex,kind:"numeric"});
+      bank.push({id:`scenario-${String(t+1).padStart(2,"0")}-${String(i+1).padStart(2,"0")}`,role:f.role,level:f.level,topic:f.topic,concept:f.concept,question:data.question,points:[data.formula,"State the underlying assumptions and check the units of the result.","Explain how execution costs, data quality or market regime could change the practical interpretation."],example:`Calculated answer: ${show(v,data.unit)}. ${data.formula}`,trap:data.trap,hint:data.hint+" Check the units, assumptions and intermediate arithmetic.",answer:show(v,data.unit),options,correctIndex,kind:"numeric"});
     }
   });
   return bank;
