@@ -48,9 +48,9 @@ function num(s) {
 //                  -> recommendation.Mean (1=Buy 2=Outperform 3=Hold 4=Underperform 5=Sell)
 function mapResponse(symbol, stockJson, targetJson) {
   const pt = targetJson?.priceTarget ?? {};
-  const target = num(pt.UnverifiedMean ?? pt.PreliminaryMean ?? pt.Mean);
+  const target = num(pt.Mean ?? pt.PreliminaryMean ?? pt.UnverifiedMean);
   const current = num(stockJson?.currentPrice?.NSE ?? stockJson?.currentPrice?.BSE);
-  const recoMean = num(targetJson?.recommendation?.UnverifiedMean ?? targetJson?.recommendation?.Mean);
+  const recoMean = num(targetJson?.recommendation?.Mean ?? targetJson?.recommendation?.UnverifiedMean);
 
   if (!(target > 0) || !(current > 0)) {
     return { ok: false, reason: "missing-target-or-price" };
@@ -58,7 +58,7 @@ function mapResponse(symbol, stockJson, targetJson) {
 
   // Map IndianAPI's numeric recommendation Mean to a rating label.
   function recoToRating(m) {
-    if (m == null) return null;
+    if (!Number.isFinite(m) || m < 1 || m > 5) return null;
     if (m < 1.5) return "Buy";
     if (m < 2.5) return "Accumulate";   // Outperform
     if (m < 3.5) return "Hold";
@@ -66,9 +66,10 @@ function mapResponse(symbol, stockJson, targetJson) {
     return "Sell";
   }
 
-  // Prefer the analyst recommendation; fall back to target-vs-price direction.
+  // A target-vs-spot comparison is not a published analyst recommendation.
+  // Do not invent a BUY/SELL rating when the source provides none.
   let rating = recoToRating(recoMean);
-  if (!rating) rating = target > current ? "Buy" : (target < current ? "Sell" : "Hold");
+  if (!rating) return { ok: false, reason: "missing-valid-recommendation" };
   rating = String(rating).charAt(0).toUpperCase() + String(rating).slice(1).toLowerCase();
 
   // Direction sanity gate (same protection as the report scraper)
@@ -95,11 +96,11 @@ function mapResponse(symbol, stockJson, targetJson) {
 async function fetchOne(symbol, apiKey) {
   const headers = { "X-API-Key": apiKey, "Accept": "application/json" };
   // 1) current price
-  const sRes = await fetch(`${BASE}/stock?name=${encodeURIComponent(symbol)}`, { headers });
+  const sRes = await fetch(`${BASE}/stock?name=${encodeURIComponent(symbol)}`, { headers, signal:AbortSignal.timeout(5000) });
   if (!sRes.ok) throw new Error(`${symbol}: /stock HTTP ${sRes.status}`);
   const stockJson = await sRes.json();
   // 2) analyst target + recommendation
-  const tRes = await fetch(`${BASE}/stock_target_price?stock_id=${encodeURIComponent(symbol)}`, { headers });
+  const tRes = await fetch(`${BASE}/stock_target_price?stock_id=${encodeURIComponent(symbol)}`, { headers, signal:AbortSignal.timeout(5000) });
   // target endpoint can 404/500 for stocks without coverage — treat as "no target"
   let targetJson = {};
   if (tRes.ok) {
