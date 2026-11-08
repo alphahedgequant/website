@@ -1,0 +1,30 @@
+name: Interview question-bank integrity
+on:
+  pull_request:
+    paths:
+      - "alphahedgequant/lib/academyInterviews.js"
+      - "alphahedgequant/lib/interviewScenarioBank.mjs"
+      - "alphahedgequant/tests/interviewBank.test.mjs"
+      - ".github/workflows/interview-integrity.yml"
+  push:
+    branches: [main]
+    paths:
+      - "alphahedgequant/lib/academyInterviews.js"
+      - "alphahedgequant/lib/interviewScenarioBank.mjs"
+      - "alphahedgequant/tests/interviewBank.test.mjs"
+      - ".github/workflows/interview-integrity.yml"
+permissions:
+  contents: read
+jobs:
+  interview-integrity:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Validate 1,224 questions, four tracks, and answer keys
+        working-directory: alphahedgequant
+        run: node --test tests/interviewBank.test.mjs
