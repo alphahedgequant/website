@@ -1,14 +1,20 @@
 import {neon} from "@neondatabase/serverless";
 import {auth,currentUser} from "@clerk/nextjs/server";
+import {isInsightsOwner} from "@/lib/insightsOwnerAccess.mjs";
 import {fetchHistory,utcDay} from "@/lib/trackerScoring";
 async function editorError(){
  const {userId}=await auth();
  if(!userId)return Response.json({success:false,error:"Sign in required"},{status:401});
  const allowed=(process.env.AHQ_TRACKER_ADMIN_EMAILS||process.env.AHQ_ANALYTICS_ADMIN_EMAILS||"").split(",").map(x=>x.trim().toLowerCase()).filter(Boolean);
- if(!allowed.length)return Response.json({success:false,error:"Tracker admin not configured"},{status:403});
- const user=await currentUser();
- const verified=(user?.emailAddresses||[]).filter(x=>x.verification?.status==="verified").map(x=>x.emailAddress.toLowerCase());
- if(!verified.some(x=>allowed.includes(x)))return Response.json({success:false,error:"Only approved editors can modify calls"},{status:403});
+ if(allowed.length){
+   const user=await currentUser();
+   const verified=(user?.emailAddresses||[]).filter(x=>x.verification?.status==="verified").map(x=>x.emailAddress.toLowerCase());
+   if(!verified.some(x=>allowed.includes(x)))return Response.json({success:false,error:"Only approved editors can modify calls"},{status:403});
+ }else if(!await isInsightsOwner()){
+   // No dedicated editor list: a verified owner can review or remove calls.
+   // A regular signed-in user never receives elevated permissions.
+   return Response.json({success:false,error:"Only the verified owner can modify calls"},{status:403});
+ }
  return null;
 }
 export async function DELETE(request,{params}){
