@@ -1,6 +1,7 @@
 "use client";
 import {useEffect,useState} from "react";
 import {allowInsightsAgain,isInsightsOptedOut,optOutAndDeleteInsights} from "@/lib/insightsClient.mjs";
+import {setGa4Consent} from "@/lib/ga4Client.mjs";
 
 export default function InsightsPrivacyControl(){
  const [opted,setOpted]=useState(null);
@@ -9,6 +10,7 @@ export default function InsightsPrivacyControl(){
  useEffect(()=>setOpted(isInsightsOptedOut()),[]);
  async function disable(){
   setBusy(true);
+  setGa4Consent(false); // A broad analytics opt-out also revokes optional GA4 consent.
   const ok=await optOutAndDeleteInsights();
   setOpted(true);setBusy(false);
   setStatus(ok?"First-party analytics disabled in this browser. Associated identifiable browser-history events have been deleted.":"Future analytics are disabled in this browser. Previous-record deletion could not be confirmed; contact us to follow up.");
