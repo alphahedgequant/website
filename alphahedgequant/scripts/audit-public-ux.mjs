@@ -16,11 +16,25 @@ async function auditPage(context,device,path){
  const exceptions=[],failures=[];
  page.on("pageerror",e=>exceptions.push(String(e.message||e).slice(0,250)));
  page.on("response",r=>{try{if(new URL(r.url()).hostname==="www.alphahedgequant.com"&&r.status()>=500) failures.push({status:r.status(),path:new URL(r.url()).pathname})}catch{}});
- let status=null,error=null;
+ let status=null,error=null,scrollReveal=null;
  try{
   const response=await page.goto(root+path,{waitUntil:"domcontentloaded",timeout:30000});
   status=response?.status()??null;
   await page.waitForTimeout(1600);
+  // Trigger the same IntersectionObserver animations a visitor sees while
+  // scrolling. Full-page screenshots taken only at the top hide later sections.
+  if(path==="/"||path==="/about"){
+   const height=await page.evaluate(()=>document.documentElement.scrollHeight);
+   const steps=Math.min(70,Math.ceil(Math.max(0,height-(await page.evaluate(()=>innerHeight)))/650)+2);
+   for(let n=0;n<=steps;n++){
+    await page.evaluate(n=>{document.documentElement.style.scrollBehavior="auto";window.scrollTo(0,n*650)},n);
+    await page.waitForTimeout(90);
+   }
+   await page.waitForTimeout(250);
+   scrollReveal={total:await page.locator(".premium-page .pr-reveal").count(),activated:await page.locator(".premium-page .pr-reveal.on").count()};
+   await page.evaluate(()=>window.scrollTo(0,0));
+   await page.waitForTimeout(200);
+  }
  }catch(e){error=String(e.message||e).slice(0,220)}
  let info={title:"",heading:"",overflow:0,logo:false,footer:false,links:0,external:false,buttons:0};
  try{
@@ -38,9 +52,9 @@ async function auditPage(context,device,path){
    }
   })
  }catch(e){error=error||String(e.message||e).slice(0,150)}
- const file=path==="/ "?"home":path==="/ "?"home":path==="/"?"home":path.substring(1).replaceAll("/","-");
+ const file=path==="/"?"home":path.substring(1).replaceAll("/","-");
  try{await page.screenshot({path:`${out}/${device}-${file}.png`,fullPage:path==="/"||path==="/about",animations:"disabled",timeout:18000})}catch(e){error=error||"Screenshot: "+String(e.message||e).slice(0,150)}
- const row={device,path,status,url:safeUrl(page.url()),...info,error,exceptions,failures};
+ const row={device,path,status,url:safeUrl(page.url()),...info,scrollReveal,error,exceptions,failures};
  if(!status||status>=500){row.critical="page failed to load";critical++}
  if(info.overflow>8){row.layoutWarning="horizontal page overflow"}
  if(info.external){row.accessNote="redirected to external auth provider"}
