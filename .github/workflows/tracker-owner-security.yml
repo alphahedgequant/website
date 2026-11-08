@@ -1,0 +1,31 @@
+name: Trust Tracker Owner Authorization
+on:
+  pull_request:
+    paths:
+      - "alphahedgequant/app/api/tracker/calls/route.js"
+      - "alphahedgequant/app/api/tracker/calls/[id]/route.js"
+      - "alphahedgequant/lib/insightsOwnerAccess.mjs"
+      - "alphahedgequant/tests/trackerOwnerAccess.test.mjs"
+      - ".github/workflows/tracker-owner-security.yml"
+  push:
+    branches: [main]
+    paths:
+      - "alphahedgequant/app/api/tracker/calls/route.js"
+      - "alphahedgequant/app/api/tracker/calls/[id]/route.js"
+      - "alphahedgequant/lib/insightsOwnerAccess.mjs"
+      - "alphahedgequant/tests/trackerOwnerAccess.test.mjs"
+      - ".github/workflows/tracker-owner-security.yml"
+permissions:
+  contents: read
+jobs:
+  editor-auth:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Validate owner fallback and fail-closed access policy
+        working-directory: alphahedgequant
+        run: node --test tests/trackerOwnerAccess.test.mjs
