@@ -17,12 +17,13 @@ const products = [
 const research = [
   { href: "/research", label: "Research Papers" },
   { href: "/reports", label: "Macro Outlook" },
-  { href: "/learn", label: "Learn, Interviews & Mental Math 🧩" },
 ];
 const isActive = (path, links) => links.some(l => path === l.href || path.startsWith(l.href + "/"));
 
 export default function Nav() {
   const path = usePathname();
+  // Editorial pages already provide a dedicated appearance control.
+  const editorial = path === "/" || path === "/about";
   const [mobileOpen, setMobileOpen] = useState(false);
   const [menu, setMenu] = useState(null);
   const panelRef = useRef(null);
@@ -102,7 +103,7 @@ export default function Nav() {
               {item.label}
             </Link>)}
           </nav>
-          <ThemeToggle />
+          {!editorial && <ThemeToggle />}
           <SignedOut>
             <Link href="/sign-in" className="text-sm text-muted hover:text-body">Sign in</Link>
             <Link href="/sign-up" className="btn-primary !py-2 !px-4">Sign up</Link>
@@ -111,7 +112,7 @@ export default function Nav() {
         </div>
 
         <div className="lg:hidden flex items-center gap-2">
-          <ThemeToggle />
+          {!editorial && <ThemeToggle />}
           <button type="button" className="p-2 text-muted" onClick={() => setMobileOpen(!mobileOpen)}
             aria-label={mobileOpen ? "Close menu" : "Open menu"} aria-expanded={mobileOpen} aria-controls="ahq-mobile-navigation">
             <svg aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
