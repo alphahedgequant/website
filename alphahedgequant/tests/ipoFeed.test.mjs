@@ -37,3 +37,13 @@ test("missing numeric values do not become zero or NaN",()=>{
  for(const x of [undefined,null,"","not-a-number",Infinity])assert.equal(numberOrNull(x),null);
  assert.equal(numberOrNull("31.5"),31.5);
 });
+
+import {ipoFreshness} from "../lib/ipoFreshness.mjs";
+test("timestamped IPO data must not be called fresh without upstream evidence",()=>{
+ const t=Date.parse("2026-11-08T12:00:00Z");
+ assert.equal(ipoFreshness(null,t).freshness,"unknown");
+ assert.equal(ipoFreshness("invalid",t).stale,null);
+ assert.equal(ipoFreshness("2026-11-01T12:00:00Z",t).stale,true);
+ assert.equal(ipoFreshness("2026-11-08T09:00:00Z",t).stale,false);
+ assert.equal(ipoFreshness("2026-11-09T16:00:00Z",t).stale,null);
+});
