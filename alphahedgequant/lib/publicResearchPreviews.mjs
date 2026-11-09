@@ -209,7 +209,7 @@ export const RESEARCH_PREVIEWS=[
       "A forecast variance is an estimate, not the future realized path."
     ],
     "question": "How much of the next period's variance estimate comes from the latest shock versus persistent volatility?",
-    "formula": "σ²ₜ = ω + α ε²ₜ₋₁ + β σ²ₜ₋₁",
+    "formula": "σ²ₜ = ω + α ε²ₜ₋₁ + β σ²ₜ₋₁; ω > 0, α ≥ 0, β ≥ 0",
     "locked": [
       "Parameter fitting and residual diagnostics",
       "Volatility forecasts under alternative distributions",
