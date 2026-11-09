@@ -648,7 +648,7 @@ export default function Markets() {
           <span className="text-muted">Tickers</span>
           <input value={tickerQ} onChange={(e) => { setTickerQ(e.target.value); setPage(0); }} className="bg-ink border border-line rounded px-2 py-1.5 outline-none focus:border-amber/60 w-full" />
         </label>
-        <button data-ahq-event="screener_filters_opened" onClick={() => setShowFilters((s) => !s)} className="btn-primary !py-1.5 !px-4">
+        <button data-ahq-event={showFilters?undefined:"screener_filters_opened"} onClick={() => setShowFilters((s) => !s)} className="btn-primary !py-1.5 !px-4">
           Filters {activeCount > 0 && `(${activeCount})`} {showFilters ? "▴" : "▾"}
         </button>
       </div>
