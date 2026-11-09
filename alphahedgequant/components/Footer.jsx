@@ -38,6 +38,9 @@ export default function Footer() {
             <Link href="/models" className="text-muted hover:text-body">Quant models</Link>
             <Link href="/backtest" className="text-muted hover:text-body">AI backtest</Link>
             <Link href="/library" className="text-muted hover:text-body">Free research library</Link>
+            <Link href="/library/series/research-papers" className="text-muted hover:text-body">Research paper previews</Link>
+            <Link href="/library/series/quant-models" className="text-muted hover:text-body">Quant model previews</Link>
+            <Link href="/library/series/macro-outlook" className="text-muted hover:text-body">Macro Outlook previews</Link>
             <Link href="/research" className="text-muted hover:text-body">Research</Link>
             <Link href="/ipo" className="text-muted hover:text-body">IPO Intelligence</Link>
             <Link href="/learn" className="text-muted hover:text-body">Learn</Link>

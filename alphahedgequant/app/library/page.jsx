@@ -1,5 +1,6 @@
 import Link from "next/link";
 import {LIBRARY_PUBLISHED,RESEARCH_LIBRARY,RESEARCH_CATEGORIES} from "@/lib/publicResearchLibrary.mjs";
+import {PUBLIC_RESEARCH_SERIES,RESEARCH_PREVIEWS} from "@/lib/publicResearchPreviews.mjs";
 import "./library.css";
 
 export const metadata={
@@ -67,6 +68,20 @@ export default function LibraryHome(){
   <section className="rl-catalog rl-shell" id="quant-research">
     <div className="rl-heading"><div><p className="rl-eyebrow">SECTION 02 / MATHEMATICAL FINANCE</p><h2>Quantitative <em>Finance.</em></h2><p>{RESEARCH_CATEGORIES[1].summary}</p></div><Link href="/learn">Explore the learning lab <span aria-hidden="true">↗</span></Link></div>
     <div className="rl-cards">{quant.map((x,i)=><ResearchCard key={x.slug} item={x} index={i}/>)}</div>
+  </section>
+  <section className="rl-shell" aria-labelledby="rl-depth-heading" style={{paddingTop:"95px",paddingBottom:"55px",borderTop:"1px solid var(--rl-line)"}}>
+    <p className="rl-eyebrow">SECTION 03 / RESEARCH PREVIEW → FULL ACCESS</p>
+    <h2 id="rl-depth-heading" style={{fontSize:"clamp(38px,5vw,68px)",fontWeight:650,margin:"17px 0 19px",lineHeight:1.12}}>Read the introduction.<br/><em>Explore the full research.</em></h2>
+    <p style={{fontSize:"16px",lineHeight:1.9,color:"var(--rl-muted)",maxWidth:"760px"}}>Discover our Research Papers, Quant Models and Macro Outlook collections. Public previews explain the key questions and methods; complete research workspaces and full reports require a free AlphaHedgeQuant login.</p>
+    <div className="rl-cards" style={{marginTop:"35px",borderTop:"1px solid var(--rl-line)"}}>
+      {PUBLIC_RESEARCH_SERIES.map((item,i)=><article className="rl-card" key={item.id}>
+       <div className="rl-card-top"><span>0{i+1} / {item.eyebrow}</span><span>{RESEARCH_PREVIEWS.filter(x=>x.series===item.id).length} PREVIEWS</span></div>
+       <h3><Link href={"/library/series/"+item.id}>{item.title}</Link></h3>
+       <p>{item.summary}</p>
+       <p style={{fontSize:"12px",marginTop:"14px",color:"#9ebfe3"}}>PUBLIC PREVIEW · FULL READING REQUIRES SIGN-IN</p>
+       <div className="rl-card-bottom"><span>INDEXABLE RESEARCH INTRODUCTION</span><Link href={"/library/series/"+item.id}>Explore previews ↗</Link></div>
+      </article>)}
+    </div>
   </section>
   <section className="rl-end rl-shell"><p className="rl-eyebrow">LEARN / VERIFY / QUESTION</p><h2>Better questions create<br/><em>better research.</em></h2><p>Research methods evolve. Refer to the latest regulations and primary disclosures when making real-world decisions.</p><div><Link href="/ipo">IPO Intelligence ↗</Link><Link href="/research">Research Papers ↗</Link><Link href="/about">About AlphaHedgeQuant ↗</Link></div></section>
  </div>;

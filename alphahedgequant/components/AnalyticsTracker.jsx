@@ -14,7 +14,7 @@ const exposedFeatures=new Set([
   "screener_view_selected","screener_exported","screener_stock_opened",
   "terminal_tab_selected","terminal_stock_selected","option_chain_refreshed",
   "option_chain_selected","strategy_leg_added","backtest_run_submitted",
-  "research_search_submitted","research_filter_selected","trust_tracker_viewed"
+  "research_search_submitted","research_filter_selected","trust_tracker_viewed","research_preview_unlock_clicked"
 ]);
 const ignore=path=>!path||/^\/(admin|api|sign-in|sign-up|account|settings)(\/|$)/.test(path)
   ||/^\/terminal\/import(\/|$)/.test(path);

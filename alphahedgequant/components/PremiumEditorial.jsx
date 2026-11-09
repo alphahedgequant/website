@@ -47,6 +47,16 @@ export default function PremiumEditorial({about=false}){
      <div className="pr-actions pr-reveal"><Link href="/library" className="pr-btn pr-btn-primary">Explore 11 free research guides ↗</Link></div>
    </div>
  </section>
+ <section className="pr-section pr-darksection" aria-labelledby="ahq-research-previews"><div className="pr-wrap">
+   <p className="pr-kicker pr-reveal">RESEARCH PAPERS / QUANT MODELS / MACRO OUTLOOK</p>
+   <h2 className="pr-display pr-reveal" id="ahq-research-previews">An open introduction.<br/><em>A deeper reading.</em></h2>
+   <p className="pr-lead pr-reveal">Explore free previews of our academic research catalogue, mathematical finance model library and India/global macro outlooks. Learn the question, assumptions and core concepts publicly; sign in to continue into the full AlphaHedgeQuant research and model workspaces.</p>
+   <div className="pr-actions pr-reveal">
+      <Link href="/library/series/research-papers" className="pr-btn pr-btn-outline">Research Papers ↗</Link>
+      <Link href="/library/series/quant-models" className="pr-btn pr-btn-outline">Quant Models ↗</Link>
+      <Link href="/library/series/macro-outlook" className="pr-btn pr-btn-primary">Macro Outlook ↗</Link>
+   </div>
+ </div></section>
  <section className="pr-section pr-trust"><div className="pr-wrap"><p className="pr-kicker pr-reveal">WHAT TRUST LOOKS LIKE TO US</p><h2 className="pr-display pr-reveal">Not a promise<br/>to be perfect.<br/><em>A commitment to be clear.</em></h2><div className="pr-credgrid">{[["I / TRANSPARENCY","Show the source.","When data is absent, say so. When a number is estimated, label it. Never ask people to confuse a model with reality."],["II / HUMILITY","Respect uncertainty.","Good research makes space for doubt. An error corrected is better than a certainty performed."],["III / TIME","Build for return visits.","Earn confidence through consistent work, maintenance, documentation, and a product that gets clearer with use."]].map(([a,b,c])=><article className="pr-credcard pr-reveal" key={a}><small>{a}</small><h3>{b}</h3><p>{c}</p></article>)}</div></div></section>
  <section className="pr-finale pr-wrap"><p className="pr-kicker pr-reveal">THE INVITATION</p><h2 className="pr-display pr-reveal">See deeper.<br/><em>Think longer.</em></h2><p className="pr-reveal">Explore a platform committed to making complex financial ideas understandable without pretending markets are simple.</p><Link className="pr-btn pr-btn-primary pr-reveal" href="/about">Understand why we build ↗</Link></section>
  </>}
