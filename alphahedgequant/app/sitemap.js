@@ -5,11 +5,11 @@ import {PUBLIC_RESEARCH_SERIES,RESEARCH_PREVIEWS,PREVIEW_RELEASE_DATE} from "../
 // an authentication redirect instead of indexable content.
 export default function sitemap() {
   const base = "https://www.alphahedgequant.com";
-  const routes = ["", "/about", "/ipo", "/library", "/privacy", "/terms", "/disclaimer"];
+  const routes = ["", "/about", "/ipo", "/library", "/learn", "/privacy", "/terms", "/disclaimer"];
   const index=routes.map(route => ({
     url: base + route,
     changeFrequency: route === "" ? "weekly" : "monthly",
-    priority: route === "" ? 1 : route === "/library" ? 0.8 : route === "/about" || route === "/ipo" ? 0.7 : 0.3,
+    priority: route === "" ? 1 : route === "/library" || route === "/learn" ? 0.8 : route === "/about" || route === "/ipo" ? 0.7 : 0.3,
   }));
   const notes=RESEARCH_LIBRARY.map(note=>({
     url: base + "/library/" + note.slug,
