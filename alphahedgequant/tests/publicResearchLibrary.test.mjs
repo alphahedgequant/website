@@ -4,7 +4,7 @@ import {readFileSync} from "node:fs";
 import {RESEARCH_LIBRARY,RESEARCH_CATEGORIES,LIBRARY_PUBLISHED,getResearchArticle} from "../lib/publicResearchLibrary.mjs";
 
 const read=path=>readFileSync(new URL("../"+path,import.meta.url),"utf8");
-const flat=x=>[x.title,x.description,x.lead,...x.takeaways,...x.sections.flatMap(s=>[s.h,...s.p,...s.bullets,s.formula||"",s.example?.body||""])].join(" ");
+const flat=x=>[x.title,x.description,x.lead,...x.takeaways,...x.sections.flatMap(s=>[s.h,...(s.p||[]),...(s.bullets||[]),s.formula||"",s.example?.body||""])].join(" ");
 
 test("public research articles are unique, substantive, factually caveated and have external references",()=>{
  assert.equal(RESEARCH_LIBRARY.length,11);
