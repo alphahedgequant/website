@@ -9,6 +9,11 @@ const isPublicRoute = createRouteMatcher([
   "/ipo",
   // Open educational library only. Do not expose authenticated research tools or APIs.
   "/library(.*)",
+  // Indexable subject introductions only; nested routes /explore, /archive,
+  // and /reports/[slug] remain protected by Clerk.
+  "/research",
+  "/models",
+  "/reports",
   "/api/ipo",
   "/sign-in(.*)",
   "/sign-up(.*)",
