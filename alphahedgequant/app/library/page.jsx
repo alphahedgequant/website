@@ -68,6 +68,16 @@ export default function LibraryHome(){
     <div className="rl-heading"><div><p className="rl-eyebrow">SECTION 02 / MATHEMATICAL FINANCE</p><h2>Quantitative <em>Finance.</em></h2><p>{RESEARCH_CATEGORIES[1].summary}</p></div><Link href="/learn">Explore the learning lab <span aria-hidden="true">↗</span></Link></div>
     <div className="rl-cards">{quant.map((x,i)=><ResearchCard key={x.slug} item={x} index={i}/>)}</div>
   </section>
-  <section className="rl-end rl-shell"><p className="rl-eyebrow">LEARN / VERIFY / QUESTION</p><h2>Better questions create<br/><em>better research.</em></h2><p>Research methods evolve. Refer to the latest regulations and primary disclosures when making real-world decisions.</p><div><Link href="/ipo">IPO Intelligence ↗</Link><Link href="/research">Research Papers ↗</Link><Link href="/about">About AlphaHedgeQuant ↗</Link></div></section>
+  <section className="rl-catalog rl-shell" aria-labelledby="ahq-in-depth-research">
+    <div className="rl-heading"><div><p className="rl-eyebrow">NEXT / DEEPER RESEARCH</p><h2 id="ahq-in-depth-research">Explore further. <em>Sign in to go deeper.</em></h2><p>Read public summaries of our research papers, mathematical models and India macro analysis. Complete collections and interactive lessons require an AlphaHedgeQuant account.</p></div></div>
+    <div className="rl-cards">
+      {[
+        {href:"/research",eyebrow:"LITERATURE / RESEARCH PAPERS",title:"Research Papers",description:"Understand the questions, methods and assumptions behind papers on quant finance, statistics and financial markets."},
+        {href:"/models",eyebrow:"MODELLING / QUANT FINANCE",title:"Quant Models",description:"Public introductions to market risk, volatility, statistical arbitrage and portfolio construction, with full model lessons after sign-in."},
+        {href:"/reports",eyebrow:"ECONOMICS / MACRO OUTLOOK",title:"Macro Outlook",description:"Read public summaries of India macro research and log in for the complete source-based field notes."}
+      ].map((x,i)=><article className="rl-card" key={x.href}><div className="rl-card-top"><span>{String(i+1).padStart(2,"0")} / {x.eyebrow}</span></div><h3><Link href={x.href}>{x.title}</Link></h3><p>{x.description}</p><div className="rl-card-bottom"><Link href={x.href}>Read public overview <span aria-hidden="true">↗</span></Link></div></article>)}
+    </div>
+   </section>
+   <section className="rl-end rl-shell"><p className="rl-eyebrow">LEARN / VERIFY / QUESTION</p><h2>Better questions create<br/><em>better research.</em></h2><p>Research methods evolve. Refer to the latest regulations and primary disclosures when making real-world decisions.</p><div><Link href="/ipo">IPO Intelligence ↗</Link><Link href="/research">Research Papers ↗</Link><Link href="/about">About AlphaHedgeQuant ↗</Link></div></section>
  </div>;
 }
