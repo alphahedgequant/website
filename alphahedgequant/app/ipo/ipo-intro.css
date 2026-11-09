@@ -1,0 +1,20 @@
+/* Non-blocking ten-second visual tour: readable and usable from first paint. */
+.ipo-brief{
+  margin-top:26px;position:relative;overflow:hidden;border:1px solid rgba(113,145,180,.3);
+  border-radius:18px;padding:20px 22px;background:linear-gradient(110deg,rgba(21,38,62,.88),rgba(14,22,38,.72) 64%,rgba(109,73,38,.13));
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.05);
+}
+.ipo-brief::before{
+  content:"";position:absolute;right:-8%;top:-120%;width:55%;aspect-ratio:1;border-radius:50%;
+  background:radial-gradient(circle,rgba(57,117,189,.23),transparent 65%);pointer-events:none;
+}
+.ipo-brief__label{font:600 10px/1.4 ui-monospace,monospace;letter-spacing:.19em;color:#d0b888}
+.ipo-brief__track{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;margin-top:16px}
+.ipo-brief__step{position:relative;border-top:1px solid rgba(172,192,216,.24);padding-top:11px}
+.ipo-brief__step strong{display:block;font-size:14px;font-weight:600;color:#eee9dd}
+.ipo-brief__step span{display:block;margin-top:4px;font-size:12px;line-height:1.6;color:#aab6c7}
+.ipo-brief__progress{margin-top:17px;height:2px;background:rgba(255,255,255,.13);border-radius:2px;overflow:hidden}
+.ipo-brief__progress::after{content:"";display:block;height:100%;width:100%;transform:scaleX(0);transform-origin:left;background:linear-gradient(90deg,#3d78bb,#bba372);animation:ipo-intro-10s 10s ease-out 1 forwards}
+@keyframes ipo-intro-10s{to{transform:scaleX(1)}}
+@media(max-width:640px){.ipo-brief{padding:16px}.ipo-brief__track{grid-template-columns:1fr;gap:10px}.ipo-brief__step{padding-top:9px}}
+@media(prefers-reduced-motion:reduce){.ipo-brief__progress::after{animation:none;transform:scaleX(1)}}
