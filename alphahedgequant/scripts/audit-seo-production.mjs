@@ -14,7 +14,10 @@ function result(name,pass,details){
 }
 function cleanCanonical(html,expected){
  const links=[...html.matchAll(/<link\b[^>]*\brel="canonical"[^>]*>/gi)].map(m=>m[0]);
- return links.length===1 && links[0].includes('href="'+expected+'"');
+ // Next.js may serialize the root canonical without a trailing slash;
+ // both are the same canonical homepage URL.
+ const acceptable=expected.endsWith("/")?[expected,expected.slice(0,-1)]:[expected];
+ return links.length===1 && acceptable.some(href=>links[0].includes('href="'+href+'"'));
 }
 for(const [path,label] of [["/","homepage"],["/ipo","ipo"]]){
  try{
