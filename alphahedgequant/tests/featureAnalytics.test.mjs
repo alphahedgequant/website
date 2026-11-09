@@ -1,7 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import {readFileSync} from "node:fs";
-import {CLIENT_EVENTS,validClientEvent} from "../lib/firstPartyInsights.mjs";
+import {CLIENT_EVENTS,validClientEvent,safePagePath} from "../lib/firstPartyInsights.mjs";
 
 const read=p=>readFileSync(new URL("../"+p,import.meta.url),"utf8");
 const ids={visitor:"00000000-0000-4000-8000-000000000001",session:"00000000-0000-4000-8000-000000000002"};
@@ -67,6 +67,14 @@ test("dashboard identifies browser visitors separately from real registered Cler
   assert.match(dashboard,/const pageEvents=new Set/);
   assert.match(dashboard,/onClick=\{\(\)=>setRefresh\(x=>x\+1\)\}/);
   assert.doesNotMatch(read("components/Nav.jsx"),/href="\/admin\/analytics"/);
+});
+test("per-stock and per-company pages are coarsened before storage",()=>{
+  assert.equal(safePagePath("/stock/RELIANCE"),"/stock/detail");
+  assert.equal(safePagePath("/stock/HDFCBANK/overview"),"/stock/detail");
+  assert.equal(safePagePath("/company/AAPL"),"/company/detail");
+  assert.equal(safePagePath("/ipo"),"/ipo");
+  assert.equal(safePagePath("/admin/analytics"),null);
+  assert.equal(validClientEvent({event:"pageview",path:"/stock/RELIANCE",...ids}).path,"/stock/detail");
 });
 test("client respects privacy controls and never reads form values for event payloads",()=>{
   const client=read("lib/insightsClient.mjs");
