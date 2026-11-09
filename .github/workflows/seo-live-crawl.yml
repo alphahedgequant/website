@@ -1,0 +1,31 @@
+name: AHQ Live Search Crawlability
+on:
+  pull_request:
+    paths:
+      - "alphahedgequant/scripts/audit-seo-production.mjs"
+      - ".github/workflows/seo-live-crawl.yml"
+  push:
+    branches: [audit/googlebot-public-seo-20261109, main]
+    paths:
+      - "alphahedgequant/scripts/audit-seo-production.mjs"
+      - ".github/workflows/seo-live-crawl.yml"
+  schedule:
+    # 10:45 AM Asia/Kolkata daily; check only crawlability, not search rank.
+    - cron: "15 5 * * *"
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  public-crawlability:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 7
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Inspect public SEO, index directives, canonicals, sitemap and HTTPS
+        working-directory: alphahedgequant
+        run: node scripts/audit-seo-production.mjs
