@@ -4,12 +4,9 @@ on:
     paths:
       - ".github/workflows/analytics-production-smoke.yml"
       - "alphahedgequant/scripts/audit-analytics-production.mjs"
-  push:
-    branches:
-      - audit/analytics-collector-production-smoke-20261109
-    paths:
-      - ".github/workflows/analytics-production-smoke.yml"
-      - "alphahedgequant/scripts/audit-analytics-production.mjs"
+  schedule:
+    # Each day at 10:30 AM Asia/Kolkata.
+    - cron: "0 5 * * *"
   workflow_dispatch:
 permissions:
   contents: read
