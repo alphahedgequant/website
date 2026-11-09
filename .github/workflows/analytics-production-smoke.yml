@@ -4,6 +4,12 @@ on:
     paths:
       - ".github/workflows/analytics-production-smoke.yml"
       - "alphahedgequant/scripts/audit-analytics-production.mjs"
+  push:
+    branches:
+      - audit/analytics-collector-production-smoke-20261109
+    paths:
+      - ".github/workflows/analytics-production-smoke.yml"
+      - "alphahedgequant/scripts/audit-analytics-production.mjs"
   workflow_dispatch:
 permissions:
   contents: read
