@@ -155,7 +155,7 @@ export default function InterviewArena({progress={},save=async()=>false,sync=""}
    </div>:question?<div className="ia-question-layout">
     <article className="ia-question">
      <div className="ia-question-top"><span className="ia-q-number">{session==="mock"?"MOCK "+(mockPos+1)+" / 10":String(currentIndex+1).padStart(3,"0")+" / "+filtered.length}</span><div className="ia-q-tags">{(session==="mock"?[role,question.level,question.topic]:activeTags).map(x=><span key={x}>{x}</span>)}</div>
-      {session==="practice"&&<button type="button" aria-label={bookmarks.includes(question.id)?"Remove bookmark":"Bookmark question"} title={bookmarks.includes(question.id)?"Remove bookmark":"Bookmark question"} className={"ia-bookmark"+(bookmarks.includes(question.id)?" saved":"")} onClick={()=>toggleBookmark(question.id)}>{bookmarks.includes(question.id)?"★":"☆"}</button>}
+      {session==="practice"&&<button data-ahq-event="interview_bookmark_toggled" type="button" aria-label={bookmarks.includes(question.id)?"Remove bookmark":"Bookmark question"} title={bookmarks.includes(question.id)?"Remove bookmark":"Bookmark question"} className={"ia-bookmark"+(bookmarks.includes(question.id)?" saved":"")} onClick={()=>toggleBookmark(question.id)}>{bookmarks.includes(question.id)?"★":"☆"}</button>}
      </div>
      <p className="ia-concept">{question.concept||question.topic||"Conceptual reasoning"} / {question.kind==="numeric"?"NUMERICAL REASONING":"OPEN-ENDED REASONING"}</p>
      <h4>{question.question}</h4>
