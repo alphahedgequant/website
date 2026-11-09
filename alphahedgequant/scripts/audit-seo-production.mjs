@@ -1,7 +1,5 @@
 // Live, read-only Googlebot-style smoke checks for publicly indexable pages.
 // Simulates the crawler user agent but does NOT assert Google's actual index status.
-import assert from "node:assert/strict";
-
 const root="https://www.alphahedgequant.com";
 const crawler="Googlebot/2.1 (+http://www.google.com/bot.html)";
 const checks=[];
@@ -26,7 +24,7 @@ for(const [path,label] of [["/","homepage"],["/ipo","ipo"]]){
   const canonical=root+(path==="/"?"/":path);
   const title=x.body.includes("AlphaHedgeQuant");
   const topic=path==="/ipo"?x.body.includes("Indian IPO Intelligence"):x.body.includes("AlphaHedgeQuant IPO Intelligence");
-  result(label+" responds to Googlebot",{valueOf(){return x.status===200&&!metaNoindex&&!headerNoindex&&cleanCanonical(x.body,canonical)&&title&&topic}},{
+  result(label+" responds to Googlebot",x.status===200&&!metaNoindex&&!headerNoindex&&cleanCanonical(x.body,canonical)&&title&&topic,{
     status:x.status,canonicalOk:cleanCanonical(x.body,canonical),brandedTitle:title,publicTopicVisible:topic,noindex:metaNoindex||headerNoindex
   });
  }catch(e){result(label+" responds to Googlebot",false,{error:e.name==="TimeoutError"?"timeout":"https unavailable"});}
