@@ -38,6 +38,7 @@ export default function Footer() {
             <Link href="/models" className="text-muted hover:text-body">Quant models</Link>
             <Link href="/backtest" className="text-muted hover:text-body">AI backtest</Link>
             <Link href="/research" className="text-muted hover:text-body">Research</Link>
+            <Link href="/ipo" className="text-muted hover:text-body">IPO Intelligence</Link>
             <Link href="/learn" className="text-muted hover:text-body">Learn</Link>
           </div>
           <div className="flex flex-col gap-2.5">
