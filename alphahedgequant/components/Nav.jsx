@@ -15,6 +15,7 @@ const products = [
   { href: "/tracker", label: "Trust Tracker", description: "Analyst calls and accountability", glyph: "◎" },
 ];
 const research = [
+  { href: "/library", label: "Open Research Library" },
   { href: "/research", label: "Research Papers" },
   { href: "/reports", label: "Macro Outlook" },
 ];
