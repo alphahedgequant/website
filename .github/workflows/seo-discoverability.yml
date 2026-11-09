@@ -14,7 +14,7 @@ on:
       - "alphahedgequant/tests/seoDiscovery.test.mjs"
       - ".github/workflows/seo-discoverability.yml"
   push:
-    branches: [main]
+    branches: [main, fix/brand-ipo-search-discovery-20261109]
     paths:
       - "alphahedgequant/app/page.jsx"
       - "alphahedgequant/components/PremiumEditorial.jsx"
