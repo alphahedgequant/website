@@ -543,7 +543,7 @@ export default function Markets() {
         <p className="eyebrow !mb-0">[ AHQ : SCREENER — {market === "US" ? "US EQUITIES" : "NSE INDIA"} ]</p>
         <div className="flex rounded-lg border border-line overflow-hidden">
           {Object.keys(MARKETS).map((m) => (
-            <button key={m} data-ahq-event="screener_market_switched" onClick={() => switchMarket(m)}
+            <button key={m} data-ahq-event={market===m?undefined:"screener_market_switched"} onClick={() => switchMarket(m)}
               className={`px-5 py-1.5 text-sm font-mono transition-colors ${market === m ? "bg-amber text-ink font-medium" : "text-muted hover:text-body"}`}>
               {m}
             </button>
@@ -692,7 +692,7 @@ export default function Markets() {
       {/* ── VIEW TAB STRIP ───────────────────────────── */}
       <div className="card mt-2 flex overflow-x-auto">
         {[...Object.keys(VIEWS), ...VISUAL_VIEWS, ...SOON_VIEWS].map((vw) => (
-          <button key={vw} data-ahq-event="screener_view_selected" onClick={() => { setView(vw); setPage(0); }}
+          <button key={vw} data-ahq-event={view===vw?undefined:"screener_view_selected"} onClick={() => { setView(vw); setPage(0); }}
             className={`px-4 py-2 text-sm whitespace-nowrap border-b-2 transition-colors ${view === vw ? "border-amber text-amber bg-raised/60" : "border-transparent text-muted hover:text-body"}`}>
             {vw}
           </button>
