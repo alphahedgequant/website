@@ -36,7 +36,7 @@ export default function AnalyticsTracker(){
     if(path==="/terminal")send("quant_terminal_opened");
     if(path==="/tracker")send("trust_tracker_viewed");
     if(path.startsWith("/models/")||path.startsWith("/learn/"))send("model_lesson_opened");
-    if(path.startsWith("/reports/")||path.startsWith("/research/"))send("article_opened");
+    if(path.startsWith("/reports/")||path.startsWith("/research/")||path.startsWith("/library/"))send("article_opened");
 
     const flush=()=>{
       const secs=Math.floor(pending);
