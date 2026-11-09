@@ -1,69 +1,23 @@
 import Link from "next/link";
-import { reports } from "@/lib/reports";
-import "../learn/pencil-reader.css";
-
-export const metadata = {
-  title: "Reports — AlphaHedgeQuant",
-  description:
-    "Original macro and market-structure research from AHQ — verified against primary sources, written for people who trade the numbers.",
+import {reports} from "@/lib/reports";
+import "../public-preview.css";
+export const metadata={
+ title:"Macro Outlook — India & Global Economy Research | AlphaHedgeQuant",
+ description:"Explore public summaries of AlphaHedgeQuant's India macro and market-structure research: inflation, RBI policy, credit, growth, fiscal trends, commodities and markets. Sign in to read full reports.",
+ alternates:{canonical:"/reports"},
+ openGraph:{title:"Macro Outlook | AlphaHedgeQuant Research",description:"India and global macro research with free public previews and sign-in access to complete field notes.",url:"/reports",type:"website"}
 };
-
-function fmtDate(iso) {
-  return new Date(iso + "T00:00:00Z").toLocaleDateString("en-IN", {
-    day: "numeric",
-    month: "short",
-    year: "numeric",
-    timeZone: "UTC",
-  });
-}
-
-export default function ReportsPage() {
-  return (
-    <div className="max-w-shell mx-auto px-5 py-12">
-      <p className="eyebrow mb-3">[ AHQ : REPORTS — PRIMARY-SOURCE MACRO ]</p>
-      <h1 className="font-display text-3xl font-medium tracking-tight">
-        Reports
-      </h1>
-      <p className="text-muted text-sm mt-2 max-w-2xl leading-relaxed">
-        Original macro research from AHQ. Every figure is verified against the
-        primary release — MoSPI, GSTN, CBDT, RBI, the Fed, BLS — before it is
-        published here. No hot takes, no unverified numbers.
-      </p>
-
-      <div className="mt-10 grid gap-5">
-        {reports.map((r) => (
-          <Link
-            key={r.slug}
-            href={`/reports/${r.slug}`}
-            className="ahq-pencil-reader block transition-transform hover:-translate-y-1"
-          >
-            <div className="pencil-main !py-7"><div className="flex flex-wrap items-center gap-3">
-              <span className="pencil-kicker">
-                {r.tag}
-              </span>
-              <span className="pencil-formula-label">
-                {fmtDate(r.date)} · {r.readMins} min read
-              </span>
-            </div>
-            <h2 className="pencil-heading !text-[27px] !mt-4">
-              {r.title}
-            </h2>
-            <p className="pencil-prose mt-2 max-w-3xl">
-              {r.dek}
-            </p>
-            <p className="pencil-prose !text-[14px] mt-3 max-w-3xl">
-              {r.summary}
-            </p>
-            <span className="pencil-handnote mt-4 inline-block">
-              Read field notes →
-            </span></div>
-          </Link>
-        ))}
-      </div>
-
-      <p className="font-mono text-[11px] text-muted mt-10">
-        RESEARCH &amp; EDUCATION ONLY — NOT INVESTMENT ADVICE.
-      </p>
-    </div>
-  );
+const schema={"@context":"https://schema.org","@type":"CollectionPage",name:"AlphaHedgeQuant Macro Outlook",url:"https://www.alphahedgequant.com/reports",description:"Public summaries of India macroeconomic research; complete field notes require account sign-in.",isAccessibleForFree:true};
+function prettyDate(d){return new Date(d+"T00:00:00Z").toLocaleDateString("en-IN",{day:"numeric",month:"long",year:"numeric",timeZone:"UTC"})}
+export default function MacroPreview(){
+ const latest=reports.slice(0,6);
+ return <div className="ahq-open-preview"><script type="application/ld+json" dangerouslySetInnerHTML={{__html:JSON.stringify(schema).replace(/</g,"\\u003c")}}/>
+ <header className="ap-hero"><div className="ap-shell"><div className="ap-crumb"><Link href="/">AHQ</Link><span>/</span><Link href="/library">Open Research</Link><span>/</span><span>Macro Outlook</span></div><p className="ap-kicker" style={{marginTop:36}}>MACRO OUTLOOK / INDIA & GLOBAL ECONOMY</p><h1 className="ap-title">Read the economy.<br/><em>Follow the transmission.</em></h1><p className="ap-lede">Monetary policy, inflation, credit creation, fiscal demand, external balances and corporate earnings interact. Our macro research links economic data to assumptions about business cash flows, capital allocation and market valuation.</p><div className="ap-metadata"><span>FREE MACRO PREVIEWS</span><span>COMPLETE FIELD NOTES · SIGN IN</span></div></div></header>
+ <main className="ap-main ap-shell"><div className="ap-two"><section><p className="ap-kicker">MACRO FIELD GUIDE / 03</p><h2 className="ap-section-title">From data release to <em>economic mechanism.</em></h2><p>A single CPI reading can move interest-rate expectations, but the market response depends on inflation composition, revision risk, central-bank reaction functions and existing expectations. An inflation print is not a complete macro thesis.</p><p>For India, the analytical chain often runs from RBI liquidity and funding costs through bank credit, investment, household demand and corporate margins. The same headline can mean different things for a borrower, a lender and a business with substantial imported inputs.</p><p>Reliable interpretation requires attention to data-release dates, seasonality, base effects, fiscal calendars and the difference between monthly flows and annualized or year-to-date levels.</p></section>
+ <aside className="ap-paper"><p className="ap-paper-label">RESEARCH FRAMEWORK / PRIMARY-SOURCE MACRO</p><h3>A macro data release is a starting point.</h3><p>For every observation, distinguish the data period from the publication date. Verify the release; compare with prior history and expectations; identify economic transmission channels; consider what must be true for the valuation impact to persist.</p><div className="ap-equation">Release → Surprise → Policy response{"\n"}→ Earnings / Cash flow → Valuation</div><p style={{marginTop:14}}>This is a conceptual chain, not an automatic forecast of asset returns.</p></aside></div>
+ <div className="ap-rule"/><section><p className="ap-kicker">REPORT INDEX / PUBLIC SUMMARIES</p><h2 className="ap-section-title">Macro research <em>field notes.</em></h2>
+ <div className="ap-grid">{latest.map((r,i)=><article key={r.slug} className="ap-card"><span className="ap-id">{String(i+1).padStart(2,"0")} / {r.tag} · {prettyDate(r.date)}</span><h3>{r.title}</h3><p>{r.dek}</p><p>{r.summary}</p><Link href={"/reports/"+r.slug}>Sign in to read full report ↗</Link></article>)}</div>
+ </section>
+ <section className="ap-gate" aria-labelledby="macro-signin"><p className="ap-kicker">FULL MACRO RESEARCH</p><h2 id="macro-signin">Continue into the complete macro reports.</h2><p>Public previews explain each report's subject and argument. The complete field notes, detailed evidence, charts and analysis remain accessible after signing in. Individual report links use the same protected access.</p><Link href="/reports/archive" className="ap-cta">Sign in to read full Macro Outlook ↗</Link><Link href="/library" className="ap-secondary">Explore free research guides</Link><p className="ap-note">Report dates reflect the underlying publication record. Older releases are not represented as current data.</p></section>
+ </main></div>
 }
