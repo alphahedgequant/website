@@ -24,7 +24,7 @@ function TopicSection({section,index}){
  return <section id={"section-"+index} className="rl-article-section">
   <p className="rl-section-no">FIELD NOTE / {String(index+1).padStart(2,"0")}</p>
   <h2>{section.h}</h2>
-  {section.p.map((p,i)=><p key={i}>{p}</p>)}
+  {(section.p||[]).map((p,i)=><p key={i}>{p}</p>)}
   {section.formula&&<div className="rl-formula" role="note"><span>MODEL / FORMULA</span><pre>{section.formula}</pre></div>}
   {section.example&&<aside className="rl-example"><span>WORKED EXAMPLE / ILLUSTRATIVE</span><h3>{section.example.title}</h3><p>{section.example.body}</p></aside>}
   {(section.bullets||[]).length>0&&<ul>{section.bullets.map((b,i)=><li key={i}>{b}</li>)}</ul>}
