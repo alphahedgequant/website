@@ -9,6 +9,7 @@ import ThemeToggle from "./ThemeToggle";
 const products = [
   { href: "/screener", label: "Market Intelligence", description: "NSE & US equity screeners", glyph: "▤" },
   { href: "/models", label: "Quant Models", description: "Systematic strategies & signals", glyph: "∑" },
+  { href: "/library/series/quant-models", label: "Quant Models — public previews", description: "Browse introductions before signing in", glyph: "ƒ" },
   { href: "/backtest", label: "AI Backtesting", description: "Test and evaluate ideas", glyph: "↗" },
   { href: "/copilot", label: "AI Copilot", description: "Natural-language strategy research", glyph: "✳" },
   { href: "/options", label: "Options Analytics", description: "Option-chain intelligence", glyph: "◈" },
@@ -16,8 +17,10 @@ const products = [
 ];
 const research = [
   { href: "/library", label: "Open Research Library" },
-  { href: "/research", label: "Research Papers" },
-  { href: "/reports", label: "Macro Outlook" },
+  { href: "/library/series/research-papers", label: "Research Papers — free previews" },
+  { href: "/research", label: "Full Research Papers (sign-in)" },
+  { href: "/library/series/macro-outlook", label: "Macro Outlook — free previews" },
+  { href: "/reports", label: "Full Macro Reports (sign-in)" },
 ];
 const isActive = (path, links) => links.some(l => path === l.href || path.startsWith(l.href + "/"));
 
