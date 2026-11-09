@@ -1,0 +1,40 @@
+name: AHQ Public Research Previews and Clerk Gating
+on:
+  pull_request:
+    paths:
+      - "alphahedgequant/app/research/**"
+      - "alphahedgequant/app/models/**"
+      - "alphahedgequant/app/reports/**"
+      - "alphahedgequant/app/library/page.jsx"
+      - "alphahedgequant/app/public-preview.css"
+      - "alphahedgequant/middleware.js"
+      - "alphahedgequant/app/sitemap.js"
+      - "alphahedgequant/tests/publicResearchGates.test.mjs"
+      - ".github/workflows/research-preview-auth.yml"
+  push:
+    branches: [main]
+    paths:
+      - "alphahedgequant/app/research/**"
+      - "alphahedgequant/app/models/**"
+      - "alphahedgequant/app/reports/**"
+      - "alphahedgequant/app/public-preview.css"
+      - "alphahedgequant/middleware.js"
+      - "alphahedgequant/app/sitemap.js"
+      - "alphahedgequant/tests/publicResearchGates.test.mjs"
+      - ".github/workflows/research-preview-auth.yml"
+permissions:
+  contents: read
+jobs:
+  research-gates:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Verify public indexable intros and private full research controls
+        working-directory: alphahedgequant
+        run: node --test tests/publicResearchGates.test.mjs
