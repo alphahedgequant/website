@@ -1,0 +1,46 @@
+name: AHQ Public Research Preview & Auth Gate
+on:
+  pull_request:
+    paths:
+      - "alphahedgequant/lib/publicResearchPreviews.mjs"
+      - "alphahedgequant/app/library/**"
+      - "alphahedgequant/components/Nav.jsx"
+      - "alphahedgequant/components/Footer.jsx"
+      - "alphahedgequant/components/PremiumEditorial.jsx"
+      - "alphahedgequant/middleware.js"
+      - "alphahedgequant/app/sitemap.js"
+      - "alphahedgequant/lib/firstPartyInsights.mjs"
+      - "alphahedgequant/components/AnalyticsTracker.jsx"
+      - "alphahedgequant/components/OwnerInsightsDashboard.jsx"
+      - "alphahedgequant/tests/publicResearchPreviews.test.mjs"
+      - ".github/workflows/public-research-previews.yml"
+  push:
+    branches: [main]
+    paths:
+      - "alphahedgequant/lib/publicResearchPreviews.mjs"
+      - "alphahedgequant/app/library/**"
+      - "alphahedgequant/middleware.js"
+      - "alphahedgequant/app/sitemap.js"
+      - "alphahedgequant/tests/publicResearchPreviews.test.mjs"
+      - ".github/workflows/public-research-previews.yml"
+permissions:
+  contents: read
+jobs:
+  previews-gate:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: alphahedgequant/package-lock.json
+      - name: Install dependencies without lifecycle scripts
+        working-directory: alphahedgequant
+        run: npm ci --ignore-scripts --no-audit --no-fund
+      - name: Validate public article previews, full-content gates, sitemap and analytics
+        working-directory: alphahedgequant
+        run: node --test tests/publicResearchPreviews.test.mjs tests/firstPartyInsights.test.mjs tests/featureAnalytics.test.mjs
