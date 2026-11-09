@@ -9,6 +9,8 @@ const isPublicRoute = createRouteMatcher([
   "/ipo",
   // Open educational library only. Do not expose authenticated research tools or APIs.
   "/library(.*)",
+  // All six Quant Learning modules are free; interview and mental maths routes remain protected.
+  "/learn",
   "/api/ipo",
   "/sign-in(.*)",
   "/sign-up(.*)",
