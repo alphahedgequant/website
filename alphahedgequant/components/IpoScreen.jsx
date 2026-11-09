@@ -41,7 +41,7 @@ function daysUntil(dateStr) {
 }
 
 function IpoCard({ ipo, showGain }) {
-  const href = ipo.id ? `/ipo/${encodeURIComponent(ipo.id)}` : null;
+  // No /ipo/[id] route exists; never link public users to a broken detail page.
   const inner = (
     <div
       style={{
@@ -96,12 +96,7 @@ function IpoCard({ ipo, showGain }) {
     </div>
   );
 
-  if (!href) return inner;
-  return (
-    <a href={href} style={{ textDecoration: "none", display: "block" }}>
-      {inner}
-    </a>
-  );
+  return inner;
 }
 
 function Field({ label, value }) {
@@ -172,13 +167,13 @@ export default function IpoScreen() {
           </div>
           <div style={{ display: "flex", flexWrap: "wrap", gap: 10 }}>
             {soon.map(({ ipo, d }, i) => (
-              <a key={i} href={ipo.id ? `/ipo/${encodeURIComponent(ipo.id)}` : undefined}
+              <div key={ipo.id || i}
                  style={{ textDecoration: "none", background: "#14161c", border: "1px solid #232733", borderRadius: 8, padding: "8px 12px", display: "flex", flexDirection: "column", gap: 2 }}>
                 <span style={{ color: "#f5f5f5", fontSize: 13, fontWeight: 600 }}>{fmt(ipo.name)}</span>
                 <span style={{ color: "#F0A93B", fontSize: 11 }}>
                   {d === 0 ? "Lists today" : d === 1 ? "Lists tomorrow" : `Lists in ${d} days`} · {ipo.listingDate}
                 </span>
-              </a>
+              </div>
             ))}
           </div>
         </div>
