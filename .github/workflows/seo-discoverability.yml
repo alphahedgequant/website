@@ -1,0 +1,39 @@
+name: AHQ Brand and IPO Search Discovery
+on:
+  pull_request:
+    paths:
+      - "alphahedgequant/app/page.jsx"
+      - "alphahedgequant/app/about/page.jsx"
+      - "alphahedgequant/app/layout.jsx"
+      - "alphahedgequant/app/ipo/page.jsx"
+      - "alphahedgequant/components/PremiumEditorial.jsx"
+      - "alphahedgequant/components/Footer.jsx"
+      - "alphahedgequant/middleware.js"
+      - "alphahedgequant/app/robots.js"
+      - "alphahedgequant/app/sitemap.js"
+      - "alphahedgequant/tests/seoDiscovery.test.mjs"
+      - ".github/workflows/seo-discoverability.yml"
+  push:
+    branches: [main]
+    paths:
+      - "alphahedgequant/app/page.jsx"
+      - "alphahedgequant/components/PremiumEditorial.jsx"
+      - "alphahedgequant/components/Footer.jsx"
+      - "alphahedgequant/tests/seoDiscovery.test.mjs"
+      - ".github/workflows/seo-discoverability.yml"
+permissions:
+  contents: read
+jobs:
+  seo-contract:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Verify brand, IPO, canonical, sitemap and privacy paths
+        working-directory: alphahedgequant
+        run: node --test tests/seoDiscovery.test.mjs
