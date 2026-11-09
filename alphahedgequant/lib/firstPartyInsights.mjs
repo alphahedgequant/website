@@ -30,6 +30,12 @@ export function validAnonymousId(id){return typeof id==="string" && uuidPattern.
 export function safePagePath(path){
   if(typeof path!=="string"||path.length>180||!/^\/(?:[a-zA-Z0-9_~.\-]+\/?)*$/.test(path)||path.includes(".."))return null;
   const normalized=path.length>1?path.replace(/\/$/,""):path;
+  // Group per-company paths: the owner can measure company-page engagement
+  // without collecting which securities an individual browser viewed.
+  if(/^\/(stock|stocks|company)\/[^/]+(?:\/.*)?$/.test(normalized)){
+    const prefix=normalized.split("/")[1];
+    return "/"+prefix+"/detail";
+  }
   if(/^\/(admin|api|sign-in|sign-up|account|settings)(\/|$)/.test(normalized)||
     /^\/terminal\/import(\/|$)/.test(normalized))return null;
   return normalized;
