@@ -4,7 +4,7 @@ import {RESEARCH_LIBRARY,LIBRARY_PUBLISHED} from "../lib/publicResearchLibrary.m
 // an authentication redirect instead of indexable content.
 export default function sitemap() {
   const base = "https://www.alphahedgequant.com";
-  const routes = ["", "/about", "/ipo", "/library", "/privacy", "/terms", "/disclaimer"];
+  const routes = ["", "/about", "/ipo", "/library", "/research", "/models", "/reports", "/privacy", "/terms", "/disclaimer"];
   const index=routes.map(route => ({
     url: base + route,
     changeFrequency: route === "" ? "weekly" : "monthly",
