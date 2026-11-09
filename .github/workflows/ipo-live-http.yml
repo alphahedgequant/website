@@ -1,0 +1,23 @@
+name: IPO Public Live Browserless Smoke
+on:
+  pull_request:
+    paths:
+      - "alphahedgequant/scripts/audit-public-ipo.mjs"
+      - ".github/workflows/ipo-live-http.yml"
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  check-live-ipo:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Verify live IPO anonymous access, SEO, feed and private analytics
+        working-directory: alphahedgequant
+        run: node scripts/audit-public-ipo.mjs
