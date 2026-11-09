@@ -213,7 +213,7 @@ export default function OptionsPage() {
             onKeyDown={e=>{if(e.key==="Enter"){e.preventDefault();chooseUnderlying(matches[0]?.symbol||stockQuery);}}}
             placeholder="Example: AXISBANK, ITC, MARUTI…" autoComplete="off"
             className="min-w-0 flex-1 rounded-lg border border-line bg-raised px-4 py-3 text-body placeholder:text-muted focus-visible:outline-2 focus-visible:outline-amber"/>
-          <button type="button" className="btn-primary text-sm" onClick={()=>chooseUnderlying(matches[0]?.symbol||stockQuery)}>View chain</button>
+          <button type="button" data-ahq-event="option_chain_selected" className="btn-primary text-sm" onClick={()=>chooseUnderlying(matches[0]?.symbol||stockQuery)}>View chain</button>
         </div>
         {stockQuery.trim()&&matches.length>0&&<div className="mt-2 max-h-60 overflow-y-auto border border-line rounded-lg divide-y divide-line">
           {matches.map(x=><button key={x.symbol} type="button" onClick={()=>chooseUnderlying(x.symbol)} className="w-full text-left p-3 hover:bg-raised">
@@ -476,7 +476,7 @@ function StrategyBuilder({ legs, setLegs, spot, lotSize, underlying, chain }) {
         <div className="flex items-center justify-between">
           <p className="font-mono text-xs text-muted tracking-wider">LEGS ({legs.length})</p>
           <div className="flex gap-1.5">
-            <button onClick={() => setLegs((L) => [...L, { id: Date.now() + Math.random(), side: "BUY", type: "CE", strike: atm, premium: ltpAt(atm, "CE") ?? 0, lots: 1, lotSize }])} className="font-mono text-[10px] px-2 py-1 rounded border border-amber/40 text-amber hover:bg-amber/10">+ ADD LEG</button>
+            <button data-ahq-event="strategy_leg_added" onClick={() => setLegs((L) => [...L, { id: Date.now() + Math.random(), side: "BUY", type: "CE", strike: atm, premium: ltpAt(atm, "CE") ?? 0, lots: 1, lotSize }])} className="font-mono text-[10px] px-2 py-1 rounded border border-amber/40 text-amber hover:bg-amber/10">+ ADD LEG</button>
             {legs.length > 0 && <button onClick={clearAll} className="font-mono text-[10px] px-2 py-1 rounded border border-line text-muted hover:text-loss">CLEAR</button>}
           </div>
         </div>
