@@ -1,0 +1,39 @@
+name: AHQ Public Research Library Integrity
+on:
+  pull_request:
+    paths:
+      - "alphahedgequant/lib/publicResearchLibrary.mjs"
+      - "alphahedgequant/app/library/**"
+      - "alphahedgequant/middleware.js"
+      - "alphahedgequant/app/sitemap.js"
+      - "alphahedgequant/components/Nav.jsx"
+      - "alphahedgequant/components/Footer.jsx"
+      - "alphahedgequant/components/PremiumEditorial.jsx"
+      - "alphahedgequant/tests/publicResearchLibrary.test.mjs"
+      - ".github/workflows/public-research-library.yml"
+  push:
+    branches: [main]
+    paths:
+      - "alphahedgequant/lib/publicResearchLibrary.mjs"
+      - "alphahedgequant/app/library/**"
+      - "alphahedgequant/middleware.js"
+      - "alphahedgequant/app/sitemap.js"
+      - "alphahedgequant/tests/publicResearchLibrary.test.mjs"
+      - ".github/workflows/public-research-library.yml"
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  library-integrity:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 7
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Check research content, SEO routes, internal links and private routes
+        working-directory: alphahedgequant
+        run: node --test tests/publicResearchLibrary.test.mjs
