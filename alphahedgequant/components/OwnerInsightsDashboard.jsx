@@ -35,7 +35,8 @@ const eventNames={
  backtest_run_submitted:"Backtest launched",
  research_search_submitted:"Research library searched",
  research_filter_selected:"Research category selected",
- trust_tracker_viewed:"Trust Tracker visited"
+ trust_tracker_viewed:"Trust Tracker visited",
+ research_preview_unlock_clicked:"Full research continuation clicked"
 };
 const nf=n=>Number(n||0).toLocaleString("en-IN");
 const time=n=>{
