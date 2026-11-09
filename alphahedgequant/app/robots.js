@@ -6,6 +6,6 @@ export default function robots() {
       allow: "/",
       disallow: ["/api/"],
     },
-    sitemap: "https://alphahedgequant.com/sitemap.xml",
+    sitemap: "https://www.alphahedgequant.com/sitemap.xml",
   };
 }
