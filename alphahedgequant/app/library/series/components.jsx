@@ -8,8 +8,8 @@ export function UnlockResearch({href,label,notice,compact=false}){
    <h2>Continue beyond the preview.</h2>
    <p>The introduction above is free to read. Detailed research and interactive material are kept inside the AlphaHedgeQuant signed-in workspace.</p>
    <div className="rp-unlock-actions">
-    <SignedOut><Link href={href} className="rp-unlock-primary">Sign in to continue reading <span aria-hidden="true">↗</span></Link><Link href="/sign-up" className="rp-unlock-secondary">Create a free account <span aria-hidden="true">↗</span></Link></SignedOut>
-    <SignedIn><Link href={href} className="rp-unlock-primary">{label||"Open complete research"} <span aria-hidden="true">↗</span></Link></SignedIn>
+    <SignedOut><Link href={href} data-ahq-event="research_preview_unlock_clicked" className="rp-unlock-primary">Sign in to continue reading <span aria-hidden="true">↗</span></Link><Link href="/sign-up" className="rp-unlock-secondary">Create a free account <span aria-hidden="true">↗</span></Link></SignedOut>
+    <SignedIn><Link href={href} data-ahq-event="research_preview_unlock_clicked" className="rp-unlock-primary">{label||"Open complete research"} <span aria-hidden="true">↗</span></Link></SignedIn>
    </div>
    {notice&&<p className="rp-unlock-notice">{notice}</p>}
   </div>
