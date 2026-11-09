@@ -5,6 +5,9 @@ import { clerkMiddleware, createRouteMatcher } from "@clerk/nextjs/server";
 const isPublicRoute = createRouteMatcher([
   "/",
   "/about",
+  // Public, read-only IPO calendar and listing intelligence for visitors and search engines.
+  "/ipo",
+  "/api/ipo",
   "/sign-in(.*)",
   "/sign-up(.*)",
   "/privacy",

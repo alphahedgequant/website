@@ -3,7 +3,7 @@
 // an authentication redirect instead of indexable content.
 export default function sitemap() {
   const base = "https://www.alphahedgequant.com";
-  const routes = ["", "/about", "/privacy", "/terms", "/disclaimer"];
+  const routes = ["", "/about", "/ipo", "/privacy", "/terms", "/disclaimer"];
   return routes.map(route => ({
     url: base + route,
     changeFrequency: route === "" ? "weekly" : "monthly",

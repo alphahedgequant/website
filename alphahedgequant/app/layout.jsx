@@ -9,12 +9,12 @@ import Ga4Tracker from "@/components/Ga4Tracker";
 export const metadata = {
   title: "AlphaHedgeQuant — Quant research, market intelligence & AI backtesting",
   description:
-    "AlphaHedgeQuant (AHQ) is a quantitative finance platform: live NSE & US market intelligence, a 10-strategy quant scanner, an AI backtesting agent, and a serious quant education hub.",
-  metadataBase: new URL("https://alphahedgequant.com"),
+    "AlphaHedgeQuant: Indian and US equity research, options analytics, IPO intelligence, quant finance education, models, research papers and backtesting.",
+  metadataBase: new URL("https://www.alphahedgequant.com"),
   openGraph: {
     title: "AlphaHedgeQuant",
     description: "Quant research, market intelligence & AI backtesting.",
-    url: "https://alphahedgequant.com",
+    url: "https://www.alphahedgequant.com",
     siteName: "AlphaHedgeQuant",
   },
 };

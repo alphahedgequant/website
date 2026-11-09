@@ -1,0 +1,36 @@
+name: IPO Public SEO and Safety
+on:
+  pull_request:
+    paths:
+      - "alphahedgequant/app/ipo/**"
+      - "alphahedgequant/components/IpoScreen.jsx"
+      - "alphahedgequant/middleware.js"
+      - "alphahedgequant/app/sitemap.js"
+      - "alphahedgequant/app/layout.jsx"
+      - "alphahedgequant/tests/ipoPublic.test.mjs"
+      - ".github/workflows/ipo-public-seo.yml"
+  push:
+    branches: [main]
+    paths:
+      - "alphahedgequant/app/ipo/**"
+      - "alphahedgequant/components/IpoScreen.jsx"
+      - "alphahedgequant/middleware.js"
+      - "alphahedgequant/app/sitemap.js"
+      - "alphahedgequant/app/layout.jsx"
+      - "alphahedgequant/tests/ipoPublic.test.mjs"
+      - ".github/workflows/ipo-public-seo.yml"
+permissions:
+  contents: read
+jobs:
+  public-ipo:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Validate IPO calculations and public SEO access contracts
+        working-directory: alphahedgequant
+        run: node --test tests/ipoFeed.test.mjs tests/ipoPublic.test.mjs
