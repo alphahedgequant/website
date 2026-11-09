@@ -193,7 +193,7 @@ export default function IpoScreen() {
         {TABS.map((t) => (
           <button
             key={t.key}
-            data-ahq-event="ipo_tab_selected"
+            data-ahq-event={tab===t.key?undefined:"ipo_tab_selected"}
             onClick={() => setTab(t.key)}
             style={{
               background: tab === t.key ? "#F0A93B" : "transparent",
