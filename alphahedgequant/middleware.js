@@ -10,6 +10,9 @@ const isPublicRoute = createRouteMatcher([
   "/privacy",
   "/terms",
   "/disclaimer",
+  // Search engines must access crawl directives and site map without Clerk login.
+  "/robots.txt",
+  "/sitemap.xml",
   "/api/waitlist(.*)",
   // Only the bounded event collector is public; dashboard/admin endpoints stay private.
   "/api/insights/event",
