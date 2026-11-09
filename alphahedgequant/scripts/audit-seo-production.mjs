@@ -25,7 +25,7 @@ for(const [path,label] of [["/","homepage"],["/ipo","ipo"]]){
   const title=x.body.includes("AlphaHedgeQuant");
   const topic=path==="/ipo"?x.body.includes("Indian IPO Intelligence"):x.body.includes("AlphaHedgeQuant IPO Intelligence");
   result(label+" responds to Googlebot",x.status===200&&!metaNoindex&&!headerNoindex&&cleanCanonical(x.body,canonical)&&title&&topic,{
-    status:x.status,canonicalOk:cleanCanonical(x.body,canonical),canonicalTags:[...x.body.matchAll(/<link\\b[^>]*\\brel="canonical"[^>]*>/gi)].map(x=>x[0].slice(0,240)),brandedTitle:title,publicTopicVisible:topic,noindex:metaNoindex||headerNoindex
+    status:x.status,canonicalOk:cleanCanonical(x.body,canonical),canonicalTags:[...x.body.matchAll(/<link\b[^>]*\brel="canonical"[^>]*>/gi)].map(x=>x[0].slice(0,240)),brandedTitle:title,publicTopicVisible:topic,noindex:metaNoindex||headerNoindex
   });
  }catch(e){result(label+" responds to Googlebot",false,{error:e.name==="TimeoutError"?"timeout":"https unavailable"});}
 }
