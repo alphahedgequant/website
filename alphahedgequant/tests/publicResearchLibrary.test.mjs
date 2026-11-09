@@ -69,7 +69,7 @@ test("reader includes visible disclosures, source links and accessible in-page o
  assert.match(reader,/aria-label="On this page"/);
  assert.match(reader,/item\.sources\.map/);
  assert.match(reader,/rel="noopener noreferrer"/);
- assert.match(reader,/data?tePublished:/); // no hidden date facts
+ assert.match(reader,/datePublished:LIBRARY_PUBLISHED/); // explicit publication date
  assert.match(hub,/<h1>/);
  assert.match(hub,/RESEARCH_LIBRARY\.filter/);
  const style=read("app/library/library.css");
