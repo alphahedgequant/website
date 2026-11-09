@@ -1,4 +1,5 @@
 import IpoScreen from "@/components/IpoScreen";
+import "./ipo-intro.css";
 
 export const metadata = {
   title: "IPO Intelligence India — Upcoming IPOs, GMP & Listing Performance | AlphaHedgeQuant",
@@ -30,6 +31,15 @@ export default function Page() {
       <p className="eyebrow tracking-[.24em]">ALPHAHEDGEQUANT / IPO INTELLIGENCE</p>
       <h1 className="mt-5 max-w-4xl font-display text-4xl font-semibold leading-tight tracking-tight md:text-6xl">Indian IPO Intelligence<span className="text-amber">.</span></h1>
       <p className="mt-5 max-w-3xl text-base leading-8 text-muted md:text-lg">Track upcoming and open Indian IPOs, compare price bands and subscription, and review unofficial grey-market premiums alongside actual listing performance. Free to explore — no account required.</p>
+      <div className="ipo-brief" aria-label="Ten-second IPO intelligence overview">
+        <p className="ipo-brief__label">YOUR 10-SECOND IPO ORIENTATION · NO WAITING, NO LOGIN</p>
+        <div className="ipo-brief__track">
+          <div className="ipo-brief__step"><strong>01 / DISCOVER</strong><span>Find upcoming, open and recently listed IPOs.</span></div>
+          <div className="ipo-brief__step"><strong>02 / COMPARE</strong><span>Read price bands, subscription and reported GMP.</span></div>
+          <div className="ipo-brief__step"><strong>03 / EVALUATE</strong><span>Separate unofficial expectations from actual listing returns.</span></div>
+        </div>
+        <div className="ipo-brief__progress" aria-hidden="true" />
+      </div>
     </section>
     <IpoScreen />
     <section className="mx-auto max-w-[1200px] px-6 pb-16 text-body" aria-label="IPO research glossary">
