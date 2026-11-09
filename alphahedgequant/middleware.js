@@ -7,6 +7,8 @@ const isPublicRoute = createRouteMatcher([
   "/about",
   // Public, read-only IPO calendar and listing intelligence for visitors and search engines.
   "/ipo",
+  // Open educational library only. Do not expose authenticated research tools or APIs.
+  "/library(.*)",
   "/api/ipo",
   "/sign-in(.*)",
   "/sign-up(.*)",
