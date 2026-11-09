@@ -201,7 +201,7 @@ export default function Research() {
           {CATEGORIES.map((c) => (
             <button
               key={c.key}
-              onClick={() => { setCat(c.key); }}
+              data-ahq-event="research_filter_selected" onClick={() => { setCat(c.key); }}
               className={`font-mono text-[11px] tracking-wider px-3 py-1.5 rounded border transition-colors ${
                 cat === c.key ? "border-amber text-amber" : "border-line text-muted hover:text-body"
               }`}
@@ -211,7 +211,7 @@ export default function Research() {
           ))}
         </div>
 
-        <form onSubmit={onSearch} className="mt-4 flex flex-wrap gap-2 max-w-3xl">
+        <form data-ahq-event="research_search_submitted" onSubmit={onSearch} className="mt-4 flex flex-wrap gap-2 max-w-3xl">
           <input
             value={search}
             onChange={(e) => setSearch(e.target.value)}
