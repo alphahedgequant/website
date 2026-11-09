@@ -1,7 +1,7 @@
 "use client";
 import {useCallback,useEffect,useMemo,useRef,useState} from "react";
 import Link from "next/link";
-import "./pencil-reader.css";
+import "@/app/learn/pencil-reader.css";
 import {LESSONS} from "@/lib/academyContent";
 import {QUANT_LESSONS} from "@/lib/quantCourse.mjs";
 import ContinuousQuantCourse from "@/components/ContinuousQuantCourse";
