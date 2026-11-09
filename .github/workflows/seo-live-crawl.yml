@@ -1,5 +1,9 @@
 name: AHQ Live Search Crawlability
 on:
+  pull_request:
+    paths:
+      - "alphahedgequant/scripts/audit-seo-production.mjs"
+      - ".github/workflows/seo-live-crawl.yml"
   push:
     branches: [audit/googlebot-public-seo-20261109, main]
     paths:
