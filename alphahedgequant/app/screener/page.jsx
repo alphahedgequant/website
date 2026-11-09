@@ -266,7 +266,7 @@ function ChartsView({ rows, market, onPick }) {
         const pos = r.high52w && r.low52w && r.price && r.high52w > r.low52w
           ? Math.min(1, Math.max(0, (r.price - r.low52w) / (r.high52w - r.low52w))) : null;
         return (
-          <button key={r.symbol} onClick={() => onPick(r.symbol)} className="text-left group">
+          <button key={r.symbol} data-ahq-event="screener_stock_opened" onClick={() => onPick(r.symbol)} className="text-left group">
             <div className="flex items-center justify-between mb-1.5">
               <span className="font-mono text-sm text-[#5aa9f5] group-hover:underline">{r.symbol}</span>
               <span className={`font-mono text-xs ${pctCls(r.changePct)}`}>{r.changePct == null ? "—" : (r.changePct > 0 ? "+" : "") + r.changePct.toFixed(2) + "%"}</span>
@@ -290,7 +290,7 @@ function TickersView({ rows, onPick }) {
   return (
     <div className="card mt-2 p-3 grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-2">
       {rows.map((r) => (
-        <button key={r.symbol} onClick={() => onPick(r.symbol)}
+        <button key={r.symbol} data-ahq-event="screener_stock_opened" onClick={() => onPick(r.symbol)}
           className="rounded-lg border border-line px-2.5 py-2 text-left hover:border-amber/40 transition-colors"
           style={{ background: heatColor(r.changePct) }}>
           <div className="font-mono text-xs text-body truncate">{r.symbol}</div>
@@ -543,7 +543,7 @@ export default function Markets() {
         <p className="eyebrow !mb-0">[ AHQ : SCREENER — {market === "US" ? "US EQUITIES" : "NSE INDIA"} ]</p>
         <div className="flex rounded-lg border border-line overflow-hidden">
           {Object.keys(MARKETS).map((m) => (
-            <button key={m} onClick={() => switchMarket(m)}
+            <button key={m} data-ahq-event={market===m?undefined:"screener_market_switched"} onClick={() => switchMarket(m)}
               className={`px-5 py-1.5 text-sm font-mono transition-colors ${market === m ? "bg-amber text-ink font-medium" : "text-muted hover:text-body"}`}>
               {m}
             </button>
@@ -571,7 +571,7 @@ export default function Markets() {
         {searchOpen && searchResults.length > 0 && (
           <div className="search-pop absolute z-30 left-0 right-0 mt-2 py-1.5 overflow-hidden">
             {searchResults.map((r, i) => (
-              <button key={r.symbol} data-active={i === searchIdx}
+              <button key={r.symbol} data-ahq-event="screener_stock_opened" data-active={i === searchIdx}
                 onMouseEnter={() => setSearchIdx(i)} onClick={() => goToStock(r.symbol)}
                 className="search-row w-full flex items-center justify-between gap-4 px-4 py-2.5 text-left">
                 <span className="flex items-center gap-3 min-w-0">
@@ -648,7 +648,7 @@ export default function Markets() {
           <span className="text-muted">Tickers</span>
           <input value={tickerQ} onChange={(e) => { setTickerQ(e.target.value); setPage(0); }} className="bg-ink border border-line rounded px-2 py-1.5 outline-none focus:border-amber/60 w-full" />
         </label>
-        <button onClick={() => setShowFilters((s) => !s)} className="btn-primary !py-1.5 !px-4">
+        <button data-ahq-event={showFilters?undefined:"screener_filters_opened"} onClick={() => setShowFilters((s) => !s)} className="btn-primary !py-1.5 !px-4">
           Filters {activeCount > 0 && `(${activeCount})`} {showFilters ? "▴" : "▾"}
         </button>
       </div>
@@ -678,7 +678,7 @@ export default function Markets() {
                 <span className="text-[13px] text-muted text-right whitespace-nowrap">{label}</span>
                 <select
                   value={active[id] || "Any"}
-                  onChange={(e) => { setActive((a) => ({ ...a, [id]: e.target.value })); setPage(0); }}
+                  data-ahq-event="screener_filter_changed" onChange={(e) => { setActive((a) => ({ ...a, [id]: e.target.value })); setPage(0); }}
                   className={`bg-ink border rounded px-2 py-1.5 text-[13px] outline-none focus:border-amber/60 w-[170px] ${active[id] && active[id] !== "Any" ? "border-amber/60 text-amber" : "border-line"}`}
                 >
                   {options.map((o) => <option key={o}>{o}</option>)}
@@ -692,7 +692,7 @@ export default function Markets() {
       {/* ── VIEW TAB STRIP ───────────────────────────── */}
       <div className="card mt-2 flex overflow-x-auto">
         {[...Object.keys(VIEWS), ...VISUAL_VIEWS, ...SOON_VIEWS].map((vw) => (
-          <button key={vw} onClick={() => { setView(vw); setPage(0); }}
+          <button key={vw} data-ahq-event={view===vw?undefined:"screener_view_selected"} onClick={() => { setView(vw); setPage(0); }}
             className={`px-4 py-2 text-sm whitespace-nowrap border-b-2 transition-colors ${view === vw ? "border-amber text-amber bg-raised/60" : "border-transparent text-muted hover:text-body"}`}>
             {vw}
           </button>
@@ -763,14 +763,14 @@ export default function Markets() {
                   className="h-[30px] px-2.5 rounded border border-line text-muted hover:text-body disabled:opacity-30 text-sm">→</button>
               )}
             </div>
-            <button onClick={exportCSV} className="text-sm text-[#5aa9f5] hover:underline">Export</button>
+            <button data-ahq-event="screener_exported" onClick={exportCSV} className="text-sm text-[#5aa9f5] hover:underline">Export</button>
           </div>
         </>
       ) : VISUAL_VIEWS.includes(view) ? (
         <>
           <div className="flex items-center justify-between mt-3 text-sm flex-wrap gap-2">
             <p className="font-mono text-xs text-muted"><span className="text-body">{filtered.length}</span> stocks · {view} view</p>
-            {view !== "Maps" && <button onClick={exportCSV} className="text-sm text-[#5aa9f5] hover:underline">Export</button>}
+            {view !== "Maps" && <button data-ahq-event="screener_exported" onClick={exportCSV} className="text-sm text-[#5aa9f5] hover:underline">Export</button>}
           </div>
           {status !== "live" ? (
             <div className="card mt-2 p-10 text-center text-muted">Loading {view.toLowerCase()}…</div>

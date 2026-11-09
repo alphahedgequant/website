@@ -1,0 +1,47 @@
+name: AHQ Owner Analytics Integrity
+on:
+  pull_request:
+    paths:
+      - "alphahedgequant/components/AnalyticsTracker.jsx"
+      - "alphahedgequant/components/OwnerInsightsDashboard.jsx"
+      - "alphahedgequant/components/IpoScreen.jsx"
+      - "alphahedgequant/components/InterviewArena.jsx"
+      - "alphahedgequant/app/learn/page.jsx"
+      - "alphahedgequant/app/options/page.jsx"
+      - "alphahedgequant/app/screener/page.jsx"
+      - "alphahedgequant/app/terminal/page.jsx"
+      - "alphahedgequant/app/backtest/page.jsx"
+      - "alphahedgequant/app/research/page.jsx"
+      - "alphahedgequant/app/api/admin/analytics/route.js"
+      - "alphahedgequant/lib/firstPartyInsights.mjs"
+      - "alphahedgequant/tests/featureAnalytics.test.mjs"
+      - ".github/workflows/owner-analytics.yml"
+  push:
+    branches: [main]
+    paths:
+      - "alphahedgequant/lib/firstPartyInsights.mjs"
+      - "alphahedgequant/components/OwnerInsightsDashboard.jsx"
+      - "alphahedgequant/app/api/admin/analytics/route.js"
+      - "alphahedgequant/tests/featureAnalytics.test.mjs"
+      - ".github/workflows/owner-analytics.yml"
+permissions:
+  contents: read
+jobs:
+  analytics-contract:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: alphahedgequant/package-lock.json
+      - name: Install locked dependencies without lifecycle scripts
+        working-directory: alphahedgequant
+        run: npm ci --ignore-scripts --no-audit --no-fund
+      - name: Guard first-party privacy, access control, feature actions and user counts
+        working-directory: alphahedgequant
+        run: node --test tests/firstPartyInsights.test.mjs tests/featureAnalytics.test.mjs

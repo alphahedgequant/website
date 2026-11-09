@@ -134,7 +134,7 @@ export default function InterviewArena({progress={},save=async()=>false,sync=""}
    <div className="ia-lab-top"><div><span className="ia-eyebrow">PRACTICE LAB / {role.toUpperCase()}</span><h3>Train how you think.</h3></div>
     <div className="ia-mode-switch" role="group" aria-label="Practice mode">
      <button type="button" className={session==="practice"?"selected":""} onClick={exitMock}>Practice</button>
-     <button type="button" className={session==="mock"?"selected":""} onClick={startMock}>5-min mock · 10 Q</button>
+     <button type="button" className={session==="mock"?"selected":""} data-ahq-event="interview_mock_started" onClick={startMock}>5-min mock · 10 Q</button>
     </div>
    </div>
    {session==="practice"&&<div className="ia-controls">
@@ -155,7 +155,7 @@ export default function InterviewArena({progress={},save=async()=>false,sync=""}
    </div>:question?<div className="ia-question-layout">
     <article className="ia-question">
      <div className="ia-question-top"><span className="ia-q-number">{session==="mock"?"MOCK "+(mockPos+1)+" / 10":String(currentIndex+1).padStart(3,"0")+" / "+filtered.length}</span><div className="ia-q-tags">{(session==="mock"?[role,question.level,question.topic]:activeTags).map(x=><span key={x}>{x}</span>)}</div>
-      {session==="practice"&&<button type="button" aria-label={bookmarks.includes(question.id)?"Remove bookmark":"Bookmark question"} title={bookmarks.includes(question.id)?"Remove bookmark":"Bookmark question"} className={"ia-bookmark"+(bookmarks.includes(question.id)?" saved":"")} onClick={()=>toggleBookmark(question.id)}>{bookmarks.includes(question.id)?"★":"☆"}</button>}
+      {session==="practice"&&<button data-ahq-event="interview_bookmark_toggled" type="button" aria-label={bookmarks.includes(question.id)?"Remove bookmark":"Bookmark question"} title={bookmarks.includes(question.id)?"Remove bookmark":"Bookmark question"} className={"ia-bookmark"+(bookmarks.includes(question.id)?" saved":"")} onClick={()=>toggleBookmark(question.id)}>{bookmarks.includes(question.id)?"★":"☆"}</button>}
      </div>
      <p className="ia-concept">{question.concept||question.topic||"Conceptual reasoning"} / {question.kind==="numeric"?"NUMERICAL REASONING":"OPEN-ENDED REASONING"}</p>
      <h4>{question.question}</h4>
@@ -171,9 +171,9 @@ export default function InterviewArena({progress={},save=async()=>false,sync=""}
      </div>}
      {notice&&<p className="ia-notice" role="status">{notice}</p>}
      <div className="ia-actions">
-      {session==="mock"?<button type="button" className="ia-main-button" onClick={submitMock}>{mockPos===9?"Finish mock":"Submit & continue"} <Icon name="→"/></button>
-      :<>{isNumeric(question)&&!checked&&<button type="button" disabled={choice===null} className="ia-main-button" onClick={checkPractice}>Check answer <Icon name="→"/></button>}
-       {!isNumeric(question)&&!revealed&&<button type="button" className="ia-main-button" onClick={()=>setRevealed(true)}>Reveal worked answer <Icon name="↗"/></button>}
+      {session==="mock"?<button type="button" className="ia-main-button" data-ahq-event="interview_mock_answer_submitted" onClick={submitMock}>{mockPos===9?"Finish mock":"Submit & continue"} <Icon name="→"/></button>
+      :<>{isNumeric(question)&&!checked&&<button type="button" disabled={choice===null} className="ia-main-button" data-ahq-event="interview_answer_checked" onClick={checkPractice}>Check answer <Icon name="→"/></button>}
+       {!isNumeric(question)&&!revealed&&<button type="button" className="ia-main-button" data-ahq-event="interview_answer_revealed" onClick={()=>setRevealed(true)}>Reveal worked answer <Icon name="↗"/></button>}
        <button type="button" className="ia-minor-button" onClick={prevPractice} disabled={!filtered.length}>← Previous</button>
        <button type="button" className="ia-minor-button" onClick={nextPractice}>Next question →</button>
        <button type="button" className="ia-minor-button" onClick={()=>{if(!filtered.length)return;switchQuestion(filtered[Math.floor(Math.random()*filtered.length)].id);}}>Surprise me ↝</button>

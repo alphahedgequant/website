@@ -8,7 +8,17 @@ import {hashQuotaIdentity} from "./serverRateLimit.mjs";
 export const CLIENT_EVENTS=Object.freeze([
   "pageview","engagement","option_chain_opened","options_page_viewed","strategy_builder_opened",
   "screener_viewed","model_lesson_opened","backtest_viewed","quant_terminal_opened",
-  "ipo_page_opened","article_opened","waitlist_opened"
+  "ipo_page_opened","article_opened","waitlist_opened",
+  // Fixed low-cardinality product actions; never include ticker, question,
+  // filter values, search terms or trade parameters in event names.
+  "ipo_tab_selected","academy_area_selected","mental_math_round_started",
+  "mental_math_answer_submitted","interview_mock_started","interview_answer_checked",
+  "interview_mock_answer_submitted","interview_bookmark_toggled","interview_answer_revealed",
+  "screener_market_switched","screener_filters_opened","screener_filter_changed",
+  "screener_view_selected","screener_exported","screener_stock_opened",
+  "terminal_tab_selected","terminal_stock_selected","option_chain_refreshed",
+  "option_chain_selected","strategy_leg_added","backtest_run_submitted",
+  "research_search_submitted","research_filter_selected","trust_tracker_viewed"
 ]);
 const clientSet=new Set(CLIENT_EVENTS);
 const sourceSet=new Set(["direct","google","bing","duckduckgo","x","linkedin","reddit","valuepickr","other"]);
@@ -20,6 +30,12 @@ export function validAnonymousId(id){return typeof id==="string" && uuidPattern.
 export function safePagePath(path){
   if(typeof path!=="string"||path.length>180||!/^\/(?:[a-zA-Z0-9_~.\-]+\/?)*$/.test(path)||path.includes(".."))return null;
   const normalized=path.length>1?path.replace(/\/$/,""):path;
+  // Group per-company paths: the owner can measure company-page engagement
+  // without collecting which securities an individual browser viewed.
+  if(/^\/(stock|stocks|company)\/[^/]+(?:\/.*)?$/.test(normalized)){
+    const prefix=normalized.split("/")[1];
+    return "/"+prefix+"/detail";
+  }
   if(/^\/(admin|api|sign-in|sign-up|account|settings)(\/|$)/.test(normalized)||
     /^\/terminal\/import(\/|$)/.test(normalized))return null;
   return normalized;

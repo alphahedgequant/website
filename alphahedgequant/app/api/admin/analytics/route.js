@@ -1,4 +1,5 @@
 import {NextResponse} from "next/server";
+import {clerkClient} from "@clerk/nextjs/server";
 import {isInsightsOwner} from "@/lib/insightsOwnerAccess.mjs";
 import {getInsightsSQL,ensureInsightsTable} from "@/lib/firstPartyInsights.mjs";
 
@@ -63,6 +64,21 @@ export async function GET(request){
         AND event_type IN ('pageview','waitlist_signup')
         GROUP BY source ORDER BY pageviews DESC LIMIT 25`
     ]);
+    // Read aggregate signup totals directly from the existing production
+    // Clerk instance. The owner is authenticated above; never return user
+    // records, emails, tokens or identifying account information.
+    // If Clerk is temporarily unavailable, show "—" rather than fake zero.
+    let registeredUsers=null,registeredNew=null;
+    try{
+      const client=await clerkClient();
+      const [total,newAccounts]=await Promise.all([
+        client.users.getCount(),
+        client.users.getUserList({createdAtAfter:Date.parse(since),limit:1})
+      ]);
+      if(Number.isSafeInteger(total)&&total>=0)registeredUsers=total;
+      if(Number.isSafeInteger(newAccounts?.totalCount)&&newAccounts.totalCount>=0)
+        registeredNew=newAccounts.totalCount;
+    }catch{/* Clerk count unavailable; first-party metrics still render. */}
     const overview=overviewRows[0]||{};
     const visitors=Number(overview.visitors||0);
     const conversions=Number(overview.waitlist_signups||0);
@@ -71,7 +87,7 @@ export async function GET(request){
     return reply({
       configured:true,days,generatedAt:new Date().toISOString(),timezone:"Asia/Kolkata",
       definition:"Visitor metrics are pseudonymous browser-based estimates, not verified Clerk account counts.",
-      overview:{...overview,conversion_percent:visitors?Math.round(conversions/visitors*10000)/100:0},
+      overview:{...overview,registered_users_total:registeredUsers,registered_users_new:registeredNew,conversion_percent:visitors?Math.round(conversions/visitors*10000)/100:0},
       pages,features,trend,sources
     });
   }catch{

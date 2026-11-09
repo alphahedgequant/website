@@ -348,7 +348,7 @@ export default function BacktestPage() {
 
           {/* Run */}
           <button
-            onClick={run}
+            data-ahq-event="backtest_run_submitted" onClick={run}
             disabled={loading}
             className="w-full py-3 rounded bg-amber text-ink font-display font-semibold text-sm hover:bg-amber/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           >
