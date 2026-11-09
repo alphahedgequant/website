@@ -39,6 +39,14 @@ export default function PremiumEditorial({about=false}){
     <div className="pr-actions pr-reveal"><Link href="/ipo" className="pr-btn pr-btn-primary">Explore free IPO Intelligence ↗</Link></div>
   </div>
  </section>
+ <section className="pr-section pr-darksection" aria-labelledby="ahq-public-research">
+   <div className="pr-wrap">
+     <p className="pr-kicker pr-reveal">OPEN RESEARCH LIBRARY / FREE TO READ</p>
+     <h2 id="ahq-public-research" className="pr-display pr-reveal">The mathematics.<br/><em>Not just the headlines.</em></h2>
+     <p className="pr-lead pr-reveal">Read AlphaHedgeQuant's free library of Indian IPO and quantitative finance guides. Work through GMP versus listing gains, IPO allotment, book building, prospectus valuation, option Greeks, implied volatility, gamma exposure, cointegration, backtesting biases and risk-based position sizing. Each article includes examples, limitations and references—without requiring an account.</p>
+     <div className="pr-actions pr-reveal"><Link href="/library" className="pr-btn pr-btn-primary">Explore 11 free research guides ↗</Link></div>
+   </div>
+ </section>
  <section className="pr-section pr-trust"><div className="pr-wrap"><p className="pr-kicker pr-reveal">WHAT TRUST LOOKS LIKE TO US</p><h2 className="pr-display pr-reveal">Not a promise<br/>to be perfect.<br/><em>A commitment to be clear.</em></h2><div className="pr-credgrid">{[["I / TRANSPARENCY","Show the source.","When data is absent, say so. When a number is estimated, label it. Never ask people to confuse a model with reality."],["II / HUMILITY","Respect uncertainty.","Good research makes space for doubt. An error corrected is better than a certainty performed."],["III / TIME","Build for return visits.","Earn confidence through consistent work, maintenance, documentation, and a product that gets clearer with use."]].map(([a,b,c])=><article className="pr-credcard pr-reveal" key={a}><small>{a}</small><h3>{b}</h3><p>{c}</p></article>)}</div></div></section>
  <section className="pr-finale pr-wrap"><p className="pr-kicker pr-reveal">THE INVITATION</p><h2 className="pr-display pr-reveal">See deeper.<br/><em>Think longer.</em></h2><p className="pr-reveal">Explore a platform committed to making complex financial ideas understandable without pretending markets are simple.</p><Link className="pr-btn pr-btn-primary pr-reveal" href="/about">Understand why we build ↗</Link></section>
  </>}
