@@ -1,0 +1,31 @@
+name: AHQ Public Research Library Live Smoke
+on:
+  push:
+    branches: [audit/public-library-production-smoke-20261109, main]
+    paths:
+      - "alphahedgequant/scripts/audit-public-library.mjs"
+      - ".github/workflows/library-live.yml"
+  pull_request:
+    paths:
+      - "alphahedgequant/scripts/audit-public-library.mjs"
+      - ".github/workflows/library-live.yml"
+  schedule:
+    # Every Monday 11:15 Asia/Kolkata. Checks crawlability, not Google's ranking.
+    - cron: "45 5 * * 1"
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  library-smoke:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 7
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Check anonymous indexability and access control for all 11 articles
+        working-directory: alphahedgequant
+        run: node scripts/audit-public-library.mjs
