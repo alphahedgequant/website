@@ -1,9 +1,9 @@
 "use client";
 import {useMemo,useState,useEffect} from "react";
-import {MODULE_GUIDES,MODULE_TOPICS,topicProgress} from "@/lib/quantModuleGuides.mjs";
+import {MODULE_GUIDES,MODULE_TOPICS} from "@/lib/quantModuleGuides.mjs";
 import {TOPIC_DEEP_DIVES} from "@/lib/quantDeepDives.mjs";
 import {CHAPTER_CONNECTIONS,MODULE_LEARNING_BRIDGES} from "@/lib/quantLearningConnections.mjs";
-import {QUANT_SECTIONS,QUANT_LESSONS,sectionProgress,isCorrect} from "@/lib/quantCourse.mjs";
+import {QUANT_SECTIONS,QUANT_LESSONS,isCorrect} from "@/lib/quantCourse.mjs";
 import {QUANT_TEACHING} from "@/lib/quantTeaching.mjs";
 import {EXTENDED_SECTIONS,EXTENDED_MODULE_GUIDES,EXTENDED_MODULE_TOPICS,EXTENDED_LESSONS,EXTENDED_BRIDGES} from "@/lib/quantExtendedModules.mjs";
 import "./continuous-course.css";
