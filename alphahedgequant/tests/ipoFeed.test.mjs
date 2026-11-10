@@ -47,3 +47,47 @@ test("timestamped IPO data must not be called fresh without upstream evidence",(
  assert.equal(ipoFreshness("2026-11-08T09:00:00Z",t).stale,false);
  assert.equal(ipoFreshness("2026-11-09T16:00:00Z",t).stale,null);
 });
+
+
+test("expired provider OPEN and UPCOMING states cannot advertise a past bidding window",()=>{
+ const today="2026-11-10";
+ const feed=[
+  {slug:"past-open",status:"OPEN",name:"Past issue",openDate:"2026-11-01T00:00:00Z",closeDate:"2026-11-05T00:00:00Z"},
+  {slug:"past-upcoming",status:"UPCOMING",name:"Past announced issue",openDate:"2026-11-01",closeDate:"2026-11-05"},
+  {slug:"new-open",status:"UPCOMING",name:"Current issue",openDate:"2026-11-09",closeDate:"2026-11-12"},
+  {slug:"next-upcoming",status:"OPEN",name:"Next issue",openDate:"2026-11-12",closeDate:"2026-11-14"}
+ ];
+ const result=buildIpoBuckets(feed,today);
+ assert.equal(result.buckets.open.length,1);
+ assert.equal(result.buckets.upcoming.length,1);
+ assert.equal(result.buckets.closed.length,2);
+ assert.equal(result.correctedStatuses,4);
+ assert.equal(result.accepted,4);
+});
+test("disputed GMP is never reported as a reliable premium or listing estimate",()=>{
+ const ipo=normalizeIpo({
+  slug:"disputed-premium",name:"Disputed GMP",status:"CLOSED",
+  priceMin:95,priceMax:100,lotSize:100,lastGmp:65,
+  gmpDisputed:true,gmpSources:3,gmpSpread:80
+ },"2026-11-10");
+ assert.equal(ipo.gmpDisputed,true);
+ assert.equal(ipo.gmp,null);
+ assert.equal(ipo.gmpPct,null);
+ assert.equal(ipo.estimatedListingPrice,null);
+ assert.equal(ipo.minimumInvestment,10000);
+ assert.equal(ipo.issuePrice,100);
+});
+test("missing values, zero GMP and source date discrepancies stay distinguishable",()=>{
+ const missing=normalizeIpo({slug:"no-lot",status:"OPEN",priceMax:0,lotSize:0,lastGmp:null},"2026-11-10");
+ assert.equal(missing.issuePrice,null);
+ assert.equal(missing.minimumInvestment,null);
+ assert.equal(missing.estimatedListingPrice,null);
+ const zero=normalizeIpo({slug:"reported-zero",status:"CLOSED",priceMax:100,lastGmp:0},"2026-11-10");
+ assert.equal(zero.gmp,0);
+ assert.equal(zero.estimatedListingPrice,100);
+});
+test("never classify an unknown or postponed source status as open",()=>{
+ const x=buildIpoBuckets([{slug:"postponed-issue",name:"Postponed",status:"Issue postponed",openDate:"2026-11-09",closeDate:"2026-11-12"}],"2026-11-10");
+ assert.equal(x.buckets.open.length,0);
+ assert.equal(x.buckets.other.length,1);
+});
