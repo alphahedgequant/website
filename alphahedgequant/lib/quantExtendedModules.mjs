@@ -625,11 +625,11 @@ export const EXTENDED_LESSONS=[
     "id": "quant-practice-8-02",
     "title": "Work through an example",
     "explain": "Use the energy & commodity trading lessons to work through this calculation. Write down the units and the assumption before you enter an answer.",
-    "example": "135 − 120 = 15 MW of shortage.",
+    "example": "135 − 120 = 15 MW of shortage, meaning demand exceeds available supply in this example.",
     "question": "Energy supply is 120 MW and demand is 135 MW. Shortfall in MW?",
     "answer": 15,
     "formula": "Shortfall = demand − supply",
-    "solution": "135 − 120 = 15 MW of shortage.",
+    "solution": "135 − 120 = 15 MW of shortage, meaning demand exceeds available supply in this example.",
     "section": 7
   },
   {
@@ -724,11 +724,11 @@ export const EXTENDED_LESSONS=[
     "id": "quant-practice-11-02",
     "title": "Work through an example",
     "explain": "Use the options, volatility & market making lessons to work through this calculation. Write down the units and the assumption before you enter an answer.",
-    "example": "8 − 3 = ₹5 premium paid.",
+    "example": "8 − 3 = ₹5 premium paid to open the two-leg spread, before fees and other costs.",
     "question": "Buy call for ₹8 and sell call for ₹3. Net premium paid?",
     "answer": 5,
     "formula": "Net debit = premium paid − premium received",
-    "solution": "8 − 3 = ₹5 premium paid.",
+    "solution": "8 − 3 = ₹5 premium paid to open the two-leg spread, before fees and other costs.",
     "section": 10
   },
   {
