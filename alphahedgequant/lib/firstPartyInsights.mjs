@@ -11,7 +11,7 @@ export const CLIENT_EVENTS=Object.freeze([
   "ipo_page_opened","article_opened","waitlist_opened",
   // Fixed low-cardinality product actions; never include ticker, question,
   // filter values, search terms or trade parameters in event names.
-  "ipo_tab_selected","academy_area_selected","mental_math_round_started",
+  "ipo_tab_selected","ipo_filter_changed","ipo_issue_opened","academy_area_selected","mental_math_round_started",
   "mental_math_answer_submitted","interview_mock_started","interview_answer_checked",
   "interview_mock_answer_submitted","interview_bookmark_toggled","interview_answer_revealed",
   "screener_market_switched","screener_filters_opened","screener_filter_changed",

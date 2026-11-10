@@ -1,20 +1,216 @@
-/* Non-blocking ten-second visual tour: readable and usable from first paint. */
-.ipo-brief{
-  margin-top:26px;position:relative;overflow:hidden;border:1px solid rgba(113,145,180,.3);
-  border-radius:18px;padding:20px 22px;background:linear-gradient(110deg,rgba(21,38,62,.88),rgba(14,22,38,.72) 64%,rgba(109,73,38,.13));
-  box-shadow:inset 0 1px 0 rgba(255,255,255,.05);
+/* IPO Intelligence: single scoped navy / ivory / champagne design, matching
+   the effective homepage palette in app/premium-editorial.css. No global
+   theme or navigation overrides. */
+.ahq-ipo-page,.ahq-ipo-screen,.ipo-brief{
+ --ipo-bg:#090c13;--ipo-panel:#131924;--ipo-raised:#1b2533;--ipo-text:#f2efe9;
+ --ipo-muted:#a5a9b4;--ipo-line:#303946;--ipo-gold:#d7b477;--ipo-paper:#f7f5f0;
+ --ipo-positive:#72d6a5;--ipo-negative:#ff898f;
 }
-.ipo-brief::before{
-  content:"";position:absolute;right:-8%;top:-120%;width:55%;aspect-ratio:1;border-radius:50%;
-  background:radial-gradient(circle,rgba(57,117,189,.23),transparent 65%);pointer-events:none;
+html[data-theme="light"] .ahq-ipo-page,html[data-theme="light"] .ahq-ipo-screen,html[data-theme="light"] .ipo-brief{
+ --ipo-bg:#f7f5f0;--ipo-panel:#fffdf9;--ipo-raised:#f1eee8;--ipo-text:#17212d;
+ --ipo-muted:#566372;--ipo-line:#d6d8d7;--ipo-gold:#88632d;--ipo-paper:#fffdf9;
+ --ipo-positive:#137852;--ipo-negative:#b43e4e;
 }
-.ipo-brief__label{font:600 10px/1.4 ui-monospace,monospace;letter-spacing:.19em;color:#d0b888}
-.ipo-brief__track{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;margin-top:16px}
-.ipo-brief__step{position:relative;border-top:1px solid rgba(172,192,216,.24);padding-top:11px}
-.ipo-brief__step strong{display:block;font-size:14px;font-weight:600;color:#eee9dd}
-.ipo-brief__step span{display:block;margin-top:4px;font-size:12px;line-height:1.6;color:#aab6c7}
-.ipo-brief__progress{margin-top:17px;height:2px;background:rgba(255,255,255,.13);border-radius:2px;overflow:hidden}
-.ipo-brief__progress::after{content:"";display:block;height:100%;width:100%;transform:scaleX(0);transform-origin:left;background:linear-gradient(90deg,#3d78bb,#bba372);animation:ipo-intro-10s 10s ease-out 1 forwards}
+.ahq-ipo-screen{position:relative;background:var(--ipo-bg);color:var(--ipo-text);padding:15px 0 85px;font-family:"DM Sans","Archivo",system-ui,sans-serif}
+.ahq-ipo-screen *,.ipo-brief *{box-sizing:border-box}
+.ahq-ipo-screen a{color:var(--ipo-gold);text-decoration:underline;text-underline-offset:3px}
+.ahq-ipo-screen button,.ahq-ipo-screen input,.ahq-ipo-screen select{font:inherit}
+.ahq-ipo-screen :is(a,button,input,select):focus-visible{outline:2px solid var(--ipo-gold);outline-offset:3px}
+.ipo-shell{width:min(1200px,calc(100% - 48px));margin:auto}
+.ipo-eyebrow{color:var(--ipo-gold);font:700 10px/1.6 "JetBrains Mono",monospace;letter-spacing:.19em}
+.ipo-board-head{display:flex;justify-content:space-between;align-items:flex-end;gap:30px;margin-bottom:29px}
+.ipo-board-head h2{margin:12px 0 13px;color:var(--ipo-text);font:650 clamp(33px,4vw,54px)/1.14 Manrope,"Archivo",sans-serif;letter-spacing:-.065em}
+.ipo-board-head h2 em,.ipo-scoreboard h3 em{color:var(--ipo-gold);font-style:normal}
+.ipo-board-head p{max-width:690px;color:var(--ipo-muted);font-size:15px;line-height:1.82}
+.ipo-refresh{flex-shrink:0;border:1px solid var(--ipo-line);background:var(--ipo-panel);color:var(--ipo-text);padding:12px 16px;font-size:12px!important;font-weight:700!important;transition:border .2s,background .2s}
+.ipo-refresh:hover:not(:disabled){border-color:var(--ipo-gold);background:var(--ipo-raised)}
+.ipo-refresh:disabled{opacity:.6;cursor:wait}
+.ipo-metrics{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:1px;border:1px solid var(--ipo-line);background:var(--ipo-line)}
+.ipo-metric{display:flex;flex-direction:column;gap:10px;min-width:0;background:var(--ipo-panel);padding:24px 24px 22px}
+.ipo-metric>span{color:var(--ipo-muted);font-size:11px;font-weight:600;letter-spacing:.045em}
+.ipo-metric strong{color:var(--ipo-text);font:650 clamp(28px,3.2vw,39px)/1 Manrope,"Archivo",sans-serif;letter-spacing:-.06em}
+.ipo-metric small{color:var(--ipo-muted);font:500 10px/1.5 "JetBrains Mono",monospace}
+.ipo-feed-meta{display:flex;align-items:center;flex-wrap:wrap;gap:9px 18px;margin-top:22px;color:var(--ipo-muted);font-size:11px}
+.ipo-feed-meta strong{font-weight:650;color:var(--ipo-text)}
+.ipo-feed-dot{display:inline-block;flex:0 0 7px;width:7px;height:7px;border-radius:50%;background:#72d6a5;box-shadow:0 0 0 3px rgba(114,214,165,.1)}
+.ipo-feed-unknown{background:var(--ipo-gold);box-shadow:none}
+.ipo-feed-error{background:var(--ipo-negative);box-shadow:none}
+.ipo-feed-caveat{margin:11px 0 0;color:var(--ipo-muted);font-size:11px;line-height:1.75}
+.ipo-alert{margin:16px 0 0;padding:13px 17px;border-left:2px solid var(--ipo-gold);background:var(--ipo-raised);color:var(--ipo-text);font-size:12px;line-height:1.75}
+.ipo-listing-soon{display:grid;grid-template-columns:215px 1fr;gap:22px;padding:23px 25px;margin-top:33px;border:1px solid var(--ipo-line);background:linear-gradient(112deg,var(--ipo-panel),var(--ipo-bg))}
+.ipo-listing-title h3{margin-top:8px;font:620 19px/1.3 Manrope,sans-serif;letter-spacing:-.045em}
+.ipo-soon-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+.ipo-soon-grid button{min-width:0;text-align:left;padding:13px 14px;background:var(--ipo-raised);border:1px solid var(--ipo-line);color:var(--ipo-text);transition:border-color .2s}
+.ipo-soon-grid button:hover{border-color:var(--ipo-gold)}
+.ipo-soon-grid strong,.ipo-soon-grid span{display:block}
+.ipo-soon-grid strong{font-size:12px;line-height:1.5}
+.ipo-soon-grid span{color:var(--ipo-gold);font-size:11px;line-height:1.55;margin-top:7px}
+.ipo-controls{margin-top:44px}
+.ipo-tabs{display:flex;gap:4px;overflow-x:auto;padding-bottom:8px;border-bottom:1px solid var(--ipo-line)}
+.ipo-tabs button{white-space:nowrap;border:1px solid transparent;background:transparent;padding:13px 16px;color:var(--ipo-muted);font-size:12px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:9px}
+.ipo-tabs button:hover{color:var(--ipo-text);background:var(--ipo-raised)}
+.ipo-tabs button.active{background:var(--ipo-panel);border-color:var(--ipo-line);border-bottom-color:var(--ipo-gold);color:var(--ipo-text)}
+.ipo-tabs button span{font:600 10px "JetBrains Mono",monospace;color:var(--ipo-gold)}
+.ipo-filters{display:flex;flex-wrap:wrap;align-items:flex-end;gap:14px;margin-top:19px}
+.ipo-search{flex:1 1 280px}
+.ipo-search input,.ipo-filter-label select{width:100%;border:1px solid var(--ipo-line);border-radius:0;background:var(--ipo-panel);color:var(--ipo-text);min-height:45px;padding:10px 12px;font-size:13px}
+.ipo-search input::placeholder{color:var(--ipo-muted);opacity:.9}
+.ipo-filter-label{display:flex;flex-direction:column;gap:5px;min-width:158px;flex:0 1 195px}
+.ipo-filter-label>span{font-size:10px;letter-spacing:.09em;color:var(--ipo-muted)}
+.ipo-filter-label select{cursor:pointer}
+.ipo-results-label{margin:23px 0 14px;display:flex;justify-content:space-between;gap:15px;flex-wrap:wrap;color:var(--ipo-muted);font:500 10px/1.6 "JetBrains Mono",monospace}
+.ipo-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+.ipo-issue{display:flex;flex-direction:column;min-width:0;padding:25px;background:var(--ipo-panel);border:1px solid var(--ipo-line);transition:border-color .23s,transform .23s}
+.ipo-issue:hover{border-color:color-mix(in srgb,var(--ipo-gold) 66%,var(--ipo-line));transform:translateY(-2px)}
+.ipo-issue-head{display:flex;justify-content:space-between;align-items:flex-start;gap:20px;min-height:102px}
+.ipo-issue-title{min-width:0;flex:1}
+.ipo-issue-label{color:var(--ipo-gold);font:600 10px/1.6 "JetBrains Mono",monospace;letter-spacing:.08em}
+.ipo-issue-title h3{font:630 clamp(19px,2vw,25px)/1.27 Manrope,"Archivo",sans-serif;letter-spacing:-.05em;margin:10px 0 8px;overflow-wrap:anywhere}
+.ipo-issue-symbol{font-size:10px;color:var(--ipo-muted)}
+.ipo-gmp-block{text-align:right;flex:0 0 130px;display:flex;flex-direction:column;align-items:flex-end;gap:8px}
+.ipo-gmp-block>span:first-child{color:var(--ipo-muted);font:600 9px/1.5 "JetBrains Mono",monospace;letter-spacing:.045em}
+.ipo-gmp-amount{color:var(--ipo-gold);font:650 22px/1.2 Manrope,"Archivo",sans-serif}
+.ipo-gmp-percent{color:var(--ipo-muted);font-size:11px}
+.ipo-positive,.ipo-negative,.ipo-neutral{font-weight:700;font-size:21px}
+.ipo-positive{color:var(--ipo-positive)}
+.ipo-negative{color:var(--ipo-negative)}
+.ipo-neutral{color:var(--ipo-text)}
+.ipo-disputed{color:var(--ipo-gold);font-size:12px;font-weight:600}
+.ipo-no-data{color:var(--ipo-muted);font-size:12px;font-weight:500}
+.ipo-issue-facts{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:17px 20px;padding-block:20px;border-top:1px solid var(--ipo-line);border-bottom:1px solid var(--ipo-line)}
+.ipo-fact{min-width:0;display:flex;flex-direction:column;gap:6px}
+.ipo-fact>span{color:var(--ipo-muted);font-size:10px;letter-spacing:.045em}
+.ipo-fact>strong{font-size:13px;color:var(--ipo-text);font-weight:600;line-height:1.5;overflow-wrap:anywhere}
+.ipo-issue-bottom{display:flex;justify-content:space-between;align-items:center;gap:16px;margin-top:auto;padding-top:20px}
+.ipo-issue-bottom>span{font:600 9px/1.5 "JetBrains Mono",monospace;color:var(--ipo-muted);letter-spacing:.045em}
+.ipo-issue-bottom>button{white-space:nowrap;border:0;background:transparent;padding:9px 0;color:var(--ipo-gold);font-size:12px;font-weight:700;cursor:pointer}
+.ipo-issue-bottom>button:hover{text-decoration:underline;text-underline-offset:4px}
+.ipo-correction{padding:11px 13px;margin-top:13px;background:color-mix(in srgb,var(--ipo-gold) 12%,transparent);color:var(--ipo-text);font-size:11px;line-height:1.6;border-left:2px solid var(--ipo-gold)}
+.ipo-empty{padding:56px 25px;text-align:center;border:1px dashed var(--ipo-line);background:var(--ipo-panel);color:var(--ipo-muted);font-size:14px;line-height:1.8}
+.ipo-empty strong{display:block;color:var(--ipo-text);font-size:19px;margin-bottom:9px}
+.ipo-empty p{max-width:570px;margin:auto}
+.ipo-empty button{color:var(--ipo-gold);padding:10px 12px;margin-top:16px;border:1px solid var(--ipo-line);background:transparent;cursor:pointer}
+.ipo-scoreboard{margin-top:75px;border-top:1px solid var(--ipo-line);padding-top:45px}
+.ipo-scoreboard-head h3{font:640 clamp(30px,3.5vw,48px)/1.18 Manrope,"Archivo",sans-serif;letter-spacing:-.06em;margin:12px 0}
+.ipo-scoreboard-head p{color:var(--ipo-muted);font-size:14px;line-height:1.8;max-width:750px}
+.ipo-board-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;margin-top:30px;background:var(--ipo-line);border:1px solid var(--ipo-line)}
+.ipo-table-scroll{margin-top:28px;overflow-x:auto;border:1px solid var(--ipo-line)}
+.ipo-score-table{border-collapse:collapse;width:100%;min-width:640px;text-align:left;background:var(--ipo-panel)}
+.ipo-score-table th,.ipo-score-table td{padding:15px 17px;border-bottom:1px solid var(--ipo-line);font-size:12px}
+.ipo-score-table thead th{font:700 10px/1.6 "JetBrains Mono",monospace;color:var(--ipo-gold);letter-spacing:.06em}
+.ipo-score-table tbody th{font-weight:620;color:var(--ipo-text);max-width:240px}
+.ipo-score-table tbody th small{display:block;color:var(--ipo-muted);font-size:10px;margin-top:4px}
+.ipo-score-table td{color:var(--ipo-text)}
+.ipo-score-table td :is(.ipo-positive,.ipo-negative,.ipo-neutral){font-size:13px}
+.ipo-methodology{display:grid;grid-template-columns:1fr 1.55fr;gap:40px;margin-top:75px;padding:46px 0;border-block:1px solid var(--ipo-line)}
+.ipo-methodology h3{font:640 clamp(27px,3vw,40px)/1.22 Manrope,"Archivo",sans-serif;letter-spacing:-.055em;margin-top:12px}
+.ipo-method-grid{display:grid;gap:20px}
+.ipo-method-grid article{padding-bottom:17px;border-bottom:1px solid var(--ipo-line)}
+.ipo-method-grid article:last-child{border-bottom:0}
+.ipo-method-grid b{font:650 10px "JetBrains Mono",monospace;color:var(--ipo-gold)}
+.ipo-method-grid p{font-size:13px;line-height:1.85;color:var(--ipo-muted);margin-top:9px}
+.ipo-source-footer{padding-top:22px;color:var(--ipo-muted);font-size:11px;line-height:1.9}
+
+/* Twenty-second promises are avoided: the tour is readable from first paint.
+   Progress merely illustrates the first ten seconds, without blocking use. */
+.ipo-brief{margin-top:28px;padding:22px 25px;position:relative;overflow:hidden;border:1px solid var(--ipo-line);background:var(--ipo-panel);box-shadow:inset 0 1px 0 rgba(255,255,255,.025)}
+.ipo-brief__label{font:650 10px/1.5 "JetBrains Mono",monospace;letter-spacing:.17em;color:var(--ipo-gold)}
+.ipo-brief__track{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:19px;margin-top:19px}
+.ipo-brief__step{padding-top:12px;border-top:1px solid var(--ipo-line)}
+.ipo-brief__step strong{display:block;color:var(--ipo-text);font-size:13px;font-weight:700}
+.ipo-brief__step span{display:block;margin-top:6px;color:var(--ipo-muted);font-size:12px;line-height:1.7}
+.ipo-brief__progress{height:2px;margin-top:18px;background:var(--ipo-line);overflow:hidden}
+.ipo-brief__progress::after{content:"";display:block;height:100%;width:100%;background:var(--ipo-gold);transform-origin:left;transform:scaleX(0);animation:ipo-intro-10s 10s linear forwards}
 @keyframes ipo-intro-10s{to{transform:scaleX(1)}}
-@media(max-width:640px){.ipo-brief{padding:16px}.ipo-brief__track{grid-template-columns:1fr;gap:10px}.ipo-brief__step{padding-top:9px}}
-@media(prefers-reduced-motion:reduce){.ipo-brief__progress::after{animation:none;transform:scaleX(1)}}
+
+/* Fully functional, accessible detail drawer. */
+.ipo-modal-root{position:fixed;inset:0;z-index:90;display:flex;justify-content:flex-end}
+.ipo-modal-scrim{position:absolute;inset:0;background:rgba(0,0,0,.72);border:0;cursor:pointer}
+.ipo-detail-panel{position:relative;z-index:1;flex:0 1 560px;height:100%;overflow-y:auto;overscroll-behavior:contain;padding:30px 34px 70px;background:var(--ipo-bg);color:var(--ipo-text);border-left:1px solid var(--ipo-line);box-shadow:-20px 0 60px rgba(0,0,0,.3)}
+.ipo-detail-top{display:flex;align-items:center;justify-content:space-between}
+.ipo-detail-close{width:42px;height:42px;display:grid;place-items:center;border:1px solid var(--ipo-line);background:var(--ipo-panel);color:var(--ipo-text);font-size:27px!important;cursor:pointer}
+.ipo-detail-segment{color:var(--ipo-gold);font:700 10px "JetBrains Mono",monospace;letter-spacing:.1em;margin-top:29px}
+.ipo-detail-panel h2{font:650 clamp(28px,4vw,42px)/1.14 Manrope,"Archivo",sans-serif;letter-spacing:-.06em;margin:14px 0}
+.ipo-detail-sub{color:var(--ipo-muted);font-size:13px;line-height:1.8}
+.ipo-detail-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:20px;margin-top:27px;padding:25px 0;border-block:1px solid var(--ipo-line)}
+.ipo-detail-section{margin-top:38px}
+.ipo-detail-section h3{font:650 21px/1.25 Manrope,"Archivo",sans-serif;letter-spacing:-.04em;margin-bottom:16px}
+.ipo-detail-muted,.ipo-detail-state{color:var(--ipo-muted);font-size:13px;line-height:1.8;margin-top:17px}
+.ipo-subscriptions{display:grid;gap:0;border-top:1px solid var(--ipo-line)}
+.ipo-subscription{display:flex;justify-content:space-between;gap:12px;padding:14px 0;border-bottom:1px solid var(--ipo-line);font-size:13px;color:var(--ipo-muted)}
+.ipo-subscription strong{color:var(--ipo-text)}
+.ipo-history-chart{margin-top:26px;padding:14px 10px 10px;border:1px solid var(--ipo-line);background:var(--ipo-panel)}
+.ipo-history-chart svg{display:block;width:100%;height:142px;color:var(--ipo-text)}
+.ipo-history-ends{display:flex;justify-content:space-between;gap:13px;flex-wrap:wrap;color:var(--ipo-muted);font-size:10px;padding:0 8px 9px}
+.ipo-detail-sources{border-top:1px solid var(--ipo-line);padding-top:25px;margin-top:45px;color:var(--ipo-muted);font-size:12px;line-height:1.8}
+.ipo-detail-sources>div{display:flex;flex-wrap:wrap;gap:12px 24px;margin-top:16px}
+
+/* Mobile and tablet layouts: no x-overflow, no viewport-sized type. */
+@media(max-width:920px){
+ .ipo-metrics{grid-template-columns:repeat(2,minmax(0,1fr))}
+ .ipo-listing-soon{grid-template-columns:1fr}
+ .ipo-grid{grid-template-columns:1fr}
+ .ipo-soon-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+ .ipo-methodology{grid-template-columns:1fr;gap:28px}
+}
+@media(max-width:640px){
+ .ipo-shell{width:calc(100% - 36px)}
+ .ipo-board-head{align-items:flex-start;flex-direction:column;gap:16px}
+ .ipo-board-head h2{font-size:36px}
+ .ipo-refresh{align-self:flex-start}
+ .ipo-metric{padding:19px 16px}
+ .ipo-metric strong{font-size:29px}
+ .ipo-soon-grid{grid-template-columns:1fr}
+ .ipo-listing-soon{padding:17px}
+ .ipo-filters{display:grid;grid-template-columns:1fr 1fr;gap:13px}
+ .ipo-search{grid-column:1/-1;min-width:0}
+ .ipo-filter-label{min-width:0}
+ .ipo-tabs button{padding:11px 13px}
+ .ipo-issue{padding:19px}
+ .ipo-issue-head{gap:10px}
+ .ipo-issue-title h3{font-size:20px}
+ .ipo-gmp-block{flex-basis:110px}
+ .ipo-gmp-amount{font-size:20px}
+ .ipo-issue-facts{gap:14px 10px}
+ .ipo-issue-bottom>span{max-width:52%;font-size:8px}
+ .ipo-board-stats{grid-template-columns:1fr}
+ .ipo-brief{padding:18px}
+ .ipo-brief__track{grid-template-columns:1fr;gap:11px}
+ .ipo-detail-panel{width:100%;flex:1;padding:25px 21px 55px}
+ .ipo-detail-grid{gap:15px}
+}
+@media(max-width:375px){.ipo-filters{grid-template-columns:1fr}.ipo-search{grid-column:auto}.ipo-gmp-block{flex-basis:100px}.ipo-issue-title h3{font-size:18px}}
+@media(prefers-reduced-motion:reduce){.ipo-brief__progress::after{animation:none;transform:scaleX(1)}.ipo-issue,.ipo-refresh,.ipo-soon-grid button,.ipo-unlock-actions a{transition:none}.ipo-issue:hover{transform:none}}
+
+
+/* Site-level IPO hero and reader use the very same home-page palette. */
+.ahq-ipo-page{background:var(--ipo-bg);color:var(--ipo-text)}
+.ipo-page-shell{width:min(1200px,calc(100% - 48px));margin:auto}
+.ipo-page-hero{padding:78px 0 68px;background:radial-gradient(ellipse at 82% 32%,rgba(215,180,119,.11),transparent 44%),radial-gradient(ellipse at 9% 82%,rgba(169,157,207,.06),transparent 50%),var(--ipo-bg);border-bottom:1px solid var(--ipo-line)}
+html[data-theme="light"] .ipo-page-hero{background:radial-gradient(ellipse at 82% 32%,rgba(136,99,45,.075),transparent 44%),var(--ipo-bg)}
+.ipo-hero-kicker{font:700 10px/1.65 "JetBrains Mono",monospace;letter-spacing:.19em;color:var(--ipo-gold)}
+.ipo-page-hero h1{font:650 clamp(54px,7vw,96px)/1.05 Manrope,"Archivo",sans-serif;letter-spacing:-.078em;margin:25px 0 25px;max-width:920px}
+.ipo-page-hero h1 em,.ipo-education h2 em{color:var(--ipo-gold);font-style:normal}
+.ipo-hero-lead{max-width:750px;color:var(--ipo-muted);font-size:clamp(16px,1.6vw,20px);line-height:1.85}
+.ipo-hero-tags{display:flex;flex-wrap:wrap;gap:17px 30px;margin-top:32px;color:var(--ipo-muted);font:650 10px/1.6 "JetBrains Mono",monospace;letter-spacing:.09em}
+.ipo-hero-tags span::before{content:"/";color:var(--ipo-gold);margin-right:8px}
+.ipo-brief{max-width:100%;margin-top:45px}
+.ipo-education{padding:85px 0 110px;border-top:1px solid var(--ipo-line);background:var(--ipo-panel)}
+.ipo-education h2{font:650 clamp(36px,4.5vw,62px)/1.12 Manrope,"Archivo",sans-serif;letter-spacing:-.067em;margin:20px 0 35px}
+.ipo-faqs{border-top:1px solid var(--ipo-line)}
+.ipo-faqs details{border-bottom:1px solid var(--ipo-line);padding:21px 0}
+.ipo-faqs summary{display:list-item;cursor:pointer;list-style-position:inside;font-size:clamp(14px,1.7vw,19px);font-weight:630}
+.ipo-faqs summary::marker{color:var(--ipo-gold)}
+.ipo-faqs details[open] summary{color:var(--ipo-gold)}
+.ipo-faqs p{margin:14px 0 2px 23px;max-width:900px;color:var(--ipo-muted);line-height:1.9;font-size:14px}
+.ipo-education-note{max-width:900px;margin-top:31px;color:var(--ipo-muted);font-size:12px;line-height:1.9}
+@media(max-width:640px){
+ .ipo-page-shell{width:calc(100% - 36px)}
+ .ipo-page-hero{padding:55px 0 48px}
+ .ipo-page-hero h1{font-size:clamp(48px,12vw,64px)}
+ .ipo-hero-lead{font-size:15px}
+ .ipo-hero-tags{gap:10px 20px;font-size:9px}
+ .ipo-brief{margin-top:32px}
+ .ipo-education{padding:62px 0 80px}
+ .ipo-education h2{font-size:38px}
+}
