@@ -4,7 +4,7 @@ import {useCallback,useEffect,useMemo,useRef,useState} from "react";
 const TABS=[
  {key:"open",label:"Open now",empty:"No IPOs with a confirmed active bidding window are in the current feed."},
  {key:"upcoming",label:"Upcoming",empty:"No upcoming IPOs with announced dates are in the current feed."},
- {key:"closed",label:"Awaiting listing",empty:"No recently closed IPOs are in the current feed."},
+ {key:"closed",label:"Closed issues",empty:"No closed IPOs are in the current feed."},
  {key:"listed",label:"Recently listed",empty:"No recent listings are available in the current feed."},
  {key:"other",label:"Other statuses",empty:"No issues with an unrecognized source status."}
 ];
@@ -83,7 +83,7 @@ function Chart({history}){
 }
 function IpoDetails({ipo,onClose}){
  const [detail,setDetail]=useState(null),[error,setError]=useState(null),[loading,setLoading]=useState(true);
- const closeRef=useRef(null);
+ const closeRef=useRef(null),panelRef=useRef(null);
  useEffect(()=>{
   let alive=true;const ctrl=new AbortController();
   setDetail(null);setError(null);setLoading(true);
@@ -94,16 +94,26 @@ function IpoDetails({ipo,onClose}){
   return()=>{alive=false;ctrl.abort();};
  },[ipo.id]);
  useEffect(()=>{
+  const oldOverflow=document.body.style.overflow;
+  document.body.style.overflow="hidden";
   closeRef.current?.focus();
-  const handler=e=>{if(e.key==="Escape")onClose();};
+  const handler=e=>{
+   if(e.key==="Escape"){e.preventDefault();onClose();return;}
+   if(e.key!=="Tab")return;
+   const nodes=Array.from(panelRef.current?.querySelectorAll('button:not(:disabled),a[href],input:not(:disabled),select:not(:disabled),[tabindex]:not([tabindex="-1"])')||[]);
+   if(!nodes.length)return;
+   const first=nodes[0],last=nodes[nodes.length-1];
+   if(e.shiftKey&&document.activeElement===first){e.preventDefault();last.focus();}
+   else if(!e.shiftKey&&document.activeElement===last){e.preventDefault();first.focus();}
+  };
   document.addEventListener("keydown",handler);
-  return()=>document.removeEventListener("keydown",handler);
+  return()=>{document.body.style.overflow=oldOverflow;document.removeEventListener("keydown",handler);};
  },[onClose]);
  const subs=detail?.subscriptions||[];
  const history=detail?.gmpHistory||[];
  return <div className="ipo-modal-root">
   <button type="button" className="ipo-modal-scrim" onClick={onClose} aria-label="Close IPO detail panel"/>
-  <aside className="ipo-detail-panel" role="dialog" aria-modal="true" aria-label={ipo.name+" IPO details"}>
+  <aside ref={panelRef} className="ipo-detail-panel" role="dialog" aria-modal="true" aria-label={ipo.name+" IPO details"}>
    <div className="ipo-detail-top"><span className="ipo-eyebrow">AHQ / IPO DETAILS</span><button type="button" ref={closeRef} onClick={onClose} className="ipo-detail-close" aria-label="Close details">×</button></div>
    <p className="ipo-detail-segment">{ipo.segment} · {ipo.status.toUpperCase()}</p><h2>{ipo.name}</h2>
    <p className="ipo-detail-sub">Issue details and observed demand. Values may be delayed; reported GMP is not exchange-verified.</p>
@@ -185,7 +195,7 @@ export default function IpoScreen(){
    <div className="ipo-metrics" aria-label="IPO coverage counts">
     <Metric label="Open for bidding" value={buckets?plain(buckets.open.length):"—"} note="Date-checked status"/>
     <Metric label="Announced upcoming" value={buckets?plain(buckets.upcoming.length):"—"} note="Tracked by the feed"/>
-    <Metric label="Closed / awaiting listing" value={buckets?plain(buckets.closed.length):"—"} note="Not open for bids"/>
+    <Metric label="Closed issues" value={buckets?plain(buckets.closed.length):"—"} note="Not open for bids"/>
     <Metric label="Recently listed" value={buckets?plain(buckets.listed.length):"—"} note="Recent provider coverage"/>
    </div>
    <div className="ipo-feed-meta" role="status">
@@ -208,7 +218,8 @@ export default function IpoScreen(){
    <div className="ipo-results-label"><span>{loading?"Checking issues…":plain(issues.length)+" displayed · "+plain(allCount)+" issues in current feed"}</span><span>{query||segment!=="all"?"Filtered results":"Showing current tracked coverage, not the complete exchange universe"}</span></div>
    <div id="ahq-ipo-results" role="tabpanel" aria-label={TABS.find(t=>t.key===tab)?.label} aria-live="polite">
     {loading&&!buckets?<div className="ipo-empty">Checking the IPO data feed…</div>:null}
-    {!loading&&issues.length===0?<div className="ipo-empty"><strong>{query||segment!=="all"?"No matching issues":"No records for this stage"}</strong><p>{query||segment!=="all"?"Try clearing the search or selecting all issue types.":TABS.find(t=>t.key===tab)?.empty}</p>{query||segment!=="all"?<button type="button" onClick={()=>{setQuery("");setSegment("all");}}>Clear filters</button>:null}</div>:null}
+    {!loading&&buckets&&issues.length===0?<div className="ipo-empty"><strong>{query||segment!=="all"?"No matching issues":"No records for this stage"}</strong><p>{query||segment!=="all"?"Try clearing the search or selecting all issue types.":TABS.find(t=>t.key===tab)?.empty}</p>{query||segment!=="all"?<button type="button" onClick={()=>{setQuery("");setSegment("all");}}>Clear filters</button>:null}</div>:null}
+    {!loading&&!buckets?<div className="ipo-empty"><strong>Issue data currently unavailable</strong><p>Please use the NSE and BSE links below to confirm active offers while the provider is unavailable.</p></div>:null}
     {issues.length>0?<div className="ipo-grid">{issues.map(ipo=><IpoCard key={ipo.id} ipo={ipo} actual={actualById[ipo.id]} onOpen={setSelected}/>)}</div>:null}
    </div>
    {tab==="listed"&&<section className="ipo-scoreboard"><div className="ipo-scoreboard-head"><span className="ipo-eyebrow">02 / LISTING REALITY CHECK</span><h3>What GMP implied. <em>What actually happened.</em></h3><p>Only historical issues with recorded comparisons are included. Missing closing-day GMP must stay missing — never an assumed zero.</p></div>
