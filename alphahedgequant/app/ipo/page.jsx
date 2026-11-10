@@ -2,9 +2,9 @@ import IpoScreen from "@/components/IpoScreen";
 import "./ipo-intro.css";
 
 export const metadata={
- title:"IPO Intelligence India — IPO Calendar, GMP, Subscription, Allotment & Listing | AlphaHedgeQuant",
+ title: "IPO Intelligence India — IPO Calendar, GMP, Subscription, Allotment & Listing | AlphaHedgeQuant",
  description:"Explore the Indian IPO market: upcoming and open NSE/BSE issues, mainboard and SME price bands, bidding dates, allotments, category subscriptions, unofficial GMP trends and actual listing performance. Open access.",
- alternates:{canonical:"/ipo"},
+ alternates: { canonical: "/ipo" },
  robots:{index:true,follow:true},
  openGraph:{
   title:"IPO Intelligence India | AlphaHedgeQuant",
@@ -50,7 +50,7 @@ export default function Page(){
   <section className="ipo-page-hero" aria-labelledby="ipo-page-title">
    <div className="ipo-page-shell">
     <p className="ipo-hero-kicker">ALPHAHEDGEQUANT / PUBLIC MARKET INTELLIGENCE</p>
-    <h1 id="ipo-page-title">Indian IPO<br/><em>Intelligence.</em></h1>
+    <h1 id="ipo-page-title" aria-label="Indian IPO Intelligence">Indian IPO<br/><em>Intelligence.</em></h1>
     <p className="ipo-hero-lead">From the first prospectus to the first traded price. Track upcoming IPOs, public issue terms, subscription demand, unofficial GMP and realized listing outcomes — without confusing expectations with evidence.</p>
     <div className="ipo-hero-tags"><span>NSE + BSE</span><span>MAINBOARD + SME</span><span>OPEN TO EVERYONE</span></div>
     <div className="ipo-brief" aria-label="IPO Intelligence introduction">
@@ -63,7 +63,7 @@ export default function Page(){
     </div>
    </div>
   </section>
-  <IpoScreen/>
+  <IpoScreen />
   <section className="ipo-education" aria-labelledby="ipo-explained">
    <div className="ipo-page-shell">
     <p className="ipo-hero-kicker">03 / THE RESEARCH NOTES</p>
