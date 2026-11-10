@@ -29,7 +29,7 @@ test("detail and scoreboard requests enforce slug validation and preserve null f
 });
 test("dashboard provides complete live stages, real details, searchable filters and listing checks",()=>{
  const screen=read("components/IpoScreen.jsx");
- for(const name of ["Open now","Upcoming","Awaiting listing","Recently listed","Other statuses"])
+ for(const name of ["Open now","Upcoming","Closed issues","Recently listed","Other statuses"])
   assert.ok(screen.includes(name),name);
  for(const element of ["IPO sort order","Search IPOs","ipo_issue_opened","ipo_filter_changed","IpoDetails","IPO details","GMP history","View details","GMP implied","Actual listing"])
   assert.ok(screen.includes(element),element);
