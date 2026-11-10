@@ -44,12 +44,18 @@ test("representative quantitative calculations match independently checked finan
 });
 test("interactive arena ships without replacing continuous course or math modules",()=>{
  const page=source("../app/learn/page.jsx");
+ const protectedAcademy=source("../components/AcademyProtected.jsx");
+ const interviewRoute=source("../app/learn/interviews/page.jsx");
+ const mentalRoute=source("../app/learn/mental-maths/page.jsx");
  const arena=source("../components/InterviewArena.jsx");
  const bank=source("../lib/academyInterviews.js");
  const css=source("../components/interview-arena.css");
- assert.match(page,/tab==="quant"&&<ContinuousQuantCourse/);
- assert.match(page,/tab==="mental"&&<section/);
- assert.match(page,/tab==="interview"&&<InterviewArena progress=\{progress\} save=\{save\} sync=\{sync\}/);
+ assert.match(page,/<PublicLearnCourse\/>/);
+ assert.match(protectedAcademy,/tab==="quant"&&<ContinuousQuantCourse/);
+ assert.match(protectedAcademy,/tab==="mental"&&<section/);
+ assert.match(mentalRoute,/initialTab="mental"/);
+ assert.match(protectedAcademy,/tab==="interview"&&<InterviewArena progress=\{progress\} save=\{save\} sync=\{sync\}/);
+ assert.match(interviewRoute,/initialTab="interview"/);
  assert.match(bank,/\.concat\(SCENARIO_CASES\)/);
  assert.match(arena,/5-min mock · 10 Q/);
  assert.match(arena,/localStorage\.setItem/);

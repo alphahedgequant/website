@@ -6,9 +6,12 @@ import {QUANT_LESSONS} from "../lib/quantCourse.mjs";
 import {CHAPTER_CONNECTIONS,MODULE_LEARNING_BRIDGES} from "../lib/quantLearningConnections.mjs";
 const view=readFileSync(new URL("../components/ContinuousQuantCourse.jsx",import.meta.url),"utf8");
 const page=readFileSync(new URL("../app/learn/page.jsx",import.meta.url),"utf8");
+const publicPage=readFileSync(new URL("../app/learn/PublicLearnCourse.jsx",import.meta.url),"utf8");
 const css=readFileSync(new URL("../components/continuous-course.css",import.meta.url),"utf8");
 test("only the continuous reader is active on the Learn Quant page",()=>{
- assert.match(page,/tab==="quant"&&<ContinuousQuantCourse/);
+ assert.match(page,/import PublicLearnCourse/);
+ assert.match(page,/<PublicLearnCourse\/>/);
+ assert.match(publicPage,/<ContinuousQuantCourse progress=\{progress\} save=\{save\} sync=\{sync\}/);
  assert.doesNotMatch(page,/<QuantCourse\s+progress=/);
  assert.match(view,/className="ac-sidebar"/);
  assert.match(view,/className="ac-paper"/);
@@ -31,15 +34,17 @@ test("navigation stays grayscale with only one module progress sidebar",()=>{
 test("completion messaging requires save success rather than assuming database writes worked",()=>{
  assert.match(view,/const saved=await save\(topic\.id,100,true\)/);
  assert.match(view,/const saved=await save\(id,100,true\)/);
- assert.match(page,/setSync\("Progress saved"\);return true/);
- assert.match(page,/return false/);
+ assert.match(publicPage,/setSync\("Progress saved to your account"\);return true/);
+ assert.match(publicPage,/return false/);
 });
 
 test("Learn Quant avoids duplicate dashboard metrics and giant selection cards",()=>{
- assert.match(page,/tab==="mental"&&<div className="grid grid-cols-2/);
- assert.doesNotMatch(page,/tab!=="quant"&&<div className="grid grid-cols-2/);
- assert.match(page,/aria-label="Academy areas"/);
- assert.doesNotMatch(page,/className="grid gap-3 md:grid-cols-3 mt-8"/);
+ assert.match(publicPage,/aria-label="Academy areas"/);
+ assert.match(publicPage,/href="\/learn\/interviews"/);
+ assert.match(publicPage,/href="\/learn\/mental-maths"/);
+ assert.doesNotMatch(publicPage,/tab!=="quant"&&<div className="grid grid-cols-2/);
+ assert.match(publicPage,/aria-label="Academy areas"/);
+ assert.doesNotMatch(publicPage,/className="grid gap-3 md:grid-cols-3 mt-8"/);
 });
 
 test("all 74 chapters have a distinct substantive connection to adjacent concepts",()=>{
@@ -50,6 +55,6 @@ test("all 74 chapters have a distinct substantive connection to adjacent concept
  }
  assert.equal(MODULE_LEARNING_BRIDGES.length,6);
  assert.ok(MODULE_LEARNING_BRIDGES.every(s=>s.length>=180));
- assert.match(view,/CHAPTER_CONNECTIONS\[topic\.id\]/);
- assert.match(view,/MODULE_LEARNING_BRIDGES\[section\]/);
+ assert.match(view,/CHAPTER_CONNECTIONS\[topic\.id\]\|\|topic\.connection/);
+ assert.match(view,/ALL_BRIDGES\[section\]/);
 });

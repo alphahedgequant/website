@@ -46,7 +46,7 @@ export default function PublicLearnCourse(){
  return <div className="mx-auto max-w-[1280px] px-5 md:px-10 py-14 text-body">
   <p className="eyebrow mb-3">[ AHQ : ACADEMY / PUBLIC LEARNING ]</p>
   <h1 className="font-display text-4xl md:text-6xl font-semibold tracking-tight">The Quant Learning Lab<span className="text-amber">.</span></h1>
-  <p className="mt-4 max-w-3xl text-muted leading-relaxed">Study quantitative finance from first principles. All six modules, examples, mathematics and Python practice are free to read — no account required.</p>
+  <p className="mt-4 max-w-3xl text-muted leading-relaxed">Study quantitative finance from first principles. All twelve modules, examples, mathematics and Python practice are free to read — no account required.</p>
   <nav aria-label="Academy areas" className="flex flex-wrap gap-2 mt-6 border-b border-line pb-3">
    <span aria-current="page" className="px-4 py-2.5 rounded-lg border text-sm font-medium bg-white text-black border-white">Learn Quant · Free</span>
    <Link href="/learn/interviews" className="px-4 py-2.5 rounded-lg border text-sm font-medium bg-transparent text-body border-line hover:border-white/60">Quant Interviews <span className="text-muted">· Sign in</span></Link>

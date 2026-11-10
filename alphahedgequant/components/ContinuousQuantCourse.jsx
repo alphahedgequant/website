@@ -1,13 +1,19 @@
 "use client";
 import {useMemo,useState,useEffect} from "react";
-import {MODULE_GUIDES,MODULE_TOPICS,topicProgress} from "@/lib/quantModuleGuides.mjs";
+import {MODULE_GUIDES,MODULE_TOPICS} from "@/lib/quantModuleGuides.mjs";
 import {TOPIC_DEEP_DIVES} from "@/lib/quantDeepDives.mjs";
 import {CHAPTER_CONNECTIONS,MODULE_LEARNING_BRIDGES} from "@/lib/quantLearningConnections.mjs";
-import {QUANT_SECTIONS,QUANT_LESSONS,sectionProgress,isCorrect} from "@/lib/quantCourse.mjs";
+import {QUANT_SECTIONS,QUANT_LESSONS,isCorrect} from "@/lib/quantCourse.mjs";
 import {QUANT_TEACHING} from "@/lib/quantTeaching.mjs";
+import {EXTENDED_SECTIONS,EXTENDED_MODULE_GUIDES,EXTENDED_MODULE_TOPICS,EXTENDED_LESSONS,EXTENDED_BRIDGES} from "@/lib/quantExtendedModules.mjs";
 import "./continuous-course.css";
 
 const lpad=n=>String(n).padStart(2,"0");
+const ALL_SECTIONS=[...QUANT_SECTIONS,...EXTENDED_SECTIONS];
+const ALL_GUIDES=[...MODULE_GUIDES,...EXTENDED_MODULE_GUIDES];
+const ALL_TOPICS=[...MODULE_TOPICS,...EXTENDED_MODULE_TOPICS];
+const ALL_LESSONS=[...QUANT_LESSONS,...EXTENDED_LESSONS.map(lesson=>({...lesson,example:"Work it out before checking the answer. Use the requested unit."}))];
+const ALL_BRIDGES=[...MODULE_LEARNING_BRIDGES,...EXTENDED_BRIDGES];
 function MiniFigure({section,topic}){
  const i=topic.index;
  if(section===2&&(i===3||i===2))return <figure className="ac-figure">
@@ -43,10 +49,11 @@ function Chapter({topic,section,progress,save}){
   <h3 id={"ac-title-"+topic.id}>{topic.title}</h3>
   <p className="ac-lead">{deep?.intuition||topic.concept}</p>
   {deep&&<p>{topic.concept}</p>}
-  <p className="ac-explanation-bridge">{CHAPTER_CONNECTIONS[topic.id]}</p>
+  <p className="ac-explanation-bridge">{CHAPTER_CONNECTIONS[topic.id]||topic.connection}</p>
   <h4>Make it concrete</h4><p>{deep?.worked||topic.example}</p>
   {deep&&<p>{topic.example}</p>}
   <MiniFigure section={section} topic={topic}/>
+  {!deep&&topic.formula&&<div className="ac-equation"><small>IN ONE LINE</small><p>{topic.formula}</p></div>}
   {deep&&<div className="ac-equation"><small>THE RELATIONSHIP</small><p>{deep.formula}</p></div>}
   <p><strong>What to remember:</strong> {topic.caution} {deep?.pitfall||""}</p>
   <div className="ac-review"><label htmlFor={"ac-ref-"+topic.id}>Check your understanding: explain this idea in your own words, including one limitation.</label>
@@ -58,7 +65,7 @@ function Chapter({topic,section,progress,save}){
 function Foundation({lesson,progress,save}){
  const [value,setValue]=useState("");
  const [result,setResult]=useState(null);
- const t=QUANT_TEACHING[lesson.id];const done=Boolean(progress[lesson.id]?.completed);
+ const t=QUANT_TEACHING[lesson.id]||lesson;const done=Boolean(progress[lesson.id]?.completed);
  async function check(e){e.preventDefault();if(!value.trim())return;const ok=isCorrect(lesson,value);setResult(ok);if(ok){const saved=await save(lesson.id,100,true);if(!saved)setResult("save-failed")}}
  return <section className="ac-foundation" id={"ac-found-"+lesson.id}>
   <div className="ac-found-title"><h4>{lesson.title}</h4><span>{done?"COMPLETED ✓":"PRACTICE"}</span></div>
@@ -70,7 +77,7 @@ function Foundation({lesson,progress,save}){
  </section>
 }
 function Coding({section,progress,save}){
- const guide=MODULE_GUIDES[section];const id="quant-lab-"+(section+1);const done=Boolean(progress[id]?.completed);
+ const guide=ALL_GUIDES[section];const id="quant-lab-"+(section+1);const done=Boolean(progress[id]?.completed);
  const [code,setCode]=useState(guide.code);const [reflection,setReflection]=useState("");const [feedback,setFeedback]=useState("");
  useEffect(()=>{setCode(guide.code);setReflection("");setFeedback("");},[guide]);
  const record=async()=>{if(reflection.trim().length<40){setFeedback("Write what you ran, changed and learned (at least 40 characters).");return}const saved=await save(id,100,true);setFeedback(saved?"Practice recorded. This is self-reported, not an automatically graded submission.":"Could not save practice to your account; please retry.")};
@@ -86,23 +93,23 @@ function Coding({section,progress,save}){
 }
 export default function ContinuousQuantCourse({progress={},save,sync}){
  const [section,setSection]=useState(0);
- const topics=useMemo(()=>MODULE_TOPICS.filter(t=>t.module===section),[section]);
- const foundations=useMemo(()=>QUANT_LESSONS.filter(l=>l.section===section),[section]);
- const doneLessons=QUANT_LESSONS.filter(l=>progress[l.id]?.completed).length;
- const doneTopics=MODULE_TOPICS.filter(t=>progress[t.id]?.completed).length;
- const doneLabs=Array.from({length:6},(_,i)=>progress["quant-lab-"+(i+1)]?.completed).filter(Boolean).length;
- const total=QUANT_LESSONS.length+MODULE_TOPICS.length+6;
+ const topics=useMemo(()=>ALL_TOPICS.filter(t=>t.module===section),[section]);
+ const foundations=useMemo(()=>ALL_LESSONS.filter(l=>l.section===section),[section]);
+ const doneLessons=ALL_LESSONS.filter(l=>progress[l.id]?.completed).length;
+ const doneTopics=ALL_TOPICS.filter(t=>progress[t.id]?.completed).length;
+ const doneLabs=Array.from({length:ALL_SECTIONS.length},(_,i)=>progress["quant-lab-"+(i+1)]?.completed).filter(Boolean).length;
+ const total=ALL_LESSONS.length+ALL_TOPICS.length+ALL_SECTIONS.length;
  const choose=i=>{setSection(i);setTimeout(()=>document.getElementById("ac-module-top")?.scrollIntoView({block:"start",behavior:"smooth"}),60)};
  return <section className="ac-course" id="learn-quant" aria-label="Quantitative finance course">
-  <div className="ac-intro"><p>ALPHAHEDGEQUANT / LEARN QUANT</p><h2>Six modules, one clear learning path.</h2><span>Read the chapters in order, study worked examples, check your understanding, then try the Python exercise. Everything is written to be understandable with basic maths.</span></div>
+  <div className="ac-intro"><p>ALPHAHEDGEQUANT / LEARN QUANT</p><h2>Twelve modules, one clear learning path.</h2><span>Read the chapters in order, study worked examples, check your understanding, then try the Python exercise. Everything is written to be understandable with basic maths.</span></div>
   <div className="ac-layout">
    <aside className="ac-sidebar" aria-label="Module progress and navigation"><div className="ac-sidebar-title"><strong>YOUR PROGRESS</strong><span>{doneLessons+doneTopics+doneLabs} / {total}</span><div className="ac-progress"><span style={{width:(doneLessons+doneTopics+doneLabs)/total*100+"%"}}/></div></div>
-    {QUANT_SECTIONS.map((s,i)=>{const ch=topicProgress(progress,i),math=sectionProgress(progress,i),lab=Boolean(progress["quant-lab-"+(i+1)]?.completed),d=ch.done+math.done+Number(lab),t=ch.total+math.total+1;return <button key={s.id} type="button" onClick={()=>choose(i)} aria-current={i===section?"page":undefined} className={"ac-sidebar-item "+(i===section?"selected":"")}><span>MODULE {lpad(i+1)} <small>{d}/{t}</small></span><strong>{s.title}</strong><span className="ac-progress"><span style={{width:d/t*100+"%"}}/></span></button>})}
+    {ALL_SECTIONS.map((s,i)=>{const chItems=ALL_TOPICS.filter(t=>t.module===i),mathItems=ALL_LESSONS.filter(l=>l.section===i),lab=Boolean(progress["quant-lab-"+(i+1)]?.completed),d=chItems.filter(t=>progress[t.id]?.completed).length+mathItems.filter(l=>progress[l.id]?.completed).length+Number(lab),t=chItems.length+mathItems.length+1;return <button key={s.id} type="button" onClick={()=>choose(i)} aria-current={i===section?"page":undefined} className={"ac-sidebar-item "+(i===section?"selected":"")}><span>MODULE {lpad(i+1)} <small>{d}/{t}</small></span><strong>{s.title}</strong><span className="ac-progress"><span style={{width:d/t*100+"%"}}/></span></button>})}
     <p className="ac-sync" aria-live="polite">{sync}</p>
    </aside>
    <article className="ac-paper" id="ac-module-top">
     <div className="ac-paper-inner">
-     <header className="ac-module-head"><p className="ac-overline">ALPHAHEDGEQUANT · MODULE {lpad(section+1)} OF 06</p><h2>{MODULE_GUIDES[section].title}</h2><p className="ac-lead">{MODULE_GUIDES[section].intro}</p><p>{MODULE_GUIDES[section].bridge}</p><p className="ac-module-bridge">{MODULE_LEARNING_BRIDGES[section]}</p>
+     <header className="ac-module-head"><p className="ac-overline">ALPHAHEDGEQUANT · MODULE {lpad(section+1)} OF {lpad(ALL_SECTIONS.length)}</p><h2>{ALL_GUIDES[section].title}</h2><p className="ac-lead">{ALL_GUIDES[section].intro}</p><p>{ALL_GUIDES[section].bridge}</p><p className="ac-module-bridge">{ALL_BRIDGES[section]}</p>
       <nav className="ac-toc" aria-label="In this module"><strong>On this page</strong><a href="#ac-chapter-start">Chapters 01–{lpad(topics.length)}</a><a href="#ac-foundations">Worked practice</a><a href="#ac-coding">Coding assignment</a></nav></header>
      <div id="ac-chapter-start" className="ac-chapters">
       {topics.map(topic=><Chapter key={topic.id} topic={topic} section={section} progress={progress} save={save}/>)}
@@ -111,7 +118,7 @@ export default function ContinuousQuantCourse({progress={},save,sync}){
      {foundations.map(l=><Foundation key={l.id} lesson={l} progress={progress} save={save}/>)}
      </section>
      <Coding key={section} section={section} progress={progress} save={save}/>
-     <footer className="ac-module-footer"><p>End of Module {lpad(section+1)} · {MODULE_GUIDES[section].title}</p>{section<5&&<button type="button" onClick={()=>choose(section+1)}>Continue to Module {lpad(section+2)} →</button>}</footer>
+     <footer className="ac-module-footer"><p>End of Module {lpad(section+1)} · {ALL_GUIDES[section].title}</p>{section<ALL_SECTIONS.length-1&&<button type="button" onClick={()=>choose(section+1)}>Continue to Module {lpad(section+2)} →</button>}</footer>
     </div>
    </article>
   </div>
