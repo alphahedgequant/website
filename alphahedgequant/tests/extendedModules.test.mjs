@@ -71,7 +71,7 @@ test("reader retains the original site style, free access and progression",()=>{
  assert.equal(EXTENDED_BRIDGES.length,6);
  assert.ok(EXTENDED_BRIDGES.every(x=>x.length>180));
  assert.match(reader,/ALL_SECTIONS=\[\.\.\.QUANT_SECTIONS,\.\.\.EXTENDED_SECTIONS\]/);
- assert.match(reader,/ALL_TOPICS=\[\.\.\.MODULE_TOPICS,\.\.\.EXTENDED_MODULE_TOPICS\]/);
+ assert.match(reader,/ALL_TOPICS=\[\.\.\.MODULE_TOPICS,\.\.\.EXTENDED_MODULE_TOPICS,/);
  assert.match(reader,/ALL_LESSONS=\[\.\.\.QUANT_LESSONS,/);
  assert.match(reader,/length:ALL_SECTIONS\.length/);
  assert.match(reader,/CHAPTER_CONNECTIONS\[topic\.id\]\|\|topic\.connection/);
