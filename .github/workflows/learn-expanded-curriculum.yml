@@ -1,0 +1,29 @@
+name: Expanded Learn Curriculum Validation
+on:
+  pull_request:
+    paths:
+      - "alphahedgequant/lib/quantExtendedModules.mjs"
+      - "alphahedgequant/components/ContinuousQuantCourse.jsx"
+      - "alphahedgequant/app/learn/**"
+      - "alphahedgequant/tests/extendedModules.test.mjs"
+      - ".github/workflows/learn-expanded-curriculum.yml"
+  push:
+    branches: [main]
+    paths:
+      - "alphahedgequant/lib/quantExtendedModules.mjs"
+      - "alphahedgequant/components/ContinuousQuantCourse.jsx"
+      - "alphahedgequant/app/learn/**"
+      - "alphahedgequant/tests/extendedModules.test.mjs"
+jobs:
+  validate-learn-modules:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: alphahedgequant
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - name: Validate module content, IDs, reader wiring and Python starter code
+        run: node --test tests/extendedModules.test.mjs
