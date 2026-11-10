@@ -6,7 +6,8 @@ const positiveOrNull=x=>{const n=numberOrNull(x);return n!==null&&n>0?n:null;};
 const isoDay=x=>{
  if(typeof x!=="string"||!/^\d{4}-\d{2}-\d{2}/.test(x))return null;
  const date=x.slice(0,10);
- return Number.isFinite(Date.parse(date+"T00:00:00Z"))?date:null;
+ const ms=Date.parse(date+"T00:00:00Z");
+ return Number.isFinite(ms)&&new Date(ms).toISOString().slice(0,10)===date?date:null;
 };
 export function istToday(now=new Date()){
  const parts=new Intl.DateTimeFormat("en-GB",{timeZone:"Asia/Kolkata",year:"numeric",month:"2-digit",day:"2-digit"}).formatToParts(now);
@@ -46,7 +47,7 @@ export function normalizeIpo(x,today=istToday()){
  return {
   id:String(x?.slug||"").trim(),name:String(x?.name||"").trim()||"Unnamed IPO",
   symbol:typeof x?.symbol==="string"?x.symbol.slice(0,40):null,
-  segment:String(x?.board||"").trim().toUpperCase()==="SME"?"SME":"Mainboard",
+  segment:String(x?.board||"").trim().toUpperCase()==="SME"?"SME":String(x?.board||"").trim().toUpperCase()==="MAINBOARD"?"Mainboard":"Unspecified",
   status:state.status,rawStatus,sourceStatus,dateAdjusted:state.adjusted,
   issuePrice,priceBand:min!==null&&price!==null?"₹"+min+"–₹"+price:price!==null?"₹"+price:null,
   lotSize,minimumInvestment:price!==null&&lotSize!==null?+(price*lotSize).toFixed(2):null,
