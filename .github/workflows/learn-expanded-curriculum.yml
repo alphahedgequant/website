@@ -3,17 +3,21 @@ on:
   pull_request:
     paths:
       - "alphahedgequant/lib/quantExtendedModules.mjs"
+      - "alphahedgequant/lib/quantMoreTopics*.mjs"
       - "alphahedgequant/components/ContinuousQuantCourse.jsx"
       - "alphahedgequant/app/learn/**"
       - "alphahedgequant/tests/extendedModules.test.mjs"
+      - "alphahedgequant/tests/moreTopics.test.mjs"
       - ".github/workflows/learn-expanded-curriculum.yml"
   push:
     branches: [main]
     paths:
       - "alphahedgequant/lib/quantExtendedModules.mjs"
+      - "alphahedgequant/lib/quantMoreTopics*.mjs"
       - "alphahedgequant/components/ContinuousQuantCourse.jsx"
       - "alphahedgequant/app/learn/**"
       - "alphahedgequant/tests/extendedModules.test.mjs"
+      - "alphahedgequant/tests/moreTopics.test.mjs"
 jobs:
   validate-learn-modules:
     runs-on: ubuntu-latest
@@ -26,4 +30,4 @@ jobs:
         with:
           node-version: 24
       - name: Validate module content, IDs, reader wiring and Python starter code
-        run: node --test tests/extendedModules.test.mjs
+        run: node --test tests/extendedModules.test.mjs tests/moreTopics.test.mjs

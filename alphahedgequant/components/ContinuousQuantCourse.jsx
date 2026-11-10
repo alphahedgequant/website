@@ -6,12 +6,16 @@ import {CHAPTER_CONNECTIONS,MODULE_LEARNING_BRIDGES} from "@/lib/quantLearningCo
 import {QUANT_SECTIONS,QUANT_LESSONS,isCorrect} from "@/lib/quantCourse.mjs";
 import {QUANT_TEACHING} from "@/lib/quantTeaching.mjs";
 import {EXTENDED_SECTIONS,EXTENDED_MODULE_GUIDES,EXTENDED_MODULE_TOPICS,EXTENDED_LESSONS,EXTENDED_BRIDGES} from "@/lib/quantExtendedModules.mjs";
+import {MORE_TOPICS_1} from "@/lib/quantMoreTopics1.mjs";
+import {MORE_TOPICS_2} from "@/lib/quantMoreTopics2.mjs";
+import {MORE_TOPICS_3} from "@/lib/quantMoreTopics3.mjs";
+import {MORE_TOPICS_4} from "@/lib/quantMoreTopics4.mjs";
 import "./continuous-course.css";
 
 const lpad=n=>String(n).padStart(2,"0");
 const ALL_SECTIONS=[...QUANT_SECTIONS,...EXTENDED_SECTIONS];
 const ALL_GUIDES=[...MODULE_GUIDES,...EXTENDED_MODULE_GUIDES];
-const ALL_TOPICS=[...MODULE_TOPICS,...EXTENDED_MODULE_TOPICS];
+const ALL_TOPICS=[...MODULE_TOPICS,...EXTENDED_MODULE_TOPICS,...MORE_TOPICS_1,...MORE_TOPICS_2,...MORE_TOPICS_3,...MORE_TOPICS_4];
 const ALL_LESSONS=[...QUANT_LESSONS,...EXTENDED_LESSONS.map(lesson=>({...lesson,example:"Work it out before checking the answer. Use the requested unit."}))];
 const ALL_BRIDGES=[...MODULE_LEARNING_BRIDGES,...EXTENDED_BRIDGES];
 function MiniFigure({section,topic}){
