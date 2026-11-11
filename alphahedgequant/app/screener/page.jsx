@@ -523,7 +523,7 @@ export default function Markets() {
       case "marketCap": return <span className="font-mono">{fmtCap(v, market)}</span>;
       case "changePct": return <span className={`font-mono ${pctCls(v)}`}>{v == null ? "-" : fmt(v) + "%"}</span>;
       case "volume": return <span className="font-mono">{fmtVol(v)}</span>;
-      case "price": return <span className="font-mono text-gain" title={market === "US" && r.priceAsOf ? `Provider quote time (UTC): ${r.priceAsOf}${r.stale ? " · older quote" : ""}` : undefined}>{MARKETS[market].cur}{fmt(v)}</span>;
+      case "price": return <span className="font-mono text-gain" title={r.priceAsOf ? `Provider quote time (UTC): ${r.priceAsOf}${r.stale ? " · older quote" : ""}` : "Provider quote time unavailable"}>{typeof v === "number" && v > 0 ? MARKETS[market].cur+fmt(v) : "—"}</span>;
       case "distSma50": case "distSma200": {
         const sma = col === "distSma50" ? r.sma50 : r.sma200;
         if (!sma || !r.price) return <span className="font-mono text-muted">-</span>;
@@ -623,7 +623,7 @@ export default function Markets() {
           <div key={name} className="card px-4 py-2.5 flex items-baseline justify-between gap-3">
             <span className="font-mono text-[11px] tracking-wider text-muted uppercase">{name}</span>
             <span className="font-mono text-sm">{fmt(v?.value ?? v?.price)}</span>
-            <span className={`font-mono text-xs ${pctCls(v?.changePct)}`}>{fmt(v?.changePct)}%</span>
+            <span className={`font-mono text-xs ${pctCls(v?.changePct)}`}>{v?.prevClose > 0 && Number.isFinite(v?.changePct) ? fmt(v.changePct)+"%" : "—"}</span>
           </div>
         ))}
         {!indices && status !== "error" && (
@@ -746,10 +746,8 @@ export default function Markets() {
             <p className="font-mono text-xs text-muted">
               #{filtered.length === 0 ? 0 : safePage * PAGE_SIZE + 1} / <span className="text-body">{filtered.length}</span> Total
             </p>
-            <p className="text-xs text-muted/50 select-none" title="Coming in v2">
-              Open in Compare | Save as Portfolio | Create Alert
-            </p>
-            <p className="font-mono text-xs text-muted">Refresh check: 15s | Page {safePage + 1} / {pages}</p>
+            <p className="text-xs text-muted/70">Stock and filter coverage depends on the connected provider.</p>
+            <div className="flex items-center gap-3"><p className="font-mono text-xs text-muted">Refresh check: 15s | Page {safePage + 1} / {pages}</p><button type="button" onClick={() => setRefreshSeq(n => n + 1)} className="text-xs text-amber hover:underline">Check now</button></div>
           </div>
 
           <div className="card mt-2 overflow-x-auto">
@@ -775,6 +773,9 @@ export default function Markets() {
                     ))}
                   </tr>
                 ))}
+                {pageRows.length === 0 && status === "error" && (
+                  <tr><td colSpan={VIEWS[view].length + 1} className="px-3 py-10 text-center text-loss/90">Screener data is unavailable. Retry now, or check the market-data provider connection.</td></tr>
+                )}
                 {pageRows.length === 0 && (status === "live" || status === "stale") && (
                   <tr><td colSpan={VIEWS[view].length + 1} className="px-3 py-10 text-center text-muted">No stocks match the current filters.</td></tr>
                 )}
@@ -823,6 +824,8 @@ export default function Markets() {
 
       <p className="font-mono text-[11px] text-muted mt-6">
         DATA: {market === "US" ? "YAHOO FINANCE CHART · DELAYED, NOT REAL-TIME" : "UPSTOX SNAPSHOTS + YAHOO FINANCE"} · RESEARCH &amp; EDUCATION ONLY · NOT INVESTMENT ADVICE
+        {quoteCheckedAt && " · Stock feed checked "+new Date(quoteCheckedAt).toLocaleString("en-IN",{timeZone:"Asia/Kolkata"})+" IST"}
+        {indexCheckedAt && " · Index feed checked "+new Date(indexCheckedAt).toLocaleString("en-IN",{timeZone:"Asia/Kolkata"})+" IST"}
       </p>
     </div>
   );
