@@ -355,6 +355,10 @@ export default function Markets() {
   const [indices, setIndices] = useState(null);
   const [rows, setRows] = useState([]);
   const [status, setStatus] = useState("loading");
+  const [marketError, setMarketError] = useState(null);
+  const [refreshSeq, setRefreshSeq] = useState(0);
+  const [quoteCheckedAt, setQuoteCheckedAt] = useState(null);
+  const [indexCheckedAt, setIndexCheckedAt] = useState(null);
   const [filterTab, setFilterTab] = useState("descriptive");
   const [showFilters, setShowFilters] = useState(true);
   const [view, setView] = useState("Overview");
@@ -382,6 +386,7 @@ export default function Markets() {
     if (m === market) return;
     setMarket(m); setActive({}); setSignal("None (all stocks)");
     setTickerQ(""); setPage(0); setRows([]); setIndices(null); setStatus("loading");
+    setMarketError(null); setQuoteCheckedAt(null); setIndexCheckedAt(null);
   };
 
   useEffect(() => {
@@ -390,26 +395,48 @@ export default function Markets() {
 
   useEffect(() => {
     let alive = true;
-    const wake = setTimeout(() => alive && setStatus((s) => (s === "loading" ? "waking" : s)), 4000);
+    let busy = false;
+    const controller = new AbortController();
+    const wake = setTimeout(() => alive && setStatus(s => s === "loading" ? "waking" : s), 4000);
     async function load() {
-      // Market index failure must never blank a valid stock screener response.
+      // Prevent overlapping 15-second requests and distinguish failure from stale data.
+      if (busy) return;
+      busy = true;
       const [idxResult, stocksResult] = await Promise.allSettled([
-        api(MARKETS[market].idx), api(MARKETS[market].scr)
+        api(MARKETS[market].idx, {signal: controller.signal}),
+        api(MARKETS[market].scr, {signal: controller.signal})
       ]);
+      busy = false;
       if (!alive) return;
-      if (idxResult.status === "fulfilled") setIndices(idxResult.value?.data || null);
-      if (stocksResult.status === "fulfilled" && Array.isArray(stocksResult.value?.data)) {
-        setRows(stocksResult.value.data);
-        setStatus("live");
+      if (idxResult.status === "fulfilled" && idxResult.value?.success === true &&
+          idxResult.value?.data && typeof idxResult.value.data === "object" && !Array.isArray(idxResult.value.data)) {
+        const valid = Object.fromEntries(Object.entries(idxResult.value.data).filter(([,v]) => typeof (v?.value ?? v?.price) === "number" && (v.value ?? v.price) > 0));
+        if (Object.keys(valid).length) {
+          setIndices(valid);
+          setIndexCheckedAt(idxResult.value.fetchedAt || new Date().toISOString());
+        } else setIndices(null);
+      } else setIndices(null);
+      if (stocksResult.status === "fulfilled" && stocksResult.value?.success === true &&
+          Array.isArray(stocksResult.value.data) && stocksResult.value.data.length > 0) {
+        const body = stocksResult.value;
+        setRows(body.data);
+        setQuoteCheckedAt(body.fetchedAt || null);
+        setStatus(body.stale === true ? "stale" : "live");
+        setMarketError(null);
       } else {
-        // Preserve existing rows on transient refresh failures. Never mark old quotes as live.
+        const err = stocksResult.status === "rejected" ? stocksResult.reason : null;
+        setMarketError(err?.code === "UPSTREAM_TIMEOUT" || err?.status === 504 ? "The data request timed out." :
+          err?.status === 429 ? "The market provider is rate-limiting requests." :
+          "The data service could not supply a confirmed stock list.");
         setStatus("error");
       }
     }
     load();
-    const t = setInterval(() => {if(!document.hidden) load();}, 15000);
-    return () => { alive = false; clearTimeout(wake); clearInterval(t); };
-  }, [market]);
+    const interval = setInterval(() => {if(!document.hidden)load();},15000);
+    const onFocus = () => {if(!document.hidden)load();};
+    window.addEventListener("focus",onFocus);
+    return () => {alive=false;clearTimeout(wake);clearInterval(interval);window.removeEventListener("focus",onFocus);controller.abort();};
+  }, [market, refreshSeq]);
 
   const filterDefs = useMemo(() => {
     const d = { descriptive: F.descriptive.map((x) => [...x]), fundamental: F.fundamental.map((x) => [...x]), technical: F.technical.map((x) => [...x]) };
