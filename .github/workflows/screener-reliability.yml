@@ -1,0 +1,43 @@
+name: AHQ Screener & Market Gateway Reliability
+on:
+  pull_request:
+    paths:
+      - "alphahedgequant/app/screener/**"
+      - "alphahedgequant/lib/config.js"
+      - "alphahedgequant/app/api/market/**"
+      - "alphahedgequant/tests/screenerRecovery.test.mjs"
+      - ".github/workflows/screener-reliability.yml"
+  push:
+    branches: [main]
+    paths:
+      - "alphahedgequant/app/screener/**"
+      - "alphahedgequant/lib/config.js"
+      - "alphahedgequant/app/api/market/**"
+      - "alphahedgequant/tests/screenerRecovery.test.mjs"
+      - ".github/workflows/screener-reliability.yml"
+permissions:
+  contents: read
+jobs:
+  reliability:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: alphahedgequant/package-lock.json
+      - name: Install pinned dependencies
+        working-directory: alphahedgequant
+        run: npm ci --ignore-scripts --no-audit --no-fund
+      - name: Verify screener status and market gateway contracts
+        working-directory: alphahedgequant
+        run: node --test tests/screenerRecovery.test.mjs tests/featureAnalytics.test.mjs
+      - name: Compile Next.js pages including NSE/US screener
+        working-directory: alphahedgequant
+        env:
+          NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY: "pk_test_ZXhhbXBsZS5jbGVyay5hY2NvdW50cy5kZXYk"
+        run: npm run build
