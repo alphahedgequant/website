@@ -610,14 +610,14 @@ export default function Markets() {
             ))}
           </div>
         )}
-        {searchOpen && searchQ && searchResults.length === 0 && status === "live" && (
+        {searchOpen && searchQ && searchResults.length === 0 && (status === "live" || status === "stale") && (
           <div className="search-pop absolute z-30 left-0 right-0 mt-2 px-4 py-3 text-sm text-muted">
             No {market === "US" ? "US" : "NSE"} stocks match “{searchQ}”.
           </div>
         )}
       </div>
 
-      {/* INDICES STRIP */}
+      {/* INDICES STRIP — suppress zero-valued or invalid upstream index quotes. */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
         {(indices ? Object.entries(indices) : []).map(([name, v]) => (
           <div key={name} className="card px-4 py-2.5 flex items-baseline justify-between gap-3">
@@ -627,7 +627,10 @@ export default function Markets() {
           </div>
         ))}
         {!indices && status !== "error" && (
-          <div className="card px-4 py-2.5 col-span-2 md:col-span-4 text-sm text-muted">Loading indices…</div>
+          <div className="card px-4 py-2.5 col-span-2 md:col-span-4 text-sm text-muted">Loading valid index snapshots…</div>
+        )}
+        {!indices && status === "error" && (
+          <div className="card px-4 py-2.5 col-span-2 md:col-span-4 text-sm text-muted">Current index quotes unavailable.</div>
         )}
       </div>
 
@@ -637,9 +640,18 @@ export default function Markets() {
         </div>
       )}
       {status === "error" && (
-        <div className="card mb-4 p-4 text-sm text-loss/90">Stock list could not be refreshed. Check the backend connection and market-data provider. Any displayed rows may be stale; no prices are confirmed live.</div>
+        <div role="alert" className="card mb-4 p-4 text-sm border-loss/30 text-loss/90 flex items-center justify-between flex-wrap gap-3">
+          <div><strong>Market-data connection problem.</strong> {marketError} {rows.length > 0 ? "Earlier rows remain visible but are not confirmed live." : "No current prices are confirmed."}</div>
+          <button type="button" onClick={() => setRefreshSeq(n => n + 1)} className="rounded border border-loss/40 px-3 py-2 text-xs hover:bg-raised">Retry now</button>
+        </div>
       )}
-      {market === "US" && status === "live" && (
+      {status === "stale" && (
+        <div role="status" className="card mb-4 p-4 text-sm border-amber/40 text-amber">
+          A previous market-data snapshot is displayed, not confirmed live quotes.
+          {quoteCheckedAt ? " Backend snapshot received: " + new Date(quoteCheckedAt).toLocaleString("en-IN",{timeZone:"Asia/Kolkata"})+" IST" : ""}
+        </div>
+      )}
+      {market === "US" && (status === "live" || status === "stale") && (
         <p className="text-xs leading-relaxed text-muted mb-4" role="note">
           US equity quotes are indicative and delayed, not live exchange prices. Hover over a price to see its provider timestamp (UTC). Unavailable fundamentals are shown as dashes, not estimated values.
         </p>
@@ -763,10 +775,10 @@ export default function Markets() {
                     ))}
                   </tr>
                 ))}
-                {pageRows.length === 0 && status === "live" && (
+                {pageRows.length === 0 && (status === "live" || status === "stale") && (
                   <tr><td colSpan={VIEWS[view].length + 1} className="px-3 py-10 text-center text-muted">No stocks match the current filters.</td></tr>
                 )}
-                {status !== "live" && status !== "error" && (
+                {status !== "live" && status !== "stale" && status !== "error" && (
                   <tr><td colSpan={VIEWS[view].length + 1} className="px-3 py-10 text-center text-muted">Loading screener…</td></tr>
                 )}
               </tbody>
@@ -799,8 +811,8 @@ export default function Markets() {
             <p className="font-mono text-xs text-muted"><span className="text-body">{filtered.length}</span> stocks · {view} view</p>
             {view !== "Maps" && <button data-ahq-event="screener_exported" onClick={exportCSV} className="text-sm text-[#5aa9f5] hover:underline">Export</button>}
           </div>
-          {status !== "live" ? (
-            <div className="card mt-2 p-10 text-center text-muted">Loading {view.toLowerCase()}…</div>
+          {status !== "live" && status !== "stale" ? (
+            <div className="card mt-2 p-10 text-center text-muted">{status === "error" ? "Market data unavailable. Retry to restore "+view.toLowerCase()+"." : "Loading "+view.toLowerCase()+"…"}</div>
           ) : view === "Charts" ? <ChartsView rows={filtered} market={market} onPick={goToStock} />
             : view === "Tickers" ? <TickersView rows={filtered} onPick={goToStock} />
             : <SectorMap rows={filtered} market={market} />}
@@ -810,7 +822,7 @@ export default function Markets() {
       )}
 
       <p className="font-mono text-[11px] text-muted mt-6">
-        DATA: {market === "US" ? "YAHOO FINANCE CHART · DELAYED, NOT REAL-TIME" : "UPSTOX (LIVE) + YAHOO FINANCE"} · RESEARCH &amp; EDUCATION ONLY · NOT INVESTMENT ADVICE
+        DATA: {market === "US" ? "YAHOO FINANCE CHART · DELAYED, NOT REAL-TIME" : "UPSTOX SNAPSHOTS + YAHOO FINANCE"} · RESEARCH &amp; EDUCATION ONLY · NOT INVESTMENT ADVICE
       </p>
     </div>
   );
