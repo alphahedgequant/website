@@ -355,6 +355,10 @@ export default function Markets() {
   const [indices, setIndices] = useState(null);
   const [rows, setRows] = useState([]);
   const [status, setStatus] = useState("loading");
+  const [marketError, setMarketError] = useState(null);
+  const [refreshSeq, setRefreshSeq] = useState(0);
+  const [quoteCheckedAt, setQuoteCheckedAt] = useState(null);
+  const [indexCheckedAt, setIndexCheckedAt] = useState(null);
   const [filterTab, setFilterTab] = useState("descriptive");
   const [showFilters, setShowFilters] = useState(true);
   const [view, setView] = useState("Overview");
@@ -382,6 +386,7 @@ export default function Markets() {
     if (m === market) return;
     setMarket(m); setActive({}); setSignal("None (all stocks)");
     setTickerQ(""); setPage(0); setRows([]); setIndices(null); setStatus("loading");
+    setMarketError(null); setQuoteCheckedAt(null); setIndexCheckedAt(null);
   };
 
   useEffect(() => {
@@ -390,26 +395,48 @@ export default function Markets() {
 
   useEffect(() => {
     let alive = true;
-    const wake = setTimeout(() => alive && setStatus((s) => (s === "loading" ? "waking" : s)), 4000);
+    let busy = false;
+    const controller = new AbortController();
+    const wake = setTimeout(() => alive && setStatus(s => s === "loading" ? "waking" : s), 4000);
     async function load() {
-      // Market index failure must never blank a valid stock screener response.
+      // Prevent overlapping 15-second requests and distinguish failure from stale data.
+      if (busy) return;
+      busy = true;
       const [idxResult, stocksResult] = await Promise.allSettled([
-        api(MARKETS[market].idx), api(MARKETS[market].scr)
+        api(MARKETS[market].idx, {signal: controller.signal}),
+        api(MARKETS[market].scr, {signal: controller.signal})
       ]);
+      busy = false;
       if (!alive) return;
-      if (idxResult.status === "fulfilled") setIndices(idxResult.value?.data || null);
-      if (stocksResult.status === "fulfilled" && Array.isArray(stocksResult.value?.data)) {
-        setRows(stocksResult.value.data);
-        setStatus("live");
+      if (idxResult.status === "fulfilled" && idxResult.value?.success === true &&
+          idxResult.value?.data && typeof idxResult.value.data === "object" && !Array.isArray(idxResult.value.data)) {
+        const valid = Object.fromEntries(Object.entries(idxResult.value.data).filter(([,v]) => typeof (v?.value ?? v?.price) === "number" && (v.value ?? v.price) > 0));
+        if (Object.keys(valid).length) {
+          setIndices(valid);
+          setIndexCheckedAt(idxResult.value.fetchedAt || new Date().toISOString());
+        } else setIndices(null);
+      } else setIndices(null);
+      if (stocksResult.status === "fulfilled" && stocksResult.value?.success === true &&
+          Array.isArray(stocksResult.value.data) && stocksResult.value.data.length > 0) {
+        const body = stocksResult.value;
+        setRows(body.data);
+        setQuoteCheckedAt(body.fetchedAt || null);
+        setStatus(body.stale === true ? "stale" : "live");
+        setMarketError(null);
       } else {
-        // Preserve existing rows on transient refresh failures. Never mark old quotes as live.
+        const err = stocksResult.status === "rejected" ? stocksResult.reason : null;
+        setMarketError(err?.code === "UPSTREAM_TIMEOUT" || err?.status === 504 ? "The data request timed out." :
+          err?.status === 429 ? "The market provider is rate-limiting requests." :
+          "The data service could not supply a confirmed stock list.");
         setStatus("error");
       }
     }
     load();
-    const t = setInterval(() => {if(!document.hidden) load();}, 15000);
-    return () => { alive = false; clearTimeout(wake); clearInterval(t); };
-  }, [market]);
+    const interval = setInterval(() => {if(!document.hidden)load();},15000);
+    const onFocus = () => {if(!document.hidden)load();};
+    window.addEventListener("focus",onFocus);
+    return () => {alive=false;clearTimeout(wake);clearInterval(interval);window.removeEventListener("focus",onFocus);controller.abort();};
+  }, [market, refreshSeq]);
 
   const filterDefs = useMemo(() => {
     const d = { descriptive: F.descriptive.map((x) => [...x]), fundamental: F.fundamental.map((x) => [...x]), technical: F.technical.map((x) => [...x]) };
@@ -496,7 +523,7 @@ export default function Markets() {
       case "marketCap": return <span className="font-mono">{fmtCap(v, market)}</span>;
       case "changePct": return <span className={`font-mono ${pctCls(v)}`}>{v == null ? "-" : fmt(v) + "%"}</span>;
       case "volume": return <span className="font-mono">{fmtVol(v)}</span>;
-      case "price": return <span className="font-mono text-gain" title={market === "US" && r.priceAsOf ? `Provider quote time (UTC): ${r.priceAsOf}${r.stale ? " · older quote" : ""}` : undefined}>{MARKETS[market].cur}{fmt(v)}</span>;
+      case "price": return <span className="font-mono text-gain" title={r.priceAsOf ? `Provider quote time (UTC): ${r.priceAsOf}${r.stale ? " · older quote" : ""}` : "Provider quote time unavailable"}>{typeof v === "number" && v > 0 ? MARKETS[market].cur+fmt(v) : "—"}</span>;
       case "distSma50": case "distSma200": {
         const sma = col === "distSma50" ? r.sma50 : r.sma200;
         if (!sma || !r.price) return <span className="font-mono text-muted">-</span>;
@@ -583,24 +610,27 @@ export default function Markets() {
             ))}
           </div>
         )}
-        {searchOpen && searchQ && searchResults.length === 0 && status === "live" && (
+        {searchOpen && searchQ && searchResults.length === 0 && (status === "live" || status === "stale") && (
           <div className="search-pop absolute z-30 left-0 right-0 mt-2 px-4 py-3 text-sm text-muted">
             No {market === "US" ? "US" : "NSE"} stocks match “{searchQ}”.
           </div>
         )}
       </div>
 
-      {/* INDICES STRIP */}
+      {/* INDICES STRIP — suppress zero-valued or invalid upstream index quotes. */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
         {(indices ? Object.entries(indices) : []).map(([name, v]) => (
           <div key={name} className="card px-4 py-2.5 flex items-baseline justify-between gap-3">
             <span className="font-mono text-[11px] tracking-wider text-muted uppercase">{name}</span>
             <span className="font-mono text-sm">{fmt(v?.value ?? v?.price)}</span>
-            <span className={`font-mono text-xs ${pctCls(v?.changePct)}`}>{fmt(v?.changePct)}%</span>
+            <span className={`font-mono text-xs ${pctCls(v?.changePct)}`}>{v?.prevClose > 0 && Number.isFinite(v?.changePct) ? fmt(v.changePct)+"%" : "—"}</span>
           </div>
         ))}
         {!indices && status !== "error" && (
-          <div className="card px-4 py-2.5 col-span-2 md:col-span-4 text-sm text-muted">Loading indices…</div>
+          <div className="card px-4 py-2.5 col-span-2 md:col-span-4 text-sm text-muted">Loading valid index snapshots…</div>
+        )}
+        {!indices && status === "error" && (
+          <div className="card px-4 py-2.5 col-span-2 md:col-span-4 text-sm text-muted">Current index quotes unavailable.</div>
         )}
       </div>
 
@@ -610,9 +640,18 @@ export default function Markets() {
         </div>
       )}
       {status === "error" && (
-        <div className="card mb-4 p-4 text-sm text-loss/90">Stock list could not be refreshed. Check the backend connection and market-data provider. Any displayed rows may be stale; no prices are confirmed live.</div>
+        <div role="alert" className="card mb-4 p-4 text-sm border-loss/30 text-loss/90 flex items-center justify-between flex-wrap gap-3">
+          <div><strong>Market-data connection problem.</strong> {marketError} {rows.length > 0 ? "Earlier rows remain visible but are not confirmed live." : "No current prices are confirmed."}</div>
+          <button type="button" onClick={() => setRefreshSeq(n => n + 1)} className="rounded border border-loss/40 px-3 py-2 text-xs hover:bg-raised">Retry now</button>
+        </div>
       )}
-      {market === "US" && status === "live" && (
+      {status === "stale" && (
+        <div role="status" className="card mb-4 p-4 text-sm border-amber/40 text-amber">
+          A previous market-data snapshot is displayed, not confirmed live quotes.
+          {quoteCheckedAt ? " Backend snapshot received: " + new Date(quoteCheckedAt).toLocaleString("en-IN",{timeZone:"Asia/Kolkata"})+" IST" : ""}
+        </div>
+      )}
+      {market === "US" && (status === "live" || status === "stale") && (
         <p className="text-xs leading-relaxed text-muted mb-4" role="note">
           US equity quotes are indicative and delayed, not live exchange prices. Hover over a price to see its provider timestamp (UTC). Unavailable fundamentals are shown as dashes, not estimated values.
         </p>
@@ -707,10 +746,8 @@ export default function Markets() {
             <p className="font-mono text-xs text-muted">
               #{filtered.length === 0 ? 0 : safePage * PAGE_SIZE + 1} / <span className="text-body">{filtered.length}</span> Total
             </p>
-            <p className="text-xs text-muted/50 select-none" title="Coming in v2">
-              Open in Compare | Save as Portfolio | Create Alert
-            </p>
-            <p className="font-mono text-xs text-muted">Refresh check: 15s | Page {safePage + 1} / {pages}</p>
+            <p className="text-xs text-muted/70">Stock and filter coverage depends on the connected provider.</p>
+            <div className="flex items-center gap-3"><p className="font-mono text-xs text-muted">Refresh check: 15s | Page {safePage + 1} / {pages}</p><button type="button" onClick={() => setRefreshSeq(n => n + 1)} className="text-xs text-amber hover:underline">Check now</button></div>
           </div>
 
           <div className="card mt-2 overflow-x-auto">
@@ -736,10 +773,13 @@ export default function Markets() {
                     ))}
                   </tr>
                 ))}
-                {pageRows.length === 0 && status === "live" && (
+                {pageRows.length === 0 && status === "error" && (
+                  <tr><td colSpan={VIEWS[view].length + 1} className="px-3 py-10 text-center text-loss/90">Screener data is unavailable. Retry now, or check the market-data provider connection.</td></tr>
+                )}
+                {pageRows.length === 0 && (status === "live" || status === "stale") && (
                   <tr><td colSpan={VIEWS[view].length + 1} className="px-3 py-10 text-center text-muted">No stocks match the current filters.</td></tr>
                 )}
-                {status !== "live" && status !== "error" && (
+                {status !== "live" && status !== "stale" && status !== "error" && (
                   <tr><td colSpan={VIEWS[view].length + 1} className="px-3 py-10 text-center text-muted">Loading screener…</td></tr>
                 )}
               </tbody>
@@ -772,8 +812,8 @@ export default function Markets() {
             <p className="font-mono text-xs text-muted"><span className="text-body">{filtered.length}</span> stocks · {view} view</p>
             {view !== "Maps" && <button data-ahq-event="screener_exported" onClick={exportCSV} className="text-sm text-[#5aa9f5] hover:underline">Export</button>}
           </div>
-          {status !== "live" ? (
-            <div className="card mt-2 p-10 text-center text-muted">Loading {view.toLowerCase()}…</div>
+          {status !== "live" && status !== "stale" ? (
+            <div className="card mt-2 p-10 text-center text-muted">{status === "error" ? "Market data unavailable. Retry to restore "+view.toLowerCase()+"." : "Loading "+view.toLowerCase()+"…"}</div>
           ) : view === "Charts" ? <ChartsView rows={filtered} market={market} onPick={goToStock} />
             : view === "Tickers" ? <TickersView rows={filtered} onPick={goToStock} />
             : <SectorMap rows={filtered} market={market} />}
@@ -783,7 +823,9 @@ export default function Markets() {
       )}
 
       <p className="font-mono text-[11px] text-muted mt-6">
-        DATA: {market === "US" ? "YAHOO FINANCE CHART · DELAYED, NOT REAL-TIME" : "UPSTOX (LIVE) + YAHOO FINANCE"} · RESEARCH &amp; EDUCATION ONLY · NOT INVESTMENT ADVICE
+        DATA: {market === "US" ? "YAHOO FINANCE CHART · DELAYED, NOT REAL-TIME" : "UPSTOX SNAPSHOTS + YAHOO FINANCE"} · RESEARCH &amp; EDUCATION ONLY · NOT INVESTMENT ADVICE
+        {quoteCheckedAt && " · Stock feed checked "+new Date(quoteCheckedAt).toLocaleString("en-IN",{timeZone:"Asia/Kolkata"})+" IST"}
+        {indexCheckedAt && " · Index feed checked "+new Date(indexCheckedAt).toLocaleString("en-IN",{timeZone:"Asia/Kolkata"})+" IST"}
       </p>
     </div>
   );

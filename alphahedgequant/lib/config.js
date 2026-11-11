@@ -1,9 +1,18 @@
 export const API_URL = "/api/market";
 
-export async function api(path) {
+export async function api(path, options = {}) {
   const route = path.startsWith("/api/") ? path.slice(4) : path;
-  const res = await fetch(API_URL + route, { cache: "no-store" });
-  if (!res.ok) throw new Error("Market-data API HTTP " + res.status);
+  const res = await fetch(API_URL + route, {cache: "no-store", signal: options.signal});
+  if (!res.ok) {
+    // Keep the error actionable without exposing upstream credentials or
+    // surfacing arbitrary provider messages to the user.
+    let data = null;
+    try { data = await res.json(); } catch {}
+    const error = new Error("Market-data API HTTP " + res.status);
+    error.status = res.status;
+    error.code = typeof data?.errorCode === "string" ? data.errorCode : "MARKET_API_ERROR";
+    throw error;
+  }
   return res.json();
 }
 
