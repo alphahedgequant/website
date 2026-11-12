@@ -135,11 +135,7 @@ export default function UnusualOptionsMonitor({selectedTicker="NIFTY",stockOptio
       </div>
     </header>
     <p className="text-xs mt-4 text-neutral-400">{activeMarket?"NSE regular hours (holidays not verified).":"Outside regular NSE hours; manual refresh available."} Monitoring runs only while this tab is open. It requires two distinct responses and is not a persisted, exchange-certified tick feed.</p>
-    <div className="grid grid-cols-1 xl:grid-cols-2 gap-3 mt-5">
-      {CORE.map(item=><Card key={item.id} label={item.label} description={item.desc} error={status[item.id]?.error} last={status[item.id]?.last} events={eventsFor(item.id)} onOpen={openChain}/>)}
-      {COMMODITIES.map(item=><Card key={item.id} label={item.label} description={item.desc} kind="MCX" onOpen={openChain}/>)}
-    </div>
-    <div className="mt-4 rounded-xl border border-white/15 bg-[#0e1014] p-4 sm:p-5" aria-label="NSE options unusual moves">
+    <div className="mt-5 rounded-xl border border-white/15 bg-[#0e1014] p-4 sm:p-5" aria-label="NSE options unusual moves">
       <div className="flex flex-wrap justify-between items-start gap-3">
         <div><h3 className="font-semibold text-white">NSE F&O · Unusual Movers</h3>
           <p className="text-xs text-neutral-400 mt-1">Rolling, rate-limited sample of available NSE symbols. Only F&O-eligible instruments with a successful option-chain response can be scored.</p></div>
@@ -157,6 +153,10 @@ export default function UnusualOptionsMonitor({selectedTicker="NIFTY",stockOptio
         {marketEvents.slice(0,15).map(e=><EventRow key={e.id} event={e} onOpen={openChain}/>)}
       </div> : <div className="mt-5 rounded-lg border border-white/10 p-5 text-center text-neutral-400 text-sm">No qualifying options movements observed in the sampled feed yet. This is not a market-wide “no signal” conclusion.</div>}
       <div className="mt-4 text-xs text-neutral-500">Click a ticker to open its option chain. Rankings are based on observed percent/absolute changes, not projected profits or order-book trade prints.</div>
+    </div>
+    <div className="grid grid-cols-1 xl:grid-cols-2 gap-3 mt-4">
+      {CORE.map(item=><Card key={item.id} label={item.label} description={item.desc} error={status[item.id]?.error} last={status[item.id]?.last} events={eventsFor(item.id)} onOpen={openChain}/>)}
+      {COMMODITIES.map(item=><Card key={item.id} label={item.label} description={item.desc} kind="MCX" onOpen={openChain}/>)}
     </div>
     <p className="mt-4 text-[11px] leading-relaxed text-neutral-500">Detection rules: IV ≥15% relative and ≥0.002 provider units; Delta ≥0.08; Gamma ≥40%; Theta/Vega ≥40%; option LTP ≥20% and ≥₹1; OI ≥12% and ≥100. Same-expiry, same-strike comparisons only, within 150 seconds. Metric units are preserved from Upstox. Alert timestamps are local observation times unless the upstream explicitly provides an exchange timestamp. Alerts expire after five minutes. Trading or institutional intent cannot be inferred from these readings alone.</p>
   </section>;
