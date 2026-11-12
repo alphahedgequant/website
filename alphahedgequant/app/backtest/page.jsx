@@ -94,8 +94,13 @@ function CustomTooltip({ active, payload, label, cur }) {
   );
 }
 
-export default function BacktestPage() {
-  const [selected,  setSelected]  = useState({ symbol: "RELIANCE", name: "Reliance Industries", market: "NSE" });
+export default function BacktestPage({initialSymbol=null,embedded=false}) {
+  const [selected,  setSelected]  = useState(()=>{
+    const next=String(initialSymbol||"").trim().toUpperCase();
+    return /^[A-Z0-9&._-]{1,40}$/.test(next)
+      ? TICKERS.find(t=>t.market==="NSE"&&t.symbol===next)||{symbol:next,name:next,market:"NSE"}
+      : {symbol:"RELIANCE",name:"Reliance Industries",market:"NSE"};
+  });
   const [query,     setQuery]     = useState("");
   const [open,      setOpen]      = useState(false);
   const [strategy,  setStrategy]  = useState(STRATEGIES[0]);
@@ -122,6 +127,12 @@ export default function BacktestPage() {
   }, []);
 
   const pick = (t) => { setSelected(t); setQuery(""); setOpen(false); setResult(null); setError(null); };
+  useEffect(()=>{
+    const next=String(initialSymbol||"").trim().toUpperCase();
+    if(!/^[A-Z0-9&._-]{1,40}$/.test(next))return;
+    setSelected(TICKERS.find(t=>t.market==="NSE"&&t.symbol===next)||{symbol:next,name:next,market:"NSE"});
+    setResult(null);setError(null);
+  },[initialSymbol]);
 
   const handleStrategyChange = (id) => {
     const s = STRATEGIES.find(s => s.id === id);
@@ -168,7 +179,7 @@ export default function BacktestPage() {
     : null;
 
   return (
-    <div className="max-w-shell mx-auto px-5 py-10">
+    <div className={embedded?"qt-embedded-tool max-w-shell mx-auto px-5 py-8":"max-w-shell mx-auto px-5 py-10"}>
       {/* Header */}
       <p className="eyebrow mb-3">[ AHQ : AI BACKTEST — STRATEGY ENGINE ]</p>
       <h1 className="font-display text-3xl font-medium tracking-tight">Strategy Backtester</h1>
