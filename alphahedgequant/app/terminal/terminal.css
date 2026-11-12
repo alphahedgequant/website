@@ -580,3 +580,14 @@
 .qt-shell .qt-reading-clean select{background:#081e37!important;color:#fff!important}
 .qt-shell .qt-reading-clean .qt-reader-tools button{background:#23527e!important;color:#fff!important;border-color:#5e93c4!important}
 .qt-shell .qt-reading-clean .qt-graph svg text{fill:#fff!important}
+
+
+/* Explicit source-recovery state: no silent 0 LTP and no fake green live badge. */
+.qt-shell .qt-provider-alert{display:flex;align-items:center;flex-wrap:wrap;gap:12px;
+ background:#163451!important;border:1px solid #6e9bc7;padding:13px 16px;margin:10px 12px;
+ color:#fff!important;font-size:12px;line-height:1.7}
+.qt-shell .qt-provider-alert strong{color:#fff;font-weight:800}
+.qt-shell .qt-provider-alert span{color:#e5f1ff;flex:1;min-width:210px}
+.qt-shell .qt-provider-alert a{display:inline-flex;align-items:center;padding:8px 12px;
+ color:#fff!important;text-decoration:underline;text-underline-offset:3px;border:1px solid #82b4e5}
+.qt-shell .qt-provider-alert a:hover{background:#245580}
