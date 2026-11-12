@@ -95,10 +95,11 @@ export async function readFlowDay(sql,day){
    FROM ahq_options_flow_runs WHERE trading_day=${day}::date ORDER BY slot`
  ]);
  const items=[...rows].sort((a,b)=>b.activity_score-a.activity_score||b.alert_count-a.alert_count||a.symbol.localeCompare(b.symbol));
+ const eligible=runs.length?Math.max(...runs.map(x=>x.eligible_count)):null;
  return {day,items,coverage:{
-  eligible:runs.length?Math.max(...runs.map(x=>x.eligible_count)):null,
-  observed:items.length,batches:runs.length,scheduledBatches:8,
-  incomplete:runs.length<8||runs.some(x=>x.status!=="captured")
+  eligible,observed:items.length,batches:runs.length,scheduledBatches:8,
+  incomplete:runs.length<8||runs.some(x=>x.status!=="captured")||
+    (eligible!==null&&items.length<eligible)
  },runs};
 }
 export async function readFlowTicker(sql,symbol,limit=45){
