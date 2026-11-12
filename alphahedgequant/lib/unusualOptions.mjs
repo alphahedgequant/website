@@ -81,6 +81,53 @@ export function compareSnapshots(previous, current, windowMs=MONITOR_WINDOW_MS) 
   }
   return events.sort((a,b)=>b.score-a.score).slice(0,maxEvents);
 }
+// Plain-language interpretations are conditional on Greek sign, not just the arrow.
+// Up/down indicates the *numeric* movement, not a buy/sell recommendation.
+export function explainMovement(event) {
+  if (!event) return "No confirmed option movement.";
+  const {metric,previous,current} = event;
+  const before=Number(previous),after=Number(current);
+  if (!Number.isFinite(before)||!Number.isFinite(after)) return "Provider values unavailable; no interpretation.";
+  switch(metric) {
+    case "iv":
+      return after>before
+        ? "Implied volatility rose. The market is pricing more volatility; this usually supports option value if other inputs stay unchanged."
+        : "Implied volatility fell. The market is pricing less volatility; this usually weighs on option value if other inputs stay unchanged.";
+    case "delta": {
+      const change=Math.abs(after)-Math.abs(before);
+      if (Math.abs(change)<1e-6) return "Delta shifted sign without changing absolute sensitivity much. Check spot and strike before drawing conclusions.";
+      return change>0
+        ? "Absolute delta increased: this option is now more sensitive to moves in the underlying. Put deltas are normally negative."
+        : "Absolute delta decreased: this option is now less sensitive to moves in the underlying. Put deltas are normally negative.";
+    }
+    case "gamma":
+      return Math.abs(after)>Math.abs(before)
+        ? "Gamma magnitude rose. Delta may change faster after a move in the underlying, especially near expiry."
+        : "Gamma magnitude fell. Delta may change less rapidly when the underlying moves.";
+    case "theta":
+      if (before<0 && after<0) {
+        return after<before
+          ? "Theta became more negative: modelled time-value decay is stronger. A long option may lose value faster from time passing, all else equal."
+          : "Theta became less negative: modelled time-value decay eased. A long option may lose value more slowly from time passing, all else equal.";
+      }
+      return "Theta changed, but it is not negative in both observations. Confirm the Greek's sign and provider time units before interpreting decay speed.";
+    case "vega":
+      return Math.abs(after)>Math.abs(before)
+        ? "Vega magnitude rose: the option premium is more sensitive to a change in implied volatility."
+        : "Vega magnitude fell: the option premium is less sensitive to a change in implied volatility.";
+    case "oi":
+      return after>before
+        ? "Reported open contracts increased. This signals greater outstanding positioning, not whether traders are bullish or bearish."
+        : "Reported open contracts decreased. Some positions may have been closed or netted; direction cannot be inferred from OI alone.";
+    case "ltp":
+      return after>before
+        ? "The last traded premium increased. This is a traded-price observation, not a guaranteed executable quote."
+        : "The last traded premium decreased. Check current bid/ask before judging whether the move is tradable.";
+    default:
+      return event.explanation || "A provider-reported option metric changed.";
+  }
+}
+
 export function numericDisplay(n, digits=4) {
   return n===null||n===undefined||!Number.isFinite(n)?"—":Number(n).toLocaleString("en-IN",{maximumFractionDigits:digits});
 }
