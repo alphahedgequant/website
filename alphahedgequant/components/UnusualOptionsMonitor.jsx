@@ -146,6 +146,12 @@ export default function UnusualOptionsMonitor({selectedTicker="NIFTY",stockOptio
         <div className="text-xs text-neutral-300 font-mono">{seenCount} option chains fetched · {unsupportedCount} unavailable · {candidates.length} candidate symbols</div>
       </div>
       <p className="text-xs text-neutral-400 mt-3 leading-relaxed">This does <strong>not</strong> continuously cover every NSE contract. A complete exchange-wide live ranking requires a dedicated subscribed WebSocket/contract-feed scanner. No comprehensive coverage is implied.</p>
+      <div className="mt-4 flex flex-wrap items-center gap-2 rounded-lg border border-white/10 bg-white/[0.03] px-3 py-3 text-xs">
+        <span className="text-neutral-400">SELECTED TICKER</span>
+        <button type="button" onClick={()=>openChain(selectedTicker)} className="font-semibold text-white hover:underline focus-visible:outline-white">{selectedTicker} ↗</button>
+        <span className="text-neutral-400">{status[selectedTicker]?.error ? "Feed: "+short(status[selectedTicker].error,140) : status[selectedTicker]?.last ? "Observation captured · "+nowIST(status[selectedTicker].last.observedAt)+" IST" : "Awaiting first observation"}</span>
+        {eventsFor(selectedTicker).length>0&&<span className="font-semibold text-emerald-400">{eventsFor(selectedTicker).length} recent metric movements</span>}
+      </div>
       {marketEvents.length ? <div className="mt-4">
         <p className="text-sm text-neutral-200 mb-2">{marketEvents[0].explanation}</p>
         {marketEvents.slice(0,15).map(e=><EventRow key={e.id} event={e} onOpen={openChain}/>)}
