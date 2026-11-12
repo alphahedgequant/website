@@ -58,7 +58,7 @@ export default function DailyOptionsFlowArchive({selectedTicker="",stockOptions=
   <div className="qt-archive-head"><div>
    <p className="qt-archive-kicker">NSE DERIVATIVES / PERSISTENT MARKET HISTORY</p>
    <h2>Daily Unusual Options Activity</h2>
-   <p>Every trading day, scheduled collectors sample eligible NSE stock-option underlyings and preserve their volume, open interest and abnormal contract metrics for historical review.</p>
+   <p>Each trading day, scheduled collectors sample eligible NSE equity-option underlyings plus NIFTY, BANKNIFTY and FINNIFTY, preserving volume, open interest and abnormal contract metrics for historical review.</p>
   </div><button type="button" onClick={()=>setRefresh(n=>n+1)} disabled={loading}>↻ Check archive</button></div>
   <div className="qt-archive-controls">
    <label>Date <input aria-label="Options archive trading date" type="date" value={day||loadedDay} max={istCalendar().day} onChange={e=>setDay(e.target.value)}/></label>
@@ -68,7 +68,7 @@ export default function DailyOptionsFlowArchive({selectedTicker="",stockOptions=
   </div>
   <div className="qt-archive-metrics" aria-label="Archive coverage">
    <div><small>TRADING DATE</small><strong>{loadedDay||"—"}</strong></div>
-   <div><small>F&O ELIGIBLE TICKERS</small><strong>{count(coverage?.eligible)}</strong></div>
+   <div><small>F&O STOCKS + INDEXES</small><strong>{count(coverage?.eligible)}</strong></div>
    <div><small>TICKERS RECORDED</small><strong>{count(coverage?.observed)}</strong></div>
    <div><small>COLLECTION WINDOWS</small><strong>{coverage?coverage.batches+"/8":"—"}</strong></div>
   </div>
