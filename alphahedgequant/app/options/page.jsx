@@ -41,9 +41,9 @@ function legPayoffAtExpiry(leg, spotAtExpiry) {
   return perUnit * qty;
 }
 
-export default function OptionsPage() {
+export default function OptionsPage({initialUnderlying=null,embedded=false}) {
   const [tab, setTab] = useState("chain");
-  const [underlying, setUnderlying] = useState("NIFTY");
+  const [underlying, setUnderlying] = useState(() => /^[A-Z0-9&_.-]{1,40}$/i.test(initialUnderlying||"")?String(initialUnderlying).toUpperCase():"NIFTY");
   const [expiry, setExpiry] = useState("");
   const [stockQuery, setStockQuery] = useState("");
   const [stockOptions, setStockOptions] = useState([]);
@@ -74,7 +74,7 @@ export default function OptionsPage() {
     const requestId = ++requestIdRef.current;
     if (!isRefresh) { setStatus("loading"); setChain(null); setSpot(0); setExpiries([]); setChainLotSize(null); setErrMsg(""); } else {setRefreshing(true);}
     try {
-      const url = `${API}/option-chain/${ul}${exp ? `?expiry=${exp}` : ""}`;
+      const url = `${API}/option-chain/${encodeURIComponent(ul)}${exp ? `?expiry=${encodeURIComponent(exp)}` : ""}`;
       const r = await fetch(url, { cache: "no-store" });
       const raw = await r.text();
       let j;
@@ -126,9 +126,10 @@ export default function OptionsPage() {
 
   useEffect(() => {
     let active=true;
-    fetch("/api/market/screener", {cache:"no-store"})
-      .then(r=>r.json())
-      .then(j=>{if(active){setStockOptions(Array.isArray(j?.data)?j.data:[]);setSymbolFeedState("ready");}})
+    // Daily exchange F&O eligibility, not a short screener/cash-equity sample.
+    fetch("/api/terminal?view=fno", {cache:"no-store"})
+      .then(async r=>{const j=await r.json();if(!r.ok||!j.success||!Array.isArray(j.data))throw Error("F&O registry unavailable");return j;})
+      .then(j=>{if(active){setStockOptions(j.data);setSymbolFeedState("ready");}})
       .catch(()=>{if(active)setSymbolFeedState("unavailable");});
     return ()=>{active=false;};
   },[]);
@@ -139,10 +140,15 @@ export default function OptionsPage() {
   },[stockQuery,stockOptions]);
   const chooseUnderlying=useCallback(value=>{
     const symbol=String(value||"").trim().toUpperCase();
-    if(!/^[A-Z0-9._-]{1,40}$/.test(symbol))return;
+    if(!/^[A-Z0-9&._-]{1,40}$/.test(symbol))return;
     requestIdRef.current++;
     setExpiry("");setLegs([]);setStockQuery("");setIvHistory([]);setLastUpdated(null);setProviderReceivedAt(null);setUnderlying(symbol);
   },[]);
+  useEffect(()=>{
+    const next=String(initialUnderlying||"").toUpperCase();
+    if(/^[A-Z0-9&._-]{1,40}$/.test(next)&&next!==underlying)chooseUnderlying(next);
+    // Trigger only when parent ticker changes; choosing a chain locally stays possible.
+  },[initialUnderlying,chooseUnderlying]);
   useEffect(() => { loadChain(underlying, ""); }, [underlying, loadChain]);
   useEffect(() => { if (expiry && expiry !== "(demo)") loadChain(underlying, expiry); }, [expiry, underlying, loadChain]);
 
@@ -179,7 +185,7 @@ export default function OptionsPage() {
   };
 
   return (
-    <div className="max-w-shell mx-auto px-5 py-10">
+    <div className={embedded?"qt-embedded-tool max-w-shell mx-auto px-5 py-8":"max-w-shell mx-auto px-5 py-10"}>
       <p className="eyebrow mb-3">[ AHQ : DERIVATIVES — OPTION CHAIN &amp; STRATEGY BUILDER ]</p>
       <div className="flex flex-wrap items-end justify-between gap-3">
         <div>
@@ -209,7 +215,7 @@ export default function OptionsPage() {
       </div>
 
       <div className="mt-5 border border-line rounded-xl p-4 bg-surface" role="search" aria-label="Search stock option chains">
-        <label htmlFor="ahq-option-search" className="text-xs text-amber font-mono uppercase tracking-wider block mb-2">Search any NSE stock or ticker</label>
+        <label htmlFor="ahq-option-search" className="text-xs text-amber font-mono uppercase tracking-wider block mb-2">Search eligible NSE F&O stock or ticker</label>
         <div className="flex gap-2">
           <input id="ahq-option-search" type="search" value={stockQuery} onChange={e=>setStockQuery(e.target.value)}
             onKeyDown={e=>{if(e.key==="Enter"){e.preventDefault();chooseUnderlying(matches[0]?.symbol||stockQuery);}}}
@@ -224,7 +230,7 @@ export default function OptionsPage() {
         </div>}
         {symbolFeedState==="loading"&&<p className="text-xs mt-2 text-muted">Loading stock suggestions…</p>}
         {symbolFeedState==="unavailable"&&<p className="text-xs mt-2 text-muted">Suggestions unavailable; you can enter an exact NSE symbol manually.</p>}
-        {symbolFeedState==="ready"&&stockQuery.trim()&&matches.length===0&&<p className="text-xs mt-2 text-muted">No match in the available screener feed. You may still try an exact NSE symbol.</p>}
+        {symbolFeedState==="ready"&&stockQuery.trim()&&matches.length===0&&<p className="text-xs mt-2 text-muted">No match in the current F&O instrument list. You may still try an exact NSE symbol; only exchange-eligible contracts can load.</p>}
         <p className="text-xs text-muted mt-3">Selected: <span className="font-semibold text-body">{underlying}</span>. Only NSE F&O-eligible stocks with a supported Upstox chain can return real options data. Search suggestions are not proof of derivatives eligibility.</p>
       </div>
 
