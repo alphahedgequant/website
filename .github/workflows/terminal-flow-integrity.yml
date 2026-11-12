@@ -7,6 +7,13 @@ on:
       - "alphahedgequant/components/UnusualOptions**"
       - "alphahedgequant/lib/unusualOptions**"
       - "alphahedgequant/tests/terminalUnusualFlow.test.mjs"
+      - "alphahedgequant/tests/terminalAllTabs.test.mjs"
+      - "alphahedgequant/lib/terminalRisk.mjs"
+      - "alphahedgequant/components/TerminalOperationalTabs.jsx"
+      - "alphahedgequant/app/options/page.jsx"
+      - "alphahedgequant/app/scanner/page.jsx"
+      - "alphahedgequant/app/backtest/page.jsx"
+      - "alphahedgequant/app/api/market/**"
       - ".github/workflows/terminal-flow-integrity.yml"
   push:
     branches: [main]
@@ -16,6 +23,13 @@ on:
       - "alphahedgequant/components/UnusualOptions**"
       - "alphahedgequant/lib/unusualOptions**"
       - "alphahedgequant/tests/terminalUnusualFlow.test.mjs"
+      - "alphahedgequant/tests/terminalAllTabs.test.mjs"
+      - "alphahedgequant/lib/terminalRisk.mjs"
+      - "alphahedgequant/components/TerminalOperationalTabs.jsx"
+      - "alphahedgequant/app/options/page.jsx"
+      - "alphahedgequant/app/scanner/page.jsx"
+      - "alphahedgequant/app/backtest/page.jsx"
+      - "alphahedgequant/app/api/market/**"
       - ".github/workflows/terminal-flow-integrity.yml"
 permissions:
   contents: read
@@ -37,7 +51,7 @@ jobs:
         run: npm ci --ignore-scripts --no-audit --no-fund
       - name: Verify option data integrity and terminal UI contracts
         working-directory: alphahedgequant
-        run: node --test tests/terminalUnusualFlow.test.mjs tests/unusualOptions.test.mjs tests/terminalReliability.test.mjs
+        run: node --test tests/terminalAllTabs.test.mjs tests/terminalUnusualFlow.test.mjs tests/unusualOptions.test.mjs tests/terminalReliability.test.mjs
       - name: Build Next.js website and terminal
         working-directory: alphahedgequant
         env:
