@@ -5,31 +5,43 @@ const root=new URL("../",import.meta.url);
 const floor=readFileSync(new URL("app/terminal/TerminalTradingFloor.jsx",root),"utf8");
 const route=readFileSync(new URL("app/terminal/page.jsx",root),"utf8");
 const css=readFileSync(new URL("app/terminal/terminal-floor.css",root),"utf8");
-test("reference screenshot trading floor contains all 11 functional panel IDs",()=>{
+test("all eleven trading-floor panels exist, disconnected data windows are replaced",()=>{
   const ids=[...floor.matchAll(/\{id:"([a-z-]+)",title:/g)].map(m=>m[1]);
-  assert.deepEqual(ids,["orders","account","messages","order-entry","depth","blocks","options","timesales","chart","alerts","movers"]);
-  for(const id of ids)assert(floor.includes('windowDef={windows.'+id+'}')||floor.includes('windowDef={windows["'+id+'"]}'),"render "+id);
+  assert.deepEqual(ids,["watchlist","metrics","messages","greeks","depth","rvol","options","volume","chart","alerts","movers"]);
+  for(const id of ids)assert(floor.includes("windowDef={windows."+id+"}"),"render "+id);
+  assert(!ids.some(x=>["orders","account","order-entry","blocks","timesales"].includes(x)));
 });
-test("new floor is the default; classic research and company intelligence are retained",()=>{
+test("existing watchlist and screener data connect to the market floor",()=>{
+  assert.match(floor,/MarketWatchlist symbol=\{symbol\} watch=\{watch\} quote=\{quote\} screener=\{screener\}/);
+  assert.match(floor,/onChoose=\{onChoose\}/);
+  assert.match(floor,/quote\.price/);
+  assert.match(floor,/NSE screener snapshot/);
+});
+test("RVOL and session-aligned curve reuse original 5-minute baseline",()=>{
+  for(const key of ["vol={vol}","rvol={rvol}","lookback={lookback}","setLookback={setLookback}","VolumeLineChart={VolumeLineChart}"])assert(floor.includes(key),key);
+  for(const key of ["vol={vol}","rvol={rvol}","lookback={lookback}","setLookback={setLookback}","VolumeLineChart={LineChart}"])assert(route.includes(key),key);
+  assert.match(floor,/Baseline withheld until sufficient complete history/);
+  assert.match(floor,/historical mean and median withheld/i);
+});
+test("ATM Greeks consume only provider option-chain data",()=>{
+  assert.match(floor,/function AtmGreeks/);
+  assert.match(floor,/chain\?\.strikes/);
+  assert.match(floor,/atm\.call\?\.\[k\]/);
+  assert.match(floor,/atm\.put\?\.\[k\]/);
+  assert.match(floor,/Provider units unchanged/);
+});
+test("no disconnected broker execution or synthetic prints appear as functional trading data",()=>{
+  for(const wording of ["NO ORDER FEED CONNECTED","NO VERIFIED TRADE PRINTS","BLOCK PRINTS NOT CONNECTED","Marked P&L","SELL PLAN","BUY PLAN"])assert(!floor.includes(wording),wording);
+  assert(!/\bfetch\([^)]*(?:\/api\/orders|\/api\/trade\/execute)/.test(floor));
+  assert.match(floor,/NO SIMULATED TRADES/);
+});
+test("classic research and company intelligence stay available",()=>{
   assert.match(route,/useState\("FLOOR"\)/);
   assert.match(route,/workspace==="FLOOR" \? <TerminalTradingFloor/);
   assert.match(route,/className="qt-main-grid"/);
   assert.match(route,/TerminalIntelligence key=\{symbol\}/);
 });
-test("broker/order/live trade sources are never fabricated",()=>{
-  assert.match(floor,/NO ORDER FEED CONNECTED/);
-  assert.match(floor,/NO VERIFIED TRADE PRINTS/);
-  assert.match(floor,/BLOCK PRINTS NOT CONNECTED/);
-  assert.match(floor,/No orders are transmitted/);
-  assert(!/\bfetch\([^)]*(?:\/api\/orders|\/api\/trade\/execute)/.test(floor));
-});
-test("option ranks are based on observed volume, not invented market-wide numbers",()=>{
-  assert.match(floor,/selected chain only/);
-  assert.match(floor,/chain\?\.strikes/);
-  assert.match(floor,/volume/);
-  assert.match(floor,/NSE screener snapshot/);
-});
-test("desktop windows can be moved and resized, mobile panels safely stack",()=>{
+test("desktop windows can be moved and resized and mobile safely stacks",()=>{
   assert.match(floor,/setPointerCapture/);
   assert.match(floor,/onPointerMove=\{move\}/);
   assert.match(css,/resize:both/);
