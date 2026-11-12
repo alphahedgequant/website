@@ -1,9 +1,9 @@
 # Daily NSE Options Activity Archive
 
 ## What is collected
-The upstream source is Upstox NSE option-chain snapshots, through the existing AlphaHedgeQuant backend. Eligibility comes from the daily F&O instrument master. Cash-market stocks without active NSE options are explicitly **not** presented as if options existed.
+The upstream source is Upstox NSE option-chain snapshots, through the existing AlphaHedgeQuant backend. Equity eligibility comes from the daily F&O instrument master, alongside the supported NSE indexes NIFTY, BANKNIFTY and FINNIFTY. Cash-market stocks without active NSE options are explicitly **not** presented as if options existed.
 
-For each eligible stock and its nearest available expiry, the collector aggregates volume and OI across all returned strikes and stores 28 high-activity contract details: volume, OI, OI change, LTP, IV and available bid/ask, along with source receipt times. These are **not** individually signed orders, blocks, sweeps, or institutional buying/selling.
+For each eligible underlying (equity or supported index) and its nearest available expiry, the collector aggregates volume and OI across all returned strikes and stores 28 high-activity contract details: volume, OI, OI change, LTP, IV and available bid/ask, along with source receipt times. These are **not** individually signed orders, blocks, sweeps, or institutional buying/selling.
 
 Heuristic flags:
 - Volume/OI >= 1.5 and absolute contract volume >= 500.
