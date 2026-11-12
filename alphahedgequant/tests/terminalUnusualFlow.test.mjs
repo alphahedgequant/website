@@ -73,3 +73,13 @@ test("terminal background is navy and text white; red and green are movements on
  assert.match(css,/\.qt-unusual-box/);
  assert.match(css,/\.qt-flow-workspace/);
 });
+
+
+test("terminal displays an actionable brokerage reauthorization link only on a quote error",()=>{
+ const page=read("app/terminal/page.jsx");
+ const css=read("app/terminal/terminal.css");
+ assert.match(page,/quoteError&&<div className="qt-provider-alert" role="alert">/);
+ assert.match(page,/zerohedgequant-backend\.onrender\.com\/auth\/login/);
+ assert.match(page,/Quotes and options analytics are not confirmed live/);
+ assert.match(css,/\.qt-provider-alert/);
+});
