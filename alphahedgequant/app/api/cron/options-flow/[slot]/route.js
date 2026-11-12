@@ -1,4 +1,4 @@
-import {istCalendar,isSafeNseCollectionTime,selectFnoBatch,normalizeDailyChain} from "@/lib/dailyOptionsFlow.mjs";
+import {istCalendar,isSafeNseCollectionTime,selectFnoBatch,normalizeDailyChain,INDEX_OPTION_SYMBOLS} from "@/lib/dailyOptionsFlow.mjs";
 import {flowDB,storeFlowBatch} from "@/lib/dailyOptionsFlowStore.mjs";
 export const runtime="nodejs";
 export const dynamic="force-dynamic";
@@ -26,7 +26,7 @@ export async function GET(request,{params}){
   const upstream=await jsonFrom("/api/terminal/fno-universe",19000);
   if(upstream.status!==200||upstream.data?.success!==true||!Array.isArray(upstream.data.data)||upstream.data.data.length<40)
    return reply({status:"unavailable",error:"No validated exchange F&O universe; cannot claim complete coverage",slot},503);
-  const universe=upstream.data.data;
+  const universe=[...upstream.data.data,...INDEX_OPTION_SYMBOLS.map(symbol=>({symbol}))];
   const symbols=selectFnoBatch(universe,slot);
   if(!symbols.length)return reply({status:"unavailable",error:"No eligible F&O tickers selected",slot},503);
   const observations=[],failures={};
