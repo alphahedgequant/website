@@ -1,6 +1,6 @@
 "use client";
 import {useCallback,useEffect,useMemo,useRef,useState} from "react";
-import {compareSnapshots,numericDisplay,readFeedError,toSnapshot} from "@/lib/unusualOptions.mjs";
+import {compareSnapshots,explainMovement,numericDisplay,readFeedError,toSnapshot} from "@/lib/unusualOptions.mjs";
 
 const CORE=[
   {id:"NIFTY",label:"NIFTY 50",desc:"Index options · direction, IV and gamma sensitivity"},
@@ -28,6 +28,34 @@ function EventRow({event,onOpen}){
     <span className="text-neutral-500">{nowIST(event.observedAt)} IST</span>
   </div>;
 }
+const GUIDE = [
+  {metric:"IV",meaning:"Expected volatility priced into the option",up:"More volatility priced in",down:"Less volatility priced in"},
+  {metric:"Delta",meaning:"How premium responds to an underlying-price move",up:"Check |Delta|, not just the arrow",down:"Check |Delta|, not just the arrow"},
+  {metric:"Gamma",meaning:"How quickly Delta may change",up:"More rapid Delta changes",down:"Slower Delta changes"},
+  {metric:"Theta",meaning:"Modelled change in option value as time passes",up:"Less negative often means slower decay",down:"More negative often means faster decay"},
+  {metric:"Vega",meaning:"How premium responds to changes in IV",up:"More IV sensitivity if magnitude rose",down:"Less IV sensitivity if magnitude fell"},
+  {metric:"OI",meaning:"Number of outstanding open contracts",up:"More open positions",down:"Fewer open positions"},
+  {metric:"LTP",meaning:"Last traded price, not a current bid/ask quote",up:"Last premium increased",down:"Last premium decreased"},
+];
+function MoverAlertRow({event,onOpen}) {
+  const up=event.direction==="UP";
+  return <article className="grid grid-cols-1 gap-3 border-t border-white/10 p-3.5 sm:p-4 md:grid-cols-[minmax(140px,1.2fr)_minmax(180px,1fr)_minmax(0,2.8fr)_90px] md:items-start" data-event-metric={event.metric}>
+    <div className="min-w-0">
+      <button type="button" onClick={()=>onOpen(event.symbol)} className="text-sm font-semibold text-white hover:underline focus-visible:outline focus-visible:outline-2 focus-visible:outline-white" title={"Open "+event.symbol+" option chain"}>{event.symbol} ↗</button>
+      <p className="mt-1 font-mono text-xs text-neutral-400">{numericDisplay(event.strike,2)} {event.kind}</p>
+    </div>
+    <div className="min-w-0">
+      <span className={"inline-flex items-center gap-1 rounded-md border px-2.5 py-1 font-mono text-xs font-semibold "+(up?"border-emerald-700/50 bg-emerald-950/30 text-emerald-300":"border-red-800/50 bg-red-950/30 text-red-300")}>{event.label} {up?"↑":"↓"}</span>
+      <p className="mt-2 font-mono text-xs text-neutral-200 tabular-nums">{numericDisplay(event.previous)} → {numericDisplay(event.current)}</p>
+    </div>
+    <div className="min-w-0">
+      <p className="text-[10px] font-mono uppercase tracking-wider text-neutral-500">What this means</p>
+      <p className="mt-1 text-sm leading-relaxed text-neutral-200">{explainMovement(event)}</p>
+    </div>
+    <time dateTime={new Date(event.observedAt).toISOString()} className="font-mono text-[11px] text-neutral-400 md:text-right tabular-nums">{nowIST(event.observedAt)}<span className="block text-neutral-500">IST · observed</span></time>
+  </article>;
+}
+
 function Card({label,description,kind,error,last,events,onOpen,children,checked}){
   const top=events?.[0]||null;
   const status = kind==="MCX"?"NOT CONNECTED":error?"NO DATA":last?"OBSERVING":"AWAITING BASELINE";
@@ -37,7 +65,7 @@ function Card({label,description,kind,error,last,events,onOpen,children,checked}
       <span className={"text-[10px] font-mono border px-2 py-1 rounded shrink-0 "+(error||kind==="MCX"?"border-red-900/60 text-red-300":top?"border-emerald-700/60 text-emerald-300":"border-white/20 text-neutral-300")}>{status}</span>
     </div>
     <p className="mt-4 text-sm leading-relaxed text-neutral-200 min-h-[48px]" role="status">
-      {top ? top.explanation :
+      {top ? explainMovement(top) :
         kind==="MCX" ? "Upstox's standard option-chain endpoint excludes MCX. No crude or gold Greeks will be invented; an MCX contract-level V3 Greeks subscription must be integrated first." :
         error ? error :
         last ? "Watching observed changes across successive quotes. A new snapshot is not, by itself, an unusual movement." :
@@ -122,7 +150,7 @@ export default function UnusualOptionsMonitor({selectedTicker="NIFTY",stockOptio
   useEffect(()=>{const id=setInterval(()=>setNow(Date.now()),PACE_MS);return()=>clearInterval(id);},[]);
   const fresh=alerts.filter(e=>now-e.observedAt<RECENT_MS);
   const eventsFor=(symbol)=>fresh.filter(e=>e.symbol===symbol).sort((a,b)=>b.score-a.score);
-  const marketEvents=fresh.filter(e=>e.symbol!=="NIFTY"&&e.symbol!=="BANKNIFTY").sort((a,b)=>b.score-a.score);
+  const marketEvents=fresh.filter(e=>e.symbol!=="NIFTY"&&e.symbol!=="BANKNIFTY").sort((a,b)=>b.observedAt-a.observedAt||b.score-a.score);
   const activeMarket=isNseSession();
   return <section className="mt-6 rounded-2xl bg-[#080a0c] border border-white/15 p-4 md:p-6 text-white" aria-label="Unusual options movements scanner" data-testid="unusual-options-monitor">
     <header className="flex flex-wrap gap-4 justify-between items-start border-b border-white/10 pb-5">
@@ -135,25 +163,80 @@ export default function UnusualOptionsMonitor({selectedTicker="NIFTY",stockOptio
       </div>
     </header>
     <p className="text-xs mt-4 text-neutral-400">{activeMarket?"NSE regular hours (holidays not verified).":"Outside regular NSE hours; manual refresh available."} Monitoring runs only while this tab is open. It requires two distinct responses and is not a persisted, exchange-certified tick feed.</p>
-    <div className="mt-5 rounded-xl border border-white/15 bg-[#0e1014] p-4 sm:p-5" aria-label="NSE options unusual moves">
-      <div className="flex flex-wrap justify-between items-start gap-3">
-        <div><h3 className="font-semibold text-white">NSE F&O · Unusual Movers</h3>
-          <p className="text-xs text-neutral-400 mt-1">Rolling, rate-limited sample of available NSE symbols. Only F&O-eligible instruments with a successful option-chain response can be scored.</p></div>
-        <div className="text-xs text-neutral-300 font-mono">{seenCount} option chains fetched · {unsupportedCount} unavailable · {candidates.length} candidate symbols</div>
+    <section id="ahq-unusual-movers" className="mt-4 rounded-2xl border border-white/20 bg-[#0e1014] p-4 sm:p-5 md:p-6 shadow-lg shadow-black/20" aria-label="NSE F&O unusual movers primary monitor" data-primary-monitor="nse">
+      <div className="flex flex-wrap items-start justify-between gap-4">
+        <div className="min-w-0">
+          <p className="text-[11px] font-mono uppercase tracking-[.16em] text-neutral-400">Primary options scanner · India</p>
+          <h3 className="mt-2 text-2xl font-semibold tracking-tight text-white">NSE F&O <span className="text-neutral-400">/</span> Unusual Movers</h3>
+          <p className="mt-2 max-w-2xl text-sm text-neutral-300 leading-relaxed">See the latest unusual changes in option Greeks, IV, open interest and premium across the NSE F&O symbols currently sampled.</p>
+        </div>
+        <div className="rounded-lg border border-white/10 bg-white/[0.035] px-3 py-2 text-xs font-mono text-neutral-300">
+          <p>{seenCount} symbols observed</p>
+          <p className="mt-1 text-neutral-400">{unsupportedCount} unavailable · {candidates.length} candidates</p>
+        </div>
       </div>
-      <p className="text-xs text-neutral-400 mt-3 leading-relaxed">This does <strong>not</strong> continuously cover every NSE contract. A complete exchange-wide live ranking requires a dedicated subscribed WebSocket/contract-feed scanner. No comprehensive coverage is implied.</p>
-      <div className="mt-4 flex flex-wrap items-center gap-2 rounded-lg border border-white/10 bg-white/[0.03] px-3 py-3 text-xs">
-        <span className="text-neutral-400">SELECTED TICKER</span>
-        <button type="button" onClick={()=>openChain(selectedTicker)} className="font-semibold text-white hover:underline focus-visible:outline-white">{selectedTicker} ↗</button>
-        <span className="text-neutral-400">{status[selectedTicker]?.error ? "Feed: "+short(status[selectedTicker].error,140) : status[selectedTicker]?.last ? "Observation captured · "+nowIST(status[selectedTicker].last.observedAt)+" IST" : "Awaiting first observation"}</span>
-        {eventsFor(selectedTicker).length>0&&<span className="font-semibold text-emerald-400">{eventsFor(selectedTicker).length} recent metric movements</span>}
+      <div className="mt-5 grid grid-cols-2 gap-2 lg:grid-cols-4">
+        <div className="rounded-lg border border-white/10 bg-white/[0.035] p-3">
+          <p className="text-[11px] font-medium text-neutral-400">Recent metric alerts</p>
+          <p className="mt-1 text-xl font-semibold text-white tabular-nums">{marketEvents.length}</p>
+          <p className="mt-0.5 text-[10px] text-neutral-500">In this tab · last 5 min</p>
+        </div>
+        <div className="rounded-lg border border-white/10 bg-white/[0.035] p-3">
+          <p className="text-[11px] font-medium text-neutral-400">Latest flagged ticker</p>
+          <p className="mt-1 truncate text-lg font-semibold text-white">{marketEvents[0]?.symbol||"—"}</p>
+          <p className="mt-0.5 text-[10px] text-neutral-500">Not a trade recommendation</p>
+        </div>
+        <div className="rounded-lg border border-white/10 bg-white/[0.035] p-3">
+          <p className="text-[11px] font-medium text-neutral-400">Latest metric movement</p>
+          <p className={"mt-1 text-lg font-semibold "+(marketEvents[0]?.direction==="UP"?"text-emerald-300":marketEvents[0]?.direction==="DOWN"?"text-red-300":"text-white")}>{marketEvents[0]?(marketEvents[0].label+" "+(marketEvents[0].direction==="UP"?"↑":"↓")):"—"}</p>
+          <p className="mt-0.5 text-[10px] text-neutral-500">Numeric rise / fall</p>
+        </div>
+        <div className="rounded-lg border border-white/10 bg-white/[0.035] p-3">
+          <p className="text-[11px] font-medium text-neutral-400">Latest flagged contract</p>
+          <p className="mt-1 truncate text-lg font-semibold text-white font-mono">{marketEvents[0]?(numericDisplay(marketEvents[0].strike,2)+" "+marketEvents[0].kind):"—"}</p>
+          <p className="mt-0.5 text-[10px] text-neutral-500">Not the highest-volume strike</p>
+        </div>
       </div>
-      {marketEvents.length ? <div className="mt-4">
-        <p className="text-sm text-neutral-200 mb-2">{marketEvents[0].explanation}</p>
-        {marketEvents.slice(0,15).map(e=><EventRow key={e.id} event={e} onOpen={openChain}/>)}
-      </div> : <div className="mt-5 rounded-lg border border-white/10 p-5 text-center text-neutral-400 text-sm">No qualifying options movements observed in the sampled feed yet. This is not a market-wide “no signal” conclusion.</div>}
-      <div className="mt-4 text-xs text-neutral-500">Click a ticker to open its option chain. Rankings are based on observed percent/absolute changes, not projected profits or order-book trade prints.</div>
-    </div>
+      <div className="mt-4 flex flex-wrap items-center justify-between gap-2 rounded-lg border border-white/10 bg-white/[0.02] px-3 py-2">
+        <p className="text-xs text-neutral-300">
+          <span className="text-emerald-300 font-semibold">↑ Green</span> = metric increased
+          <span className="px-2 text-neutral-600">·</span>
+          <span className="text-red-300 font-semibold">↓ Red</span> = metric decreased
+          <span className="px-2 text-neutral-600">·</span> Latest first
+        </p>
+        <p className="text-[11px] text-neutral-400">Arrows show numeric change, never BUY / SELL</p>
+      </div>
+      <div className="mt-3 flex flex-wrap items-center gap-2 rounded-lg border border-white/10 px-3 py-2 text-xs">
+        <span className="font-medium text-neutral-400">Selected ticker</span>
+        <button type="button" onClick={()=>openChain(selectedTicker)} className="font-semibold text-white hover:underline focus-visible:outline focus-visible:outline-2 focus-visible:outline-white">{selectedTicker} ↗</button>
+        <span className="text-neutral-400">{status[selectedTicker]?.error ? "Feed: "+short(status[selectedTicker].error,125) : status[selectedTicker]?.last ? "Last observed "+nowIST(status[selectedTicker].last.observedAt)+" IST" : "Awaiting a verified option snapshot"}</span>
+      </div>
+      <div className="mt-5 overflow-hidden rounded-xl border border-white/10">
+        <div className="flex flex-wrap items-center justify-between gap-3 bg-white/[0.045] px-4 py-3">
+          <div>
+            <h4 className="text-sm font-semibold text-white">Latest unusual option movements</h4>
+            <p className="mt-1 text-xs text-neutral-400">Each alert includes the contract, numeric change and a plain-English explanation.</p>
+          </div>
+          <span className="text-xs text-neutral-400 font-mono">Up to 15 recent alerts</span>
+        </div>
+        {marketEvents.length
+          ? marketEvents.slice(0,15).map(e=><MoverAlertRow key={e.id} event={e} onOpen={openChain}/>)
+          : <div className="p-6 text-center text-sm leading-relaxed text-neutral-300">No qualifying movements observed yet. Two distinct snapshots are needed before a metric change can be detected. This does not mean the whole market is quiet.</div>}
+      </div>
+      <details className="mt-4 overflow-hidden rounded-xl border border-white/10 bg-white/[0.025]">
+        <summary className="cursor-pointer px-4 py-3 text-sm font-semibold text-white marker:text-neutral-400 hover:bg-white/[0.04]">Simple guide: What do IV, Delta, Gamma, Theta, Vega, OI and LTP mean?</summary>
+        <div className="grid grid-cols-1 gap-2 border-t border-white/10 p-3 sm:grid-cols-2 lg:grid-cols-3">
+          {GUIDE.map(item=><div key={item.metric} className="rounded-lg border border-white/10 bg-[#101319] p-3">
+            <p className="text-sm font-semibold text-white">{item.metric}</p>
+            <p className="mt-1 text-xs leading-relaxed text-neutral-300">{item.meaning}</p>
+            <p className="mt-2 text-xs text-neutral-400"><span className="text-emerald-300">↑</span> {item.up}</p>
+            <p className="mt-1 text-xs text-neutral-400"><span className="text-red-300">↓</span> {item.down}</p>
+          </div>)}
+        </div>
+        <p className="border-t border-white/10 px-4 py-3 text-xs text-neutral-400"><strong className="text-white">Example — Theta -0.138 → -0.3561:</strong> Theta is now more negative, so modelled time decay is stronger. Theta -0.3561 → -0.138 means the opposite. This assumes consistent provider units and other pricing inputs unchanged.</p>
+      </details>
+      <p className="mt-4 text-xs leading-relaxed text-neutral-400">Coverage: a rotating, rate-limited sample of NSE symbols, not every contract continuously. Only F&O-eligible tickers with a valid Upstox chain can be ranked. Observed times are backend snapshots unless exchange timestamps are provided. Click a ticker to inspect its option chain.</p>
+    </section>
     <div className="grid grid-cols-1 xl:grid-cols-2 gap-3 mt-4">
       {CORE.map(item=><Card key={item.id} label={item.label} description={item.desc} error={status[item.id]?.error} last={status[item.id]?.last} events={eventsFor(item.id)} onOpen={openChain}/>)}
       {COMMODITIES.map(item=><Card key={item.id} label={item.label} description={item.desc} kind="MCX" onOpen={openChain}/>)}
