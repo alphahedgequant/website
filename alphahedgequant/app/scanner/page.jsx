@@ -22,7 +22,7 @@ const STRATEGIES = [
 
 const SECTORS = ["All Sectors", "Technology", "Financial", "Energy", "Healthcare", "Consumer Cyclical", "Consumer Defensive", "Industrials", "Basic Materials", "Utilities", "Communication"];
 
-const API = process.env.NEXT_PUBLIC_API_URL || "https://zerohedgequant-backend.onrender.com";
+const API = "/api/market";
 const REFRESH_MS = 2 * 60 * 1000; // server-side recomputation budget
 
 function SignalBadge({ direction }) {
@@ -59,7 +59,7 @@ function SkeletonRow() {
   );
 }
 
-export default function ScannerPage() {
+export default function ScannerPage({onOpenTicker=null,embedded=false}) {
   const [signals, setSignals]     = useState([]);
   const [loading, setLoading]     = useState(true);
   const [error, setError]         = useState(null);
@@ -75,7 +75,7 @@ export default function ScannerPage() {
     setLoading(true);
     setError(null);
     try {
-      const r = await fetch(`${API}/api/scanner/signals`);
+      const r = await fetch(`${API}/scanner/signals`,{cache:"no-store"});
       if (!r.ok) throw new Error(`HTTP ${r.status}`);
       const json = await r.json();
       if (!json.success) throw new Error(json.error || "API error");
@@ -129,7 +129,7 @@ export default function ScannerPage() {
   const sentiment = buys > sells ? "RISK-ON" : sells > buys ? "RISK-OFF" : "NEUTRAL";
 
   return (
-    <div className="max-w-shell mx-auto px-5 py-10">
+    <div className={embedded?"qt-embedded-tool max-w-shell mx-auto px-5 py-8":"max-w-shell mx-auto px-5 py-10"}>
       {/* Header */}
       <p className="eyebrow mb-3">[ AHQ : SCANNER — LIVE SIGNALS ]</p>
       <div className="flex items-start justify-between flex-wrap gap-4">
@@ -333,7 +333,7 @@ export default function ScannerPage() {
               <h3 className="font-display text-xl font-semibold">{selected.symbol} <span className="text-muted font-normal text-base">— {selected.name}</span></h3>
               <p className="text-muted text-xs mt-0.5">{selected.sector}</p>
             </div>
-            <button onClick={() => setSelected(null)} className="text-muted hover:text-body text-lg">×</button>
+            <div className="flex gap-2 items-center">{onOpenTicker&&<button type="button" onClick={()=>onOpenTicker(selected.symbol)} className="border border-line rounded px-3 py-2 text-xs text-body">Open {selected.symbol} in terminal ↗</button>}<button onClick={() => setSelected(null)} className="text-muted hover:text-body text-lg" aria-label="Close signal details">×</button></div>
           </div>
           <div className="mt-4 grid grid-cols-2 sm:grid-cols-4 gap-4">
             {[
