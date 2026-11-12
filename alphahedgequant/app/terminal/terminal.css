@@ -448,3 +448,135 @@
 .qt-reading-clean .qt-workbook-tickers button[aria-current=page]{background:#e9d69e!important;border-color:#aa8a50!important}
 @media(max-width:800px){.qt-reading-clean .qt-workbook-kpis{grid-template-columns:repeat(2,minmax(0,1fr))}.qt-reading-clean .qt-workbook-scenarios{grid-template-columns:1fr}.qt-reading-clean .qt-workbook-scenarios article{gap:4px}}
 @media(max-width:480px){.qt-reading-clean .qt-workbook-kpis{grid-template-columns:1fr}}
+
+
+/* 2026-11-12 AHQ Quant Terminal theme contract: BLUE-BLACK surfaces,
+   WHITE neutral content; GREEN up, RED down. Entirely route-scoped. */
+.qt-shell.qt-shell{
+ --qt-gold:#8fcaff;--qt-cyan:#8fcaff;--qt-border:#355779;
+ --qt-green:#3de48c;--qt-red:#ff6577;
+ background:#07192f!important;color:#f7fbff!important;
+ font-family:"DM Sans","Archivo",system-ui,sans-serif;
+ font-size:13px;
+}
+.qt-shell .qt-tape,.qt-shell .qt-toolbar,.qt-shell .qt-symbol-bar,
+.qt-shell .qt-footer,.qt-shell .qt-module-notice{
+ background:#0a203c!important;color:#f5faff!important;
+ border-color:#335376!important;
+}
+.qt-shell :is(.qt-panel,.qt-svg,.qt-search,.qt-depth-grid,.qt-mini-actions){
+ background:#0b223f!important;
+ border-color:#335477!important;
+}
+.qt-shell :is(.qt-tabs button,.qt-tape button,.qt-tape-state,.qt-panel-top strong,
+.qt-panel-top span,.qt-brand,.qt-watch-row,.qt-watch-head,.qt-metrics strong,
+.qt-metrics span,.qt-price-strip,.qt-option-controls,.qt-section-label,
+.qt-mini-actions,.qt-legend,.qt-watch-foot,.qt-hint,.qt-footer,
+.qt-symbol-results strong,.qt-symbol-results small){
+ color:#f0f6ff!important;
+}
+.qt-shell .qt-panel-top,.qt-shell .qt-tape,.qt-shell .qt-price-strip,
+.qt-shell .qt-watch-row,.qt-shell .qt-symbol-bar,.qt-shell .qt-depth-metrics{
+ border-color:#335477!important
+}
+.qt-shell .qt-tabs button.active,
+.qt-shell .qt-watch-row.selected{
+ color:#fff!important;border-color:#82beff!important;
+ background:#183d65!important
+}
+.qt-shell :is(.qt-tabs button:hover,.qt-tape button:hover,.qt-watch-row:hover,
+.qt-mini-actions button:hover,.qt-symbol-picker>button:hover){
+ background:#214b72!important;color:#fff!important
+}
+.qt-shell .qt-tabs button:not(.active){color:#dae7f6!important}
+.qt-shell .qt-panel-top strong{font-size:12px;letter-spacing:.05em}
+.qt-shell .qt-panel-top span{font-size:11px}
+.qt-shell .qt-toolbar-right,.qt-shell .qt-mode{
+ color:#f0f7ff!important;border-color:#5680aa!important
+}
+.qt-shell :is(.qt-symbol-picker input,.qt-symbol-picker>button,.qt-symbol-results,
+.qt-shell select,.qt-shell input,.qt-results){
+ background:#102c4c!important;color:#fff!important;border-color:#456c91!important
+}
+.qt-shell input::placeholder{color:#b9cde3!important;opacity:1}
+.qt-shell .qt-symbol-results button:hover{background:#1f476f!important}
+.qt-shell .qt-symbol-results strong{color:#fff!important}
+.qt-shell .qt-linked-symbol{color:#fff!important}
+.qt-shell .qt-chain-scroll th{background:#1b3e62!important;color:#fff!important}
+.qt-shell .qt-chain-scroll td{color:#f0f8ff!important;border-color:#304f70!important}
+.qt-shell .qt-chain-scroll tr:hover{background:#1d4265!important}
+.qt-shell .qt-chain-scroll td:nth-child(4){color:#fff!important}
+.qt-shell .qt-metrics>div{border-color:#315577!important}
+.qt-shell .qt-metrics span{color:#d9e9fb!important}
+.qt-shell .qt-metrics strong{color:#fff!important}
+.qt-shell .qt-level,.qt-shell .qt-report-row,.qt-shell .qt-network-form{
+ background:#102b4b!important;border-color:#365b80!important
+}
+.qt-shell .qt-empty,.qt-shell .qt-hint,.qt-shell .qt-watch-foot{
+ color:#d4e4f5!important;font-size:12px
+}
+.qt-shell .positive,.qt-shell .qt-price-strip .positive{color:var(--qt-green)!important}
+.qt-shell .negative,.qt-shell .qt-price-strip .negative{color:var(--qt-red)!important}
+.qt-shell .qt-alert{color:#fff!important;background:#193653!important}
+.qt-shell .qt-alert a,.qt-shell .qt-footer a{color:#a9d6ff!important}
+.qt-shell .qt-legend span{color:#fff!important}
+.qt-shell .qt-legend span:nth-child(1){color:#f8fbff!important}
+.qt-shell .qt-legend span:nth-child(2){color:#9fcfff!important}
+.qt-shell .qt-legend span:nth-child(3){color:#d0eaff!important}
+.qt-shell .qt-flow-workspace{padding:20px clamp(12px,2.5vw,35px) 30px}
+.qt-shell .qt-flow-info{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;padding:12px 16px;border:1px solid #375d83;background:#102d4d}
+.qt-shell .qt-flow-info strong{color:#fff;font-size:14px}
+.qt-shell .qt-flow-info span{color:#d2e8ff;font-size:12px}
+.qt-shell .qt-flow-workspace [data-testid="unusual-options-monitor"],
+.qt-shell .qt-flow-workspace [data-unusual-card],
+.qt-shell .qt-flow-workspace [aria-label="NSE options unusual moves"]{
+ background:#0d2846!important;border-color:#42658a!important;color:#fff!important;
+}
+.qt-shell .qt-flow-workspace [data-testid="unusual-options-monitor"] p,
+.qt-shell .qt-flow-workspace [data-unusual-card] p{color:#e6f0fa}
+.qt-shell .qt-flow-workspace [data-unusual-card] button{color:#fff!important}
+.qt-unusual-box{height:100%;display:flex;flex-direction:column;background:#0b223c;color:#fff}
+.qt-unusual-intro{padding:10px;display:flex;align-items:center;justify-content:space-between;gap:10px;border-bottom:1px solid #355778}
+.qt-unusual-intro div{display:grid;gap:4px}
+.qt-unusual-intro strong{color:#fff;font-size:12px;letter-spacing:.07em}
+.qt-unusual-intro span,.qt-unusual-caption{font-size:10px;line-height:1.7;color:#d5e6f7}
+.qt-unusual-intro button{font-weight:700;color:#a9d7ff!important;border:1px solid #5985b0;padding:6px 9px}
+.qt-unusual-intro button:hover{background:#1c4771}
+.qt-unusual-caption{padding:9px 10px;margin:0;color:#e1edfb}
+.qt-unusual-caption em{color:#fff;font-style:normal}
+.qt-unusual-summary{display:flex;flex-wrap:wrap;gap:10px 19px;padding:9px 10px;border-block:1px solid #355778;background:#102c4b}
+.qt-unusual-summary span{font-size:10px;color:#e1efff}
+.qt-unusual-summary b{margin-left:5px;color:#fff}
+.qt-unusual-scroll{overflow:auto;flex:1;min-height:110px}
+.qt-unusual-scroll table{width:100%;min-width:420px;border-collapse:collapse;text-align:right;font-size:11px;font-variant-numeric:tabular-nums}
+.qt-unusual-scroll th{position:sticky;top:0;background:#1a3c5e;color:#fff;padding:6px 9px}
+.qt-unusual-scroll td{border-bottom:1px solid #315070;color:#f5faff;padding:6px 9px}
+.qt-unusual-scroll th:first-child,.qt-unusual-scroll td:first-child{text-align:left}
+.qt-unusual-scroll tr:hover{background:#1b3f62}
+.qt-unusual-scroll button{color:#fff!important;text-decoration:underline;text-underline-offset:3px}
+.qt-unusual-scroll .qt-unusual-highlight{color:var(--qt-green)!important;font-weight:800}
+.qt-unusual-empty{padding:23px 12px;text-align:center;color:#e1edfc;font-size:12px;line-height:1.65}
+@media(max-width:720px){.qt-shell .qt-flow-workspace{padding:12px}.qt-unusual-intro{flex-wrap:wrap}}
+/* Company/Network/Peers: use the same navy/white reading design rather than
+   the older cream page treatment. Keep the original content and metrics. */
+.qt-shell .qt-reading-clean{
+ --paper:#0c2644!important;--ink:#f6faff!important;
+ background:linear-gradient(135deg,#102e4e,#091d36)!important;
+ border-color:#54789e!important;color:#fff!important
+}
+.qt-shell .qt-reading-clean :is(.qt-company-overview,.qt-intel-story,.qt-panel,
+.qt-network-item,.qt-intel-metric,.qt-peer-reading-card,.qt-report-row,
+.qt-audited,.qt-audited-bar,.qt-reader-toolbar,.qt-reader-notes,
+.qt-financial-table th,.qt-business-details,.qt-intel-note){
+ background:#113254!important;border-color:#486c90!important;
+ color:#f4f9ff!important
+}
+.qt-shell .qt-reading-clean :is(h1,h2,h3,h4,p,span,small,strong,b,li,label,
+.qt-company-description,.qt-network-meta,.qt-report-body,
+.qt-report-row p,.qt-intel-note,.qt-intel-source){
+ color:#f1f7ff!important
+}
+.qt-shell .qt-reading-clean input,.qt-shell .qt-reading-clean textarea,
+.qt-shell .qt-reading-clean select{background:#081e37!important;color:#fff!important}
+.qt-shell .qt-reading-clean .qt-reader-tools button{background:#23527e!important;color:#fff!important;border-color:#5e93c4!important}
+.qt-shell .qt-reading-clean .qt-graph svg text{fill:#fff!important}

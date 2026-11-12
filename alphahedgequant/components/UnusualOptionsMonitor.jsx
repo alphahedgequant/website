@@ -22,21 +22,21 @@ function isNseSession(){
 function EventRow({event,onOpen}){
   return <div className="flex flex-wrap gap-x-3 gap-y-1 items-center border-b border-white/10 py-2 last:border-b-0 text-xs" data-event-metric={event.metric}>
     <button type="button" onClick={()=>onOpen(event.symbol)} className="font-semibold text-white hover:underline focus-visible:outline focus-visible:outline-2 focus-visible:outline-white" title={"Open "+event.symbol+" option chain"}>{event.symbol} ↗</button>
-    <span className="text-neutral-300 font-mono">{numericDisplay(event.strike,2)} {event.kind}</span>
+    <span className="text-slate-100 font-mono">{numericDisplay(event.strike,2)} {event.kind}</span>
     <span className={"font-bold "+(event.direction==="UP"?"text-emerald-400":"text-red-400")}>{event.label} {event.direction==="UP"?"↑":"↓"}</span>
-    <span className="text-neutral-300 font-mono">{numericDisplay(event.previous)} → {numericDisplay(event.current)}</span>
-    <span className="text-neutral-500">{nowIST(event.observedAt)} IST</span>
+    <span className="text-slate-100 font-mono">{numericDisplay(event.previous)} → {numericDisplay(event.current)}</span>
+    <span className="text-slate-300">{nowIST(event.observedAt)} IST</span>
   </div>;
 }
 function Card({label,description,kind,error,last,events,onOpen,children,checked}){
   const top=events?.[0]||null;
   const status = kind==="MCX"?"NOT CONNECTED":error?"NO DATA":last?"OBSERVING":"AWAITING BASELINE";
-  return <section className="rounded-xl border border-white/15 bg-[#0e1014] p-4 sm:p-5 flex flex-col min-h-[270px]" aria-label={label+" unusual options movements"} data-unusual-card={label}>
+  return <section className="rounded-xl border border-white/15 bg-[#102847] p-4 sm:p-5 flex flex-col min-h-[270px]" aria-label={label+" unusual options movements"} data-unusual-card={label}>
     <div className="flex justify-between gap-3 items-start">
-      <div><h3 className="font-semibold text-white text-base tracking-wide">{label}</h3><p className="text-neutral-400 text-xs mt-1">{description}</p></div>
-      <span className={"text-[10px] font-mono border px-2 py-1 rounded shrink-0 "+(error||kind==="MCX"?"border-red-900/60 text-red-300":top?"border-emerald-700/60 text-emerald-300":"border-white/20 text-neutral-300")}>{status}</span>
+      <div><h3 className="font-semibold text-white text-base tracking-wide">{label}</h3><p className="text-slate-200 text-xs mt-1">{description}</p></div>
+      <span className={"text-[10px] font-mono border px-2 py-1 rounded shrink-0 "+(error||kind==="MCX"?"border-red-900/60 text-red-300":top?"border-emerald-700/60 text-emerald-300":"border-white/20 text-slate-100")}>{status}</span>
     </div>
-    <p className="mt-4 text-sm leading-relaxed text-neutral-200 min-h-[48px]" role="status">
+    <p className="mt-4 text-sm leading-relaxed text-white min-h-[48px]" role="status">
       {top ? top.explanation :
         kind==="MCX" ? "Upstox's standard option-chain endpoint excludes MCX. No crude or gold Greeks will be invented; an MCX contract-level V3 Greeks subscription must be integrated first." :
         error ? error :
@@ -45,18 +45,18 @@ function Card({label,description,kind,error,last,events,onOpen,children,checked}
     </p>
     {top&&<div className={"mt-3 rounded-lg border px-3 py-2 text-sm "+(top.direction==="UP"?"border-emerald-800/40 bg-emerald-950/20":"border-red-900/40 bg-red-950/20")}>
       <span className="font-semibold text-white">{top.label} {top.direction==="UP"?"spike ↑":"drop ↓"}</span>
-      <span className="ml-2 font-mono text-neutral-200">{numericDisplay(top.previous)} → {numericDisplay(top.current)}</span>
-      <p className="text-[11px] mt-1 text-neutral-400">{top.strike} {top.kind} · {nowIST(top.observedAt)} IST</p>
+      <span className="ml-2 font-mono text-white">{numericDisplay(top.previous)} → {numericDisplay(top.current)}</span>
+      <p className="text-[11px] mt-1 text-slate-200">{top.strike} {top.kind} · {nowIST(top.observedAt)} IST</p>
     </div>}
     {events?.length>0&&<div className="mt-3">{events.slice(0,3).map(e=><EventRow key={e.id} event={e} onOpen={onOpen}/>)}</div>}
     {error&&kind!=="MCX"&&<p className="text-xs text-red-300 mt-3">{short(error,200)}</p>}
-    {kind==="MCX"&&<p className="text-xs text-neutral-500 mt-3">This panel will not claim live monitoring without verified MCX instrument keys and Greek quotes.</p>}
+    {kind==="MCX"&&<p className="text-xs text-slate-300 mt-3">This panel will not claim live monitoring without verified MCX instrument keys and Greek quotes.</p>}
     {children}
-    <div className="mt-auto pt-4 flex justify-between gap-3 text-[10px] text-neutral-500 font-mono">
+    <div className="mt-auto pt-4 flex justify-between gap-3 text-[10px] text-slate-300 font-mono">
       <span>{last?("Expiry "+last.expiry):"No confirmed option snapshot"}</span>
       <span>{last?("Observed "+nowIST(last.observedAt)+" IST"):"—"}</span>
     </div>
-    {last&&last.timestampKind!=="EXCHANGE_REPORTED"&&<p className="text-[10px] text-neutral-500 mt-1">Backend-snapshot comparison; per-contract exchange-tick time is unavailable.</p>}
+    {last&&last.timestampKind!=="EXCHANGE_REPORTED"&&<p className="text-[10px] text-slate-300 mt-1">Backend-snapshot comparison; per-contract exchange-tick time is unavailable.</p>}
   </section>;
 }
 export default function UnusualOptionsMonitor({selectedTicker="NIFTY",stockOptions=[],onOpenChain}){
@@ -65,7 +65,7 @@ export default function UnusualOptionsMonitor({selectedTicker="NIFTY",stockOptio
   const snapshots=useRef(new Map()),scanCursor=useRef(0),scanBatch=useRef([]),scanPhase=useRef(0);
   const candidates=useMemo(()=>{
     const fromFeed=stockOptions.filter(x=>x&&typeof x.symbol==="string"&&/^[A-Z0-9._-]{1,40}$/.test(x.symbol)).map(x=>x.symbol);
-    const all=[...DEFAULT_SYMBOLS,...fromFeed];
+    const all=fromFeed.length?fromFeed:DEFAULT_SYMBOLS;
     return [...new Set(all)].filter(x=>x!=="NIFTY"&&x!=="BANKNIFTY"&&x!=="FINNIFTY").slice(0,500);
   },[stockOptions]);
   const seenCount=Object.values(checked).filter(x=>x==="observed").length;
@@ -124,40 +124,40 @@ export default function UnusualOptionsMonitor({selectedTicker="NIFTY",stockOptio
   const eventsFor=(symbol)=>fresh.filter(e=>e.symbol===symbol).sort((a,b)=>b.score-a.score);
   const marketEvents=fresh.filter(e=>e.symbol!=="NIFTY"&&e.symbol!=="BANKNIFTY").sort((a,b)=>b.score-a.score);
   const activeMarket=isNseSession();
-  return <section className="mt-6 rounded-2xl bg-[#080a0c] border border-white/15 p-4 md:p-6 text-white" aria-label="Unusual options movements scanner" data-testid="unusual-options-monitor">
+  return <section className="mt-6 rounded-2xl bg-[#091c35] border border-white/15 p-4 md:p-6 text-white" aria-label="Unusual options movements scanner" data-testid="unusual-options-monitor">
     <header className="flex flex-wrap gap-4 justify-between items-start border-b border-white/10 pb-5">
-      <div><p className="text-xs tracking-widest font-mono text-neutral-400">ALPHAHEDGEQUANT / OPTIONS INTELLIGENCE</p>
+      <div><p className="text-xs tracking-widest font-mono text-slate-200">ALPHAHEDGEQUANT / OPTIONS INTELLIGENCE</p>
       <h2 className="mt-2 text-2xl font-semibold tracking-tight">Unusual Options Movements</h2>
-      <p className="mt-2 text-sm text-neutral-400 max-w-[760px]">Look for sudden changes in delta, gamma, theta, vega, IV, option LTP or open interest between actual option-chain responses. Green means a metric rose; red means it fell — neither is automatically a LONG or SHORT signal.</p></div>
+      <p className="mt-2 text-sm text-slate-200 max-w-[760px]">Look for sudden changes in delta, gamma, theta, vega, IV, option LTP or open interest between actual option-chain responses. Green means a metric rose; red means it fell — neither is automatically a LONG or SHORT signal.</p></div>
       <div className="flex gap-2 flex-wrap">
-        <button type="button" aria-pressed={auto} onClick={()=>setAuto(v=>!v)} className={"rounded border px-3 py-2 text-xs font-mono "+(auto?"border-emerald-700 text-emerald-300":"border-white/20 text-neutral-300")}>{auto?"AUTO ON · 15s":"AUTO OFF"}</button>
+        <button type="button" aria-pressed={auto} onClick={()=>setAuto(v=>!v)} className={"rounded border px-3 py-2 text-xs font-mono "+(auto?"border-emerald-700 text-emerald-300":"border-white/20 text-slate-100")}>{auto?"AUTO ON · 15s":"AUTO OFF"}</button>
         <button type="button" onClick={()=>setPulse(n=>n+1)} className="rounded border border-white/25 px-3 py-2 text-xs font-mono hover:bg-white/10">REFRESH NOW ↻</button>
       </div>
     </header>
-    <p className="text-xs mt-4 text-neutral-400">{activeMarket?"NSE regular hours (holidays not verified).":"Outside regular NSE hours; manual refresh available."} Monitoring runs only while this tab is open. It requires two distinct responses and is not a persisted, exchange-certified tick feed.</p>
-    <div className="mt-5 rounded-xl border border-white/15 bg-[#0e1014] p-4 sm:p-5" aria-label="NSE options unusual moves">
+    <p className="text-xs mt-4 text-slate-200">{activeMarket?"NSE regular hours (holidays not verified).":"Outside regular NSE hours; manual refresh available."} Monitoring runs only while this tab is open. It requires two distinct responses and is not a persisted, exchange-certified tick feed.</p>
+    <div className="mt-5 rounded-xl border border-white/15 bg-[#102847] p-4 sm:p-5" aria-label="NSE options unusual moves">
       <div className="flex flex-wrap justify-between items-start gap-3">
         <div><h3 className="font-semibold text-white">NSE F&O · Unusual Movers</h3>
-          <p className="text-xs text-neutral-400 mt-1">Rolling, rate-limited sample of available NSE symbols. Only F&O-eligible instruments with a successful option-chain response can be scored.</p></div>
-        <div className="text-xs text-neutral-300 font-mono">{seenCount} option chains fetched · {unsupportedCount} unavailable · {candidates.length} candidate symbols</div>
+          <p className="text-xs text-slate-200 mt-1">Rolling, rate-limited sample of available NSE symbols. Only F&O-eligible instruments with a successful option-chain response can be scored.</p></div>
+        <div className="text-xs text-slate-100 font-mono">{seenCount} option chains fetched · {unsupportedCount} unavailable · {candidates.length} candidate symbols</div>
       </div>
-      <p className="text-xs text-neutral-400 mt-3 leading-relaxed">This does <strong>not</strong> continuously cover every NSE contract. A complete exchange-wide live ranking requires a dedicated subscribed WebSocket/contract-feed scanner. No comprehensive coverage is implied.</p>
+      <p className="text-xs text-slate-200 mt-3 leading-relaxed">This does <strong>not</strong> continuously cover every NSE contract. A complete exchange-wide live ranking requires a dedicated subscribed WebSocket/contract-feed scanner. No comprehensive coverage is implied.</p>
       <div className="mt-4 flex flex-wrap items-center gap-2 rounded-lg border border-white/10 bg-white/[0.03] px-3 py-3 text-xs">
-        <span className="text-neutral-400">SELECTED TICKER</span>
+        <span className="text-slate-200">SELECTED TICKER</span>
         <button type="button" onClick={()=>openChain(selectedTicker)} className="font-semibold text-white hover:underline focus-visible:outline-white">{selectedTicker} ↗</button>
-        <span className="text-neutral-400">{status[selectedTicker]?.error ? "Feed: "+short(status[selectedTicker].error,140) : status[selectedTicker]?.last ? "Observation captured · "+nowIST(status[selectedTicker].last.observedAt)+" IST" : "Awaiting first observation"}</span>
+        <span className="text-slate-200">{status[selectedTicker]?.error ? "Feed: "+short(status[selectedTicker].error,140) : status[selectedTicker]?.last ? "Observation captured · "+nowIST(status[selectedTicker].last.observedAt)+" IST" : "Awaiting first observation"}</span>
         {eventsFor(selectedTicker).length>0&&<span className="font-semibold text-emerald-400">{eventsFor(selectedTicker).length} recent metric movements</span>}
       </div>
       {marketEvents.length ? <div className="mt-4">
-        <p className="text-sm text-neutral-200 mb-2">{marketEvents[0].explanation}</p>
+        <p className="text-sm text-white mb-2">{marketEvents[0].explanation}</p>
         {marketEvents.slice(0,15).map(e=><EventRow key={e.id} event={e} onOpen={openChain}/>)}
-      </div> : <div className="mt-5 rounded-lg border border-white/10 p-5 text-center text-neutral-400 text-sm">No qualifying options movements observed in the sampled feed yet. This is not a market-wide “no signal” conclusion.</div>}
-      <div className="mt-4 text-xs text-neutral-500">Click a ticker to open its option chain. Rankings are based on observed percent/absolute changes, not projected profits or order-book trade prints.</div>
+      </div> : <div className="mt-5 rounded-lg border border-white/10 p-5 text-center text-slate-200 text-sm">No qualifying options movements observed in the sampled feed yet. This is not a market-wide “no signal” conclusion.</div>}
+      <div className="mt-4 text-xs text-slate-300">Click a ticker to open its option chain. Rankings are based on observed percent/absolute changes, not projected profits or order-book trade prints.</div>
     </div>
     <div className="grid grid-cols-1 xl:grid-cols-2 gap-3 mt-4">
       {CORE.map(item=><Card key={item.id} label={item.label} description={item.desc} error={status[item.id]?.error} last={status[item.id]?.last} events={eventsFor(item.id)} onOpen={openChain}/>)}
       {COMMODITIES.map(item=><Card key={item.id} label={item.label} description={item.desc} kind="MCX" onOpen={openChain}/>)}
     </div>
-    <p className="mt-4 text-[11px] leading-relaxed text-neutral-500">Detection rules: IV ≥15% relative and ≥0.002 provider units; Delta ≥0.08; Gamma ≥40%; Theta/Vega ≥40%; option LTP ≥20% and ≥₹1; OI ≥12% and ≥100. Same-expiry, same-strike comparisons only, within 150 seconds. Metric units are preserved from Upstox. Alert timestamps are local observation times unless the upstream explicitly provides an exchange timestamp. Alerts expire after five minutes. Trading or institutional intent cannot be inferred from these readings alone.</p>
+    <p className="mt-4 text-[11px] leading-relaxed text-slate-300">Detection rules: IV ≥15% relative and ≥0.002 provider units; Delta ≥0.08; Gamma ≥40%; Theta/Vega ≥40%; option LTP ≥20% and ≥₹1; OI ≥12% and ≥100. Same-expiry, same-strike comparisons only, within 150 seconds. Metric units are preserved from Upstox. Alert timestamps are local observation times unless the upstream explicitly provides an exchange timestamp. Alerts expire after five minutes. Trading or institutional intent cannot be inferred from these readings alone.</p>
   </section>;
 }

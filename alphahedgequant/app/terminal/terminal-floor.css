@@ -225,3 +225,140 @@
   .floor-greek-line{font-size:12px;padding:7px 10px}
   .floor-volume .qt-svg{max-height:none}
 }
+
+
+/* 2026-11-12: AHQ canonical NAVY/BLUE + WHITE trading floor.
+   Only positive/negative market movements use GREEN/RED. Scoped to /terminal. */
+.qt-shell .floor-terminal {
+ --floor-bright:#f7fbff;
+ --floor-green:#3de48c;
+ --floor-red:#ff6577;
+ --floor-line:#365578;
+ --floor-mid:#09213e;
+ --floor-panel:#0b203a;
+ background:#06172e!important;color:#f7fbff!important;
+ border-color:#365578!important;
+ font-family:"DM Sans","Archivo",ui-monospace,monospace;
+}
+.qt-shell .floor-terminal-header {
+ background:linear-gradient(110deg,#102b4a,#081c34)!important;
+ border-bottom-color:#3b5a7a;color:#fff;
+}
+.qt-shell .floor-diamond {
+ background:#153b60!important;color:#fff!important;border-color:#5c9ddd!important;
+}
+.qt-shell .floor-wordmark strong,
+.qt-shell .floor-window-label,.qt-shell .floor-tape-cell strong,
+.qt-shell .floor-window-body,.qt-shell .floor-account strong {color:#f7fbff!important}
+.qt-shell .floor-wordmark small,.qt-shell .floor-tape-cell span,
+.qt-shell .floor-tape-status small,.qt-shell .floor-footnote,
+.qt-shell .floor-desktop-hint,.qt-shell .floor-account span {
+ color:#c6d7ea!important
+}
+.qt-shell .floor-commands>button,.qt-shell .floor-windows-menu summary {
+ background:#153352!important;border-color:#486c96!important;color:#fff!important
+}
+.qt-shell .floor-commands>button:hover,.qt-shell .floor-windows-menu summary:hover,
+.qt-shell .floor-windows-menu>div button:hover {background:#22517e!important}
+.qt-shell .floor-readonly {
+ color:#e0ebfa!important;border-color:#44688e!important
+}
+.qt-shell .floor-readonly.feed-on {color:#f2f8ff!important}
+.qt-shell .floor-windows-menu>div {
+ background:#102640!important;border-color:#456c95!important
+}
+.qt-shell .floor-windows-menu>div button {
+ color:#fff!important;border-color:#304f71!important
+}
+.qt-shell .floor-ticker-tape {
+ background:linear-gradient(180deg,#102b4b,#081b31)!important;
+ border-bottom-color:#3e5d81!important
+}
+.qt-shell .floor-tape-cell{border-right-color:#365270!important}
+.qt-shell .floor-tape-status{color:#e5f4ff!important}
+.qt-shell .floor-desktop-hint{background:#0a1b31!important;border-bottom-color:#355477!important}
+.qt-shell .floor-windows-canvas{
+ min-height:1295px;
+ background-color:#06172c!important;
+ background-image:
+  linear-gradient(rgba(85,154,210,.08) 1px,transparent 1px),
+  linear-gradient(90deg,rgba(85,154,210,.08) 1px,transparent 1px)!important;
+}
+.qt-shell .floor-window {
+ background:#0a203a!important;border-color:#567799!important;
+ box-shadow:0 12px 27px rgba(1,8,20,.5),0 0 0 1px #112e4c!important;
+}
+.qt-shell .floor-window-title {
+ color:#fff!important;
+ background:linear-gradient(180deg,#23466c,#173352)!important;
+ border-bottom-color:#658bb7!important
+}
+.qt-shell .floor-green-dot {
+ background:#67b4f2!important;border-color:#286ba8!important
+}
+.qt-shell .floor-window-buttons button {
+ color:#fff!important;background:#1b4269!important;border-color:#658ab2!important
+}
+.qt-shell .floor-window-buttons button:hover{background:#2e628c!important}
+.qt-shell .floor-window-body{
+ background:#091d36!important;
+ scrollbar-color:#3e688f #081a30!important
+}
+.qt-shell .floor-table th,.qt-shell .floor-watch-head,
+.qt-shell .floor-greek-head,.qt-shell .floor-mini-head {
+ background:#1b3b5c!important;color:#f8fbff!important;border-color:#4b719a!important
+}
+.qt-shell .floor-table td,.qt-shell .floor-greek-line,
+.qt-shell .floor-alert-row,.qt-shell .floor-watch-line {
+ color:#edf5ff!important;border-bottom-color:#284665!important
+}
+.qt-shell .floor-table tr:nth-child(even),
+.qt-shell .floor-watch-line:nth-child(odd),
+.qt-shell .floor-depth-row:nth-child(even){background:#102940!important}
+.qt-shell .floor-table tr:hover,.qt-shell .floor-table tr.floor-highlight,
+.qt-shell .floor-watch-line:hover,.qt-shell .floor-watch-line.floor-active,
+.qt-shell .floor-mover-row:hover {background:#244b72!important}
+.qt-shell .floor-watch-line strong,.qt-shell .floor-greek-line strong,
+.qt-shell .floor-greek-line span,.qt-shell .floor-greek-head span,
+.qt-shell .floor-rvol-main strong {color:#fff!important}
+.qt-shell .floor-inline-link,.qt-shell .floor-blank a{color:#9bccff!important}
+.qt-shell .floor-blank,.qt-shell .floor-blank strong,
+.qt-shell .floor-blank p,.qt-shell .floor-caveat {
+ color:#d6e4f5!important
+}
+.qt-shell .floor-account>div,.qt-shell .floor-greek-line,
+.qt-shell .floor-mover-row,.qt-shell .floor-alert-row {
+ border-bottom-color:#274663!important
+}
+.qt-shell .floor-stat-grid,.qt-shell .floor-innerbar,
+.qt-shell .floor-price-head,.qt-shell .floor-rvol-stats {
+ background:#102b49!important;color:#f6fbff!important;border-color:#3d658b!important
+}
+.qt-shell .floor-innerbar select,.qt-shell .floor-innerbar button,
+.qt-shell .floor-innerbar a,.qt-shell .floor-order-fields input {
+ background:#183a5c!important;color:#fff!important;border-color:#547aa1!important
+}
+.qt-shell .floor-innerbar a:hover{background:#235783!important}
+.qt-shell .floor-caveat{background:#0d2744!important;border-color:#355475!important}
+.qt-shell .floor-depth-head{background:#204367!important;color:#fff!important;border-color:#648ab4!important}
+.qt-shell .floor-depth-row{border-bottom-color:#2a4c71!important}
+.qt-shell .floor-depth-row span:nth-child(-n+2){background:rgba(61,228,140,.075)!important}
+.qt-shell .floor-depth-row span:nth-child(n+3){background:rgba(255,101,119,.075)!important}
+.qt-shell .floor-chart-svg{background:#091e35!important}
+.qt-shell .floor-volume .qt-svg{background:#0b2039!important}
+.qt-shell .floor-volume .qt-svg text{fill:#fff!important}
+.qt-shell .floor-bottom-disclosure{background:#0d2744!important;border-top-color:#47668a!important;color:#e7f1ff!important}
+.qt-shell .floor-messages p,.qt-shell .floor-account span,
+.qt-shell .floor-footnote,.qt-shell .floor-volume-legend {color:#dceaff!important}
+.qt-shell .floor-terminal .gain,.qt-shell .floor-terminal .positive{color:var(--floor-green)!important}
+.qt-shell .floor-terminal .loss,.qt-shell .floor-terminal .negative{color:var(--floor-red)!important}
+.qt-shell .floor-terminal :is(button,select,input):focus-visible {
+ outline:2px solid #8dc8ff;outline-offset:2px
+}
+@media(max-width:1100px){
+ .qt-shell .floor-windows-canvas{min-height:0}
+ .qt-shell .floor-window[data-floor-window="flow"]{height:385px!important}
+}
+@media(max-width:670px){
+ .qt-shell .floor-window[data-floor-window="flow"]{height:405px!important}
+}

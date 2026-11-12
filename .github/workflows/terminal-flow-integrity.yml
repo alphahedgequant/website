@@ -1,0 +1,45 @@
+name: Quant Terminal FLOW & Brand Integrity
+on:
+  pull_request:
+    paths:
+      - "alphahedgequant/app/terminal/**"
+      - "alphahedgequant/app/api/terminal/**"
+      - "alphahedgequant/components/UnusualOptions**"
+      - "alphahedgequant/lib/unusualOptions**"
+      - "alphahedgequant/tests/terminalUnusualFlow.test.mjs"
+      - ".github/workflows/terminal-flow-integrity.yml"
+  push:
+    branches: [main]
+    paths:
+      - "alphahedgequant/app/terminal/**"
+      - "alphahedgequant/app/api/terminal/**"
+      - "alphahedgequant/components/UnusualOptions**"
+      - "alphahedgequant/lib/unusualOptions**"
+      - "alphahedgequant/tests/terminalUnusualFlow.test.mjs"
+      - ".github/workflows/terminal-flow-integrity.yml"
+permissions:
+  contents: read
+jobs:
+  terminal-flow:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: alphahedgequant/package-lock.json
+      - name: Install locked dependencies
+        working-directory: alphahedgequant
+        run: npm ci --ignore-scripts --no-audit --no-fund
+      - name: Verify option data integrity and terminal UI contracts
+        working-directory: alphahedgequant
+        run: node --test tests/terminalUnusualFlow.test.mjs tests/unusualOptions.test.mjs tests/terminalReliability.test.mjs
+      - name: Build Next.js website and terminal
+        working-directory: alphahedgequant
+        env:
+          NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY: "pk_test_ZXhhbXBsZS5jbGVyay5hY2NvdW50cy5kZXYk"
+        run: npm run build
