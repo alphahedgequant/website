@@ -5,9 +5,9 @@ const root=new URL("../",import.meta.url);
 const floor=readFileSync(new URL("app/terminal/TerminalTradingFloor.jsx",root),"utf8");
 const route=readFileSync(new URL("app/terminal/page.jsx",root),"utf8");
 const css=readFileSync(new URL("app/terminal/terminal-floor.css",root),"utf8");
-test("all eleven trading-floor panels exist, disconnected data windows are replaced",()=>{
+test("all twelve trading-floor panels exist, with unusual options activity added",()=>{
   const ids=[...floor.matchAll(/\{id:"([a-z-]+)",title:/g)].map(m=>m[1]);
-  assert.deepEqual(ids,["watchlist","metrics","messages","greeks","depth","rvol","options","volume","chart","alerts","movers"]);
+  assert.deepEqual(ids,["watchlist","metrics","messages","greeks","depth","rvol","options","volume","chart","alerts","movers","flow"]);
   for(const id of ids)assert(floor.includes("windowDef={windows."+id+"}"),"render "+id);
   assert(!ids.some(x=>["orders","account","order-entry","blocks","timesales"].includes(x)));
 });
