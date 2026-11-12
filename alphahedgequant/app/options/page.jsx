@@ -1,6 +1,7 @@
 "use client";
 import { useState, useEffect, useMemo, useRef, useCallback } from "react";
 import OptionIVAnalytics from "@/components/OptionIVAnalytics";
+import UnusualOptionsMonitor from "@/components/UnusualOptionsMonitor";
 import {
   XAxis, YAxis, CartesianGrid, Tooltip,
   ResponsiveContainer, ReferenceLine, Area, AreaChart,
@@ -151,13 +152,13 @@ export default function OptionsPage() {
   },[]);
   useEffect(() => {
     if (timerRef.current) clearInterval(timerRef.current);
-    if (autoRefresh && sessionOpen && status === "live") {
+    if (tab !== "unusual" && autoRefresh && sessionOpen && status === "live") {
       timerRef.current = setInterval(() => {
         if (!document.hidden) loadChain(underlying, expiry, true);
       }, 5000);
     }
     return () => timerRef.current && clearInterval(timerRef.current);
-  }, [autoRefresh, sessionOpen, status, underlying, expiry, loadChain]);
+  }, [autoRefresh, sessionOpen, status, underlying, expiry, loadChain, tab]);
 
   const { atmStrike, maxOI } = useMemo(() => {
     if (!chain?.length) return { atmStrike: null, maxOI: 1 };
@@ -187,6 +188,7 @@ export default function OptionsPage() {
         <div className="flex gap-1.5">
           <button onClick={() => setTab("chain")} className={`font-mono text-xs px-3 py-1.5 rounded border transition-colors ${tab === "chain" ? "border-amber text-amber" : "border-line text-muted hover:text-body"}`}>OPTION CHAIN</button>
           <button onClick={() => {window.dispatchEvent(new CustomEvent("ahq:analytics",{detail:{name:"strategy_builder_opened"}}));setTab("builder");}} className={`font-mono text-xs px-3 py-1.5 rounded border transition-colors ${tab === "builder" ? "border-amber text-amber" : "border-line text-muted hover:text-body"}`}>STRATEGY BUILDER{legs.length ? ` (${legs.length})` : ""}</button>
+          <button type="button" onClick={() => setTab("unusual")} aria-pressed={tab==="unusual"} className={`font-mono text-xs px-3 py-1.5 rounded border transition-colors ${tab === "unusual" ? "border-white text-body bg-raised" : "border-line text-muted hover:text-body"}`}>UNUSUAL MOVEMENTS</button>
         </div>
       </div>
 
@@ -269,10 +271,14 @@ export default function OptionsPage() {
         <span>{providerReceivedAt ? "Backend received "+new Date(providerReceivedAt).toLocaleTimeString("en-IN",{timeZone:"Asia/Kolkata"})+" IST" : "Awaiting verified quotes"}</span>
         <button type="button" onClick={()=>loadChain(underlying,expiry,true)} disabled={refreshing} className="rounded border border-line px-3 py-1.5 hover:text-body disabled:opacity-50">{refreshing?"Refreshing…":"Refresh now"}</button>
       </div>
-      <OptionIVAnalytics chain={chain} spot={spot} history={ivHistory} expiry={expiry} marketOpen={sessionOpen} lastUpdated={lastUpdated}/>
-      {tab === "chain"
-        ? <OptionChainTable chain={chain} spot={spot} atmStrike={atmStrike} maxOI={maxOI} status={status} onAdd={addLeg} />
-        : <StrategyBuilder legs={legs} setLegs={setLegs} spot={spot} lotSize={lotSize} underlying={underlying} chain={chain} />}
+      {tab==="unusual" ?
+        <UnusualOptionsMonitor selectedTicker={underlying} stockOptions={stockOptions} onOpenChain={ticker=>{chooseUnderlying(ticker);setTab("chain");}} />
+        : <>
+          <OptionIVAnalytics chain={chain} spot={spot} history={ivHistory} expiry={expiry} marketOpen={sessionOpen} lastUpdated={lastUpdated}/>
+          {tab === "chain"
+            ? <OptionChainTable chain={chain} spot={spot} atmStrike={atmStrike} maxOI={maxOI} status={status} onAdd={addLeg} />
+            : <StrategyBuilder legs={legs} setLegs={setLegs} spot={spot} lotSize={lotSize} underlying={underlying} chain={chain} />}
+        </>}
     </div>
   );
 }
