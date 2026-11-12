@@ -5,9 +5,9 @@ import "./library.css";
 
 export const metadata={
  title:"IPO & Quant Finance Research Library | AlphaHedgeQuant",
- description:"Read free, public research guides on Indian IPO GMP, listing gains, allotment, ASBA, DRHP valuation, options Greeks, implied volatility, gamma exposure, pairs trading, backtesting and risk.",
+ description:"Explore original research guides on Indian IPO GMP, listing gains, allotment, ASBA, DRHP valuation, options Greeks, implied volatility, gamma exposure, pairs trading, backtesting and risk.",
  alternates:{canonical:"/library"},
- openGraph:{title:"IPO & Quant Finance Research Library — AlphaHedgeQuant",description:"A free, accessible collection of structured educational research on Indian IPOs, derivatives and quantitative finance.",url:"/library",type:"website"}
+ openGraph:{title:"IPO & Quant Finance Research Library — AlphaHedgeQuant",description:"A curated collection of structured educational research on Indian IPOs, derivatives and quantitative finance.",url:"/library",type:"website"}
 };
 
 const canonical="https://www.alphahedgequant.com";
@@ -16,7 +16,7 @@ const jsonld={
  "@type":"CollectionPage",
  "@id":canonical+"/library#collection",
  name:"IPO & Quant Finance Research Library",
- description:"Free, evergreen educational research about Indian IPOs and quantitative financial models.",
+ description:"Evergreen educational research about Indian IPOs and quantitative financial models.",
  url:canonical+"/library",
  isAccessibleForFree:true,
  inLanguage:"en-IN",
