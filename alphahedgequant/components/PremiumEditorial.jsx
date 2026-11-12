@@ -33,24 +33,24 @@ export default function PremiumEditorial({about=false}){
  <section className="pr-section pr-darksection"><div className="pr-wrap"><p className="pr-kicker pr-reveal">THREE WAYS TO SEE FURTHER</p><h2 className="pr-display pr-reveal">Intelligence is<br/><em>a discipline.</em></h2>{features.map(f=><article className="pr-feature" key={f.n}><div className="pr-feature-copy pr-reveal"><small>{f.n}</small><h3>{f.title}</h3><p>{f.copy}</p><Link href={f.route} className="pr-feature-link">Explore the approach ↗</Link></div><div className="pr-product-visual pr-reveal"><div className="pr-ui"><div className="pr-ui-top"><span>{f.label}</span><span>CONCEPT VIEW</span></div>{f.rows.map(([a,b])=><div className="pr-ui-row" key={a}><span>{a}</span><b>{b}</b></div>)}<svg viewBox="0 0 460 155" preserveAspectRatio="none" aria-label="Illustrative visual, not live data"><path d="M0 35H460M0 80H460M0 125H460" stroke="#30343a" strokeDasharray="3 5"/><polyline points={f.points} fill="none" stroke="var(--pr-gold)" strokeWidth="2.5" strokeLinecap="round"/></svg><small>ILLUSTRATIVE VISUAL · NOT LIVE QUOTES</small></div></div></article>)}</div></section>
  <section className="pr-section pr-darksection" aria-labelledby="ahq-ipo-intelligence">
   <div className="pr-wrap">
-    <p className="pr-kicker pr-reveal">INDIAN IPO INTELLIGENCE / FREE TO EXPLORE</p>
+    <p className="pr-kicker pr-reveal">INDIAN IPO INTELLIGENCE / MARKET RESEARCH</p>
     <h2 id="ahq-ipo-intelligence" className="pr-display pr-reveal">From an IPO's opening<br/>to its <em>market debut.</em></h2>
     <p className="pr-lead pr-reveal">AlphaHedgeQuant IPO Intelligence follows Indian NSE and BSE initial public offerings with public information on opening and closing dates, issue price bands, lot sizes, subscription data, reported grey market premiums (GMP) and actual listing performance. Reported GMP is unofficial, not exchange-verified, and does not predict a listing gain.</p>
-    <div className="pr-actions pr-reveal"><Link href="/ipo" className="pr-btn pr-btn-primary">Explore free IPO Intelligence ↗</Link></div>
+    <div className="pr-actions pr-reveal"><Link href="/ipo" className="pr-btn pr-btn-primary">Explore IPO Intelligence ↗</Link></div>
   </div>
  </section>
  <section className="pr-section pr-darksection" aria-labelledby="ahq-public-research">
    <div className="pr-wrap">
-     <p className="pr-kicker pr-reveal">OPEN RESEARCH LIBRARY / FREE TO READ</p>
+     <p className="pr-kicker pr-reveal">OPEN RESEARCH LIBRARY / RESEARCH NOTES</p>
      <h2 id="ahq-public-research" className="pr-display pr-reveal">The mathematics.<br/><em>Not just the headlines.</em></h2>
-     <p className="pr-lead pr-reveal">Read AlphaHedgeQuant's free library of Indian IPO and quantitative finance guides. Work through GMP versus listing gains, IPO allotment, book building, prospectus valuation, option Greeks, implied volatility, gamma exposure, cointegration, backtesting biases and risk-based position sizing. Each article includes examples, limitations and references—without requiring an account.</p>
-     <div className="pr-actions pr-reveal"><Link href="/library" className="pr-btn pr-btn-primary">Explore 11 free research guides ↗</Link></div>
+     <p className="pr-lead pr-reveal">Explore AlphaHedgeQuant's library of Indian IPO and quantitative finance guides. Work through GMP versus listing gains, IPO allotment, book building, prospectus valuation, option Greeks, implied volatility, gamma exposure, cointegration, backtesting biases and risk-based position sizing. Each article includes worked examples, methodological limitations and research references.</p>
+     <div className="pr-actions pr-reveal"><Link href="/library" className="pr-btn pr-btn-primary">Explore the research library ↗</Link></div>
    </div>
  </section>
  <section className="pr-section pr-darksection" aria-labelledby="ahq-research-previews"><div className="pr-wrap">
    <p className="pr-kicker pr-reveal">RESEARCH PAPERS / QUANT MODELS / MACRO OUTLOOK</p>
    <h2 className="pr-display pr-reveal" id="ahq-research-previews">An open introduction.<br/><em>A deeper reading.</em></h2>
-   <p className="pr-lead pr-reveal">Explore free previews of our academic research catalogue, mathematical finance model library and India/global macro outlooks. Learn the question, assumptions and core concepts publicly; sign in to continue into the full AlphaHedgeQuant research and model workspaces.</p>
+   <p className="pr-lead pr-reveal">Explore our academic research catalogue, mathematical finance model library and India/global macro outlooks. Begin with the research questions, assumptions and core concepts, then follow the methodology into the dedicated collections.</p>
    <div className="pr-actions pr-reveal">
       <Link href="/library/series/research-papers" className="pr-btn pr-btn-outline">Research Papers ↗</Link>
       <Link href="/library/series/quant-models" className="pr-btn pr-btn-outline">Quant Models ↗</Link>
