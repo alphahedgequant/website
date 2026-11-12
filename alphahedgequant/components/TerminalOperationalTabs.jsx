@@ -7,6 +7,13 @@ const finite=x=>x!==null&&x!==undefined&&x!==""&&Number.isFinite(Number(x))?Numb
 const total=(rows,side,key)=>rows.reduce((sum,r)=>sum+(finite(r?.[side]?.[key])??0),0);
 const n=x=>x===null||!Number.isFinite(x)?"—":x.toLocaleString("en-IN",{maximumFractionDigits:2});
 const pct=x=>x===null||!Number.isFinite(x)?"—":x.toFixed(2)+"%";
+function duringNseSession(){
+ const fields=Object.fromEntries(new Intl.DateTimeFormat("en-GB",{timeZone:"Asia/Kolkata",
+  weekday:"short",hour:"2-digit",minute:"2-digit",hourCycle:"h23"}).formatToParts(new Date())
+  .map(x=>[x.type,x.value]));
+ const minutes=Number(fields.hour)*60+Number(fields.minute);
+ return !["Sat","Sun"].includes(fields.weekday)&&minutes>=555&&minutes<930;
+}
 function Metric({label,value,detail}){
  return <div className="qt-operational-metric"><small>{label}</small><strong>{value}</strong><span>{detail}</span></div>;
 }
@@ -44,7 +51,7 @@ export function TerminalOptionAnalytics({symbol,chain,chainError,onRefresh}){
      <Metric label="ATM CALL IV" value={finite(atm?.call?.iv)===null?"—":n(finite(atm.call.iv))} detail="Provider units, unchanged"/>
      <Metric label="ATM PUT IV" value={finite(atm?.put?.iv)===null?"—":n(finite(atm.put.iv))} detail="Provider units, unchanged"/>
     </div>
-    <OptionIVAnalytics chain={rows} spot={spot} expiry={expiry} history={history} marketOpen={false} lastUpdated={Date.now()}/>
+    <OptionIVAnalytics chain={rows} spot={spot} expiry={expiry} history={history} marketOpen={duringNseSession()} lastUpdated={chain?.received_at&&Number.isFinite(Date.parse(chain.received_at))?chain.received_at:null}/>
     <p className="qt-operational-caveat">The ATM IV history begins during this browser visit only. OI ratios describe positioning, not buyer-initiated trades. Changes may remain unavailable when the broker feed is offline.</p>
    </>}
  </div>;
