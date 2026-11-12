@@ -1,0 +1,26 @@
+name: Unusual Options Monitor Reliability
+on:
+  pull_request:
+    paths:
+      - 'alphahedgequant/lib/unusualOptions.mjs'
+      - 'alphahedgequant/components/UnusualOptionsMonitor.jsx'
+      - 'alphahedgequant/app/options/page.jsx'
+      - 'alphahedgequant/tests/unusualOptions.test.mjs'
+      - '.github/workflows/unusual-options-monitor.yml'
+  push:
+    branches: [main, 'feat/unusual-options-movements']
+    paths:
+      - 'alphahedgequant/lib/unusualOptions.mjs'
+      - 'alphahedgequant/components/UnusualOptionsMonitor.jsx'
+      - 'alphahedgequant/app/options/page.jsx'
+      - 'alphahedgequant/tests/unusualOptions.test.mjs'
+      - '.github/workflows/unusual-options-monitor.yml'
+jobs:
+  snapshot-regression:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: node --test alphahedgequant/tests/unusualOptions.test.mjs
