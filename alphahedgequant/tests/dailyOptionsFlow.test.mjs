@@ -9,7 +9,7 @@ const payload=(overrides={})=>({success:true,data:{
   {strike_price:95,call:{volume:4000,oi:1000,oi_change:400,ltp:7.1,iv:20.4,bid_price:7,ask_price:7.3},
                     put:{volume:150,oi:5000,oi_change:20,ltp:2,iv:21}},
   {strike_price:105,call:{volume:2000,oi:20000,oi_change:100,ltp:1,iv:23},
-                     put:{volume:3500,oi:1000,oi_change:2500,ltp:6,iv:23}}
+                     put:{volume:3500,oi:5000,oi_change:2500,ltp:6,iv:23}}
  ],...overrides}});
 test("NSE collection uses IST and never runs on weekends or outside working hours",()=>{
  assert.deepEqual(istCalendar("2026-11-12T05:00:00Z"),{day:"2026-11-12",weekday:"Thu",minutes:630});
