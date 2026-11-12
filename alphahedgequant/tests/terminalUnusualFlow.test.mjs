@@ -62,18 +62,28 @@ test("terminal retains all NSE cash equity search and avoids quote race",()=>{
  assert.match(page,/controller\.signal\.aborted/);
  assert.match(route,/MARKET_DATA_API_URL/);
 });
-test("terminal background is navy and text white; red and green are movements only",()=>{
+test("terminal is true black across trading floor, FLOW and research with white text",()=>{
  const css=read("app/terminal/terminal.css");
  const floor=read("app/terminal/terminal-floor.css");
- for(const x of ["#07192f","#0b223f","#f7fbff","#3de48c","#ff6577"]) assert.ok(css.includes(x),"missing "+x);
- assert.match(floor,/canonical NAVY\/BLUE \+ WHITE/);
- assert.match(floor,/--floor-green:#3de48c/);
- assert.match(floor,/--floor-red:#ff6577/);
- assert.match(css,/\.qt-shell \.qt-reading-clean/);
+ assert.match(css,/AHQ TERMINAL 2026-11-12 · TRUE BLACK/);
+ assert.match(floor,/AHQ FLOOR 2026-11-12 · TRUE BLACK/);
+ assert.match(css,/\.qt-shell\.qt-shell\{[\s\S]*?background:#000!important;color:#fff!important;color-scheme:dark/);
+ assert.match(floor,/\.qt-shell \.floor-terminal\{[\s\S]*?background:#000!important;color:#fff!important/);
+ assert.match(floor,/\.qt-shell \.floor-windows-canvas\{[\s\S]*?background-color:#000!important/);
+ assert.match(css,/\.qt-shell :is\(\.qt-reading-clean/);
+ assert.match(css,/background:#000!important;color:#fff!important;border-color:#454545!important/);
+ assert.match(css,/\.qt-flow-workspace \[data-testid="unusual-options-monitor"\]/);
  assert.match(css,/\.qt-unusual-box/);
- assert.match(css,/\.qt-flow-workspace/);
+ assert.match(css,/\.qt-shell \.positive/);
+ assert.match(css,/\.qt-shell \.negative/);
+ for(const text of ["--qt-green:#3de48c","--qt-red:#ff6577","--floor-green:#3de48c","--floor-red:#ff6577"]){
+  assert.ok((css+"\n"+floor).includes(text),text);
+ }
+ const trueBlack=css.slice(css.lastIndexOf("AHQ TERMINAL 2026-11-12 · TRUE BLACK"));
+ assert.doesNotMatch(trueBlack,/background:#07192f!important|background:#0b223f!important/);
+ const floorBlack=floor.slice(floor.lastIndexOf("AHQ FLOOR 2026-11-12 · TRUE BLACK"));
+ assert.doesNotMatch(floorBlack,/background:#06172e!important|background:#091d36!important/);
 });
-
 
 test("terminal displays an actionable brokerage reauthorization link only on a quote error",()=>{
  const page=read("app/terminal/page.jsx");

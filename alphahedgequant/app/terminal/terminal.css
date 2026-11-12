@@ -591,3 +591,130 @@
 .qt-shell .qt-provider-alert a{display:inline-flex;align-items:center;padding:8px 12px;
  color:#fff!important;text-decoration:underline;text-underline-offset:3px;border:1px solid #82b4e5}
 .qt-shell .qt-provider-alert a:hover{background:#245580}
+
+
+/* AHQ TERMINAL 2026-11-12 · TRUE BLACK
+   Route-local palette only. Preserve terminal functionality and quote semantics.
+   Neutral interface = black, charcoal, white; market rise/fall = green/red. */
+.qt-shell.qt-shell{
+  --qt-gold:#fff;--qt-cyan:#fff;--qt-border:#303030;
+  --qt-green:#3de48c;--qt-red:#ff6577;
+  background:#000!important;color:#fff!important;color-scheme:dark;
+}
+.qt-shell :is(.qt-tape,.qt-toolbar,.qt-symbol-bar,.qt-footer,
+ .qt-module-notice,.qt-flow-info,.qt-provider-alert){
+  background:#080808!important;color:#fff!important;border-color:#303030!important
+}
+.qt-shell :is(.qt-panel,.qt-svg,.qt-search,.qt-depth-grid,
+ .qt-mini-actions,.qt-unusual-box,.qt-results,.qt-symbol-results,
+ .qt-level,.qt-report-row,.qt-network-form){
+  background:#090909!important;color:#fff!important;border-color:#303030!important
+}
+.qt-shell :is(.qt-panel-top,.qt-chain-scroll th,.qt-unusual-scroll th,
+ .qt-unusual-summary,.qt-option-controls,.qt-watch-head){
+  background:#111!important;color:#fff!important;border-color:#363636!important
+}
+.qt-shell :is(.qt-tabs button.active,.qt-watch-row.selected){
+  background:#1b1b1b!important;color:#fff!important;
+  border-color:#f2f2f2!important
+}
+.qt-shell :is(.qt-tabs button:hover,.qt-tape button:hover,
+ .qt-watch-row:hover,.qt-mini-actions button:hover,.qt-symbol-picker>button:hover,
+ .qt-symbol-results button:hover,.qt-chain-scroll tr:hover,.qt-unusual-scroll tr:hover){
+  background:#202020!important;color:#fff!important
+}
+.qt-shell :is(.qt-symbol-picker input,.qt-symbol-picker>button,
+ select,input,textarea,.qt-results button,.qt-mini-actions button,
+ .qt-option-controls button){
+  background:#101010!important;color:#fff!important;border-color:#454545!important
+}
+.qt-shell input::placeholder{color:#bcbcbc!important;opacity:1}
+.qt-shell :is(.qt-tabs button,.qt-tape button,.qt-tape-state,.qt-panel-top strong,
+ .qt-panel-top span,.qt-brand,.qt-watch-row,.qt-watch-head,.qt-metrics strong,
+ .qt-metrics span,.qt-price-strip,.qt-option-controls,.qt-section-label,
+ .qt-mini-actions,.qt-legend,.qt-watch-foot,.qt-hint,.qt-footer,
+ .qt-symbol-results strong,.qt-symbol-results small,.qt-toolbar-right,
+ .qt-mode,.qt-linked-symbol,.qt-chain-scroll td,.qt-empty,.qt-flow-info strong,
+ .qt-flow-info span,.qt-provider-alert span,.qt-unusual-summary span,
+ .qt-unusual-intro strong,.qt-unusual-caption,.qt-unusual-empty){
+  color:#f4f4f4!important
+}
+.qt-shell :is(.qt-depth-metrics,.qt-watch-row,.qt-chain-scroll td,
+ .qt-metrics>div,.qt-tape,.qt-price-strip,.qt-symbol-bar,
+ .qt-unusual-intro,.qt-unusual-summary,.qt-unusual-scroll td){
+  border-color:#333!important
+}
+.qt-shell .qt-tabs button:not(.active){color:#d3d3d3!important}
+.qt-shell .qt-chain-scroll th{background:#151515!important;color:#fff!important}
+.qt-shell .qt-chain-scroll td:nth-child(4){color:#fff!important}
+.qt-shell .qt-legend span,.qt-shell .qt-legend span:nth-child(n){
+  color:#eee!important
+}
+.qt-shell .qt-alert,.qt-shell .qt-provider-alert{
+  background:#151515!important;color:#fff!important;border-color:#505050!important
+}
+.qt-shell :is(.qt-alert a,.qt-footer a,.qt-provider-alert a,
+ .qt-option-controls a,.qt-unusual-intro button){
+  color:#fff!important;border-color:#666!important
+}
+.qt-shell .qt-provider-alert a:hover{background:#222!important}
+.qt-shell .qt-unusual-box{background:#090909!important}
+.qt-shell .qt-unusual-summary{background:#151515!important}
+.qt-shell .qt-unusual-intro button:hover{background:#242424!important}
+.qt-shell .qt-unusual-highlight{color:var(--qt-green)!important}
+.qt-shell .qt-flow-info{background:#0c0c0c!important}
+.qt-shell .qt-flow-workspace [data-testid="unusual-options-monitor"],
+.qt-shell .qt-flow-workspace [data-unusual-card],
+.qt-shell .qt-flow-workspace [aria-label="NSE options unusual moves"]{
+  background:#0a0a0a!important;color:#fff!important;border-color:#393939!important
+}
+.qt-shell .qt-flow-workspace [data-testid="unusual-options-monitor"] :is(p,span,strong,h2,h3),
+.qt-shell .qt-flow-workspace [data-unusual-card] :is(p,span,strong,h2,h3){
+  color:#ededed
+}
+.qt-shell .qt-flow-workspace [data-testid="unusual-options-monitor"] :is(input,select,button){
+  border-color:#494949!important
+}
+.qt-shell :is(.qt-reading-clean,.qt-reading-clean.qt-reader-focus){
+  --paper:#000!important;--ink:#fff!important;--rule:#303030!important;
+  background:#000!important;color:#fff!important;border-color:#454545!important
+}
+.qt-shell .qt-reading-clean :is(.qt-company-overview,.qt-intel-story,.qt-panel,
+ .qt-network-item,.qt-intel-metric,.qt-peer-reading-card,.qt-report-row,
+ .qt-audited,.qt-audited-bar,.qt-reader-toolbar,.qt-reader-notes,
+ .qt-financial-table th,.qt-business-details,.qt-intel-note,
+ .qt-workbook-kpis article,.qt-workbook-scenarios article,.qt-workbook-story,
+ .qt-workbook-tickers button,.qt-intel-head,.qt-valuation-summary>div){
+  background:#0c0c0c!important;color:#fff!important;
+  border-color:#353535!important;box-shadow:none!important
+}
+.qt-shell .qt-reading-clean :is(p,span,small,strong,h1,h2,h3,h4,td,th,
+ label,li,blockquote,summary,.qt-company-description,.qt-network-meta,
+ .qt-report-body,.qt-report-row p,.qt-intel-note,.qt-intel-source,
+ .qt-workbook-kpis strong,.qt-workbook-kpis small,.qt-workbook-scenarios strong,
+ .qt-workbook-scenarios span,.qt-workbook-years,.qt-workbook-caution){
+  color:#eee!important
+}
+.qt-shell .qt-reading-clean :is(input,textarea,select,.qt-reader-tools button,
+ .qt-business-details summary,.qt-reader-notes blockquote){
+  background:#111!important;color:#fff!important;border-color:#555!important
+}
+.qt-shell .qt-reading-clean :is(.qt-financial-table tr:hover td,
+ .qt-workbook-tickers button[aria-current="page"]){
+  background:#202020!important;color:#fff!important
+}
+.qt-shell .qt-reading-clean .qt-reader-focus :is(.qt-intel-story,.qt-panel,.qt-network-item){
+  background:#111!important
+}
+.qt-shell .qt-reading-clean a{color:#fff!important;text-decoration:underline}
+.qt-shell .qt-reading-clean .qt-graph svg text{fill:#fff!important}
+.qt-shell .positive,.qt-shell .qt-price-strip .positive,
+.qt-shell .qt-unusual-highlight{color:var(--qt-green)!important}
+.qt-shell .negative,.qt-shell .qt-price-strip .negative{color:var(--qt-red)!important}
+.qt-shell :is(button,input,select,textarea,a):focus-visible{
+  outline:2px solid #fff!important;outline-offset:2px
+}
+@media(max-width:720px){
+ .qt-shell .qt-flow-workspace{background:#000!important}
+ .qt-shell .qt-flow-info{background:#0c0c0c!important}
+}
