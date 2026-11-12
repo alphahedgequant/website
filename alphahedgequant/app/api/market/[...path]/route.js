@@ -10,9 +10,10 @@ const ALLOWED = [
   /^us-screener$/,
   /^indices$/,
   /^us-indices$/,
-  /^stock\/[A-Za-z0-9._-]{1,40}$/,
-  /^fundamentals\/[A-Za-z0-9._-]{1,40}$/,
-  /^option-chain\/[A-Za-z0-9._-]{1,40}$/,
+  /^scanner\/signals$/,
+  /^stock\/[A-Za-z0-9&._-]{1,40}$/,
+  /^fundamentals\/[A-Za-z0-9&._-]{1,40}$/,
+  /^option-chain\/[A-Za-z0-9&._-]{1,40}$/,
 ];
 
 export async function GET(request, { params }) {
