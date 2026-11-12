@@ -1,19 +1,9 @@
 "use client";
 import {useMemo} from "react";
+import {rankOptionActivity} from "@/lib/unusualOptionsActivity.mjs";
 
 const num=x=>x===null||x===undefined||x===""||!Number.isFinite(Number(x))?null:Number(x);
 const display=(x,d=0)=>num(x)===null?"—":Number(x).toLocaleString("en-IN",{maximumFractionDigits:d,minimumFractionDigits:d});
-export function rankOptionActivity(chain){
- const strikes=Array.isArray(chain?.strikes)?chain.strikes:[];
- return strikes.flatMap(row=>["call","put"].map(side=>{
-  const leg=row[side]||{},volume=num(leg.volume),oi=num(leg.oi),change=num(leg.oi_change);
-  if(volume===null||volume<0||num(row.strike_price)===null)return null;
-  const ratio=oi!==null&&oi>0?volume/oi:null;
-  return {id:String(row.strike_price)+side,strike:Number(row.strike_price),
-   type:side==="call"?"CE":"PE",volume,oi,change,ratio,ltp:num(leg.ltp),
-   iv:num(leg.iv),notional:num(leg.ltp)!==null?volume*leg.ltp:null};
- })).filter(Boolean).sort((a,b)=>(b.ratio??-1)-(a.ratio??-1)||b.volume-a.volume);
-}
 export default function UnusualOptionsFlowBox({symbol,chain,onOpenMonitor,onOpenChain}){
  const rows=useMemo(()=>rankOptionActivity(chain).slice(0,14),[chain]);
  const qualified=rows.filter(x=>x.ratio!==null&&x.ratio>=1.5);
