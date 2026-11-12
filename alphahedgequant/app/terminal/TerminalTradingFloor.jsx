@@ -128,12 +128,12 @@ function MarketWatchlist({symbol,watch,quote,screener,onChoose}){
     <p className="floor-footnote">Selected ticker uses its current quote response; other prices only appear if present in the NSE screener snapshot. Tap to link all panels.</p>
   </div>;
 }
-function MarketMetrics({symbol,quote,vol,rvol}){
+function MarketMetrics({symbol,quote,vol,rvol,lookback}){
   const bids=Array.isArray(quote?.bids)?quote.bids:[],asks=Array.isArray(quote?.asks)?quote.asks:[];
   const spread=bids.length&&asks.length&&n(bids[0]?.price)!==null&&n(asks[0]?.price)!==null?Number(asks[0].price)-Number(bids[0].price):null;
   const point=vol?.points?.at(-1);
   return <div className="floor-account">
-    {[["NSE ticker",symbol],["Last traded price",n(quote?.price)!==null?"₹"+px(quote.price):"—"],["Day change",n(quote?.change)!==null?"₹"+px(quote.change):"—"],["Trade volume",compact(quote?.volume)],["Best bid / ask",bids[0]&&asks[0]?px(bids[0].price)+" / "+px(asks[0].price):"—"],["Bid/ask spread",spread!==null?"₹"+px(spread):"—"],["Relative volume",vol?.ready&&rvol!==null&&rvol!==undefined?rvol.toFixed(2)+"×":"—"],["History sessions",vol?vol.count+"/"+15:"—"],["Cum. intraday volume",compact(point?.today)]].map(([name,val])=><div key={name}><span>{name}</span><strong>{val}</strong></div>)}
+    {[["NSE ticker",symbol],["Last traded price",n(quote?.price)!==null?"₹"+px(quote.price):"—"],["Day change",n(quote?.change)!==null?"₹"+px(quote.change):"—"],["Trade volume",compact(quote?.volume)],["Best bid / ask",bids[0]&&asks[0]?px(bids[0].price)+" / "+px(asks[0].price):"—"],["Bid/ask spread",spread!==null?"₹"+px(spread):"—"],["Relative volume",vol?.ready&&rvol!==null&&rvol!==undefined?rvol.toFixed(2)+"×":"—"],["History sessions",vol?vol.count+"/"+lookback:"—"],["Cum. intraday volume",compact(point?.today)]].map(([name,val])=><div key={name}><span>{name}</span><strong>{val}</strong></div>)}
     <p className="floor-footnote">Quote snapshots and historical derived metrics only. This is not broker account equity or P&L.</p>
   </div>;
 }
