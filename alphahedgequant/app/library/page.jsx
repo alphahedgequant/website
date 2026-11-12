@@ -5,9 +5,9 @@ import "./library.css";
 
 export const metadata={
  title:"IPO & Quant Finance Research Library | AlphaHedgeQuant",
- description:"Read free, public research guides on Indian IPO GMP, listing gains, allotment, ASBA, DRHP valuation, options Greeks, implied volatility, gamma exposure, pairs trading, backtesting and risk.",
+ description:"Explore original research guides on Indian IPO GMP, listing gains, allotment, ASBA, DRHP valuation, options Greeks, implied volatility, gamma exposure, pairs trading, backtesting and risk.",
  alternates:{canonical:"/library"},
- openGraph:{title:"IPO & Quant Finance Research Library — AlphaHedgeQuant",description:"A free, accessible collection of structured educational research on Indian IPOs, derivatives and quantitative finance.",url:"/library",type:"website"}
+ openGraph:{title:"IPO & Quant Finance Research Library — AlphaHedgeQuant",description:"A curated collection of structured educational research on Indian IPOs, derivatives and quantitative finance.",url:"/library",type:"website"}
 };
 
 const canonical="https://www.alphahedgequant.com";
@@ -16,7 +16,7 @@ const jsonld={
  "@type":"CollectionPage",
  "@id":canonical+"/library#collection",
  name:"IPO & Quant Finance Research Library",
- description:"Free, evergreen educational research about Indian IPOs and quantitative financial models.",
+ description:"Evergreen educational research about Indian IPOs and quantitative financial models.",
  url:canonical+"/library",
  isAccessibleForFree:true,
  inLanguage:"en-IN",
@@ -49,7 +49,7 @@ export default function LibraryHome(){
         <h1>Finance is complicated.<br/><em>Understanding shouldn't be.</em></h1>
         <p className="rl-hero-sub">A public library of quantitative finance and Indian IPO research, built around definitions, real mathematics, worked examples, and the assumptions behind every answer.</p>
         <div className="rl-hero-links"><a href="#ipo-research">Explore IPO research <span>↘</span></a><a href="#quant-research">Explore Quant finance <span>↘</span></a></div>
-        <div className="rl-stats"><span><strong>{RESEARCH_LIBRARY.length}</strong> open research notes</span><span><strong>2</strong> research disciplines</span><span><strong>0</strong> account requirements</span></div>
+        <div className="rl-stats"><span><strong>{RESEARCH_LIBRARY.length}</strong> open research notes</span><span><strong>2</strong> research disciplines</span><span><strong>{PUBLIC_RESEARCH_SERIES.length}</strong> research collections</span></div>
       </div>
       <div className="rl-hero-orbit" aria-hidden="true"><div className="rl-orbit1"/><div className="rl-orbit2"/><div className="rl-orbit3"/><span>∂V/∂S</span><i>σ</i><b>α</b></div>
     </div>
@@ -70,16 +70,15 @@ export default function LibraryHome(){
     <div className="rl-cards">{quant.map((x,i)=><ResearchCard key={x.slug} item={x} index={i}/>)}</div>
   </section>
   <section className="rl-shell" aria-labelledby="rl-depth-heading" style={{paddingTop:"95px",paddingBottom:"55px",borderTop:"1px solid var(--rl-line)"}}>
-    <p className="rl-eyebrow">SECTION 03 / RESEARCH PREVIEW → FULL ACCESS</p>
+    <p className="rl-eyebrow">SECTION 03 / RESEARCH COLLECTIONS</p>
     <h2 id="rl-depth-heading" style={{fontSize:"clamp(38px,5vw,68px)",fontWeight:650,margin:"17px 0 19px",lineHeight:1.12}}>Read the introduction.<br/><em>Explore the full research.</em></h2>
-    <p style={{fontSize:"16px",lineHeight:1.9,color:"var(--rl-muted)",maxWidth:"760px"}}>Discover our Research Papers, Quant Models and Macro Outlook collections. Public previews explain the key questions and methods; complete research workspaces and full reports require a free AlphaHedgeQuant login.</p>
+    <p style={{fontSize:"16px",lineHeight:1.9,color:"var(--rl-muted)",maxWidth:"760px"}}>Explore Research Papers, Quant Models and Macro Outlook. Read the foundational questions, compare methodologies and follow the analysis into dedicated research workspaces.</p>
     <div className="rl-cards" style={{marginTop:"35px",borderTop:"1px solid var(--rl-line)"}}>
       {PUBLIC_RESEARCH_SERIES.map((item,i)=><article className="rl-card" key={item.id}>
-       <div className="rl-card-top"><span>0{i+1} / {item.eyebrow}</span><span>{RESEARCH_PREVIEWS.filter(x=>x.series===item.id).length} PREVIEWS</span></div>
+       <div className="rl-card-top"><span>0{i+1} / {item.eyebrow}</span><span>{RESEARCH_PREVIEWS.filter(x=>x.series===item.id).length} RESEARCH NOTES</span></div>
        <h3><Link href={"/library/series/"+item.id}>{item.title}</Link></h3>
        <p>{item.summary}</p>
-       <p style={{fontSize:"12px",marginTop:"14px",color:"#9ebfe3"}}>PUBLIC PREVIEW · FULL READING REQUIRES SIGN-IN</p>
-       <div className="rl-card-bottom"><span>INDEXABLE RESEARCH INTRODUCTION</span><Link href={"/library/series/"+item.id}>Explore previews ↗</Link></div>
+       <div className="rl-card-bottom"><span>RESEARCH COLLECTION</span><Link href={"/library/series/"+item.id}>Explore collection ↗</Link></div>
       </article>)}
     </div>
   </section>

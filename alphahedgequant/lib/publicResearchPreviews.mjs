@@ -8,7 +8,7 @@ export const PUBLIC_RESEARCH_SERIES=[
     "eyebrow": "01 / SCIENTIFIC RESEARCH",
     "title": "Research Papers",
     "summary": "Discover methods behind quantitative research: market manipulation detection, cointegration, statistical arbitrage and coherent portfolio risk.",
-    "intro": "A searchable introduction to influential academic and original quantitative research. Read our public interpretation of a paper’s question, method and limitations. Sign in to access the full AlphaHedgeQuant research workspace and its research-paper catalogue.",
+    "intro": "A curated introduction to influential academic and original quantitative research. Examine the central question, methodology, assumptions and limitations of each paper, then explore connected topics in our research catalogue.",
     "subject": "Financial engineering · econometrics · market microstructure",
     "fullRoute": "/research",
     "fullLabel": "Open full research-paper workspace",
@@ -19,18 +19,18 @@ export const PUBLIC_RESEARCH_SERIES=[
     "eyebrow": "02 / MATHEMATICAL MODELS",
     "title": "Quant Models",
     "summary": "Explore mathematical ideas behind VaR, GARCH, gamma exposure, cointegration, covariance shrinkage and regime models before entering the interactive model library.",
-    "intro": "A preview of the mathematical framework and intuition for six models already available in the AlphaHedgeQuant Quant Models section. The public notes explain what a model estimates and where its assumptions break. Sign in to open detailed lessons, formulas and model interfaces.",
+    "intro": "Explore the mathematical foundations and intuition behind six quantitative models. Each research note examines what a model estimates, the assumptions behind its equations and the conditions under which its conclusions can break down.",
     "subject": "Risk · volatility · systematic research · portfolio design",
     "fullRoute": "/models",
     "fullLabel": "Open full Quant Models",
-    "notice": "Model examples are educational and do not provide trading signals. The complete interactive model lessons are available to signed-in visitors."
+    "notice": "Model examples are educational, not trading signals. The interactive library explores methodology, assumptions, worked calculations and model limitations."
   },
   {
     "id": "macro-outlook",
     "eyebrow": "03 / MACROECONOMIC RESEARCH",
     "title": "Macro Outlook",
     "summary": "Understand the transmission from inflation, central-bank policy, liquidity, trade and currency to Indian sectors and company valuation.",
-    "intro": "Read the key questions behind AlphaHedgeQuant's India and global macro reports. Public previews focus on the economic reasoning rather than republishing unverified or stale market figures. Sign in to read the complete archived reports and their detailed narrative.",
+    "intro": "Examine the central questions behind AlphaHedgeQuant's India and global macro research, from inflation and monetary policy to growth, external balances and valuation. Follow the economic reasoning while distinguishing historical context from current market evidence.",
     "subject": "India macro · monetary policy · sector earnings · valuation",
     "fullRoute": "/reports",
     "fullLabel": "Open full Macro Outlook reports",
@@ -45,7 +45,7 @@ export const RESEARCH_PREVIEWS=[
     "subtitle": "An AlphaHedgeQuant research-paper preview on modelling unusual order-flow patterns and surveillance evidence.",
     "published": "2026-04-01",
     "label": "ORIGINAL RESEARCH / MARKET MICROSTRUCTURE",
-    "reading": "6 MIN PREVIEW",
+    "reading": "6 MIN READ",
     "fullRoute": "/research",
     "paper": {
       "label": "AlphaHedgeQuant research catalogue entry (SSRN link)",
@@ -76,7 +76,7 @@ export const RESEARCH_PREVIEWS=[
     "subtitle": "Why correlated asset prices are not automatically cointegrated and what an error-correction representation means.",
     "published": "2026-11-09",
     "label": "FOUNDATIONAL PAPER / ECONOMETRICS",
-    "reading": "5 MIN PREVIEW",
+    "reading": "5 MIN READ",
     "fullRoute": "/research",
     "paper": {
       "label": "Engle & Granger (1987), Econometrica DOI",
@@ -107,7 +107,7 @@ export const RESEARCH_PREVIEWS=[
     "subtitle": "Factor-neutral residual trading, systematic portfolio construction and the difference between a signal and an executable strategy.",
     "published": "2026-11-09",
     "label": "FOUNDATIONAL PAPER / STATISTICAL ARBITRAGE",
-    "reading": "5 MIN PREVIEW",
+    "reading": "5 MIN READ",
     "fullRoute": "/research",
     "paper": {
       "label": "Avellaneda & Lee — SSRN research entry",
@@ -138,7 +138,7 @@ export const RESEARCH_PREVIEWS=[
     "subtitle": "An introduction to axioms for financial risk measures and why expected shortfall is studied alongside VaR.",
     "published": "2026-11-09",
     "label": "FOUNDATIONAL PAPER / RISK THEORY",
-    "reading": "5 MIN PREVIEW",
+    "reading": "5 MIN READ",
     "fullRoute": "/research",
     "paper": {
       "label": "Artzner et al. (1999), Mathematical Finance DOI",
@@ -169,7 +169,7 @@ export const RESEARCH_PREVIEWS=[
     "subtitle": "Understand empirical loss quantiles, horizon selection, and why historical VaR is not a worst-case loss bound.",
     "published": "2026-11-09",
     "label": "RISK MODEL / HISTORICAL VAR",
-    "reading": "5 MIN PREVIEW",
+    "reading": "5 MIN READ",
     "fullRoute": "/models",
     "intro": [
       "Historical Value at Risk constructs a distribution of hypothetical portfolio losses by repricing the current holdings using past returns or shocks. A reported 99% one-day VaR is a chosen empirical loss quantile under the method’s assumptions, not an upper limit on what can be lost.",
@@ -196,7 +196,7 @@ export const RESEARCH_PREVIEWS=[
     "subtitle": "Why conditional variance evolves over time and how GARCH responds to clustered market shocks.",
     "published": "2026-11-09",
     "label": "VOLATILITY MODEL / GARCH",
-    "reading": "6 MIN PREVIEW",
+    "reading": "6 MIN READ",
     "fullRoute": "/models",
     "intro": [
       "Returns in many markets show periods of relatively calm movement followed by periods of heightened variability. A constant-variance model does not capture this time variation. GARCH introduces an evolving estimate of conditional variance.",
@@ -223,7 +223,7 @@ export const RESEARCH_PREVIEWS=[
     "subtitle": "A transparent introduction to option-chain gamma aggregation and the key uncertainty in dealer-position assumptions.",
     "published": "2026-11-09",
     "label": "OPTIONS MODEL / GEX",
-    "reading": "6 MIN PREVIEW",
+    "reading": "6 MIN READ",
     "fullRoute": "/models",
     "intro": [
       "Gamma exposure models combine option sensitivities with contract positions to estimate how the delta of an option book might change when the underlying price moves. This becomes interesting when market participants hedge their books using the underlying asset or related futures.",
@@ -250,7 +250,7 @@ export const RESEARCH_PREVIEWS=[
     "subtitle": "A primer on why sample covariance is unstable and how structured shrinkage can improve estimation.",
     "published": "2026-11-09",
     "label": "PORTFOLIO MODEL / COVARIANCE",
-    "reading": "5 MIN PREVIEW",
+    "reading": "5 MIN READ",
     "fullRoute": "/models",
     "intro": [
       "Portfolio optimization depends heavily on how risks move together. A sample covariance matrix estimated from a short or noisy return history can be unstable, especially when the number of assets is large relative to available observations.",
@@ -277,7 +277,7 @@ export const RESEARCH_PREVIEWS=[
     "subtitle": "Study spread estimation, residual stationarity and the gap between a z-score and a tradable signal.",
     "published": "2026-11-09",
     "label": "STATISTICAL ARBITRAGE / PAIRS",
-    "reading": "5 MIN PREVIEW",
+    "reading": "5 MIN READ",
     "fullRoute": "/models",
     "intro": [
       "Pairs trading often begins with a plausible economic relationship between two securities. A spread is formed using a hedge ratio, then examined for evidence of mean reversion. Choosing the pair solely because its past chart looks tidy invites selection bias.",
@@ -304,7 +304,7 @@ export const RESEARCH_PREVIEWS=[
     "subtitle": "Learn how hidden-state probabilities describe market environments and why a regime model is not a crystal ball.",
     "published": "2026-11-09",
     "label": "MACHINE LEARNING / HMM",
-    "reading": "6 MIN PREVIEW",
+    "reading": "6 MIN READ",
     "fullRoute": "/models",
     "intro": [
       "Markets do not always behave according to one fixed volatility or return process. Regime models attempt to describe changes in the statistical behavior of observed returns and other measurements. A hidden Markov model represents the regime as a latent state with probabilistic transitions.",
@@ -331,7 +331,7 @@ export const RESEARCH_PREVIEWS=[
     "subtitle": "Preview the research questions behind an archived India macro outlook on inflation, activity, trade and external risks.",
     "published": "2026-07-16",
     "label": "INDIA MACRO / ARCHIVED REPORT",
-    "reading": "6 MIN PREVIEW",
+    "reading": "6 MIN READ",
     "fullRoute": "/reports/india-macro-monthly-july-2026",
     "intro": [
       "This archived monthly note examines why a calm-looking inflation headline can conceal important differences between sectors, regions and production stages. A macro interpretation requires looking below the aggregate series and tracking how food, energy, goods and services costs affect households and corporate margins differently.",
@@ -358,7 +358,7 @@ export const RESEARCH_PREVIEWS=[
     "subtitle": "A preview of the archived macro report comparing the meaning of central-bank pauses across different economic environments.",
     "published": "2026-07-15",
     "label": "GLOBAL MACRO / ARCHIVED REPORT",
-    "reading": "6 MIN PREVIEW",
+    "reading": "6 MIN READ",
     "fullRoute": "/reports/the-twin-pause",
     "intro": [
       "Two central banks may leave policy rates unchanged for very different reasons. A policy pause can reflect confidence that inflation is stabilizing, caution around weaker growth, uncertainty about exchange-rate pressure, or a decision to collect more evidence before moving again.",

@@ -11,8 +11,8 @@ export async function generateMetadata({params}){
  const {series:id}=await params;const category=findResearchSeries(id);
  if(!category)return {};
  return {
-  title:category.title+" — Public Previews & Full Research | AlphaHedgeQuant",
-  description:category.summary+" Read previews free; sign in for complete AHQ research.",
+  title:category.title+" | AlphaHedgeQuant Research",
+  description:category.summary+" Explore the research questions, methods and published notes.",
   alternates:{canonical:"/library/series/"+category.id},
   openGraph:{title:category.title+" — AlphaHedgeQuant Open Research",description:category.summary,url:"/library/series/"+category.id,type:"website"}
  };
@@ -26,10 +26,10 @@ export default async function SeriesLanding({params}){
   <script type="application/ld+json" dangerouslySetInnerHTML={{__html:JSON.stringify(schema).replace(/</g,"\\u003c")}}/>
   <SeriesBreadcrumb/>
   <header className="rp-series-hero"><div className="rl-shell">
-   <p className="rl-eyebrow">{category.eyebrow} / PUBLIC RESEARCH PREVIEW</p>
+   <p className="rl-eyebrow">{category.eyebrow} / RESEARCH SERIES</p>
    <h1>{category.title}<em>.</em></h1>
    <p className="rp-series-sub">{category.intro}</p>
-   <div className="rp-hero-data"><span>{articles.length} RESEARCH PREVIEWS</span><span>NO LOGIN FOR PREVIEWS</span><span>FULL READING REQUIRES SIGN-IN</span></div>
+   <div className="rp-hero-data"><span>{articles.length} RESEARCH NOTES</span><span>METHODS &amp; EVIDENCE</span><span>THE READING LIST</span></div>
   </div></header>
   <main className="rl-shell rp-catalogue">
     <div className="rp-catalogue-header"><div><p className="rl-eyebrow">THE READING LIST</p><h2>Explore the <em>questions.</em></h2><p>{category.subject}</p></div><Link href="/library">← All public research</Link></div>
@@ -38,7 +38,7 @@ export default async function SeriesLanding({params}){
       <h3><Link href={path.replace(root,"")+"/"+item.slug}>{item.title}</Link></h3>
       <p>{item.subtitle}</p>
       <p className="rp-card-excerpt">{item.intro[0]}</p>
-      <div className="rp-card-bottom"><Link href={"/library/series/"+category.id+"/"+item.slug}>Read the public preview <span aria-hidden="true">↗</span></Link><span>FULL MATERIAL / ACCOUNT ACCESS</span></div>
+      <div className="rp-card-bottom"><Link href={"/library/series/"+category.id+"/"+item.slug}>Explore research note <span aria-hidden="true">↗</span></Link><span>ALPHAHEDGEQUANT RESEARCH</span></div>
     </article>)}</div>
     <div className="rp-collection-note"><p className="rl-eyebrow">EDITORIAL NOTE</p><p>{category.notice}</p></div>
     <UnlockResearch href={category.fullRoute} label={category.fullLabel} notice={category.notice} compact/>

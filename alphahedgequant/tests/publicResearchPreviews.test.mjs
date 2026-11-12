@@ -88,10 +88,12 @@ test("previews link to protected full routes, never expose gated content or acco
  assert.match(ui,/<SignedOut>/);
  assert.match(ui,/<SignedIn>/);
  assert.match(ui,/href=\{href\}/);
- assert.match(ui,/Sign in to continue reading/);
+ assert.match(ui,/Continue reading/);
+ assert.match(ui,/<SignedOut>/);
+ assert.doesNotMatch(ui,/Create a free account|Sign in to continue reading/);
  assert.match(page,/item\.intro\.map/);
  assert.match(page,/item\.locked\.map/);
- assert.match(page,/PUBLIC ACCESS/);
+ assert.match(page,/ALPHAHEDGEQUANT \/ RESEARCH/);
  assert.doesNotMatch(page,/getReport\(/);
  assert.doesNotMatch(page,/ModelPlayground/);
  assert.doesNotMatch(page,/models\/page\.jsx/);
@@ -108,9 +110,10 @@ test("existing library, homepage, navigation and footer link to previews",()=>{
   assert.ok(s.includes("/library/series/quant-models") || s.includes('PUBLIC_RESEARCH_SERIES'),"Model preview missing");
   assert.ok(s.includes("/library/series/macro-outlook") || s.includes('PUBLIC_RESEARCH_SERIES'),"Macro preview missing");
  }
- assert.match(nav,/href: "\/research"/);
- assert.match(nav,/href: "\/reports"/);
  assert.match(nav,/href: "\/models"/);
+ assert.doesNotMatch(nav,/free previews|sign-in\)|public previews/i);
+ assert.ok(PUBLIC_RESEARCH_SERIES.some(x=>x.fullRoute==="/research"));
+ assert.ok(PUBLIC_RESEARCH_SERIES.some(x=>x.fullRoute==="/reports"));
 });
 
 test("full research continuation clicks are recorded only as a fixed low-cardinality event",()=>{
@@ -123,4 +126,23 @@ test("full research continuation clicks are recorded only as a fixed low-cardina
  assert.ok(dashboard.includes(ev));
  assert.match(actions,/data-ahq-event="research_preview_unlock_clicked"/);
  assert.doesNotMatch(actions,/email=|userId=|tradeId=|stockSymbol=/);
+});
+
+test("research navigation and IPO editorial avoid repeated account and free-preview promotion",()=>{
+ const nav=read("components/Nav.jsx");
+ const ipo=read("app/ipo/page.jsx");
+ const hub=read("app/library/page.jsx");
+ const series=read("app/library/series/[series]/page.jsx");
+ const page=read("app/library/series/[series]/[slug]/page.jsx");
+ const home=read("components/PremiumEditorial.jsx");
+ const footer=read("components/Footer.jsx");
+ for(const x of [nav,ipo,hub,series,page,home,footer])
+  assert.doesNotMatch(x,/free previews|free research guides|NO LOGIN REQUIRED|FULL READING REQUIRES SIGN-IN|Create a free account|\(sign-in\)/i);
+ for(const x of ["Research Library","Research Papers","Quant Research","Macro Outlook"])
+  assert.ok(nav.includes('label: "'+x+'"'),"Missing research destination: "+x);
+ assert.match(ipo,/THE IPO LIFECYCLE/);
+ assert.match(ipo,/LISTING PERFORMANCE/);
+ assert.match(hub,/RESEARCH COLLECTIONS/);
+ assert.match(series,/METHODS &amp; EVIDENCE/);
+ assert.match(page,/RESEARCH NOTE/);
 });
