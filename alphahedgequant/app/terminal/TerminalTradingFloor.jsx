@@ -4,14 +4,14 @@ import {useCallback,useEffect,useMemo,useRef,useState} from "react";
 import "./terminal-floor.css";
 
 const DEFAULT_WINDOWS = [
-  {id:"orders",title:"Orders",x:0.7,y:82,w:18.3,h:214},
-  {id:"account",title:"Account Summary",x:19.3,y:82,w:17.3,h:194},
+  {id:"watchlist",title:"NSE Market Watchlist",x:0.7,y:82,w:18.3,h:214},
+  {id:"metrics",title:"Quant Market Metrics",x:19.3,y:82,w:17.3,h:194},
   {id:"messages",title:"Messages",x:0.7,y:306,w:18.3,h:152},
-  {id:"order-entry",title:"Order Entry",x:0.7,y:468,w:29.5,h:179},
+  {id:"greeks",title:"ATM Option Greeks",x:0.7,y:468,w:29.5,h:179},
   {id:"depth",title:"Level 2 · Market Depth",x:0.7,y:660,w:32.7,h:298},
-  {id:"blocks",title:"Block Trades",x:53.6,y:10,w:18.2,h:176},
+  {id:"rvol",title:"Relative Volume / RVOL",x:53.6,y:10,w:18.2,h:176},
   {id:"options",title:"Options Most Active",x:31.4,y:201,w:39.9,h:360},
-  {id:"timesales",title:"Time & Sales",x:33.8,y:574,w:37.8,h:383},
+  {id:"volume",title:"Intraday Volume Curve",x:33.8,y:574,w:37.8,h:383},
   {id:"chart",title:"Price Chart · 5-Minute Bars",x:72.2,y:10,w:27.1,h:360},
   {id:"alerts",title:"Ticker Alerts",x:72.2,y:384,w:27.1,h:252},
   {id:"movers",title:"Risers & Fallers",x:72.2,y:650,w:27.1,h:308},
@@ -110,10 +110,78 @@ function SortedMovers({data,onChoose}){
       {items.length?items.map(x=><button className="floor-mover-row" type="button" key={sym(x)} onClick={()=>onChoose(sym(x))}><span>{sym(x)}</span><strong className={pc(x)>0?"gain":"loss"}>{pc(x)>0?"+":""}{px(pc(x))}%</strong></button>):<p className="floor-footnote">No qualifying symbols</p>}
     </div>)}</div></>;
 }
-export default function TerminalTradingFloor({symbol,onChoose,quote,quoteError,seen,bars,chain,optionSymbol,setOptionSymbol,chainLoad,watch,refresh,historyError}){
+
+function MarketWatchlist({symbol,watch,quote,screener,onChoose}){
+  const names=[...new Set([symbol,...(watch||[])])].slice(0,30);
+  const mapped=new Map((screener||[]).map(x=>[sym(x),x]).filter(([s])=>s));
+  return <div className="floor-watch-data">
+    <div className="floor-watch-head"><span>SYMBOL</span><span>LTP ₹</span><span>CHG %</span></div>
+    {names.map(t=>{
+      const live=t===symbol&&n(quote?.price)!==null;
+      const feed=mapped.get(t);
+      const price=live?n(quote.price):first(feed,"price","ltp","last_price");
+      const change=live?null:pc(feed);
+      return <button type="button" key={t} onClick={()=>onChoose(t)} className={"floor-watch-line"+(t===symbol?" floor-active":"")}>
+        <strong>{t}</strong><span>{px(price)}</span><span className={signed(change)}>{change===null?"—":(change>0?"+":"")+px(change)+"%"}</span>
+      </button>
+    })}
+    <p className="floor-footnote">Selected ticker uses its current quote response; other prices only appear if present in the NSE screener snapshot. Tap to link all panels.</p>
+  </div>;
+}
+function MarketMetrics({symbol,quote,vol,rvol,lookback}){
+  const bids=Array.isArray(quote?.bids)?quote.bids:[],asks=Array.isArray(quote?.asks)?quote.asks:[];
+  const spread=bids.length&&asks.length&&n(bids[0]?.price)!==null&&n(asks[0]?.price)!==null?Number(asks[0].price)-Number(bids[0].price):null;
+  const point=vol?.points?.at(-1);
+  return <div className="floor-account">
+    {[["NSE ticker",symbol],["Last traded price",n(quote?.price)!==null?"₹"+px(quote.price):"—"],["Day change",n(quote?.change)!==null?"₹"+px(quote.change):"—"],["Trade volume",compact(quote?.volume)],["Best bid / ask",bids[0]&&asks[0]?px(bids[0].price)+" / "+px(asks[0].price):"—"],["Bid/ask spread",spread!==null?"₹"+px(spread):"—"],["Relative volume",vol?.ready&&rvol!==null&&rvol!==undefined?rvol.toFixed(2)+"×":"—"],["History sessions",vol?vol.count+"/"+lookback:"—"],["Cum. intraday volume",compact(point?.today)]].map(([name,val])=><div key={name}><span>{name}</span><strong>{val}</strong></div>)}
+    <p className="floor-footnote">Quote snapshots and historical derived metrics only. This is not broker account equity or P&L.</p>
+  </div>;
+}
+const GREEK_NAMES=[["iv","IV"],["delta","Delta"],["gamma","Gamma"],["theta","Theta"],["vega","Vega"]];
+function AtmGreeks({chain,optionSymbol}){
+  const rows=Array.isArray(chain?.strikes)?chain.strikes:[];
+  const spot=n(chain?.spot_price);
+  const strikes=rows.filter(x=>n(x.strike_price)!==null);
+  if(!strikes.length||spot===null)return <PanelBlank title="OPTION CHAIN NOT AVAILABLE" body={"ATM Greeks require a supported Upstox NSE F&O chain for "+optionSymbol+"."}/>;
+  const atm=strikes.reduce((best,x)=>Math.abs(Number(x.strike_price)-spot)<Math.abs(Number(best.strike_price)-spot)?x:best,strikes[0]);
+  return <div className="floor-greek-panel">
+    <p className="floor-caveat">{optionSymbol} · spot {px(spot)} · nearest strike {px(atm.strike_price,0)} · {chain.expiry||"provider expiry"}</p>
+    <div className="floor-greek-line floor-greek-head"><span>GREEK</span><span>CE</span><span>PE</span></div>
+    {GREEK_NAMES.map(([k,label])=><div className="floor-greek-line" key={k}><strong>{label}</strong><span>{px(atm.call?.[k],4)}</span><span>{px(atm.put?.[k],4)}</span></div>)}
+    <p className="floor-footnote">Provider units unchanged. Theta: more negative = stronger modelled long-option time decay, all else equal. Greeks are sensitivities, not entry signals.</p>
+  </div>;
+}
+function RvolPanel({vol,rvol,lookback,setLookback}){
+  const last=vol?.points?.at(-1);
+  const ratio=vol?.ready&&n(rvol)!==null?rvol:null;
+  const delta=vol?.ready&&n(last?.today)!==null&&n(last?.mean)!==null?last.today-last.mean:null;
+  return <div className="floor-rvol">
+    <div className="floor-innerbar"><span>LAST {vol?.session||"—"}</span><label>BASELINE
+      <select aria-label="Relative volume lookback" value={lookback} onChange={e=>setLookback(Number(e.target.value))}>{[5,10,15,20,30].map(v=><option key={v} value={v}>{v} DAYS</option>)}</select>
+    </label></div>
+    <div className="floor-rvol-main"><strong className={ratio===null?"":ratio>=1?"gain":"loss"}>{ratio===null?"—":ratio.toFixed(2)+"×"}</strong><span>RVOL vs mean</span></div>
+    <div className="floor-rvol-stats"><div>Today <b>{compact(last?.today)}</b></div><div>Mean <b>{vol?.ready?compact(last?.mean):"—"}</b></div><div>Median <b>{vol?.ready?compact(last?.median):"—"}</b></div><div>Vs mean <b className={signed(delta)}>{delta===null?"—":(delta>0?"+":"")+compact(delta)}</b></div></div>
+    <p className="floor-footnote">{vol?.count||0}/{lookback} complete reference sessions. {vol?.ready?"Matched by NSE trading time.":"Baseline withheld until sufficient complete history."}</p>
+  </div>;
+}
+function VolumeCurve({vol,lookback,setLookback,isCumulative,setIsCumulative,VolumeLineChart}){
+  return <div className="floor-volume">
+    <div className="floor-innerbar">
+      <strong>SESSION-ALIGNED {isCumulative?"CUMULATIVE":"INTERVAL"} VOLUME</strong>
+      <div className="floor-volume-actions">
+        <select value={lookback} aria-label="Volume baseline trading sessions" onChange={e=>setLookback(Number(e.target.value))}>{[5,10,15,20,30].map(v=><option key={v} value={v}>{v} sessions</option>)}</select>
+        <button type="button" onClick={()=>setIsCumulative(x=>!x)}>{isCumulative?"Switch: 5m bars":"Switch: cumulative"}</button>
+      </div>
+    </div>
+    <div className="floor-volume-legend"><span style={{color:"#e9ba5e"}}>━ Observed day</span><span style={{color:"#50a7e8"}}>┄ {lookback}-day median</span><span style={{color:"#67cba0"}}>┄ {lookback}-day mean</span></div>
+    {vol?.points?.length&&VolumeLineChart?<VolumeLineChart points={vol.points} height={300}/>:<PanelBlank title="NO HISTORICAL VOLUME CURVE" body="Waiting for valid 5-minute NSE volume candles."/>}
+    <p className="floor-footnote">Historical 5-minute OHLCV records, not live time-and-sales. {vol?.count||0}/{lookback} complete baseline sessions. {vol?.ready?"Mean/median computed on aligned 5-minute timestamps.":"Historical mean and median withheld until baseline is complete."}</p>
+  </div>;
+}
+export default function TerminalTradingFloor({symbol,onChoose,quote,quoteError,seen,bars,chain,optionSymbol,setOptionSymbol,chainLoad,watch,refresh,historyError,vol,rvol,lookback,setLookback,isCumulative,setIsCumulative,VolumeLineChart}){
   const [windows,setWindows]=useState(()=>INIT);
   const zRef=useRef(50);
-  const [orderSide,setOrderSide]=useState("BUY"),[qty,setQty]=useState("1"),[limit,setLimit]=useState("");
+  
   const [screener,setScreener]=useState([]),[screenerStatus,setScreenerStatus]=useState("LOADING"),[screenerAt,setScreenerAt]=useState(null);
   const [ticks,setTicks]=useState([]);
   const prev=useRef(null),drag=useRef(null),floorRef=useRef(null);
@@ -173,7 +241,7 @@ export default function TerminalTradingFloor({symbol,onChoose,quote,quoteError,s
       <div className="floor-wordmark"><span className="floor-diamond">α</span><div><strong>ALPHAHEDGEQUANT</strong><small>QUANT TRADING WORKSTATION · NSE</small></div></div>
       <div className="floor-commands">
         <span className={"floor-readonly "+(quote?"feed-on":"")}>{quote?"● PRICE SNAPSHOT":"○ QUOTE NOT VERIFIED"}</span>
-        <span className="floor-readonly">READ ONLY · NO BROKER EXECUTION</span>
+        <span className="floor-readonly">READ ONLY · VERIFIED DATA ONLY</span>
         <button type="button" onClick={reset}>↶ RESET LAYOUT</button>
         <details className="floor-windows-menu"><summary>WINDOWS {shown}/11</summary><div>{DEFAULT_WINDOWS.map(p=><button type="button" key={p.id} onClick={()=>restore(p.id)}>{windows[p.id].hidden?"＋":"✓"} {p.title}</button>)}</div></details>
       </div>
@@ -190,16 +258,11 @@ export default function TerminalTradingFloor({symbol,onChoose,quote,quoteError,s
     </div>
     <div className="floor-desktop-hint">DRAG TITLE BARS TO MOVE · DRAG WINDOW CORNERS TO RESIZE · USE × TO HIDE · RESET TO RESTORE</div>
     <div className="floor-windows-canvas" ref={floorRef} onPointerMove={move} onPointerUp={endDrag} onPointerCancel={endDrag} onLostPointerCapture={endDrag}>
-      <FloorWindow windowDef={windows.orders} onStart={startDrag} onBring={bring} onCollapse={collapse} onClose={hide}>
-        <div className="floor-table-scroll"><table className="floor-table"><thead><tr><th>SYMBOL</th><th>SIDE</th><th>QTY</th><th>STATUS</th></tr></thead></table></div>
-        <PanelBlank title="NO ORDER FEED CONNECTED" body="Connect a broker-authorized orders endpoint before displaying live, pending or filled orders."/>
-        <Link className="floor-inline-link" href="/options">Open Options Desk ↗</Link>
+      <FloorWindow windowDef={windows.watchlist} onStart={startDrag} onBring={bring} onCollapse={collapse} onClose={hide}>
+        <MarketWatchlist symbol={symbol} watch={watch} quote={quote} screener={screener} onChoose={onChoose}/>
       </FloorWindow>
-      <FloorWindow windowDef={windows.account} onStart={startDrag} onBring={bring} onCollapse={collapse} onClose={hide}>
-        <div className="floor-account">
-          {[["Marked P&L","—"],["Open P&L","—"],["Closed P&L","—"],["Positions","—"],["Available buying power","—"]].map(([name,val])=><div key={name}><span>{name}</span><strong>{val}</strong></div>)}
-          <p className="floor-footnote">Account balances and P&L require authorized broker portfolio data. Nothing is estimated.</p>
-        </div>
+      <FloorWindow windowDef={windows.metrics} onStart={startDrag} onBring={bring} onCollapse={collapse} onClose={hide}>
+        <MarketMetrics symbol={symbol} quote={quote} vol={vol} rvol={rvol} lookback={lookback}/>
       </FloorWindow>
       <FloorWindow windowDef={windows.messages} onStart={startDrag} onBring={bring} onCollapse={collapse} onClose={hide}>
         <div className="floor-messages">
@@ -207,28 +270,19 @@ export default function TerminalTradingFloor({symbol,onChoose,quote,quoteError,s
           <p>{quoteError?"PRICE FEED: "+quoteError:"Selected "+symbol+" · REST quote polling"}</p>
           <p>{chain?"OPTIONS: CHAIN RECEIVED":"OPTIONS: NO VERIFIED CHAIN"}</p>
           <p>{historyError?"HISTORY: "+historyError:"HISTORY: 5-MINUTE SOURCE"}</p>
-          <p>ORDER ROUTING: NOT CONNECTED</p>
+          <p>WORKSPACE: QUOTE · DEPTH · GREEKS · VOLUME · RESEARCH</p>
         </div>
       </FloorWindow>
-      <FloorWindow windowDef={windows["order-entry"]} onStart={startDrag} onBring={bring} onCollapse={collapse} onClose={hide}>
-        <div className="floor-order-ticket">
-          <div className="floor-order-fields"><label>SYMBOL<input value={symbol} readOnly aria-label="Selected order planning ticker"/></label>
-            <label>QTY<input value={qty} inputMode="numeric" onChange={e=>setQty(e.target.value.replace(/[^0-9]/g,"").slice(0,8))} aria-label="Quantity for planning only"/></label>
-            <label>LIMIT PRICE ₹<input value={limit} inputMode="decimal" onChange={e=>setLimit(e.target.value.replace(/[^0-9.]/g,"").slice(0,12))} placeholder="Not set" aria-label="Limit price for planning only"/></label></div>
-          <div className="floor-plan-actions"><button className={orderSide==="SELL"?"floor-sell selected":"floor-sell"} type="button" onClick={()=>setOrderSide("SELL")}>SELL PLAN</button><button className={orderSide==="BUY"?"floor-buy selected":"floor-buy"} type="button" onClick={()=>setOrderSide("BUY")}>BUY PLAN</button></div>
-          <p className="floor-footnote">Planning form only: {orderSide} {qty||"0"} {symbol}. <strong>No orders are transmitted.</strong></p>
-        </div>
+      <FloorWindow windowDef={windows.greeks} onStart={startDrag} onBring={bring} onCollapse={collapse} onClose={hide}>
+        <AtmGreeks chain={chain} optionSymbol={optionSymbol}/>
       </FloorWindow>
       <FloorWindow windowDef={windows.depth} onStart={startDrag} onBring={bring} onCollapse={collapse} onClose={hide}><MarketDepth quote={quote} symbol={symbol}/></FloorWindow>
-      <FloorWindow windowDef={windows.blocks} onStart={startDrag} onBring={bring} onCollapse={collapse} onClose={hide}>
-        <div className="floor-table-scroll"><table className="floor-table"><thead><tr><th>SYMBOL</th><th>SIZE</th><th>TIME</th></tr></thead></table></div>
-        <PanelBlank title="BLOCK PRINTS NOT CONNECTED" body="A verified block-trade feed and exchange trade timestamps are required. Quote changes are not block executions."/>
+      <FloorWindow windowDef={windows.rvol} onStart={startDrag} onBring={bring} onCollapse={collapse} onClose={hide}>
+        <RvolPanel vol={vol} rvol={rvol} lookback={lookback} setLookback={setLookback}/>
       </FloorWindow>
       <FloorWindow windowDef={windows.options} onStart={startDrag} onBring={bring} onCollapse={collapse} onClose={hide}><OptionsActivity chain={chain} optionSymbol={optionSymbol} setOptionSymbol={setOptionSymbol} onRefresh={chainLoad}/></FloorWindow>
-      <FloorWindow windowDef={windows.timesales} onStart={startDrag} onBring={bring} onCollapse={collapse} onClose={hide}>
-        <div className="floor-innerbar"><strong>{symbol}</strong><span>PRICE · QTY · TIME · EXCHANGE</span></div>
-        <div className="floor-table-scroll"><table className="floor-table"><thead><tr><th>PRICE ₹</th><th>SIZE</th><th>TIME</th><th>EXCH</th></tr></thead></table></div>
-        <PanelBlank title="NO VERIFIED TRADE PRINTS" body="Time & Sales requires a licensed trade-by-trade or time-and-sales feed. We will not fabricate fills from price snapshots."/>
+      <FloorWindow windowDef={windows.volume} onStart={startDrag} onBring={bring} onCollapse={collapse} onClose={hide}>
+        <VolumeCurve vol={vol} lookback={lookback} setLookback={setLookback} isCumulative={isCumulative} setIsCumulative={setIsCumulative} VolumeLineChart={VolumeLineChart}/>
       </FloorWindow>
       <FloorWindow windowDef={windows.chart} onStart={startDrag} onBring={bring} onCollapse={collapse} onClose={hide}>
         <div className="floor-price-head"><strong>{symbol}</strong><span className={signed(dayMove)}>{px(quote?.price)} {dayMove!==null?(dayMove>=0?"▲ ":"▼ ")+px(Math.abs(dayMove)):""}</span></div>
@@ -244,6 +298,6 @@ export default function TerminalTradingFloor({symbol,onChoose,quote,quoteError,s
         {screenerAt&&<p className="floor-footnote">Response fetched {ist(screenerAt)} IST. Source timestamp may differ.</p>}
       </FloorWindow>
     </div>
-    <div className="floor-bottom-disclosure">MARKET OBSERVATION ONLY · REAL NSE SOURCES WHEN AVAILABLE · ACCOUNT / ORDERS / BLOCK TRADES / TIME & SALES NOT CONNECTED · CLOSE OR RESIZE ANY WINDOW · NO SYNTHETIC TRADE PRINTS</div>
+    <div className="floor-bottom-disclosure">NSE RESEARCH WORKSPACE · QUOTE/DEPTH/OPTIONS/SCREENER SUBJECT TO UPSTOX CONNECTIVITY · VOLUME BASELINE REQUIRES COMPLETE HISTORICAL SESSIONS · NO SIMULATED TRADES</div>
   </div>;
 }
