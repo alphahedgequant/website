@@ -1,7 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import {readFileSync} from "node:fs";
-import {istCalendar,isSafeNseCollectionTime,selectFnoBatch,normalizeDailyChain,
+import {istCalendar,isSafeNseCollectionTime,selectFnoBatch,normalizeDailyChain,INDEX_OPTION_SYMBOLS,
  unusualVolumeBaseline,median} from "../lib/dailyOptionsFlow.mjs";
 const read=p=>readFileSync(new URL("../"+p,import.meta.url),"utf8");
 const payload=(overrides={})=>({success:true,data:{
@@ -25,6 +25,10 @@ test("eight daily slots cover each eligible F&O ticker twice, not every cash-mar
  assert.equal(counts.size,218);assert.ok([...counts.values()].every(x=>x===2));
  assert.deepEqual(selectFnoBatch([{symbol:"M&M"},{symbol:"M&M"},{symbol:"<script>"}],0),["M&M"]);
  assert.deepEqual(selectFnoBatch(items,-1),[]);
+ assert.deepEqual(INDEX_OPTION_SYMBOLS,["NIFTY","BANKNIFTY","FINNIFTY"]);
+ const withIndexes=[...items,...INDEX_OPTION_SYMBOLS.map(symbol=>({symbol}))];
+ const all=Array.from({length:8},(_,slot)=>selectFnoBatch(withIndexes,slot)).flat();
+ for(const index of INDEX_OPTION_SYMBOLS)assert.equal(all.filter(x=>x===index).length,2);
 });
 test("normalizer stores genuine observed metrics and identifies volume/OI plus OI delta",()=>{
  const item=normalizeDailyChain(payload(),"RELIANCE","2026-11-12T09:15:00Z");
@@ -68,6 +72,7 @@ test("private collection route is CRON_SECRET protected; public route is read-on
  assert.match(cron,/process\.env\.CRON_SECRET/);
  assert.match(cron,/request\.headers\.get\("authorization"\)/);
  assert.match(cron,/selectFnoBatch\(universe,slot\)/);
+ assert.match(cron,/INDEX_OPTION_SYMBOLS\.map/);
  assert.match(cron,/normalizeDailyChain\(/);
  assert.match(cron,/storeFlowBatch\(/);
  assert.match(cron,/maxDuration=300/);
