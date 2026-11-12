@@ -8,7 +8,7 @@ export const metadata={
  robots:{index:true,follow:true},
  openGraph:{
   title:"IPO Intelligence India | AlphaHedgeQuant",
-  description:"Follow IPO calendars, mainboard and SME issues, unofficial GMP, investor demand and actual listing outcomes. No login required.",
+  description:"Follow IPO calendars, mainboard and SME issues, unofficial GMP, investor demand and actual listing outcomes.",
   url:"/ipo",type:"website",siteName:"AlphaHedgeQuant"
  }
 };
@@ -52,9 +52,9 @@ export default function Page(){
     <p className="ipo-hero-kicker">ALPHAHEDGEQUANT / PUBLIC MARKET INTELLIGENCE</p>
     <h1 id="ipo-page-title" aria-label="Indian IPO Intelligence">Indian IPO<br/><em>Intelligence.</em></h1>
     <p className="ipo-hero-lead">From the first prospectus to the first traded price. Track upcoming IPOs, public issue terms, subscription demand, unofficial GMP and realized listing outcomes — without confusing expectations with evidence.</p>
-    <div className="ipo-hero-tags"><span>NSE + BSE</span><span>MAINBOARD + SME</span><span>OPEN TO EVERYONE</span></div>
+    <div className="ipo-hero-tags"><span>NSE + BSE</span><span>MAINBOARD + SME</span><span>LISTING PERFORMANCE</span></div>
     <div className="ipo-brief" aria-label="IPO Intelligence introduction">
-     <p className="ipo-brief__label">UNDERSTAND THE IPO LIFECYCLE · NO LOGIN REQUIRED</p>
+     <p className="ipo-brief__label">THE IPO LIFECYCLE</p>
      <div className="ipo-brief__track">
       <div className="ipo-brief__step"><strong>01 / DISCOVER</strong><span>Follow the bidding window, issue price, lot size and upcoming listings.</span></div>
       <div className="ipo-brief__step"><strong>02 / EXAMINE</strong><span>Compare subscription demand and reported grey-market premiums, including disputed or missing figures.</span></div>
