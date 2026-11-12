@@ -718,3 +718,103 @@
  .qt-shell .qt-flow-workspace{background:#000!important}
  .qt-shell .qt-flow-info{background:#0c0c0c!important}
 }
+
+
+/* Fully operational tab surfaces: keep the approved TRUE-BLACK terminal
+   distinct from the rest of AlphaHedgeQuant's site design. */
+.qt-shell .qt-operational-workspace,
+.qt-shell .qt-integrated-app{
+ background:#000!important;color:#fff!important;padding:18px clamp(12px,2.5vw,32px) 30px;
+ min-width:0;max-width:100%;overflow-x:hidden
+}
+.qt-shell .qt-operational-header{
+ display:flex;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;
+ gap:15px 24px;border-bottom:1px solid #353535;padding:8px 0 20px
+}
+.qt-shell .qt-operational-header>div{flex:1 1 350px}
+.qt-shell .qt-operational-header small,.qt-shell .qt-integrated-header span{
+ color:#ccc!important;font:700 10px/1.7 ui-monospace,monospace;letter-spacing:.13em
+}
+.qt-shell .qt-operational-header h2{color:#fff;font:700 clamp(23px,3vw,34px)/1.25 "DM Sans",sans-serif;margin:9px 0}
+.qt-shell .qt-operational-header p{color:#ddd;font-size:13px;line-height:1.8;max-width:800px}
+.qt-shell .qt-operational-header :is(button,a),
+.qt-shell .qt-integrated-header a{
+ display:inline-flex;align-items:center;justify-content:center;padding:10px 14px;
+ border:1px solid #555;background:#161616;color:#fff!important;
+ font:700 12px/1.5 "DM Sans",sans-serif;text-decoration:none;cursor:pointer
+}
+.qt-shell .qt-operational-header :is(button,a):hover,.qt-shell .qt-integrated-header a:hover{
+ background:#292929;border-color:#fff
+}
+.qt-shell .qt-operational-metrics{
+ display:grid;grid-template-columns:repeat(4,minmax(0,1fr));
+ gap:1px;background:#393939;border:1px solid #393939;margin:22px 0
+}
+.qt-shell .qt-operational-metric{
+ background:#0c0c0c;padding:22px 17px;min-width:0;
+ display:flex;flex-direction:column;gap:12px
+}
+.qt-shell .qt-operational-metric small{
+ color:#ccc;font:700 10px/1.5 ui-monospace,monospace;letter-spacing:.065em
+}
+.qt-shell .qt-operational-metric strong{
+ color:#fff;font:700 clamp(17px,2.1vw,27px)/1.25 "DM Sans",sans-serif;
+ overflow-wrap:anywhere;font-variant-numeric:tabular-nums
+}
+.qt-shell .qt-operational-metric>span{color:#c9c9c9;font-size:11px;line-height:1.6}
+.qt-shell .qt-operational-empty{
+ background:#0c0c0c;border:1px solid #414141;padding:26px;
+ color:#e5e5e5;line-height:1.85;font-size:13px
+}
+.qt-shell .qt-operational-empty a,.qt-shell .qt-operational-caveat a{color:#fff!important;text-decoration:underline}
+.qt-shell .qt-operational-filters{display:flex;gap:12px;flex-wrap:wrap;margin:20px 0}
+.qt-shell .qt-operational-filters label{display:flex;align-items:center;gap:11px;color:#eee;font-size:12px}
+.qt-shell .qt-operational-filters select{padding:9px 13px;background:#161616!important;color:#fff!important;border:1px solid #555!important}
+.qt-shell .qt-operational-caveat{
+ color:#ccc;line-height:1.9;font-size:12px;margin-top:18px
+}
+.qt-shell .qt-integrated-header{
+ display:flex;align-items:center;justify-content:space-between;gap:12px;
+ flex-wrap:wrap;padding:14px 8px;border-bottom:1px solid #404040
+}
+.qt-shell .qt-integrated-app .qt-embedded-tool{
+ width:100%;max-width:100%!important;margin:0!important;background:#000!important;color:#fff!important
+}
+.qt-shell .qt-integrated-app :is(.bg-surface,.bg-raised,.bg-ink,.card,.border-line,.bg-white){
+ background-color:#111!important;border-color:#373737!important;color:#fff!important
+}
+.qt-shell .qt-integrated-app :is(.text-body,.text-amber,.text-cyan,.text-muted,
+ .text-neutral-400,.text-slate-400,.font-display,h1,h2,h3,p,label,summary){
+ color:#f2f2f2!important
+}
+.qt-shell .qt-integrated-app :is(input,select,textarea){
+ background:#121212!important;border-color:#595959!important;color:#fff!important
+}
+.qt-shell .qt-integrated-app input::placeholder{color:#bbb!important}
+.qt-shell .qt-integrated-app :is(button,a):focus-visible{
+ outline:2px solid #fff!important;outline-offset:2px
+}
+.qt-shell .qt-integrated-app .text-gain,.qt-shell .qt-integrated-app .text-emerald-400,
+.qt-shell .qt-integrated-app .text-green-400{color:#3de48c!important}
+.qt-shell .qt-integrated-app .text-loss,.qt-shell .qt-integrated-app .text-red-400,
+.qt-shell .qt-integrated-app .text-rose-500{color:#ff6577!important}
+.qt-shell .qt-integrated-app a:hover,.qt-shell .qt-integrated-app button:hover{
+ border-color:#888
+}
+.qt-shell .qt-integrated-app table{font-variant-numeric:tabular-nums}
+.qt-shell .qt-integrated-app th{color:#fff!important;background:#171717}
+.qt-shell .qt-integrated-app tr:hover{background:#202020}
+.qt-shell .qt-operational-workspace [aria-label="Implied volatility analytics"]{
+ background:#0c0c0c!important;border-color:#393939!important;color:#fff!important
+}
+.qt-shell .qt-operational-workspace [aria-label="Implied volatility analytics"] :is(h2,p,span){
+ color:#eee
+}
+@media(max-width:950px){.qt-shell .qt-operational-metrics{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:520px){
+ .qt-shell .qt-operational-workspace,.qt-shell .qt-integrated-app{padding:12px 9px 23px}
+ .qt-shell .qt-operational-metrics{grid-template-columns:1fr 1fr}
+ .qt-shell .qt-operational-metric{padding:16px 11px}
+ .qt-shell .qt-operational-metric strong{font-size:19px}
+ .qt-shell .qt-operational-header h2{font-size:24px}
+}
