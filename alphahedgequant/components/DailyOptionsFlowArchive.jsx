@@ -1,6 +1,6 @@
 "use client";
 import {useCallback,useEffect,useMemo,useState} from "react";
-import {unusualVolumeBaseline} from "@/lib/dailyOptionsFlow.mjs";
+import {istCalendar,unusualVolumeBaseline} from "@/lib/dailyOptionsFlow.mjs";
 const count=x=>typeof x==="number"&&Number.isFinite(x)?x.toLocaleString("en-IN",{maximumFractionDigits:0}):"—";
 const value=(x,d=2)=>typeof x==="number"&&Number.isFinite(x)?x.toLocaleString("en-IN",{maximumFractionDigits:d}):"—";
 const ist=x=>x?new Date(x).toLocaleString("en-IN",{timeZone:"Asia/Kolkata",dateStyle:"medium",timeStyle:"short"})+" IST":"—";
@@ -61,7 +61,7 @@ export default function DailyOptionsFlowArchive({selectedTicker="",stockOptions=
    <p>Every trading day, scheduled collectors sample eligible NSE stock-option underlyings and preserve their volume, open interest and abnormal contract metrics for historical review.</p>
   </div><button type="button" onClick={()=>setRefresh(n=>n+1)} disabled={loading}>↻ Check archive</button></div>
   <div className="qt-archive-controls">
-   <label>Date <input aria-label="Options archive trading date" type="date" value={day||loadedDay} max={new Date().toLocaleDateString("en-CA",{timeZone:"Asia/Kolkata"})} onChange={e=>setDay(e.target.value)}/></label>
+   <label>Date <input aria-label="Options archive trading date" type="date" value={day||loadedDay} max={istCalendar().day} onChange={e=>setDay(e.target.value)}/></label>
    <label>Ticker <input aria-label="Filter archived NSE option tickers" type="search" placeholder="Search NSE F&O ticker" value={query} onChange={e=>setQuery(e.target.value)}/></label>
    <button type="button" onClick={()=>{setDay("");setQuery("");setFocusSymbol("")}}>Latest records</button>
    {selectedTicker&&<button type="button" onClick={()=>setFocusSymbol(selectedTicker)}>Inspect {selectedTicker}</button>}
@@ -95,7 +95,7 @@ export default function DailyOptionsFlowArchive({selectedTicker="",stockOptions=
       <div><small>15-SESSION PUT VOLUME</small><strong>{ratios.put===null?"Building baseline":ratios.put+"× median"}</strong></div>
       <div><small>RECENT SCORE</small><strong>{count(todayHistory?.activity_score)}</strong></div>
      </div>
-     {todayHistory?.top_contracts?.length>0&&<div className="qt-archive-scroll"><table aria-label="Ticker unusual option contracts"><thead><tr><th>STRIKE</th><th>TYPE</th><th>VOL</th><th>OI</th><th>VOL/OI</th><th>OI Δ</th><th>OI Δ%</th><th>IV</th></tr></thead><tbody>{todayHistory.top_contracts.filter(x=>x.score>0).slice(0,14).map(x=><tr key={x.strike+":"+x.type}><td>{value(x.strike)}</td><td>{x.type}</td><td>{count(x.volume)}</td><td>{count(x.oi)}</td><td>{value(x.ratio)}×</td><td>{count(x.changeOI)}</td><td>{x.changeOIPct===null?"—":value(x.changeOIPct)+"%"}</td><td>{value(x.iv)}</td></tr>)}</tbody></table></div>}
+     {todayHistory?.top_contracts?.length>0&&<div className="qt-archive-scroll"><table aria-label="Ticker unusual option contracts"><thead><tr><th>STRIKE</th><th>TYPE</th><th>VOL</th><th>OI</th><th>VOL/OI</th><th>OI Δ</th><th>OI Δ%</th><th>IV</th></tr></thead><tbody>{todayHistory.top_contracts.filter(x=>x.score>0).slice(0,14).map(x=><tr key={x.strike+":"+x.type}><td>{value(x.strike)}</td><td>{x.type}</td><td>{count(x.volume)}</td><td>{count(x.oi)}</td><td>{x.ratio===null?"—":value(x.ratio)+"×"}</td><td>{count(x.changeOI)}</td><td>{x.changeOIPct===null?"—":value(x.changeOIPct)+"%"}</td><td>{value(x.iv)}</td></tr>)}</tbody></table></div>}
      <div className="qt-archive-scroll"><table aria-label="Ticker daily options history"><thead><tr><th>DAY</th><th>EXPIRY</th><th>CALL VOL</th><th>PUT VOL</th><th>PCR OI</th><th>ACTIVITY</th><th>RECORDED</th></tr></thead><tbody>{history.map(x=><tr key={x.day}><td>{x.day}</td><td>{x.expiry}</td><td>{count(x.call_volume)}</td><td>{count(x.put_volume)}</td><td>{value(x.pcr_oi,3)}</td><td>{count(x.activity_score)}</td><td>{ist(x.observed_at)}</td></tr>)}</tbody></table></div>
      <p className="qt-archive-caption">Historical 15-session volume median is shown only with 10 or more comparable, same-expiry trading-day observations. Missing dates, rollovers and incomplete coverage are never filled with estimates.</p>
     </>}
