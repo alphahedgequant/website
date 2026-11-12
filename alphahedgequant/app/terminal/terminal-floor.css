@@ -362,3 +362,98 @@
 @media(max-width:670px){
  .qt-shell .floor-window[data-floor-window="flow"]{height:405px!important}
 }
+
+
+/* AHQ FLOOR 2026-11-12 · TRUE BLACK
+   Uniform pure-black canvas with charcoal cards, white type and semantic
+   red/green market changes. Scoped to Quant Terminal only. */
+.qt-shell .floor-terminal{
+  --floor-bright:#fff;--floor-green:#3de48c;--floor-red:#ff6577;
+  --floor-line:#353535;--floor-mid:#0d0d0d;--floor-panel:#090909;
+  background:#000!important;color:#fff!important;border-color:#353535!important
+}
+.qt-shell :is(.floor-terminal-header,.floor-ticker-tape,
+ .floor-desktop-hint,.floor-bottom-disclosure){
+  background:#080808!important;color:#fff!important;border-color:#333!important
+}
+.qt-shell .floor-windows-canvas{
+  background-color:#000!important;
+  background-image:
+   linear-gradient(rgba(255,255,255,.035) 1px,transparent 1px),
+   linear-gradient(90deg,rgba(255,255,255,.035) 1px,transparent 1px)!important
+}
+.qt-shell .floor-window{
+  background:#080808!important;color:#fff!important;
+  border:1px solid #494949!important;
+  box-shadow:0 9px 25px rgba(0,0,0,.7)!important
+}
+.qt-shell .floor-window-title{
+  background:linear-gradient(180deg,#222,#151515)!important;
+  border-bottom-color:#454545!important;color:#fff!important
+}
+.qt-shell .floor-window-body{
+  background:#090909!important;color:#fff!important;
+  scrollbar-color:#555 #0a0a0a!important
+}
+.qt-shell .floor-diamond,.qt-shell .floor-window-buttons button,
+.qt-shell .floor-commands>button,.qt-shell .floor-windows-menu summary,
+.qt-shell .floor-innerbar select,.qt-shell .floor-innerbar button,
+.qt-shell .floor-innerbar a,.qt-shell .floor-order-fields input{
+  background:#151515!important;border-color:#555!important;color:#fff!important
+}
+.qt-shell .floor-green-dot{background:#eee!important;border-color:#777!important}
+.qt-shell :is(.floor-window-buttons button:hover,.floor-commands>button:hover,
+ .floor-windows-menu summary:hover,.floor-windows-menu>div button:hover,
+ .floor-innerbar a:hover,.floor-watch-line:hover,.floor-watch-line.floor-active,
+ .floor-mover-row:hover,.floor-table tr:hover,.floor-table tr.floor-highlight){
+  background:#292929!important;color:#fff!important
+}
+.qt-shell .floor-windows-menu>div{background:#101010!important;border-color:#555!important}
+.qt-shell .floor-windows-menu>div button{color:#fff!important;border-color:#353535!important}
+.qt-shell :is(.floor-table th,.floor-watch-head,.floor-greek-head,
+ .floor-mini-head,.floor-innerbar,.floor-stat-grid,.floor-price-head,
+ .floor-rvol-stats,.floor-depth-head,.floor-caveat){
+  background:#151515!important;color:#fff!important;border-color:#3b3b3b!important
+}
+.qt-shell :is(.floor-table td,.floor-watch-line,.floor-greek-line,
+ .floor-depth-row,.floor-alert-row,.floor-mover-row,
+ .floor-account>div,.floor-rvol-stats>div,.floor-footnote){
+  border-color:#353535!important;color:#fff!important
+}
+.qt-shell :is(.floor-table tr:nth-child(even),
+ .floor-watch-line:nth-child(odd),.floor-depth-row:nth-child(even)){
+  background:#101010!important
+}
+.qt-shell .floor-chart-svg,.qt-shell .floor-volume .qt-svg{
+  background:#080808!important
+}
+.qt-shell :is(.floor-wordmark strong,.floor-wordmark small,
+ .floor-tape-cell span,.floor-tape-cell strong,.floor-tape-status,
+ .floor-tape-status small,.floor-footnote,.floor-desktop-hint,
+ .floor-blank,.floor-blank p,.floor-blank strong,.floor-inline-link,
+ .floor-account span,.floor-account strong,.floor-messages p,
+ .floor-watch-line strong,.floor-watch-head,.floor-greek-line strong,
+ .floor-greek-line span,.floor-greek-head span,.floor-rvol-main strong,
+ .floor-caveat,.floor-volume-legend,.floor-stat-grid b,
+ .floor-window-body,.floor-tape-cell strong){
+  color:#f3f3f3!important
+}
+.qt-shell .floor-readonly{color:#fff!important;border-color:#555!important}
+.qt-shell .floor-readonly.feed-on{color:#fff!important}
+.qt-shell :is(.floor-stat-grid,.floor-innerbar,.floor-price-head,.floor-rvol-stats){
+  background:#111!important;color:#fff!important
+}
+.qt-shell .floor-messages p.gain,.qt-shell .floor-messages p.loss{
+  color:inherit
+}
+.qt-shell .floor-terminal .gain,.qt-shell .floor-terminal .positive{color:var(--floor-green)!important}
+.qt-shell .floor-terminal .loss,.qt-shell .floor-terminal .negative{color:var(--floor-red)!important}
+.qt-shell .floor-depth-row span:nth-child(-n+2){
+  background:rgba(61,228,140,.06)!important
+}
+.qt-shell .floor-depth-row span:nth-child(n+3){
+  background:rgba(255,101,119,.06)!important
+}
+.qt-shell .floor-terminal :is(button,select,input):focus-visible{
+  outline:2px solid #fff!important;outline-offset:2px
+}
