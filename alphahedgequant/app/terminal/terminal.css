@@ -818,3 +818,78 @@
  .qt-shell .qt-operational-metric strong{font-size:19px}
  .qt-shell .qt-operational-header h2{font-size:24px}
 }
+
+
+/* Persistent NSE F&O Flow archive — true black Quant Terminal palette. */
+.qt-shell .qt-daily-archive{
+ background:#050505;color:#fff!important;border:1px solid #373737;
+ margin:14px 0 30px;padding:clamp(14px,2.2vw,26px);min-width:0
+}
+.qt-shell .qt-archive-head,.qt-shell .qt-archive-detail-head{
+ display:flex;flex-wrap:wrap;justify-content:space-between;align-items:flex-start;
+ gap:16px;border-bottom:1px solid #414141;padding-bottom:18px;margin-bottom:18px
+}
+.qt-shell .qt-archive-head>div{flex:1 1 380px}
+.qt-shell .qt-archive-kicker{font:700 10px/1.5 "JetBrains Mono",monospace;letter-spacing:.14em;color:#c9c9c9}
+.qt-shell .qt-archive-head h2{font:700 clamp(22px,2.6vw,33px)/1.3 "DM Sans",sans-serif;color:#fff!important;margin:10px 0}
+.qt-shell .qt-archive-head p:not(.qt-archive-kicker){font-size:13px;line-height:1.7;color:#dedede;max-width:790px}
+.qt-shell .qt-archive-head button,
+.qt-shell .qt-archive-controls button,
+.qt-shell .qt-archive-detail-head button{
+ display:inline-flex;align-items:center;justify-content:center;background:#191919!important;
+ border:1px solid #6b6b6b!important;color:#fff!important;padding:10px 13px;
+ font-weight:650;font-size:12px;cursor:pointer
+}
+.qt-shell .qt-archive-head button:hover,
+.qt-shell .qt-archive-controls button:hover,
+.qt-shell .qt-archive-detail-head button:hover{background:#303030!important;border-color:#fff!important}
+.qt-shell .qt-archive-head button:disabled{opacity:.5;cursor:not-allowed}
+.qt-shell .qt-archive-controls{
+ display:flex;align-items:end;flex-wrap:wrap;gap:10px 16px;margin:18px 0
+}
+.qt-shell .qt-archive-controls label{display:grid;gap:6px;color:#e2e2e2;font-size:12px;font-weight:600}
+.qt-shell .qt-archive-controls input{
+ min-height:40px;min-width:170px;background:#131313!important;
+ border:1px solid #515151!important;color:#fff!important;
+ padding:9px 12px;font-size:13px;max-width:100%
+}
+.qt-shell .qt-archive-metrics{
+ display:grid;grid-template-columns:repeat(4,minmax(0,1fr));
+ gap:1px;background:#383838;border:1px solid #383838;margin:18px 0
+}
+.qt-shell .qt-archive-metrics>div{background:#101010;padding:14px 16px;min-width:0}
+.qt-shell .qt-archive-metrics small{display:block;color:#c7c7c7;letter-spacing:.08em;font:650 10px/1.6 monospace;margin-bottom:8px}
+.qt-shell .qt-archive-metrics strong{display:block;color:#fff!important;font:700 19px/1.4 "DM Sans",sans-serif;overflow-wrap:anywhere}
+.qt-shell .qt-archive-warning{
+ border:1px solid #555;background:#141414!important;color:#eaeaea!important;
+ padding:13px 15px;line-height:1.75;font-size:12px;margin:14px 0
+}
+.qt-shell .qt-archive-scroll{max-width:100%;overflow-x:auto;border:1px solid #404040;margin:14px 0}
+.qt-shell .qt-archive-scroll table{border-collapse:collapse;min-width:760px;width:100%;font-variant-numeric:tabular-nums;font-size:12px}
+.qt-shell .qt-archive-scroll th{
+ background:#1b1b1b!important;color:#fff!important;font-size:10px;
+ font-family:monospace;text-align:left;letter-spacing:.05em;padding:11px 10px;white-space:nowrap
+}
+.qt-shell .qt-archive-scroll td{
+ border-top:1px solid #292929;color:#e8e8e8!important;padding:10px;white-space:nowrap
+}
+.qt-shell .qt-archive-scroll tr:hover td{background:#232323!important}
+.qt-shell .qt-archive-scroll td strong{color:#fff!important}
+.qt-shell .qt-archive-scroll button{
+ color:#fff!important;background:transparent;border:0;
+ cursor:pointer;text-decoration:underline;text-underline-offset:3px
+}
+.qt-shell .qt-archive-scroll .qt-flow-active{
+ color:#3de48c!important;font-weight:700
+}
+.qt-shell .qt-archive-detail{padding:20px 0 0;margin-top:24px;border-top:1px solid #454545}
+.qt-shell .qt-archive-detail-head h3{font-size:21px;color:#fff;font-weight:700}
+.qt-shell .qt-archive-detail-head p{font-size:12px;color:#cacaca;margin-top:8px}
+.qt-shell .qt-archive-detail-head>div:last-child{display:flex;flex-wrap:wrap;gap:9px}
+.qt-shell .qt-archive-caption{font-size:11px;line-height:1.85;color:#c7c7c7!important;margin:13px 0 2px;max-width:1100px}
+@media(max-width:760px){
+ .qt-shell .qt-archive-metrics{grid-template-columns:repeat(2,minmax(0,1fr))}
+ .qt-shell .qt-archive-metrics strong{font-size:16px}
+ .qt-shell .qt-archive-controls input{min-width:0;width:100%}
+ .qt-shell .qt-archive-controls label{flex:1 1 45%}
+}
