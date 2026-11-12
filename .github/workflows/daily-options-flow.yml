@@ -1,0 +1,49 @@
+name: Daily NSE Options Activity Archive
+on:
+  pull_request:
+    paths:
+      - "alphahedgequant/lib/dailyOptionsFlow*.mjs"
+      - "alphahedgequant/app/api/options-flow/**"
+      - "alphahedgequant/app/api/cron/options-flow/**"
+      - "alphahedgequant/components/DailyOptionsFlowArchive.jsx"
+      - "alphahedgequant/app/terminal/**"
+      - "alphahedgequant/vercel.json"
+      - "alphahedgequant/tests/dailyOptionsFlow.test.mjs"
+      - ".github/workflows/daily-options-flow.yml"
+  push:
+    branches: [main]
+    paths:
+      - "alphahedgequant/lib/dailyOptionsFlow*.mjs"
+      - "alphahedgequant/app/api/options-flow/**"
+      - "alphahedgequant/app/api/cron/options-flow/**"
+      - "alphahedgequant/components/DailyOptionsFlowArchive.jsx"
+      - "alphahedgequant/app/terminal/**"
+      - "alphahedgequant/vercel.json"
+      - "alphahedgequant/tests/dailyOptionsFlow.test.mjs"
+      - ".github/workflows/daily-options-flow.yml"
+permissions:
+  contents: read
+jobs:
+  validate-daily-archive:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 14
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: alphahedgequant/package-lock.json
+      - name: Install audited pinned dependencies
+        working-directory: alphahedgequant
+        run: npm ci --ignore-scripts --no-audit --no-fund
+      - name: Check archive maths, public privacy, full NSE coverage and cron schedule
+        working-directory: alphahedgequant
+        run: node --test tests/dailyOptionsFlow.test.mjs tests/unusualOptions.test.mjs tests/terminalUnusualFlow.test.mjs
+      - name: Build entire website with archive API and UI
+        working-directory: alphahedgequant
+        env:
+          NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY: "pk_test_ZXhhbXBsZS5jbGVyay5hY2NvdW50cy5kZXYk"
+        run: npm run build
