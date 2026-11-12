@@ -1,5 +1,5 @@
 "use client";
-import {useCallback,useEffect,useMemo,useState} from "react";
+import {useCallback,useEffect,useMemo,useRef,useState} from "react";
 import Link from "next/link";
 import TerminalIntelligence from "@/components/TerminalIntelligence";
 import TerminalTradingFloor from "./TerminalTradingFloor";
@@ -42,12 +42,61 @@ export default function QuantTerminal(){
  useEffect(()=>{const p=new URLSearchParams(window.location.search);const ticker=p.get("symbol");const tab=p.get("tab");if(ticker&&/^[A-Z0-9&_.-]{1,40}$/i.test(ticker)){const value=ticker.toUpperCase();setSymbol(value);setQuery(value);setOptionSymbol(value);setDepthSymbol(value)}if(["COMPANY","FORECAST","NETWORK","PEERS","MARKET","OPTIONS","FLOW"].includes(tab?.toUpperCase()))setActiveTab(tab.toUpperCase())},[]);
  const pickSymbol=s=>{const next=String(s||"").trim().toUpperCase();if(!/^[A-Z0-9&_.-]{1,40}$/.test(next))return;setSymbol(next);setQuery(next);setFound([]);setOptionSymbol(next);setChain(null);setChainError("");if(linked)setDepthSymbol(next)};
  useEffect(()=>{if(query.length<2||query===symbol){setFound([]);return}const ctrl=new AbortController(),id=setTimeout(async()=>{try{const r=await fetch("/api/terminal?view=search&q="+encodeURIComponent(query),{signal:ctrl.signal});const j=await r.json();if(j.success)setFound(j.data||[])}catch{}},260);return()=>{ctrl.abort();clearTimeout(id)}},[query,symbol]);
- const loadQuote=useCallback(async(s,detail=false)=>{try{const r=await fetch("/api/terminal?view=quote&symbol="+encodeURIComponent(s),{cache:"no-store"}),j=await r.json();if(!r.ok||!j.success)throw Error(j.error||"Quote unavailable");if(detail)setDepthQuote(j);else{setQuote(j);setQuoteError("");setSeen(new Date())}}catch(e){if(detail)setDepthQuote(null);else{setQuote(null);setQuoteError(e.message)}}},[]);
- const loadHistory=useCallback(async s=>{try{const r=await fetch("/api/terminal?view=history&symbol="+encodeURIComponent(s),{cache:"no-store"}),j=await r.json();if(!r.ok||!j.success||!Array.isArray(j.data))throw Error(j.error||"No history");setHist(j.data);setHistoryError("")}catch(e){setHist([]);setHistoryError(e.message)}},[]);
+
+ const quoteTask=useRef({main:null,depth:null});
+ const historyTask=useRef(null),chainTask=useRef(null);
+ useEffect(()=>()=>{quoteTask.current.main?.controller.abort();quoteTask.current.depth?.controller.abort();historyTask.current?.abort();chainTask.current?.abort()},[]);
+ const loadQuote=useCallback(async(s,detail=false)=>{
+   const key=detail?"depth":"main",prior=quoteTask.current[key];
+   // One upstream call per symbol at a time; a prior symbol is cancelled.
+   if(prior?.symbol===s&&prior.inflight&&!prior.controller.signal.aborted)return;
+   prior?.controller.abort();
+   const controller=new AbortController(),job={symbol:s,inflight:true,controller};
+   quoteTask.current[key]=job;
+   try{
+     const r=await fetch("/api/terminal?view=quote&symbol="+encodeURIComponent(s),{cache:"no-store",signal:controller.signal});
+     const j=await r.json();
+     if(!r.ok||!j.success||!(Number(j.price)>0))throw Error(j.error||"Verified stock quote unavailable");
+     if(controller.signal.aborted||quoteTask.current[key]!==job)return;
+     if(detail)setDepthQuote(j);
+     else{setQuote(j);setQuoteError("");setSeen(new Date())}
+   }catch(e){
+     if(controller.signal.aborted||quoteTask.current[key]!==job)return;
+     if(detail)setDepthQuote(null);
+     else{setQuote(null);setQuoteError(e.message||"Price feed unavailable")}
+   }finally{if(quoteTask.current[key]===job)job.inflight=false}
+ },[]);
+ const loadHistory=useCallback(async s=>{
+   historyTask.current?.abort();const controller=new AbortController();historyTask.current=controller;
+   try{
+     const r=await fetch("/api/terminal?view=history&symbol="+encodeURIComponent(s),{cache:"no-store",signal:controller.signal}),j=await r.json();
+     if(!r.ok||!j.success||!Array.isArray(j.data))throw Error(j.error||"No verified price history");
+     if(controller.signal.aborted)return;
+     setHist(j.data);setHistoryError("");
+   }catch(e){if(!controller.signal.aborted){setHist([]);setHistoryError(e.message||"Price history unavailable")}}
+ },[]);
  useEffect(()=>{setQuote(null);setHist([]);loadQuote(symbol);loadHistory(symbol)},[symbol,loadQuote,loadHistory]);
  useEffect(()=>{setDepthQuote(null);loadQuote(depthSymbol,true)},[depthSymbol,loadQuote]);
- useEffect(()=>{let active=true,timer;const tick=async()=>{if(!active)return;if(!document.hidden){await Promise.allSettled([loadQuote(symbol),...(depthSymbol!==symbol?[loadQuote(depthSymbol,true)]:[])])}if(active)timer=setTimeout(tick,refresh)};timer=setTimeout(tick,refresh);return()=>{active=false;clearTimeout(timer)}},[symbol,depthSymbol,refresh,loadQuote]);
- const chainLoad=useCallback(async()=>{setChain(null);setChainError("");try{const r=await fetch("/api/market/option-chain/"+encodeURIComponent(optionSymbol),{cache:"no-store"}),j=await r.json();if(!r.ok||!j.success||!j.data?.strikes?.length)throw Error(j.error||"No options contracts available for "+optionSymbol+". This stock may not be in NSE F&O.");setChain(j.data)}catch(e){setChain(null);setChainError(e.message)}},[optionSymbol]);
+ useEffect(()=>{
+   let active=true,timer;
+   const tick=async()=>{
+     if(!active)return;
+     if(!document.hidden)await Promise.allSettled([loadQuote(symbol),...(depthSymbol!==symbol?[loadQuote(depthSymbol,true)]:[])]);
+     if(active)timer=setTimeout(tick,refresh);
+   };
+   timer=setTimeout(tick,refresh);
+   return()=>{active=false;clearTimeout(timer)};
+ },[symbol,depthSymbol,refresh,loadQuote]);
+ const chainLoad=useCallback(async()=>{
+   chainTask.current?.abort();
+   const controller=new AbortController();chainTask.current=controller;
+   setChain(null);setChainError("");
+   try{
+     const r=await fetch("/api/market/option-chain/"+encodeURIComponent(optionSymbol),{cache:"no-store",signal:controller.signal}),j=await r.json();
+     if(!r.ok||!j.success||!j.data?.strikes?.length)throw Error(j.error||"No NSE F&O option contracts for "+optionSymbol);
+     if(!controller.signal.aborted)setChain(j.data);
+   }catch(e){if(!controller.signal.aborted){setChain(null);setChainError(e.message||"Option chain unavailable")}}
+ },[optionSymbol]);
  useEffect(()=>{chainLoad()},[chainLoad]);
  const vol=useMemo(()=>volumeStats(hist,lookback,isCumulative),[hist,lookback,isCumulative]),last=vol.points.at(-1),rvol=vol.ready&&last?.mean>0?last.today/last.mean:null;
  const bars=useMemo(()=>{let agg=0;return hist.filter(x=>day(x.date)===vol.session).slice(-110).map(x=>{agg+=N(x.volume);return {time:hm(x.date),close:N(x.close),volume:N(x.volume),open:N(x.open),high:N(x.high),low:N(x.low)}}).filter(x=>x.time)},[hist,vol.session]);
