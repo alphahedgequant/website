@@ -5,6 +5,7 @@ import dynamic from "next/dynamic";
 import TerminalIntelligence from "@/components/TerminalIntelligence";
 import TerminalTradingFloor from "./TerminalTradingFloor";
 import UnusualOptionsMonitor from "@/components/UnusualOptionsMonitor";
+import DailyOptionsFlowArchive from "@/components/DailyOptionsFlowArchive";
 import "./terminal.css";
 const OptionsDesk=dynamic(()=>import("@/app/options/page"),{ssr:false,loading:()=> <div className="qt-operational-empty">Opening Options Desk…</div>});
 const SignalScanner=dynamic(()=>import("@/app/scanner/page"),{ssr:false,loading:()=> <div className="qt-operational-empty">Opening Signal Scanner…</div>});
@@ -123,7 +124,7 @@ export default function QuantTerminal(){
  {activeTab==="FLOW"&&<div className="qt-module-notice">This panel compares real option-chain snapshots. It is not an exchange trade-by-trade tape and does not classify buyer-initiated trades.</div>}
  <div id="qt-terminal-panel" role="tabpanel" aria-label={activeTab+" workspace"}>
  {["COMPANY","FORECAST","NETWORK","PEERS"].includes(activeTab)?<TerminalIntelligence key={symbol} symbol={symbol} tab={activeTab} onChoose={s=>{pickSymbol(s);setActiveTab("COMPANY")}} onForecast={()=>setActiveTab("FORECAST")}/>:<>
- {activeTab==="FLOW" ? <div className="qt-flow-workspace"><div className="qt-flow-info"><strong>NSE F&O · Unusual Options Activity</strong><span>{fnoStatus}. Source snapshots are sampled sequentially, not an exchange-wide tape.</span></div><UnusualOptionsMonitor selectedTicker={optionSymbol} stockOptions={fnoTickers} onOpenChain={ticker=>{setOptionSymbol(ticker);if(ticker!=="NIFTY"&&ticker!=="BANKNIFTY"&&ticker!=="FINNIFTY")pickSymbol(ticker);selectTab("OPTIONS")}}/></div>
+ {activeTab==="FLOW" ? <div className="qt-flow-workspace"><div className="qt-flow-info"><strong>NSE F&O · Unusual Options Activity</strong><span>{fnoStatus}. Source snapshots are sampled sequentially, not an exchange-wide tape.</span></div><DailyOptionsFlowArchive selectedTicker={optionSymbol} stockOptions={fnoTickers} onOpenChain={ticker=>{setOptionSymbol(ticker);pickSymbol(ticker);selectTab("OPTIONS")}}/><UnusualOptionsMonitor selectedTicker={optionSymbol} stockOptions={fnoTickers} onOpenChain={ticker=>{setOptionSymbol(ticker);if(ticker!=="NIFTY"&&ticker!=="BANKNIFTY"&&ticker!=="FINNIFTY")pickSymbol(ticker);selectTab("OPTIONS")}}/></div>
  : activeTab==="OPTIONS" ? <div className="qt-integrated-app" data-terminal-panel="OPTIONS"><OptionsDesk initialUnderlying={optionSymbol} embedded/></div>
  : activeTab==="SCANNERS" ? <div className="qt-integrated-app" data-terminal-panel="SCANNERS"><div className="qt-integrated-header"><span>QUANT SIGNAL SCANNER · VERIFIED PROVIDER DATA ONLY</span><Link href="/screener">Open NSE & US market screener ↗</Link></div><SignalScanner embedded onOpenTicker={ticker=>{pickSymbol(ticker);selectTab("MARKET")}}/></div>
  : activeTab==="ANALYTICS" ? <OptionAnalytics key={optionSymbol} symbol={optionSymbol} chain={chain} chainError={chainError} onRefresh={chainLoad}/>

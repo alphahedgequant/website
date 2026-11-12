@@ -11,6 +11,38 @@
     {
       "path": "/api/cron/ingest-research",
       "schedule": "30 4 * * *"
+    },
+    {
+      "path": "/api/cron/options-flow/0",
+      "schedule": "0 4 * * 1-5"
+    },
+    {
+      "path": "/api/cron/options-flow/1",
+      "schedule": "30 4 * * 1-5"
+    },
+    {
+      "path": "/api/cron/options-flow/2",
+      "schedule": "0 5 * * 1-5"
+    },
+    {
+      "path": "/api/cron/options-flow/3",
+      "schedule": "30 5 * * 1-5"
+    },
+    {
+      "path": "/api/cron/options-flow/4",
+      "schedule": "0 7 * * 1-5"
+    },
+    {
+      "path": "/api/cron/options-flow/5",
+      "schedule": "30 7 * * 1-5"
+    },
+    {
+      "path": "/api/cron/options-flow/6",
+      "schedule": "0 8 * * 1-5"
+    },
+    {
+      "path": "/api/cron/options-flow/7",
+      "schedule": "30 8 * * 1-5"
     }
   ]
 }
