@@ -3,6 +3,7 @@
 export const NSE_SYMBOL=/^[A-Z0-9&_.-]{1,40}$/;
 export const FLOW_SLOTS=8;
 export const FLOW_GROUPS=4;
+export const INDEX_OPTION_SYMBOLS=Object.freeze(["NIFTY","BANKNIFTY","FINNIFTY"]);
 const MAX_STORED_CONTRACTS=28;
 const f=v=>v===null||v===undefined||v===""||!Number.isFinite(Number(v))?null:Number(v);
 const positive=v=>{const n=f(v);return n!==null&&n>0?n:null;};
