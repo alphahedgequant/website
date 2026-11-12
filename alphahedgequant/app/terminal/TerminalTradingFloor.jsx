@@ -2,6 +2,7 @@
 import Link from "next/link";
 import {useCallback,useEffect,useMemo,useRef,useState} from "react";
 import "./terminal-floor.css";
+import UnusualOptionsFlowBox from "@/components/UnusualOptionsFlowBox";
 
 const DEFAULT_WINDOWS = [
   {id:"watchlist",title:"NSE Market Watchlist",x:0.7,y:82,w:18.3,h:214},
@@ -15,6 +16,7 @@ const DEFAULT_WINDOWS = [
   {id:"chart",title:"Price Chart · 5-Minute Bars",x:72.2,y:10,w:27.1,h:360},
   {id:"alerts",title:"Ticker Alerts",x:72.2,y:384,w:27.1,h:252},
   {id:"movers",title:"Risers & Fallers",x:72.2,y:650,w:27.1,h:308},
+  {id:"flow",title:"Unusual Options Flow · Vol/OI",x:20,y:977,w:61,h:275},
 ];
 const INIT = Object.fromEntries(DEFAULT_WINDOWS.map((p,i)=>[p.id,{...p,z:10+i,hidden:false,collapsed:false}]));
 const n=v=>v===null||v===undefined||v===""||!Number.isFinite(Number(v))?null:Number(v);
@@ -178,7 +180,7 @@ function VolumeCurve({vol,lookback,setLookback,isCumulative,setIsCumulative,Volu
     <p className="floor-footnote">Historical 5-minute OHLCV records, not live time-and-sales. {vol?.count||0}/{lookback} complete baseline sessions. {vol?.ready?"Mean/median computed on aligned 5-minute timestamps.":"Historical mean and median withheld until baseline is complete."}</p>
   </div>;
 }
-export default function TerminalTradingFloor({symbol,onChoose,quote,quoteError,seen,bars,chain,optionSymbol,setOptionSymbol,chainLoad,watch,refresh,historyError,vol,rvol,lookback,setLookback,isCumulative,setIsCumulative,VolumeLineChart}){
+export default function TerminalTradingFloor({symbol,onChoose,quote,quoteError,seen,bars,chain,optionSymbol,setOptionSymbol,chainLoad,watch,refresh,historyError,vol,rvol,lookback,setLookback,isCumulative,setIsCumulative,VolumeLineChart,onOpenFlow,onOpenOptions}){
   const [windows,setWindows]=useState(()=>INIT);
   const zRef=useRef(50);
   
@@ -236,14 +238,14 @@ export default function TerminalTradingFloor({symbol,onChoose,quote,quoteError,s
   },[]);
   const dayMove=n(quote?.change);
   const shown=Object.values(windows).filter(p=>!p.hidden).length;
-  return <div className="floor-terminal" aria-label="AlphaHedgeQuant eleven-window trading terminal">
+  return <div className="floor-terminal" aria-label="AlphaHedgeQuant twelve-window trading terminal">
     <div className="floor-terminal-header">
       <div className="floor-wordmark"><span className="floor-diamond">α</span><div><strong>ALPHAHEDGEQUANT</strong><small>QUANT TRADING WORKSTATION · NSE</small></div></div>
       <div className="floor-commands">
         <span className={"floor-readonly "+(quote?"feed-on":"")}>{quote?"● PRICE SNAPSHOT":"○ QUOTE NOT VERIFIED"}</span>
         <span className="floor-readonly">READ ONLY · VERIFIED DATA ONLY</span>
         <button type="button" onClick={reset}>↶ RESET LAYOUT</button>
-        <details className="floor-windows-menu"><summary>WINDOWS {shown}/11</summary><div>{DEFAULT_WINDOWS.map(p=><button type="button" key={p.id} onClick={()=>restore(p.id)}>{windows[p.id].hidden?"＋":"✓"} {p.title}</button>)}</div></details>
+        <details className="floor-windows-menu"><summary>WINDOWS {shown}/{DEFAULT_WINDOWS.length}</summary><div>{DEFAULT_WINDOWS.map(p=><button type="button" key={p.id} onClick={()=>restore(p.id)}>{windows[p.id].hidden?"＋":"✓"} {p.title}</button>)}</div></details>
       </div>
     </div>
     <div className="floor-ticker-tape">
@@ -296,6 +298,9 @@ export default function TerminalTradingFloor({symbol,onChoose,quote,quoteError,s
       <FloorWindow windowDef={windows.movers} onStart={startDrag} onBring={bring} onCollapse={collapse} onClose={hide}>
         {screenerStatus==="READY"?<SortedMovers data={screener} onChoose={onChoose}/>:<PanelBlank title={"SCREENER "+screenerStatus} body="Live ranking requires a usable NSE screener response; no placeholder market movers."/>}
         {screenerAt&&<p className="floor-footnote">Response fetched {ist(screenerAt)} IST. Source timestamp may differ.</p>}
+      </FloorWindow>
+      <FloorWindow windowDef={windows.flow} onStart={startDrag} onBring={bring} onCollapse={collapse} onClose={hide}>
+        <UnusualOptionsFlowBox symbol={optionSymbol} chain={chain} onOpenMonitor={onOpenFlow} onOpenChain={onOpenOptions}/>
       </FloorWindow>
     </div>
     <div className="floor-bottom-disclosure">NSE RESEARCH WORKSPACE · QUOTE/DEPTH/OPTIONS/SCREENER SUBJECT TO UPSTOX CONNECTIVITY · VOLUME BASELINE REQUIRES COMPLETE HISTORICAL SESSIONS · NO SIMULATED TRADES</div>
