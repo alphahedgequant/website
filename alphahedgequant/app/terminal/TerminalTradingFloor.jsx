@@ -112,13 +112,13 @@ function SortedMovers({data,onChoose}){
 }
 export default function TerminalTradingFloor({symbol,onChoose,quote,quoteError,seen,bars,chain,optionSymbol,setOptionSymbol,chainLoad,watch,refresh,historyError}){
   const [windows,setWindows]=useState(()=>INIT);
-  const [z,setZ]=useState(50);
+  const zRef=useRef(50);
   const [orderSide,setOrderSide]=useState("BUY"),[qty,setQty]=useState("1"),[limit,setLimit]=useState("");
   const [screener,setScreener]=useState([]),[screenerStatus,setScreenerStatus]=useState("LOADING"),[screenerAt,setScreenerAt]=useState(null);
   const [ticks,setTicks]=useState([]);
   const prev=useRef(null),drag=useRef(null),floorRef=useRef(null);
-  const reset=useCallback(()=>{setWindows(INIT);setZ(50)},[]);
-  const bring=id=>{setZ(prevZ=>{const next=prevZ+1;setWindows(p=>({...p,[id]:{...p[id],z:next}}));return next})};
+  const reset=useCallback(()=>{zRef.current=50;setWindows(INIT)},[]);
+  const bring=id=>{zRef.current+=1;const next=zRef.current;setWindows(p=>({...p,[id]:{...p[id],z:next}}))};
   const collapse=id=>setWindows(p=>({...p,[id]:{...p[id],collapsed:!p[id].collapsed}}));
   const hide=id=>setWindows(p=>({...p,[id]:{...p[id],hidden:true}}));
   const restore=id=>setWindows(p=>({...p,[id]:{...p[id],hidden:false,collapsed:false}}));
@@ -170,7 +170,7 @@ export default function TerminalTradingFloor({symbol,onChoose,quote,quoteError,s
   const shown=Object.values(windows).filter(p=>!p.hidden).length;
   return <div className="floor-terminal" aria-label="AlphaHedgeQuant eleven-window trading terminal">
     <div className="floor-terminal-header">
-      <div className="floor-wordmark"><span className="floor-diamond">α</span><div><strong>ALPHAHEDGEQUANT</strong><small>LIGHTSPEED-STYLE QUANT WORKSTATION · NSE</small></div></div>
+      <div className="floor-wordmark"><span className="floor-diamond">α</span><div><strong>ALPHAHEDGEQUANT</strong><small>QUANT TRADING WORKSTATION · NSE</small></div></div>
       <div className="floor-commands">
         <span className={"floor-readonly "+(quote?"feed-on":"")}>{quote?"● PRICE SNAPSHOT":"○ QUOTE NOT VERIFIED"}</span>
         <span className="floor-readonly">READ ONLY · NO BROKER EXECUTION</span>
