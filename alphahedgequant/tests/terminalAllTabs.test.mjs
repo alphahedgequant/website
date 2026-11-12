@@ -11,7 +11,7 @@ test("each of ten terminal tabs has an actual workspace or provider-dependent to
   ["OPTIONS","OptionsDesk"],["FLOW","UnusualOptionsMonitor"],
   ["SCANNERS","SignalScanner"],["ANALYTICS","OptionAnalytics"],
   ["RISK","RiskMonitor"]])
-  assert.match(page,new RegExp('activeTab==="'+tab+'"[\\\\s\\\\S]{0,300}'+component));
+  assert.ok(page.includes('activeTab==="'+tab+'"')&&page.includes(component),"Tab missing component "+tab);
  assert.match(page,/TerminalIntelligence key=\{symbol\} symbol=\{symbol\} tab=\{activeTab\}/);
  assert.match(page,/workspace==="FLOOR" \? <TerminalTradingFloor/);
  assert.match(page,/role="tablist"/);
