@@ -189,3 +189,39 @@
  .floor-tape-cell{padding:7px;min-width:83px}
  .floor-terminal-header{padding:7px}
 }
+
+
+/* Connected workspace widgets, replacing unavailable brokerage/time-and-sales windows. */
+.floor-watch-head,.floor-watch-line{
+  display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,.9fr) minmax(0,.85fr);
+  gap:3px;align-items:center;padding:6px 7px;
+  font-size:10px;font-variant-numeric:tabular-nums;
+}
+.floor-watch-head{background:#263b2a;color:#bfd0c1;font-weight:800;border-bottom:1px solid #5b795d}
+.floor-watch-line{width:100%;text-align:right;border-bottom:1px solid #263b2a;background:transparent}
+.floor-watch-line:nth-child(odd){background:rgba(90,132,89,.06)}
+.floor-watch-line:hover,.floor-watch-line.floor-active{background:#193324}
+.floor-watch-line strong{text-align:left;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:#f1f7ee}
+.floor-watch-line span{white-space:nowrap}
+.floor-greek-panel{min-width:0}
+.floor-greek-line{display:grid;grid-template-columns:1fr 1fr 1fr;gap:5px;align-items:center;padding:5px 9px;font:11px ui-monospace,monospace;border-bottom:1px solid #213627}
+.floor-greek-line strong{color:#dde7db}
+.floor-greek-line span{text-align:right;color:#d1e2d4}
+.floor-greek-head{background:#26372a;color:#b7d1b9;font-size:10px;font-weight:800}
+.floor-greek-head span{color:#b7d1b9}
+.floor-rvol-main{display:flex;justify-content:center;gap:7px;align-items:baseline;padding:6px 5px 3px}
+.floor-rvol-main strong{font:800 27px ui-monospace,monospace;color:#e8f1e7}
+.floor-rvol-main span{font-size:9px;color:#acc0ae}
+.floor-rvol-stats{display:grid;grid-template-columns:1fr 1fr;gap:0 9px;padding:0 8px}
+.floor-rvol-stats>div{padding:4px 0;border-bottom:1px solid #203524;display:flex;gap:4px;justify-content:space-between;color:#9fb5a4;font-size:10px}
+.floor-rvol-stats b{color:#e5f2e5;font-weight:700}
+.floor-volume-actions{display:flex;flex-wrap:wrap;align-items:center;gap:6px}
+.floor-volume-legend{display:flex;flex-wrap:wrap;gap:12px;padding:9px 8px 4px;color:#adc4ae;font-size:10px}
+.floor-volume .qt-svg{width:100%;height:auto;min-height:175px;max-height:300px;background:#030b05!important}
+.floor-volume .qt-svg text{fill:#d7dfd3}
+.floor-volume .floor-footnote{border-top:1px solid #2a4630}
+@media(max-width:670px){
+  .floor-watch-line,.floor-watch-head{font-size:11px;padding:8px}
+  .floor-greek-line{font-size:12px;padding:7px 10px}
+  .floor-volume .qt-svg{max-height:none}
+}
