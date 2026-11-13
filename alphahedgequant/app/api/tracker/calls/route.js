@@ -38,7 +38,18 @@ export async function GET() {
     }
     const sql = neon(process.env.NEON_DATABASE_URL);
     await ensureTable(sql);
-    const rows = await sql`SELECT id,house,analyst_name,symbol,rating,target_price,price_at_call,call_date,horizon_days,note,source_url,verification_status,verified_at FROM analyst_calls WHERE deleted_at IS NULL ORDER BY call_date DESC,id DESC`;
+    const {userId}=await auth();
+    let isEditor=false;
+    if(userId){
+      const allowed=(process.env.AHQ_TRACKER_ADMIN_EMAILS||process.env.AHQ_ANALYTICS_ADMIN_EMAILS||"").split(",").map(x=>x.trim().toLowerCase()).filter(Boolean);
+      if(allowed.length){
+        const user=await currentUser();
+        isEditor=(user?.emailAddresses||[]).some(e=>e.verification?.status==="verified"&&allowed.includes(e.emailAddress.toLowerCase()));
+      }else isEditor=await isInsightsOwner();
+    }
+    const rows = await sql`SELECT id,house,analyst_name,symbol,rating,target_price,price_at_call,call_date,horizon_days,note,source_url,verification_status,verified_at
+     FROM analyst_calls WHERE deleted_at IS NULL AND (verification_status='verified' OR ${isEditor})
+     ORDER BY call_date DESC,id DESC`;
 
     const symbols = [...new Set(rows.filter(c=>c.verification_status==="verified").map(c=>c.symbol))];
     const priceCache = {};
