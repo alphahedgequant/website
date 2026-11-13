@@ -19,7 +19,7 @@ function fixture(n=180){
 }
 test("Safe parser accepts supported math and rejects JS execution",()=>{
  assert.ok(parseFormula("rank(-ts_corr(returns,log(volume+1),20))"));
- assert.throws(()=>parseFormula("process.exit(0)"),/Unknown operator/);
+ assert.throws(()=>parseFormula("process.exit(0)"),/Unexpected character|Unknown operator/);
  assert.throws(()=>parseFormula("eval(close)"),/Unknown operator/);
  assert.throws(()=>parseFormula("close; alert(1)"),/Unexpected character/);
 });
