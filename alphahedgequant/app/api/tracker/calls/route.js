@@ -102,6 +102,10 @@ export async function POST(request) {
     if(!Number.isFinite(publicationDate.valueOf())||publicationDate.toISOString().slice(0,10)!==String(call_date)||publicationDate>new Date())return Response.json({success:false,error:"Invalid or future publication date"},{status:400});
     const sql = neon(process.env.NEON_DATABASE_URL);
     await ensureTable(sql);
+    const duplicate=await sql`SELECT id FROM analyst_calls
+      WHERE deleted_at IS NULL AND LOWER(house)=LOWER(${house.trim()})
+      AND symbol=${symbol.toUpperCase().trim()} AND source_url=${verifiedSource} LIMIT 1`;
+    if(duplicate.length)return Response.json({success:false,error:"The same firm, ticker and publication are already tracked"},{status:409});
     const rows = await sql`
       INSERT INTO analyst_calls (house, symbol, rating, target_price, price_at_call, call_date, horizon_days, note, analyst_name, source_url, verification_status)
       VALUES (${house.trim()}, ${symbol.toUpperCase().trim()}, ${String(rating).toUpperCase()},
