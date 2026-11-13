@@ -1,0 +1,43 @@
+name: October 2026 Macro Publication
+on:
+  pull_request:
+    paths:
+      - "alphahedgequant/content/october-2026-india-macro.md"
+      - "alphahedgequant/app/library/series/**"
+      - "alphahedgequant/app/sitemap.js"
+      - "alphahedgequant/tests/macroOctoberPublication.test.mjs"
+      - ".github/workflows/macro-october-publication.yml"
+  push:
+    branches: [main]
+    paths:
+      - "alphahedgequant/content/october-2026-india-macro.md"
+      - "alphahedgequant/app/library/series/**"
+      - "alphahedgequant/app/sitemap.js"
+      - "alphahedgequant/tests/macroOctoberPublication.test.mjs"
+      - ".github/workflows/macro-october-publication.yml"
+permissions:
+  contents: read
+jobs:
+  build-and-evidence:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: alphahedgequant/package-lock.json
+      - name: Install pinned dependencies
+        working-directory: alphahedgequant
+        run: npm ci --ignore-scripts --no-audit --no-fund
+      - name: Test report integrity and public research access
+        working-directory: alphahedgequant
+        run: node --test tests/macroOctoberPublication.test.mjs tests/publicResearchPreviews.test.mjs
+      - name: Build Next.js (new public macro route)
+        working-directory: alphahedgequant
+        env:
+          NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY: "pk_test_ZXhhbXBsZS5jbGVyay5hY2NvdW50cy5kZXYk"
+        run: npm run build
