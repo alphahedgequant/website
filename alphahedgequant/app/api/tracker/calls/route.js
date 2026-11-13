@@ -84,7 +84,7 @@ export async function POST(request) {
       return Response.json({ success: false, error: "Database not configured." }, { status: 500 });
     }
     const body = await request.json();
-    const { house, symbol, rating = "BUY", target_price, price_at_call, call_date, horizon_days = 365, note = "", source_url = "", analyst_name = "" } = body || {};
+    const { house, symbol, rating = "BUY", target_price, price_at_call, call_date, horizon_days, note = "", source_url = "", analyst_name = "" } = body || {};
     if (!house || !symbol || !target_price || !price_at_call || !call_date) {
       return Response.json({ success: false, error: "house, symbol, target_price, price_at_call, call_date are required." }, { status: 400 });
     }
