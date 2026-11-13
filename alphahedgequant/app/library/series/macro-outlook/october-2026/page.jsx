@@ -1,4 +1,6 @@
 import Link from "next/link";
+import {auth} from "@clerk/nextjs/server";
+import {UnlockResearch} from "../../components.jsx";
 import {readFileSync} from "node:fs";
 import {join} from "node:path";
 import {MacroFigures} from "./MacroFigures.jsx";
@@ -6,6 +8,8 @@ import "../../../library.css";
 import "../../preview.css";
 import "./macro-report.css";
 
+export const dynamic="force-dynamic";
+export const revalidate=0;
 const route="/library/series/macro-outlook/october-2026";
 const title="India Macro Monthly — October 2026 | The Export Breakout Meets the Inflation Test";
 const dek="Record merchandise exports, a heavier sequential import bill and renewed inflation pressure: what October's numbers mean for Indian growth, industry and business cash flows.";
@@ -70,14 +74,17 @@ function BodyBlock({block}){
  }
 }
 const absolute="https://www.alphahedgequant.com"+route;
-export default function OctoberMacroReport(){
- const markdown=readFileSync(join(process.cwd(),"content","october-2026-india-macro.md"),"utf8");
- const blocks=extractBlocks(markdown);
- const sections=blocks.filter(b=>b.type==="heading"&&b.id);
+export default async function OctoberMacroReport(){
+ // Access is enforced while rendering on the server. Public visitors never
+ // receive the complete article in the HTML or a downloadable page payload.
+ const {userId}=await auth();
+ const signedIn=Boolean(userId);
+ const blocks=signedIn?extractBlocks(readFileSync(join(process.cwd(),"content","october-2026-india-macro.md"),"utf8")):[];
+ const sections=signedIn?blocks.filter(b=>b.type==="heading"&&b.id):[];
  const schema={"@context":"https://schema.org","@type":"Article",
   headline:"India Macro Monthly — October 2026: The Export Breakout Meets the Inflation Test",
   description:dek,datePublished:"2026-11-13T17:30:00+00:00",dateModified:"2026-11-13T17:30:00+00:00",
-  mainEntityOfPage:absolute,url:absolute,isAccessibleForFree:true,inLanguage:"en-IN",
+  mainEntityOfPage:absolute,url:absolute,isAccessibleForFree:false,inLanguage:"en-IN",
   author:{"@type":"Organization",name:"AlphaHedgeQuant Research Desk"},
   publisher:{"@type":"Organization",name:"AlphaHedgeQuant",url:"https://www.alphahedgequant.com"}};
  return <div className="rl-site rp-site rp-article ahq-macro-report">
@@ -87,18 +94,43 @@ export default function OctoberMacroReport(){
    <p className="rl-eyebrow">INDIA MACRO / MONTHLY REPORT / OCTOBER 2026</p>
    <h1>The export breakout meets <em>the inflation test.</em></h1>
    <p className="rp-article-lead">{dek}</p>
-   <div className="rp-meta"><span>ALPHAHEDGEQUANT RESEARCH DESK</span><span>13 NOV 2026</span><span>FULL PUBLIC RESEARCH</span></div>
+   <div className="rp-meta"><span>ALPHAHEDGEQUANT RESEARCH DESK</span><span>13 NOV 2026</span><span>{signedIn?"COMPLETE RESEARCH":"PUBLIC RESEARCH PREVIEW"}</span></div>
    <div className="macro-hero-stats" aria-label="October India macro highlights">
     {[["$49.47bn","GOODS EXPORTS","+45.1% year on year"],["$39.88bn","GOODS TRADE DEFICIT","Down 6.3% YoY · up 32% MoM"],["6.09%","OCTOBER CPI","Food inflation 8.94%"],["5.50%","RBI REPO RATE","After October 7 decision"]].map(x=><div key={x[1]}><strong>{x[0]}</strong><span>{x[1]}</span><small>{x[2]}</small></div>)}
    </div>
   </div></header>
   <main className="rp-paper"><article className="rp-paper-shell">
-   <div className="rp-note-label"><span>01 / MACRO RESEARCH</span><span>RESEARCH CUT-OFF / 13 NOV 2026</span></div>
+   <div className="rp-note-label"><span>01 / {signedIn?"COMPLETE MACRO RESEARCH":"OPEN RESEARCH PREVIEW"}</span><span>RESEARCH CUT-OFF / 13 NOV 2026</span></div>
    <div className="rp-lead-note"><p>Record exports are an encouraging signal. Higher inflation and a large import bill mean the economic story is more complicated.</p><span>THE CENTRAL RESEARCH QUESTION</span></div>
+   {!signedIn&&<div className="macro-public-preview" aria-label="October 2026 research introduction">
+    <p className="macro-preview-kicker">THE OCTOBER STORY / THREE LINKED QUESTIONS</p>
+    <h2>More exports. A stubborn import bill. Higher inflation.</h2>
+    <p>October's trade figures make a strong first impression: merchandise exports reached <strong>$49.47 billion</strong>, about <strong>45% above</strong> the same month a year earlier. But India's merchandise trade deficit remained large at <strong>$39.88 billion</strong>, despite being smaller than a year ago.</p>
+    <p>The trade balance also worsened relative to September. That matters because a record export month can coexist with a rising import bill. Economic growth looks more durable when the additional sales translate into stronger business margins, returns on capital and cash flows.</p>
+    <MacroFigures section="trade"/>
+    <div className="macro-preview-takeaways">
+     <h3>What the complete research examines</h3>
+     <ol>
+      <li><strong>Trade and services:</strong> which parts of the export breakout appear sustainable, and why services estimates should be treated as provisional.</li>
+      <li><strong>Inflation and household demand:</strong> how October CPI of 6.09% and food inflation of 8.94% affect purchasing power and monetary policy.</li>
+      <li><strong>Industry, jobs and credit:</strong> why investment-linked manufacturing can grow faster than broad consumption.</li>
+      <li><strong>Company valuations:</strong> when higher sales actually produce higher margins, cash flow and economic value.</li>
+     </ol>
+    </div>
+    <div className="macro-preview-gate">
+     <div className="rp-next-list"><span>01</span><span>Complete data tables and monthly sector narrative</span><span aria-hidden="true">↗</span></div>
+     <div className="rp-next-list"><span>02</span><span>All seven research exhibits and scenario comparisons</span><span aria-hidden="true">↗</span></div>
+     <div className="rp-next-list"><span>03</span><span>Detailed valuation interpretation and 25-source register</span><span aria-hidden="true">↗</span></div>
+    </div>
+   </div>}
+   {!signedIn&&<UnlockResearch href={"/sign-in?redirect_url="+encodeURIComponent(route)} label="Read complete October report"
+      notice="Research figures are dated to the stated publication cut-off. Provisional releases and historical scenarios should be read in their original time context."/>}
+   {signedIn&&<>
    <nav className="macro-toc" aria-label="In this report"><span>RESEARCH INDEX</span><div>{sections.map(s=><a href={"#section-"+s.id} key={s.id}>{s.text.replace(/^\d{2}\s+\//,"").trim()}</a>)}<a href="#sources">Source register</a></div></nav>
    <section className="rp-article-body macro-article-body" aria-label="Full October macro research">
     {blocks.map((block,i)=><div className="macro-block" key={i}><BodyBlock block={block}/>{block.type==="heading"&&figureFor[block.id]&&<MacroFigures section={figureFor[block.id]}/>}</div>)}
    </section>
+   </>}
    <div className="macro-report-end"><strong>ALPHAHEDGEQUANT RESEARCH</strong><p>Research and educational analysis, not investment advice. Provisional services estimates, comparison periods, illustrative INR conversions and hypothetical valuation scenarios are explicitly identified in the article.</p><Link href="/library/series/macro-outlook">← Return to Macro Outlook</Link></div>
   </article></main>
  </div>;

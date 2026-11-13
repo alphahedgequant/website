@@ -35,11 +35,11 @@ export default async function SeriesLanding({params}){
     <div className="rp-catalogue-header"><div><p className="rl-eyebrow">THE READING LIST</p><h2>Explore the <em>questions.</em></h2><p>{category.subject}</p></div><Link href="/library">← All public research</Link></div>
     <div className="rp-cards">
     {category.id==="macro-outlook"&&<article className="rp-card" aria-label="Featured October 2026 macro research">
-      <div className="rp-card-index"><span>FEATURED / OCTOBER 2026</span><span>FULL MONTHLY REPORT</span></div>
+      <div className="rp-card-index"><span>FEATURED / OCTOBER 2026</span><span>OCTOBER RESEARCH</span></div>
       <h3><Link href="/library/series/macro-outlook/october-2026">India Macro Monthly — October 2026</Link></h3>
       <p>Record merchandise exports, pressure from food inflation, and the path from India’s growth story to corporate cash flows.</p>
-      <p className="rp-card-excerpt">Seven visual research exhibits, sector analysis, scenario valuation, and a complete source register.</p>
-      <div className="rp-card-bottom"><Link href="/library/series/macro-outlook/october-2026">Read October report ↗</Link><span>ALPHAHEDGEQUANT RESEARCH</span></div>
+      <p className="rp-card-excerpt">Explore key charts and the research questions, then continue into the complete report after signing in.</p>
+      <div className="rp-card-bottom"><Link href="/library/series/macro-outlook/october-2026">Explore October report ↗</Link><span>ALPHAHEDGEQUANT RESEARCH</span></div>
     </article>}
     {articles.map((item,i)=><article key={item.slug} className="rp-card">
       <div className="rp-card-index"><span>{String(i+1).padStart(2,"0")} / {item.label}</span><span>{item.reading}</span></div>
