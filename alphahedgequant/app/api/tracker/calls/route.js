@@ -25,6 +25,10 @@ async function ensureTable(sql) {
   await sql`ALTER TABLE analyst_calls ADD COLUMN IF NOT EXISTS analyst_name TEXT`;
   await sql`ALTER TABLE analyst_calls ADD COLUMN IF NOT EXISTS source_url TEXT`;
   await sql`ALTER TABLE analyst_calls ADD COLUMN IF NOT EXISTS verification_status TEXT NOT NULL DEFAULT 'unverified'`;
+  await sql`ALTER TABLE analyst_calls ADD COLUMN IF NOT EXISTS deleted_at TIMESTAMPTZ`;
+  await sql`ALTER TABLE analyst_calls ADD COLUMN IF NOT EXISTS deleted_by TEXT`;
+  await sql`ALTER TABLE analyst_calls ADD COLUMN IF NOT EXISTS verified_at TIMESTAMPTZ`;
+  await sql`ALTER TABLE analyst_calls ADD COLUMN IF NOT EXISTS verified_by TEXT`;
 }
  
 export async function GET() {
@@ -34,14 +38,16 @@ export async function GET() {
     }
     const sql = neon(process.env.NEON_DATABASE_URL);
     await ensureTable(sql);
-    const rows = await sql`SELECT * FROM analyst_calls ORDER BY call_date DESC, id DESC`;
+    const rows = await sql`SELECT id,house,analyst_name,symbol,rating,target_price,price_at_call,call_date,horizon_days,note,source_url,verification_status,verified_at FROM analyst_calls WHERE deleted_at IS NULL ORDER BY call_date DESC,id DESC`;
 
-    const symbols = [...new Set(rows.map((r) => r.symbol))];
+    const symbols = [...new Set(rows.filter(c=>c.verification_status==="verified").map(c=>c.symbol))];
     const priceCache = {};
-    await Promise.all(symbols.map(async (s) => { priceCache[s] = await fetchHistory(s); }));
-
-    const calls = rows.map((c) => ({ ...c, ...scoreAnalystCall(c, priceCache[c.symbol] || []) }));
-    return Response.json({ success: true, calls });
+    let next=0;
+    await Promise.all(Array.from({length:Math.min(6,symbols.length)},async()=>{
+      while(next<symbols.length){const symbol=symbols[next++];priceCache[symbol]=await fetchHistory(symbol);}
+    }));
+    const calls = rows.map(c=>({...c,...scoreAnalystCall(c,priceCache[c.symbol]||[])}));
+    return Response.json({ success: true, calls },{headers:{"Cache-Control":"public,max-age=20,stale-while-revalidate=60"}});
   } catch (e) {
     console.error("[Tracker GET]", e);
     return Response.json({ success: false, error: "Could not load calls." }, { status: 500 });
