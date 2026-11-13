@@ -3,7 +3,7 @@ import {useCallback,useEffect,useMemo,useState} from "react";
 import Link from "next/link";
 import "./tracker.css";
 
-const INITIAL={house:"",analyst_name:"",symbol:"",rating:"BUY",target_price:"",price_at_call:"",call_date:"",horizon_days:"365",source_url:"",note:""};
+const INITIAL={house:"",analyst_name:"",symbol:"",rating:"BUY",target_price:"",price_at_call:"",call_date:"",horizon_days:"",source_url:"",note:""};
 const fmt=(x,dp=1)=>x===null||x===undefined||!Number.isFinite(Number(x))?"—":Number(x).toLocaleString("en-IN",{minimumFractionDigits:dp,maximumFractionDigits:dp});
 const day=x=>x?String(x).slice(0,10):"—";
 const safeSource=x=>typeof x==="string"&&/^https:\/\/[^/]+/i.test(x);
@@ -71,7 +71,7 @@ function EntryForm({onComplete}){
     ["target_price","Published target price","number","Published target"],
     ["price_at_call","Price at publication","number","Historical published close"],
     ["call_date","Publication date","date",""],
-    ["horizon_days","Horizon in days","number","365"],
+    ["horizon_days","Published horizon (days)","number","As stated in source"],
     ["source_url","Original report URL","url","https://publisher.example/report"]
    ].map(([key,label,type,placeholder])=><label key={key}>{label}<input
     type={type} min={type==="number"?0.01:undefined} step={type==="number"?"any":undefined}
