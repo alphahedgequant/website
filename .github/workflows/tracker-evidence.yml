@@ -1,0 +1,49 @@
+name: Trust Tracker Evidence & UI
+on:
+  pull_request:
+    paths:
+      - "alphahedgequant/app/tracker/**"
+      - "alphahedgequant/app/api/tracker/**"
+      - "alphahedgequant/lib/trackerMetrics.mjs"
+      - "alphahedgequant/lib/trackerScoring.js"
+      - "alphahedgequant/middleware.js"
+      - "alphahedgequant/app/sitemap.js"
+      - "alphahedgequant/tests/trackerEvidence.test.mjs"
+      - ".github/workflows/tracker-evidence.yml"
+  push:
+    branches: [main]
+    paths:
+      - "alphahedgequant/app/tracker/**"
+      - "alphahedgequant/app/api/tracker/**"
+      - "alphahedgequant/lib/trackerMetrics.mjs"
+      - "alphahedgequant/lib/trackerScoring.js"
+      - "alphahedgequant/middleware.js"
+      - "alphahedgequant/app/sitemap.js"
+      - "alphahedgequant/tests/trackerEvidence.test.mjs"
+      - ".github/workflows/tracker-evidence.yml"
+permissions:
+  contents: read
+jobs:
+  evidence:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 14
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: alphahedgequant/package-lock.json
+      - name: Install pinned dependencies
+        working-directory: alphahedgequant
+        run: npm ci --ignore-scripts --no-audit --no-fund
+      - name: Verify source evidence, scoring, editor controls and existing authorization
+        working-directory: alphahedgequant
+        run: node --test tests/trackerEvidence.test.mjs tests/trackerOwnerAccess.test.mjs
+      - name: Build Next.js pages and APIs
+        working-directory: alphahedgequant
+        env:
+          NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY: "pk_test_ZXhhbXBsZS5jbGVyay5hY2NvdW50cy5kZXYk"
+        run: npm run build
