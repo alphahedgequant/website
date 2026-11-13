@@ -17,7 +17,7 @@ async function readCalls(sql){
  await sql`ALTER TABLE analyst_calls ADD COLUMN IF NOT EXISTS deleted_by TEXT`;
  return sql`SELECT id,house,symbol,rating,target_price,price_at_call,call_date,
    horizon_days,analyst_name,source_url,verification_status
-  FROM analyst_calls WHERE deleted_at IS NULL
+  FROM analyst_calls WHERE deleted_at IS NULL AND verification_status='verified'
   ORDER BY call_date DESC,id DESC`;
 }
 async function fetchHistories(calls){
