@@ -26,9 +26,16 @@ export function scoreAnalystCall(c,bars,now=new Date()){
  if(!final)return {resolved:false,status:"unverified",priceNow:current,expiryDate:expiry.toISOString().slice(0,10)};
  const px=Number(final.close);
  const retPct=rating==="SELL"?(entry-px)/entry*100:(px-entry)/entry*100;
- const hit=rating==="BUY"?path.some(b=>Number(b.high)>=target):rating==="SELL"?path.some(b=>Number(b.low)<=target):false;
- const historyHasIntradayExtremes=path.length>0&&path.every(b=>Number.isFinite(Number(b.high))&&Number.isFinite(Number(b.low)));
- const verifiedHit=historyHasIntradayExtremes ? hit : null;
+ // A calendar-day research date has no verified intraday publication time.
+ // Exclude its own day from target-hit tests to avoid counting targets reached
+ // before the report was published. No daily high/low means "unknown", not miss.
+ const afterPublication=path.filter(b=>utcDay(b.date)>start);
+ const usable=v=>v!==null&&v!==undefined&&v!==""&&Number.isFinite(Number(v))&&Number(v)>0;
+ const targetEvidence=afterPublication.length>0&&afterPublication.every(b=>usable(b.high)&&usable(b.low));
+ const hit=targetEvidence?rating==="BUY"?
+   afterPublication.some(b=>Number(b.high)>=target):
+   rating==="SELL"?afterPublication.some(b=>Number(b.low)<=target):null:null;
+ const verifiedHit=hit;
  const madeMoney=rating==="HOLD"?null:retPct>0;
  return {resolved:rating!=="HOLD",status:rating==="HOLD"?"hold_unscored":"resolved",priceNow:current,evaluationPrice:px,evaluationDate:String(final.date).slice(0,10),returnPct:+retPct.toFixed(2),madeMoney,targetHit:verifiedHit,expiryDate:expiry.toISOString().slice(0,10)};
 }
