@@ -114,3 +114,11 @@ test("never describe public confidence score as official PaRRVA/regulator-verifi
  assert.match(scoring,/not regulator\/PaRRVA-verified/);
  assert.doesNotMatch(page,/Very Poor|Excellent|credit-score-style|Who Can You Trust/);
 });
+
+test("historical target hits never count publication-day highs or missing OHLC as factual hits",()=>{
+ const scoring=read("lib/trackerScoring.js");
+ assert.match(scoring,/afterPublication=path\.filter\(b=>utcDay\(b\.date\)>start\)/);
+ assert.match(scoring,/v!==null&&v!==undefined&&v!==""/);
+ assert.match(scoring,/afterPublication\.every\(b=>usable\(b\.high\)&&usable\(b\.low\)\)/);
+ assert.match(scoring,/const verifiedHit=hit/);
+});
