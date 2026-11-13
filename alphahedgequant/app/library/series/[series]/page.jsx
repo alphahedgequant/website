@@ -21,7 +21,7 @@ export default async function SeriesLanding({params}){
  const {series:id}=await params;const category=findResearchSeries(id);if(!category)notFound();
  const articles=RESEARCH_PREVIEWS.filter(x=>x.series===category.id);
  const path=root+"/library/series/"+category.id;
- const schema={"@context":"https://schema.org","@type":"CollectionPage",name:category.title+" — Public Research Previews",description:category.summary,url:path,isAccessibleForFree:true,datePublished:PREVIEW_RELEASE_DATE,hasPart:articles.map(x=>({"@type":"WebPage",url:path+"/"+x.slug,name:x.title}))};
+ const schema={"@context":"https://schema.org","@type":"CollectionPage",name:category.title+" — Public Research Previews",description:category.summary,url:path,isAccessibleForFree:true,datePublished:PREVIEW_RELEASE_DATE,hasPart:[...articles.map(x=>({"@type":"WebPage",url:path+"/"+x.slug,name:x.title})),...(category.id==="macro-outlook"?[{"@type":"Article",url:path+"/october-2026",name:"India Macro Monthly — October 2026"}]:[])]};
  return <div className="rl-site rp-site">
   <script type="application/ld+json" dangerouslySetInnerHTML={{__html:JSON.stringify(schema).replace(/</g,"\\u003c")}}/>
   <SeriesBreadcrumb/>
@@ -29,11 +29,19 @@ export default async function SeriesLanding({params}){
    <p className="rl-eyebrow">{category.eyebrow} / RESEARCH SERIES</p>
    <h1>{category.title}<em>.</em></h1>
    <p className="rp-series-sub">{category.intro}</p>
-   <div className="rp-hero-data"><span>{articles.length} RESEARCH NOTES</span><span>METHODS &amp; EVIDENCE</span><span>THE READING LIST</span></div>
+   <div className="rp-hero-data"><span>{articles.length+(category.id==="macro-outlook"?1:0)} RESEARCH NOTES</span><span>METHODS &amp; EVIDENCE</span><span>THE READING LIST</span></div>
   </div></header>
   <main className="rl-shell rp-catalogue">
     <div className="rp-catalogue-header"><div><p className="rl-eyebrow">THE READING LIST</p><h2>Explore the <em>questions.</em></h2><p>{category.subject}</p></div><Link href="/library">← All public research</Link></div>
-    <div className="rp-cards">{articles.map((item,i)=><article key={item.slug} className="rp-card">
+    <div className="rp-cards">
+    {category.id==="macro-outlook"&&<article className="rp-card" aria-label="Featured October 2026 macro research">
+      <div className="rp-card-index"><span>FEATURED / OCTOBER 2026</span><span>FULL MONTHLY REPORT</span></div>
+      <h3><Link href="/library/series/macro-outlook/october-2026">India Macro Monthly — October 2026</Link></h3>
+      <p>Record merchandise exports, pressure from food inflation, and the path from India’s growth story to corporate cash flows.</p>
+      <p className="rp-card-excerpt">Seven visual research exhibits, sector analysis, scenario valuation, and a complete source register.</p>
+      <div className="rp-card-bottom"><Link href="/library/series/macro-outlook/october-2026">Read October report ↗</Link><span>ALPHAHEDGEQUANT RESEARCH</span></div>
+    </article>}
+    {articles.map((item,i)=><article key={item.slug} className="rp-card">
       <div className="rp-card-index"><span>{String(i+1).padStart(2,"0")} / {item.label}</span><span>{item.reading}</span></div>
       <h3><Link href={path.replace(root,"")+"/"+item.slug}>{item.title}</Link></h3>
       <p>{item.subtitle}</p>
