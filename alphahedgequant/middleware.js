@@ -11,6 +11,11 @@ const isPublicRoute = createRouteMatcher([
   "/library(.*)",
   // All six Quant Learning modules are free; interview and mental maths routes remain protected.
   "/learn",
+  // Public read-only Trust Tracker; every mutation still requires verified editor auth inside the API.
+  "/tracker",
+  "/api/tracker/leaderboard",
+  "/api/tracker/calls(.*)",
+  "/api/tracker/editor",
   "/api/ipo",
   "/sign-in(.*)",
   "/sign-up(.*)",

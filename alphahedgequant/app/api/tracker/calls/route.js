@@ -25,6 +25,10 @@ async function ensureTable(sql) {
   await sql`ALTER TABLE analyst_calls ADD COLUMN IF NOT EXISTS analyst_name TEXT`;
   await sql`ALTER TABLE analyst_calls ADD COLUMN IF NOT EXISTS source_url TEXT`;
   await sql`ALTER TABLE analyst_calls ADD COLUMN IF NOT EXISTS verification_status TEXT NOT NULL DEFAULT 'unverified'`;
+  await sql`ALTER TABLE analyst_calls ADD COLUMN IF NOT EXISTS deleted_at TIMESTAMPTZ`;
+  await sql`ALTER TABLE analyst_calls ADD COLUMN IF NOT EXISTS deleted_by TEXT`;
+  await sql`ALTER TABLE analyst_calls ADD COLUMN IF NOT EXISTS verified_at TIMESTAMPTZ`;
+  await sql`ALTER TABLE analyst_calls ADD COLUMN IF NOT EXISTS verified_by TEXT`;
 }
  
 export async function GET() {
@@ -34,14 +38,27 @@ export async function GET() {
     }
     const sql = neon(process.env.NEON_DATABASE_URL);
     await ensureTable(sql);
-    const rows = await sql`SELECT * FROM analyst_calls ORDER BY call_date DESC, id DESC`;
+    const {userId}=await auth();
+    let isEditor=false;
+    if(userId){
+      const allowed=(process.env.AHQ_TRACKER_ADMIN_EMAILS||process.env.AHQ_ANALYTICS_ADMIN_EMAILS||"").split(",").map(x=>x.trim().toLowerCase()).filter(Boolean);
+      if(allowed.length){
+        const user=await currentUser();
+        isEditor=(user?.emailAddresses||[]).some(e=>e.verification?.status==="verified"&&allowed.includes(e.emailAddress.toLowerCase()));
+      }else isEditor=await isInsightsOwner();
+    }
+    const rows = await sql`SELECT id,house,analyst_name,symbol,rating,target_price,price_at_call,call_date,horizon_days,note,source_url,verification_status,verified_at
+     FROM analyst_calls WHERE deleted_at IS NULL AND (verification_status='verified' OR ${isEditor})
+     ORDER BY call_date DESC,id DESC`;
 
-    const symbols = [...new Set(rows.map((r) => r.symbol))];
+    const symbols = [...new Set(rows.filter(c=>c.verification_status==="verified").map(c=>c.symbol))];
     const priceCache = {};
-    await Promise.all(symbols.map(async (s) => { priceCache[s] = await fetchHistory(s); }));
-
-    const calls = rows.map((c) => ({ ...c, ...scoreAnalystCall(c, priceCache[c.symbol] || []) }));
-    return Response.json({ success: true, calls });
+    let next=0;
+    await Promise.all(Array.from({length:Math.min(6,symbols.length)},async()=>{
+      while(next<symbols.length){const symbol=symbols[next++];priceCache[symbol]=await fetchHistory(symbol);}
+    }));
+    const calls = rows.map(c=>({...c,...scoreAnalystCall(c,priceCache[c.symbol]||[])}));
+    return Response.json({ success: true, calls },{headers:{"Cache-Control":"private,no-store"}});
   } catch (e) {
     console.error("[Tracker GET]", e);
     return Response.json({ success: false, error: "Could not load calls." }, { status: 500 });
@@ -67,7 +84,7 @@ export async function POST(request) {
       return Response.json({ success: false, error: "Database not configured." }, { status: 500 });
     }
     const body = await request.json();
-    const { house, symbol, rating = "BUY", target_price, price_at_call, call_date, horizon_days = 365, note = "", source_url = "", analyst_name = "" } = body || {};
+    const { house, symbol, rating = "BUY", target_price, price_at_call, call_date, horizon_days, note = "", source_url = "", analyst_name = "" } = body || {};
     if (!house || !symbol || !target_price || !price_at_call || !call_date) {
       return Response.json({ success: false, error: "house, symbol, target_price, price_at_call, call_date are required." }, { status: 400 });
     }
@@ -85,6 +102,10 @@ export async function POST(request) {
     if(!Number.isFinite(publicationDate.valueOf())||publicationDate.toISOString().slice(0,10)!==String(call_date)||publicationDate>new Date())return Response.json({success:false,error:"Invalid or future publication date"},{status:400});
     const sql = neon(process.env.NEON_DATABASE_URL);
     await ensureTable(sql);
+    const duplicate=await sql`SELECT id FROM analyst_calls
+      WHERE deleted_at IS NULL AND LOWER(house)=LOWER(${house.trim()})
+      AND symbol=${symbol.toUpperCase().trim()} AND source_url=${verifiedSource} LIMIT 1`;
+    if(duplicate.length)return Response.json({success:false,error:"The same firm, ticker and publication are already tracked"},{status:409});
     const rows = await sql`
       INSERT INTO analyst_calls (house, symbol, rating, target_price, price_at_call, call_date, horizon_days, note, analyst_name, source_url, verification_status)
       VALUES (${house.trim()}, ${symbol.toUpperCase().trim()}, ${String(rating).toUpperCase()},
