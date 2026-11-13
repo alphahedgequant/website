@@ -58,7 +58,7 @@ export async function GET() {
       while(next<symbols.length){const symbol=symbols[next++];priceCache[symbol]=await fetchHistory(symbol);}
     }));
     const calls = rows.map(c=>({...c,...scoreAnalystCall(c,priceCache[c.symbol]||[])}));
-    return Response.json({ success: true, calls },{headers:{"Cache-Control":"public,max-age=20,stale-while-revalidate=60"}});
+    return Response.json({ success: true, calls },{headers:{"Cache-Control":"private,no-store"}});
   } catch (e) {
     console.error("[Tracker GET]", e);
     return Response.json({ success: false, error: "Could not load calls." }, { status: 500 });
