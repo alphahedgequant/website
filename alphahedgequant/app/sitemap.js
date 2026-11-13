@@ -31,5 +31,10 @@ export default function sitemap() {
     changeFrequency:"monthly",
     priority:0.55,
   }));
-  return [...index,...notes,...series,...previews];
+  const publishedMacro=[{
+    url:base+"/library/series/macro-outlook/october-2026",
+    lastModified:new Date("2026-11-13T17:30:00Z"),
+    changeFrequency:"monthly",priority:0.82
+  }];
+  return [...index,...notes,...series,...previews,...publishedMacro];
 }
