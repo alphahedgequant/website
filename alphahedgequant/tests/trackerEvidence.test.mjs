@@ -122,3 +122,14 @@ test("historical target hits never count publication-day highs or missing OHLC a
  assert.match(scoring,/afterPublication\.every\(b=>usable\(b\.high\)&&usable\(b\.low\)\)/);
  assert.match(scoring,/const verifiedHit=hit/);
 });
+
+test("new tracked calls require source-specified horizons and reject duplicate reports",()=>{
+ const add=read("app/api/tracker/calls/route.js");
+ const ui=read("app/tracker/page.jsx");
+ assert.match(add,/const duplicate=await sql/);
+ assert.match(add,/source_url=\$\{verifiedSource\}/);
+ assert.match(add,/status:409/);
+ assert.doesNotMatch(add,/horizon_days = 365, note/);
+ assert.match(ui,/horizon_days:"",source_url/);
+ assert.match(ui,/Published horizon \(days\)/);
+});
