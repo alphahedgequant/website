@@ -21,7 +21,14 @@ export async function DELETE(request,{params}){
  const denied=await editorError();if(denied)return denied;
  const id=Number(params.id);if(!Number.isSafeInteger(id)||id<=0)return Response.json({success:false,error:"Invalid ID"},{status:400});
  if(!process.env.NEON_DATABASE_URL)return Response.json({success:false,error:"Database unavailable"},{status:503});
- try{const sql=neon(process.env.NEON_DATABASE_URL);await sql`DELETE FROM analyst_calls WHERE id=${id}`;return Response.json({success:true});}
+ try{
+  const sql=neon(process.env.NEON_DATABASE_URL);
+  await sql`ALTER TABLE analyst_calls ADD COLUMN IF NOT EXISTS deleted_at TIMESTAMPTZ`;
+  await sql`ALTER TABLE analyst_calls ADD COLUMN IF NOT EXISTS deleted_by TEXT`;
+  const {userId}=await auth();
+  const rows=await sql`UPDATE analyst_calls SET deleted_at=NOW(),deleted_by=${userId} WHERE id=${id} AND deleted_at IS NULL RETURNING id`;
+  return rows.length?Response.json({success:true}):Response.json({success:false,error:"Call not found"},{status:404});
+ }
  catch{return Response.json({success:false,error:"Could not remove call"},{status:503});}
 }
 export async function PATCH(request,{params}){
@@ -30,9 +37,13 @@ export async function PATCH(request,{params}){
  if(!process.env.NEON_DATABASE_URL)return Response.json({success:false,error:"Database unavailable"},{status:503});
  let body;try{body=await request.json()}catch{return Response.json({success:false,error:"Invalid body"},{status:400})}
  if(!["verified","unverified"].includes(body?.status))return Response.json({success:false,error:"Invalid status"},{status:400});
+ if(body.status==="verified"&&body.confirmedSource!==true)return Response.json({success:false,error:"Confirm review of the dated original publication before approving"},{status:400});
  try{
   const sql=neon(process.env.NEON_DATABASE_URL);
-  const rows=await sql`SELECT * FROM analyst_calls WHERE id=${id} LIMIT 1`;
+  await sql`ALTER TABLE analyst_calls ADD COLUMN IF NOT EXISTS verified_at TIMESTAMPTZ`;
+  await sql`ALTER TABLE analyst_calls ADD COLUMN IF NOT EXISTS verified_by TEXT`;
+  await sql`ALTER TABLE analyst_calls ADD COLUMN IF NOT EXISTS deleted_at TIMESTAMPTZ`;
+  const rows=await sql`SELECT * FROM analyst_calls WHERE id=${id} AND deleted_at IS NULL LIMIT 1`;
   if(!rows.length)return Response.json({success:false,error:"Call not found"},{status:404});
   const c=rows[0];
   if(body.status==="verified"){
@@ -45,7 +56,11 @@ export async function PATCH(request,{params}){
     if(!Number.isFinite(lo)||!Number.isFinite(hi)||price<lo*0.98||price>hi*1.02)
       return Response.json({success:false,error:"Entry price falls outside historical day range; check corporate actions and source"},{status:409});
   }
-  await sql`UPDATE analyst_calls SET verification_status=${body.status} WHERE id=${id}`;
+  const {userId}=await auth();
+  await sql`UPDATE analyst_calls SET verification_status=${body.status},
+   verified_at=CASE WHEN ${body.status}='verified' THEN NOW() ELSE NULL END,
+   verified_by=CASE WHEN ${body.status}='verified' THEN ${userId} ELSE NULL END
+   WHERE id=${id} AND deleted_at IS NULL`;
   return Response.json({success:true,status:body.status});
  }catch{return Response.json({success:false,error:"Unable to update verification"},{status:503})}
 }
