@@ -25,7 +25,7 @@ test("full public research article reuses the existing macro outlook reader and 
  assert.match(src,/macro-source-cites/);
  assert.match(src,/isAccessibleForFree:true/);
  assert.match(src,/robots:\{index:true,follow:true\}/);
- assert.match(src,/source-\+block\.id/);
+ assert.ok(src.includes('"source-"+block.id'));
  assert.match(style,/\.ahq-macro-report \.macro-figure/);
  assert.match(style,/@media\(max-width:520px\)/);
  assert.doesNotMatch(src,/auth\(|auth\.protect|SignedOut|UnlockResearch/);
