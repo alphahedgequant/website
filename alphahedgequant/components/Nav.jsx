@@ -9,6 +9,7 @@ import ThemeToggle from "./ThemeToggle";
 const products = [
   { href: "/screener", label: "Market Intelligence", description: "NSE & US equity screeners", glyph: "▤" },
   { href: "/models", label: "Quant Models", description: "Systematic strategies & signals", glyph: "∑" },
+  { href: "/alpha-lab", label: "Alpha Research Lab", description: "Mathematical signals & research simulation", glyph: "α" },
   { href: "/backtest", label: "AI Backtesting", description: "Test and evaluate ideas", glyph: "↗" },
   { href: "/copilot", label: "AI Copilot", description: "Natural-language strategy research", glyph: "✳" },
   { href: "/options", label: "Options Analytics", description: "Option-chain intelligence", glyph: "◈" },
