@@ -63,12 +63,28 @@ export async function GET(request) {
         checkedAt: new Date().toISOString()
       }, { headers: { "Cache-Control": "public, s-maxage=60, stale-while-revalidate=120" } });
     }
-    const list = await source(paths.hack, "application/json");
-    const arr = Array.isArray(list) ? list
-      : ["hackathons","data","results"].map(k => list?.[k]).find(Array.isArray);
-    if (!arr) throw Error("Unexpected source data");
+    // Devpost's public discovery list is paginated. Page 1 is required;
+    // later pages are best-effort and deduplicated, never guessed.
+    const first = await source(paths.hack, "application/json");
+    const toRows = json => Array.isArray(json) ? json :
+      ["hackathons","data","results"].map(k=>json?.[k]).find(Array.isArray);
+    const rows = toRows(first);
+    if (!rows) throw Error("Unexpected source data");
+    const later=await Promise.allSettled([2,3,4,5].map(page=>
+      source(paths.hack+"&page="+page,"application/json")));
+    const merged=[...rows];
+    for(const result of later){
+      if(result.status!=="fulfilled")continue;
+      const more=toRows(result.value);
+      if(more?.length)merged.push(...more);
+    }
+    const dedup=new Set(),hackathons=merged.filter(item=>{
+      const id=String(item?.id||item?.url||item?.title||"").trim();
+      if(!id||dedup.has(id))return false;
+      dedup.add(id);return true;
+    }).slice(0,200);
     return Response.json({
-      hackathons: arr.slice(0,400), checkedAt: new Date().toISOString()
+      hackathons, pageOneCount:rows.length, pagesAttempted:5, checkedAt: new Date().toISOString()
     }, { headers: { "Cache-Control": "public, s-maxage=1800, stale-while-revalidate=1800" } });
   } catch {
     return Response.json({
