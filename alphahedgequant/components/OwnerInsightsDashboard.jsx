@@ -116,7 +116,6 @@ export default function OwnerInsightsDashboard({historical=null}){
    <div className="flex flex-wrap justify-between items-start gap-3 mb-4">
     <div>
      <p className="text-[11px] font-mono uppercase tracking-[.12em] text-muted">Historical audience · archived metrics</p>
-     <h2 className="font-display text-xl md:text-2xl text-body mt-2">September 2026 baseline</h2>
     </div>
     <p className="text-xs text-muted font-mono">Approx. 60 days before 14 Nov 2026</p>
    </div>
