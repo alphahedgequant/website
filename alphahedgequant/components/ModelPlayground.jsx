@@ -3,6 +3,10 @@ import { useState } from "react";
 
 const n=(x,d=2)=>Number(x).toLocaleString("en-IN",{maximumFractionDigits:d});
 const typeFor=m=>{
+ if(m.id==="S7")return "opening";
+ if(m.id==="S8")return "vwap";
+ if(m.id==="O5")return "oi";
+ if(m.id==="G6")return "breadth";
  if(m.id==="O1"||m.id==="G3")return "iv";
  if(m.id==="O2")return "gamma";
  if(m.id==="G5")return "volume";
@@ -17,6 +21,10 @@ const typeFor=m=>{
  return "trend";
 };
 const configs={
+ opening:{title:"Previous-day high proximity",a:"Latest completed-bar price (₹)",b:"Previous-day high (₹)",start:[102,100],min:[1,1],max:[400,400],help:"This is not a breakout trade or backtest. A full opening-range screen requires completed prior-session and intraday candles.",calculate:(a,b)=>({value:n(100*(a/b-1),2)+"% vs PDH",meaning:a>b?"Price is above the supplied PDH, but trend, opening range, execution and volume remain unverified.":a<b?"Price is below the supplied PDH. No breakout is confirmed.":"Price equals the supplied previous-day high."})},
+ vwap:{title:"Price deviation from VWAP",a:"Completed-bar close (₹)",b:"Session VWAP (₹)",start:[102,100],min:[1,1],max:[400,400],help:"Not an EMA crossover or MCX live quote; a crossover requires previous and current completed bars.",calculate:(a,b)=>({value:n(100*(a/b-1),2)+"% from VWAP",meaning:a>b?"Close is above the assumed VWAP. This is a descriptive condition.":a<b?"Close is below the assumed VWAP.":"Close equals VWAP."})},
+ oi:{title:"Same-expiry open-interest PCR",a:"Put open interest (lakh provider units)",b:"Call open interest (lakh provider units)",start:[12,10],min:[0,1],max:[100,100],help:"Assumes matching expiry and strike coverage. OI ratios cannot identify who bought, sold or is hedging.",calculate:(a,b)=>({value:n(a/b,3)+"× OI PCR",meaning:"This is the put/call ratio for the illustrative open positions. It is not a prediction or an options trade recommendation."})},
+ breadth:{title:"Advance–decline sample breadth",a:"Stocks advancing",b:"Stocks declining",start:[60,30],min:[0,0],max:[500,500],help:"Excludes unchanged stocks from this two-count illustration; the full AHQ market dashboard includes unchanged names in its denominator.",calculate:(a,b)=>({value:a+b?n(100*(a-b)/(a+b),1)+"% of movers":"—",meaning:a+b?"An equal-count participation measure for the advancing and declining sample, not an index return or point contribution.":"No advancing or declining stocks supplied."})},
  iv:{title:"IV compared with historical volatility",a:"Implied volatility (%)",b:"Past realised volatility (%)",start:[30,20],min:[1,1],max:[90,90],help:"A positive difference is not an option-selling profit estimate.",calculate:(a,b)=>({value:n(a-b,1)+" percentage points",meaning:a>b?"Options imply more volatility than the selected historical level.":a<b?"Options imply less volatility than the selected historical level.":"The two levels match."})},
  gamma:{title:"Illustrative gamma sensitivity",a:"Hypothetical signed gamma units",b:"Underlying move (%)",start:[20,2],min:[-100,-10],max:[100,10],help:"Signed dealer exposure is not observable from open interest alone; this is a sensitivity illustration, not a gamma-flip estimator.",calculate:(a,b)=>({value:n(a*b,1)+" relative units",meaning:"The sign and magnitude change with the assumed position and spot move. No actual dealer positioning is inferred."})},
  volume:{title:"Volume compared with the same time of day",a:"Today's cumulative volume (thousands)",b:"Historical median by now (thousands)",start:[200,100],min:[0,1],max:[1000,1000],help:"Both values refer to the same point during the trading session.",calculate:(a,b)=>({value:n(a/b,2)+"× RVOL",meaning:a/b>1?"Activity is above the chosen time-matched baseline.":"Activity is at or below the chosen baseline. Neither says whether prices will rise."})},
