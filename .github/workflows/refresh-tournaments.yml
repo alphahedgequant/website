@@ -32,13 +32,13 @@ jobs:
         run: node --version
       - name: Refresh upstream snapshots
         run: node "alphahedgequant/scripts/refresh-tournaments.mjs"
-      - name: Publish JSON snapshot if content changed
+      - name: Publish JSON snapshots and sourced news if content changed
         shell: bash
         run: |
           set -euo pipefail
           file="alphahedgequant/public/tournaments-data.json"
           if [[ ! -f "$file" ]]; then exit 0; fi
-          git add "$file"
+          git add "$file" "alphahedgequant/public/tournaments-news.json"
           if git diff --cached --quiet; then exit 0; fi
           git config user.name "AHQ Data Refresh"
           git config user.email "actions@users.noreply.github.com"
