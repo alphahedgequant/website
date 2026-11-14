@@ -1,10 +1,19 @@
 import {ensurePushTable,configured,deliverPush} from "@/lib/tournamentWebPush.mjs";
+import {verifyTournamentGithubToken} from "@/lib/tournamentGithubOIDC.mjs";
 export const runtime="nodejs";
 export const dynamic="force-dynamic";
 export async function GET(req){
  const token=process.env.CRON_SECRET;
  if(!token||req.headers.get("authorization")!=="Bearer "+token)
    return Response.json({error:"Unauthorized"},{status:401,headers:{"Cache-Control":"no-store"}});
+ return dispatch();
+}
+export async function POST(req){
+ if(!await verifyTournamentGithubToken(req.headers.get("authorization")))
+   return Response.json({error:"GitHub Actions OIDC signature required"},{status:403,headers:{"Cache-Control":"no-store"}});
+ return dispatch();
+}
+async function dispatch(){
  if(!configured())return Response.json({error:"Push configuration missing"},{status:503});
  try{
    const res=await fetch("https://www.alphahedgequant.com/tournaments-news.json",{
