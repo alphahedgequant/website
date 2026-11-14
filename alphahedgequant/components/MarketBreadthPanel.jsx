@@ -27,6 +27,7 @@ function validStocks(payload){
 }
 export default function MarketBreadthPanel({onChoose=()=>{}}){
  const [market,setMarket]=useState("NSE"),[open,setOpen]=useState(true);
+ const [manualWeight,setManualWeight]=useState("4.0"),[manualReturn,setManualReturn]=useState("-1.0"),[manualIndex,setManualIndex]=useState("");
  const [payload,setPayload]=useState({indices:[],stocks:[],stocksAt:null,indicesAt:null,stale:false,status:"CHECKING",error:""});
  const active=useRef(null);
  const load=useCallback(async()=>{
@@ -68,6 +69,12 @@ export default function MarketBreadthPanel({onChoose=()=>{}}){
      up:sorted.slice(0,3),down:sorted.slice(-3).reverse(),sector};
  },[payload.stocks]);
  const priceLabel=(r)=>MARKETS[market].currency+display(r.price);
+ const validIndex=payload.indices.filter(x=>x.prevClose!==null&&x.prevClose>0);
+ const index=validIndex.find(x=>x.key===manualIndex)||validIndex[0]||null;
+ const weight=v(manualWeight),pct=v(manualReturn);
+ const contribution=index&&weight!==null&&pct!==null&&weight>=0&&weight<=100&&pct>=-100&&pct<=200
+   ?index.prevClose*(weight/100)*(pct/100):null;
+
  return <section className="qt-panel" aria-label="AHQ market at a glance and breadth" style={{margin:"12px 0 16px",padding:"15px 18px",background:"#0c121b",borderColor:"#243349",color:"#f3f7ff"}}>
    <header style={{display:"flex",gap:12,justifyContent:"space-between",alignItems:"center",flexWrap:"wrap"}}>
      <div><div style={{fontSize:10,letterSpacing:".16em",fontWeight:800,color:"#7cb2f8"}}>AHQ / MARKET INTELLIGENCE</div>
@@ -108,6 +115,28 @@ export default function MarketBreadthPanel({onChoose=()=>{}}){
          </div>):<p style={{fontSize:12,color:"#a6b7cb"}}>No verified stock movers available.</p>}
        </section>
      </div>
+     <section aria-label="Hypothetical cap-weighted index point contribution calculator" style={{border:"1px solid #2e3e52",background:"#111925",padding:14,marginTop:10}}>
+       <div style={{fontSize:11,fontWeight:800,letterSpacing:".09em",color:"#d5e7fa"}}>CONSTITUENT IMPACT · MANUAL WHAT-IF, NOT AN OBSERVED CONTRIBUTION</div>
+       <p style={{fontSize:11,color:"#9db0c9",margin:"7px 0 12px"}}>Enter a constituent's independently verified index weight and daily stock return. This approximates how many points that one stock would contribute to a cap-weighted index.</p>
+       <div style={{display:"flex",alignItems:"end",gap:10,flexWrap:"wrap"}}>
+         <label style={{fontSize:11,color:"#a9bad0"}}>Index snapshot
+           <select value={index?.key||""} onChange={e=>setManualIndex(e.target.value)} style={{display:"block",marginTop:4,padding:"8px 10px",background:"#192434",color:"#f4f9ff",border:"1px solid #304051"}}>
+             {!validIndex.length?<option value="">No verified prior close</option>:validIndex.map(x=><option key={x.key} value={x.key}>{x.key}</option>)}
+           </select>
+         </label>
+         <label style={{fontSize:11,color:"#a9bad0"}}>Weight at prior close (%)
+           <input type="number" min="0" max="100" step=".01" value={manualWeight} onChange={e=>setManualWeight(e.target.value)} style={{display:"block",marginTop:4,width:130,padding:"8px",background:"#192434",color:"#f4f9ff",border:"1px solid #304051"}}/>
+         </label>
+         <label style={{fontSize:11,color:"#a9bad0"}}>Constituent day return (%)
+           <input type="number" min="-100" max="200" step=".01" value={manualReturn} onChange={e=>setManualReturn(e.target.value)} style={{display:"block",marginTop:4,width:130,padding:"8px",background:"#192434",color:"#f4f9ff",border:"1px solid #304051"}}/>
+         </label>
+         <div style={{marginLeft:"auto",padding:"7px 12px",border:"1px solid #304051"}}>
+           <div style={{fontSize:10,color:"#afbdd0"}}>HYPOTHETICAL INDEX POINTS</div>
+           <strong style={{fontSize:20,color:contribution===null?"#e2e9f2":shade(contribution)}}>{contribution===null?"—":(contribution>0?"+":"")+display(contribution,3)}</strong>
+         </div>
+       </div>
+       <p style={{fontSize:10,color:"#9db0c9",lineHeight:1.5,marginTop:10}}>Approximation = previous index close × start-of-day index weight × constituent's observed or manually entered return. Corporate actions, divisor changes and intraday weight drift are excluded. AHQ does not supply verified index weights here; no live company-level point drag is claimed.</p>
+     </section>
      <div style={{fontSize:11,color:"#9dacc1",marginTop:11,lineHeight:1.5}}>
        {MARKETS[market].disclosure} Counts describe only {stats.total||0} stocks with valid price and change data; they are not the full exchange breadth. Sector returns are equal-weight averages, not market-cap index contributions. No signal is a trade recommendation. <Link href="/screener" style={{color:"#7cb2f8",textDecoration:"underline"}}>Full screener ↗</Link>
      </div>
