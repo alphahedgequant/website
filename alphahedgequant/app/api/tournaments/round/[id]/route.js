@@ -47,6 +47,30 @@ function summary(san){
   return {move:san,flag:move.includes("#")?"CHECKMATE":move.includes("+")?"CHECK":move.includes("=")?"PROMOTION":move.includes("x")?"CAPTURE":"MOVE",explanation};
 }
 
+/**
+ * Optional broadcaster-supplied PGN [%eval] annotations. These are NOT
+ * independent Stockfish calculations and they do not establish a blunder.
+ * Mate scores are intentionally excluded from numeric swing comparisons.
+ */
+function annotatedSwing(block){
+  const marks=[],move=/(O-O(?:-O)?|[KQRBN]?[a-h1-8]{0,2}x?[a-h][1-8](?:=[QRBN])?[+#]?)\s*\{([^{}]{0,1200})\}/g;
+  for(const m of block.matchAll(move)){
+    const score=m[2].match(/\[%eval\s+(-?\d+(?:\.\d+)?)\]/);
+    if(!score)continue;
+    const value=Number(score[1]);
+    if(Number.isFinite(value)&&Math.abs(value)<=25)marks.push({move:m[1],value});
+    if(marks.length>=400)break;
+  }
+  let best=null;
+  for(let i=1;i<marks.length;i++){
+    const before=marks[i-1],after=marks[i],swing=after.value-before.value;
+    if(Math.abs(swing)<1.5)continue;
+    if(!best||Math.abs(swing)>Math.abs(best.change))
+      best={move:after.move,before:before.value,after:after.value,change:Number(swing.toFixed(2)),
+        attribution:"Lichess broadcaster PGN annotation only; not independent engine analysis or proof of a blunder."};
+  }
+  return best;
+}
 function extract(pgn,roundId){
   const starts=[...pgn.matchAll(/^\[Event\s+"/gm)].map(m=>m.index);
   if(!starts.length)return [];
@@ -73,6 +97,7 @@ function extract(pgn,roundId){
       lastMove:last,lastMoveIndex:moves.length,
       recentMoves:moves.slice(-10),
       notable:summary([...moves].reverse().find(m=>/[+#=]/.test(m))||last),
+      annotatedSwing:annotatedSwing(block),
       playedAt:roundDate?(roundDate+(time?"T"+time+"Z":"")):null,
       // This may be supplied for a chess960/variant initial setup; don't
       // confuse it with the final board position.
