@@ -1,7 +1,7 @@
 import {notFound} from "next/navigation";
 import {isInsightsOwner} from "@/lib/insightsOwnerAccess.mjs";
 import OwnerInsightsDashboard from "@/components/OwnerInsightsDashboard";
-import {parseOwnerAudienceSnapshot} from "@/lib/ownerAudienceSnapshot.mjs";
+import {parseOwnerAudienceSnapshot,parseHistoricalAudienceSnapshot} from "@/lib/ownerAudienceSnapshot.mjs";
 export const dynamic="force-dynamic";
 export const metadata={
   title:"Owner Insights | AlphaHedgeQuant",
@@ -12,5 +12,6 @@ export const metadata={
 export default async function PrivateInsightsPage(){
   if(!await isInsightsOwner())notFound();
   const ownerReported=parseOwnerAudienceSnapshot(process.env.AHQ_OWNER_REPORTED_AUDIENCE_SNAPSHOT);
-  return <OwnerInsightsDashboard ownerReported={ownerReported}/>;
+  const historical=parseHistoricalAudienceSnapshot(process.env.AHQ_HISTORICAL_AUDIENCE_SNAPSHOT);
+  return <OwnerInsightsDashboard ownerReported={ownerReported} historical={historical}/>;
 }
