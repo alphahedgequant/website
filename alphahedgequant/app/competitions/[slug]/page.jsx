@@ -48,7 +48,7 @@ export default async function CompetitionDetail({params}){
      <div className="cq-tags">{e.tags.map(tag=><span key={tag}>{tag}</span>)}</div>
     </section>
     <section><p className="cq-overline">03 / TIMELINE & RESULTS</p><h2>Dates & event status</h2>
-     <p>Starts {formatDate(e.start)}{e.end?" and ends "+formatDate(e.end):"; end date is not confirmed in the available source"}. {e.dateNote||""}</p>
+     <p>Starts {formatDate(e.start)}{e.end?" and ends "+formatDate(e.end):e.endLabel?" with "+e.endLabel:"; end date is not confirmed in the available source"}. {e.dateNote||""}</p>
      <p>Current status shown above is derived from published calendar dates, not a confirmed live-score service. Event rankings, pairings, match scores and winning teams must be checked directly with the organiser.</p>
      {e.broadcastURL&&<p><a href={e.broadcastURL} target="_blank" rel="noopener noreferrer" className="cq-arrow-link">Explore live chess broadcasts ↗</a></p>}
     </section>
@@ -64,7 +64,7 @@ export default async function CompetitionDetail({params}){
        <Field label="Attendance">{e.mode}</Field>
        <Field label="Organiser">{e.organiser}</Field>
        <Field label="Start">{formatDate(e.start)}</Field>
-       <Field label="End">{formatDate(e.end)}</Field>
+       <Field label="End">{e.endLabel||formatDate(e.end)}</Field>
        <Field label="Registration">{stage}</Field>
        {e.registrationDeadline&&<Field label="Published application deadline">{formatDate(e.registrationDeadline)}</Field>}
       </dl>
