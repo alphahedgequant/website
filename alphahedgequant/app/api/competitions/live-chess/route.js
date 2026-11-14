@@ -18,7 +18,7 @@ export async function GET() {
       const url=rawUrl.startsWith("https://lichess.org/broadcast/")?rawUrl:(id?"https://lichess.org/broadcast/"+id:"https://lichess.org/broadcast");
       return {
         id:id||"live-"+i, title:String(tour.name||item?.name||"Lichess broadcast").slice(0,150),
-        round:String(round.name||"Live broadcast").slice(0,80),url,
+        round:String(round.name||"Round schedule").slice(0,80),isLive:round.ongoing===true,url,
         players:Array.isArray(tour.topPlayers)?tour.topPlayers.filter(x=>typeof x==="string").slice(0,8):[]
       };
     });
