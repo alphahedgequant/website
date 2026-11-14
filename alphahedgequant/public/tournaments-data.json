@@ -1,8 +1,8 @@
 {
   "version": 1,
-  "updatedAt": "2026-11-14T20:26:41.581Z",
+  "updatedAt": "2026-11-14T20:29:26.873Z",
   "lichess": {
-    "updatedAt": "2026-11-14T20:26:47.186Z",
+    "updatedAt": "2026-11-14T20:29:32.153Z",
     "top": {
       "active": [
         {
@@ -134,40 +134,6 @@
         },
         {
           "tour": {
-            "id": "VVoR4udb",
-            "name": "IX Festival Salamanca Cuna Del Ajedrez Moderno 2026",
-            "slug": "ix-festival-salamanca-cuna-del-ajedrez-moderno-2026",
-            "info": {
-              "format": "6-player round-robin",
-              "tc": "30 min + 5 sec / move",
-              "fideTC": "rapid",
-              "location": "Salamanca, Spain",
-              "timeZone": "Europe/Madrid",
-              "players": "Martinez, Vallejo, Hnatyshyn, Sivanandan",
-              "website": "https://salamancachess.com/",
-              "standings": "https://s2.chess-results.com/tnr1534227.aspx"
-            },
-            "createdAt": 1793274963370,
-            "url": "https://lichess.org/broadcast/ix-festival-salamanca-cuna-del-ajedrez-moderno-2026/VVoR4udb",
-            "tier": 4,
-            "dates": [
-              1794409200000,
-              1794677400000
-            ],
-            "image": "https://image.lichess.org/display?fmt=webp&h=400&op=thumbnail&path=O1ja5I4Zyey6.webp&w=800&sig=ce3e640f4c70340b43dfb0134a7067ae46cae878"
-          },
-          "round": {
-            "id": "I4zn3Nvt",
-            "name": "Round 10",
-            "slug": "round-10",
-            "finishedAt": 1794681901978,
-            "finished": true,
-            "startsAt": 1794677400000,
-            "url": "https://lichess.org/broadcast/ix-festival-salamanca-cuna-del-ajedrez-moderno-2026/round-10/I4zn3Nvt"
-          }
-        },
-        {
-          "tour": {
             "id": "yVOLKime",
             "name": "FIDE World Senior Chess Championships 2026 | Open 50+",
             "slug": "fide-world-senior-chess-championships-2026-open-50",
@@ -203,20 +169,54 @@
         },
         {
           "tour": {
-            "id": "Xe62pluc",
-            "name": "North American Youth Chess Champioship 2026 | O18",
-            "slug": "north-american-youth-chess-champioship-2026-o18",
+            "id": "VVoR4udb",
+            "name": "IX Festival Salamanca Cuna Del Ajedrez Moderno 2026",
+            "slug": "ix-festival-salamanca-cuna-del-ajedrez-moderno-2026",
+            "info": {
+              "format": "6-player round-robin",
+              "tc": "30 min + 5 sec / move",
+              "fideTC": "rapid",
+              "location": "Salamanca, Spain",
+              "timeZone": "Europe/Madrid",
+              "players": "Martinez, Vallejo, Hnatyshyn, Sivanandan",
+              "website": "https://salamancachess.com/",
+              "standings": "https://s2.chess-results.com/tnr1534227.aspx"
+            },
+            "createdAt": 1793274963370,
+            "url": "https://lichess.org/broadcast/ix-festival-salamanca-cuna-del-ajedrez-moderno-2026/VVoR4udb",
+            "tier": 4,
+            "dates": [
+              1794409200000,
+              1794677400000
+            ],
+            "image": "https://image.lichess.org/display?fmt=webp&h=400&op=thumbnail&path=O1ja5I4Zyey6.webp&w=800&sig=ce3e640f4c70340b43dfb0134a7067ae46cae878"
+          },
+          "round": {
+            "id": "I4zn3Nvt",
+            "name": "Round 10",
+            "slug": "round-10",
+            "finishedAt": 1794681901978,
+            "finished": true,
+            "startsAt": 1794677400000,
+            "url": "https://lichess.org/broadcast/ix-festival-salamanca-cuna-del-ajedrez-moderno-2026/round-10/I4zn3Nvt"
+          }
+        },
+        {
+          "tour": {
+            "id": "THrV96eX",
+            "name": "North American Youth Chess Champioship 2026 | O16",
+            "slug": "north-american-youth-chess-champioship-2026-o16",
             "info": {
               "format": "9-round Swiss",
               "tc": "90 min + 30 sec / move",
               "fideTC": "standard",
               "location": "Ciudad de Mexico, México",
               "timeZone": "America/Mexico_City",
-              "standings": "https://s3.chess-results.com/tnr1477765.aspx?art=1",
+              "standings": "https://s3.chess-results.com/tnr1477762.aspx?art=1",
               "regulations": "https://fideamerica.net/wp-content/uploads/2026/05/Convocatoria-NAYCC-2026-Ingles-1.pdf"
             },
-            "createdAt": 1794408090260,
-            "url": "https://lichess.org/broadcast/north-american-youth-chess-champioship-2026-o18/Xe62pluc",
+            "createdAt": 1794411346973,
+            "url": "https://lichess.org/broadcast/north-american-youth-chess-champioship-2026-o16/THrV96eX",
             "tier": 3,
             "dates": [
               1794438480000,
@@ -225,12 +225,12 @@
             "image": "https://image.lichess.org/display?fmt=webp&h=400&op=thumbnail&path=NjkC-O2LOSzY.webp&w=800&sig=ab4cc4bb42af3ff7e94a2d28dc280b8a1b4e358a"
           },
           "round": {
-            "id": "scOHTF0i",
+            "id": "kab5yVJr",
             "name": "Round 6",
             "slug": "round-6",
             "ongoing": true,
             "startsAt": 1794672480000,
-            "url": "https://lichess.org/broadcast/north-american-youth-chess-champioship-2026-o18/round-6/scOHTF0i"
+            "url": "https://lichess.org/broadcast/north-american-youth-chess-champioship-2026-o16/round-6/kab5yVJr"
           },
           "group": "North American Youth Chess Champioship 2026"
         },
@@ -7500,7 +7500,8 @@
             "id": "scOHTF0i",
             "name": "Round 6",
             "slug": "round-6",
-            "ongoing": true,
+            "finishedAt": 1794688061199,
+            "finished": true,
             "startsAt": 1794672480000,
             "url": "https://lichess.org/broadcast/north-american-youth-chess-champioship-2026-o18/round-6/scOHTF0i"
           },
@@ -11342,7 +11343,7 @@
     ]
   },
   "devpost": {
-    "updatedAt": "2026-11-14T20:26:47.398Z",
+    "updatedAt": "2026-11-14T20:29:32.378Z",
     "hackathons": [
       {
         "id": 31667,
@@ -11373,10 +11374,10 @@
         ],
         "prize_amount": "$<span data-currency-value>100,000</span>",
         "prizes_counts": {
-          "cash": 15,
-          "other": 2
+          "cash": 1,
+          "other": 0
         },
-        "registrations_count": 13886,
+        "registrations_count": 13887,
         "featured": true,
         "organization_name": "Kiro",
         "winners_announced": false,
@@ -11457,8 +11458,8 @@
         ],
         "prize_amount": "$<span data-currency-value>120,000</span>",
         "prizes_counts": {
-          "cash": 1,
-          "other": 0
+          "cash": 7,
+          "other": 1
         },
         "registrations_count": 3410,
         "featured": false,
@@ -11499,7 +11500,7 @@
         ],
         "prize_amount": "$<span data-currency-value>46,000</span>",
         "prizes_counts": {
-          "cash": 1,
+          "cash": 4,
           "other": 0
         },
         "registrations_count": 2549,
@@ -12418,7 +12419,7 @@
           "cash": 6,
           "other": 11
         },
-        "registrations_count": 304,
+        "registrations_count": 305,
         "featured": false,
         "organization_name": "Princeton University",
         "winners_announced": false,
@@ -12872,7 +12873,7 @@
           "cash": 0,
           "other": 22
         },
-        "registrations_count": 149,
+        "registrations_count": 150,
         "featured": false,
         "organization_name": "DurHack",
         "winners_announced": false,
@@ -13082,7 +13083,7 @@
           "cash": 3,
           "other": 3
         },
-        "registrations_count": 121,
+        "registrations_count": 122,
         "featured": false,
         "organization_name": "HackSC",
         "winners_announced": false,

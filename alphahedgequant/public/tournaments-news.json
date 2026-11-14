@@ -1,9 +1,23 @@
 {
   "version": 1,
-  "updatedAt": "2026-11-14T20:26:47.406Z",
+  "updatedAt": "2026-11-14T20:29:32.384Z",
   "source": "Lichess index & published PGN; cached by scheduled GitHub Actions",
   "roundsChecked": 1,
   "items": [
+    {
+      "id": "live-THrV96eX-kab5yVJr",
+      "type": "broadcast",
+      "cat": "chess",
+      "title": "North American Youth Chess Champioship 2026 | O16",
+      "detail": "New ongoing round appeared in the Lichess broadcast index. Live flag only; score is not implied.",
+      "eventId": "l-THrV96eX",
+      "tourId": "THrV96eX",
+      "roundId": "kab5yVJr",
+      "url": "https://lichess.org/broadcast/north-american-youth-chess-champioship-2026-o16/THrV96eX",
+      "source": "Lichess broadcast index",
+      "timeType": "source_check",
+      "observedAt": "2026-11-14T20:29:32.384Z"
+    },
     {
       "id": "result-69d88d9ab7cc58f54bda",
       "type": "result",
