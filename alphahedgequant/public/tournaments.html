@@ -352,7 +352,7 @@
     else bullets.push('This event is on the watchlist. Exact dates or match details are not fully confirmed.');
     if(e.cat==='chess'){
       if(roundData?.games?.length){
-        bullets.push(roundData.games.length+' board(s) are visible in the published round PGN; '+done.length+' have a recorded final result.');
+        bullets.push(roundData.games.length+' board(s) are visible in the published round PGN; '+done.length+' have a recorded final result: '+done.filter(g=>g.result==='1/2-1/2').length+' draws and '+done.filter(g=>g.result==='1-0'||g.result==='0-1').length+' decisive games.');
         const examples=done.slice(0,2);
         for(const g of examples)bullets.push(g.verdict+'. Result: '+g.result+'.');
         const highlight=games.find(g=>g.notable?.flag==='CHECKMATE'||g.notable?.flag==='CHECK');
@@ -386,6 +386,10 @@
     }else if(e.roundStart)events.push({time:dt(e.roundStart),label:(e.round||'Broadcast round')+' scheduled start'});
     if(e.cat==='math'&&e.scheduleTime)events.push({time:dt(e.scheduleTime),label:'Organiser-listed start time'});
     else if(e.start)events.push({time:pretty(e.start)+' · date only',label:e.tbc?'Expected event window':'Published event start window'});
+    if(roundData?.games?.length){
+      const results=roundData.games.filter(g=>g.playedAt&&g.result&&g.result!=='*').slice(0,2);
+      for(const g of results)events.push({time:dt(g.playedAt),label:g.white+' — '+g.black+': game start listed in PGN; current result '+g.result+' (not match finish time)'});
+    }
     if(roundData?.checkedAt)events.unshift({time:dt(roundData.checkedAt),label:'Lichess round PGN checked · '+(roundData.games?.length||0)+' board(s) accessible'});
     else if(e.cat==='chess'&&state.latestChess)events.unshift({time:dt(state.latestChess),label:'Chess broadcast index checked; not a last-move timestamp'});
     return '<div class="story-timeline">'+events.slice(0,6).map(x=>'<div class="story-entry"><time>'+escape(x.time)+'</time>'+escape(x.label)+'</div>').join('')+'</div>';
@@ -394,14 +398,16 @@
     const games=roundData?.games||[];
     if(e.cat!=='chess'||!e.roundId)return '';
     if(!games.length)return '<div class="story-games"><div class="story-label">GAME LOG / SOURCE POSITION</div><p class="story-sub">'+escape(roundData?.error||'No verified game positions or results in this round yet. Check again after the broadcast starts.')+'</p></div>';
-    const focus=games[Math.min(state.selectedGame,games.length-1)]||games[0];
+    const mateIndex=games.findIndex(g=>g.notable?.flag==='CHECKMATE'),decisiveIndex=games.findIndex(g=>g.result==='1-0'||g.result==='0-1');
+    const focusIndex=state.selectedGame>=0?Math.min(state.selectedGame,games.length-1):mateIndex>=0?mateIndex:decisiveIndex>=0?decisiveIndex:0;
+    const focus=games[focusIndex]||games[0];
     const moveStrip=(focus.recentMoves||[]).map((m,i)=>{
       const n=focus.lastMoveIndex-(focus.recentMoves.length||0)+i;
       return (Math.floor(n/2)+1)+(n%2?'…':'.')+m;
     }).join('  ');
     return '<div class="story-games"><div class="story-label">VERIFIED GAME LOG <small> / '+games.length+' BOARDS · CLICK A GAME</small></div>'
       +'<div class="story-game-grid">'+games.slice(0,12).map((g,i)=>'<button class="story-game '+(g===focus?'active':'')+'" type="button" data-game-index="'+i+'"><strong>'+escape(g.white)+' — '+escape(g.black)+'</strong>'
-        +'<small>'+(g.round?'Round '+escape(g.round)+' · ':'')+escape(g.moveCount)+' moves in source</small>'
+        +'<small>'+(g.round?'Round '+escape(g.round)+' · ':'')+escape(g.moveCount)+' moves in source · '+escape(g.playedAt?'Listed '+dt(g.playedAt):'Time unlisted')+'</small>'
         +'<span class="result">'+escape(g.result==='*'?'NO FINAL SCORE':g.result)+'</span></button>').join('')+'</div>'
       +'<div class="story-game-focus"><strong>POSITION / MOVE EXPLAINER</strong>'
       +'<p><strong>'+escape(focus.white)+' vs '+escape(focus.black)+'</strong> · '+escape(focus.verdict)+'.</p>'
@@ -446,7 +452,7 @@
   }
   function openStory(id){
     const e=state.events.find(x=>x.id===id);if(!e)return;
-    state.selectedId=id;state.selectedGame=0;
+    state.selectedId=id;state.selectedGame=-1;
     renderStory(e);
     const panel=el('story-panel');
     panel.scrollIntoView({behavior:window.matchMedia('(prefers-reduced-motion: reduce)').matches?'auto':'smooth',block:'start'});
