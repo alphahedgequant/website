@@ -28,12 +28,13 @@ function validStocks(payload){
 export default function MarketBreadthPanel({onChoose=()=>{}}){
  const [market,setMarket]=useState("NSE"),[open,setOpen]=useState(true);
  const [payload,setPayload]=useState({indices:[],stocks:[],stocksAt:null,indicesAt:null,stale:false,status:"CHECKING",error:""});
- const active=useRef(false);
+ const active=useRef(null);
  const load=useCallback(async()=>{
-   if(active.current)return;active.current=true;
+   if(active.current===market)return;active.current=market;
    const conf=MARKETS[market];
    const read=async url=>{const r=await fetch(url,{cache:"no-store"});const j=await r.json();if(!r.ok||!j?.success)throw Error(j?.error||"Source unavailable");return j;};
    const [a,b]=await Promise.allSettled([read(conf.index),read(conf.stocks)]);
+   if(active.current!==market)return;
    if(a.status==="fulfilled"||b.status==="fulfilled"){
      const indices=a.status==="fulfilled"?validIndices(a.value):[];
      const stocks=b.status==="fulfilled"?validStocks(b.value):[];
@@ -44,14 +45,17 @@ export default function MarketBreadthPanel({onChoose=()=>{}}){
        error:!stocks.length?"Verified constituent prices unavailable; market breadth cannot be calculated.":""});
    }else setPayload({indices:[],stocks:[],stocksAt:null,indicesAt:null,stale:false,
      status:"SOURCE UNAVAILABLE",error:"The connected market-data service did not return a valid snapshot. Figures have been withheld."});
-   active.current=false;
+   if(active.current===market)active.current=null;
  },[market]);
  useEffect(()=>{
    setPayload({indices:[],stocks:[],stocksAt:null,indicesAt:null,stale:false,status:"CHECKING",error:""});
    load();
-   const timer=setInterval(()=>{if(!document.hidden&&open)load();},30000);
-   return ()=>{clearInterval(timer);};
- },[market,open,load]);
+ },[market,load]);
+ useEffect(()=>{
+   if(!open)return;
+   const timer=setInterval(()=>{if(!document.hidden)load();},30000);
+   return ()=>clearInterval(timer);
+ },[open,load]);
  const stats=useMemo(()=>{
    const listed=payload.stocks;
    const advance=listed.filter(r=>r.changePct>0).length,decline=listed.filter(r=>r.changePct<0).length,flat=listed.length-advance-decline;
