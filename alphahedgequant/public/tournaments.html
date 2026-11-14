@@ -212,7 +212,7 @@
   function render(){el('sources').innerHTML=feedText('Chess')+feedText('Hack');const all=state.events,day=localDay(),latest=day+90*DAY;el('k-live').textContent=all.filter(e=>e.live).length.toLocaleString('en-IN');el('k-next').textContent=all.filter(e=>e.start&&!e.tbc&&dayMs(e.start)>=day&&dayMs(e.start)<=latest).length.toLocaleString('en-IN');el('k-countries').textContent=new Set(all.filter(e=>e.start&&(!e.end||dayMs(e.end)>=day)&&dayMs(e.start)<=latest).map(e=>e.country).filter(c=>!['ON','GL','XX'].includes(c))).size.toLocaleString('en-IN');el('k-india').textContent=all.filter(e=>isIndian(e)&&(!e.end||dayMs(e.end)>=day-45*DAY)).length.toLocaleString('en-IN');
     const countrySelect=el('country'),current=state.country,codes=unique(all.map(e=>e.country)).sort((a,b)=>(a==='IN'?-1:b==='IN'?1:(NAME[a]||a).localeCompare(NAME[b]||b)));countrySelect.innerHTML='<option value="all">All countries</option>'+codes.map(c=>'<option value="'+escape(c)+'">'+escape(NAME[c]||c)+'</option>').join('');countrySelect.value=codes.includes(current)?current:'all';if(countrySelect.value!==current)state.country='all';
     el('clock').textContent='CHECKED '+new Date().toLocaleString('en-GB',{dateStyle:'medium',timeStyle:'short',timeZone:'UTC'})+' UTC';el('freshness').textContent='Latest source checks — Lichess: '+(state.latestChess||state.feedChess)+'; Devpost: '+(state.latestHack||state.feedHack)+'. Auto-refresh active while this page is open.';
-    const arr=filtered();el('resultcount').textContent=arr.length.toLocaleString('en-IN')+' matching events · '+all.length.toLocaleString('en-IN')+' indexed';renderTimeline(arr);renderFeatures(arr);renderGroups(arr);
+    const arr=filtered();el('resultcount').textContent=arr.length.toLocaleString('en-IN')+' matching events · '+all.length.toLocaleString('en-IN')+' indexed';renderTimeline(arr);renderFeatures(arr);renderGroups(arr);renderNews(all);if(state.selectedId)renderStory(findSelected());
   }
   function renderTimeline(items){const today=localDay(),start=today-14*DAY,end=today+120*DAY,total=end-start,highlight=items.filter(e=>e.start&&dayMs(e.start)<=end&&dayMs(e.end||e.start)>=start).sort((a,b)=>relevance(b)-relevance(a)||(a.start||'').localeCompare(b.start||'')).slice(0,12);const mark=((today-start)/total*100).toFixed(3);let head='<div class="t-head"><div>EVENT / WINDOW</div><div class="t-months">';let cur=new Date(start),months=[];cur.setUTCDate(1);for(let i=0;i<7;i++){let x=Date.UTC(cur.getUTCFullYear(),cur.getUTCMonth()+i,1,12);if(x>start&&x<end)months.push({pct:(x-start)/total*100,label:new Date(x).toLocaleDateString('en-GB',{month:'short',year:'2-digit',timeZone:'UTC'})});}head+=months.map(m=>'<span style="left:'+m.pct.toFixed(2)+'%">'+escape(m.label)+'</span>').join('')+'</div></div>';if(!highlight.length){el('timeline').innerHTML=head+'<div class="noevents">No dated events match this window. Adjust filters to see more.</div>';return;}const rows=highlight.map(e=>{const a=Math.max(start,dayMs(e.start)),b=Math.min(end,dayMs(e.end||e.start)+DAY);const left=(a-start)/total*100,w=Math.max(0.8,(b-a)/total*100),s=status(e);return'<div class="t-row"><div class="t-name"><button class="story-trigger" type="button" data-story-event="'+escape(e.id)+'" title="Read quick catch-up: '+escape(e.name)+'">'+escape(e.name)+'</button><small>'+escape(NAME[e.country]||e.country)+' · '+escape(short(e.start))+'</small></div><div class="t-track"><span class="t-now" style="left:'+mark+'%"></span><a class="t-bar '+escape(e.cat)+(s.kind==='live'?' live':'')+(e.tbc?' tbc':'')+'" style="left:'+left.toFixed(3)+'%;width:'+w.toFixed(3)+'%" title="'+escape(e.name+' · '+s.label)+'" href="'+escape(safeURL(e.broadcastURL||e.url))+'" target="_blank" rel="noopener noreferrer"></a></div></div>';}).join('');el('timeline').innerHTML=head+rows+'<div class="t-legend"><span><i class="dot"></i> Live <i class="dot hack"></i> Hackathons <i class="dot quant"></i> Quant & finance <b>▥</b> Striped = expected</span><span>'+escape(new Date().toLocaleDateString('en-GB',{day:'numeric',month:'short'}))+' · TODAY</span></div>';}
   function renderFeatures(items){
@@ -299,6 +299,172 @@
     }
     build();
   }
+
+  // All news comes from public API metadata / PGN, official calendars or explicitly
+  // labelled scheduled dates. No unsourced "blunder" or evaluation is generated.
+  function dt(v){const d=new Date(v);return Number.isFinite(d.getTime())?d.toLocaleString('en-GB',{day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit',timeZone:'UTC'})+' UTC':'Time not published';}
+  function excerpt(e){const st=status(e);
+    if(st.kind==='live')return(e.round||'Official broadcast round')+' underway';
+    if(st.kind==='progress')return e.round?'Round '+e.round.replace(/round\s*/i,'')+' · programme in progress':'Programme in progress — no verified individual result';
+    if(st.kind==='finished')return 'Scheduled window closed · results belong to the organiser';
+    if(e.tbc)return 'Dates expected — the organiser has not confirmed the full schedule';
+    return st.label+(e.cat==='math'?' · maths olympiad':'');
+  }
+  function renderNews(all){
+    const live=all.filter(e=>e.cat==='chess'&&e.live===true).sort((a,b)=>relevance(b)-relevance(a));
+    const soon=all.filter(e=>e.cat==='math'&&e.start&&dayMs(e.start)>=localDay()&&dayMs(e.start)<=localDay()+30*DAY).sort((a,b)=>dayMs(a.start)-dayMs(b.start));
+    const notable=all.filter(e=>important(e)&&!e.live&&e.start&&dayMs(e.start)>=localDay()).sort((a,b)=>dayMs(a.start)-dayMs(b.start));
+    const picks=unique([...live.slice(0,2),...soon.slice(0,1),...notable].map(e=>e.id)).map(id=>all.find(e=>e.id===id)).filter(Boolean).slice(0,6);
+    el('news').innerHTML=picks.map(e=>{
+      const st=status(e),live=st.kind==='live';
+      const time=live&&e.roundStart?dt(e.roundStart):e.start?'DATE / '+pretty(e.start):'DATE / TBC';
+      return '<button type="button" class="news-item" data-story-event="'+escape(e.id)+'">'
+       +'<small><b>'+(live?'● LIVE ROUND':e.cat==='math'?'π MATHS WATCH':st.kind==='expected'?'◫ EXPECTED':'UPCOMING')+'</b> · '+escape(time)+'</small>'
+       +'<strong>'+escape(e.name)+'</strong><small>'+escape(excerpt(e))+' · Read catch-up ↗</small></button>';
+    }).join('')||'<div class="noevents">No new verified developments available. The feed will refresh automatically.</div>';
+  }
+  function findSelected(){return state.events.find(e=>e.id===state.selectedId);}
+  function eventFacts(e){
+    const parts=[
+      ['STATUS',status(e).label],['WHERE',(NAME[e.country]||e.country)+' · '+(e.city||'Not stated')],
+      ['DATES',(e.start?pretty(e.start):'Not announced')+(e.end&&e.end!==e.start?' — '+pretty(e.end):'')],
+      ['CATEGORY',badges[e.cat]||e.cat],['FORMAT',e.format||'See organiser']
+    ];
+    if(e.round)parts.push(['LATEST ROUND',e.round]);
+    return '<div class="story-facts">'+parts.map(([k,v])=>'<div><span>'+escape(k)+'</span><strong>'+escape(v)+'</strong></div>').join('')+'</div>';
+  }
+  function instantSummary(e,games,roundData){
+    const st=status(e),done=games.filter(g=>g.result&&g.result!=='*');
+    const bullets=[];
+    if(st.kind==='live')bullets.push((e.round||'A broadcast round')+' is underway. This is confirmed by the Lichess broadcast status, not a calendar guess.');
+    else if(st.kind==='upcoming')bullets.push(e.name+' is scheduled to start '+pretty(e.start)+(e.tbc?' (date is estimated)':'')+'.');
+    else if(st.kind==='progress')bullets.push('The tournament is within its published date window. This does not mean individual games are currently live.');
+    else if(st.kind==='finished')bullets.push('The published competition window has closed. Confirm final results with the event organiser.');
+    else bullets.push('This event is on the watchlist. Exact dates or match details are not fully confirmed.');
+    if(e.cat==='chess'){
+      if(roundData?.games?.length){
+        bullets.push(roundData.games.length+' board(s) are visible in the published round PGN; '+done.length+' have a recorded final result.');
+        const examples=done.slice(0,2);
+        for(const g of examples)bullets.push(g.verdict+'. Result: '+g.result+'.');
+        const highlight=games.find(g=>g.notable?.flag==='CHECKMATE'||g.notable?.flag==='CHECK');
+        if(highlight)bullets.push('Move to notice: '+highlight.white+'–'+highlight.black+', '+highlight.notable.move+'. '+highlight.notable.explanation);
+        else if(games.length)bullets.push('Game moves are available. No independently verified tactical turning point is identified in the current feed.');
+      }else if(roundData?.error)bullets.push('Round PGN is temporarily unreachable. Individual scores, tactics and results are not asserted.');
+      else bullets.push('Game-by-game results are not yet available in the selected source. Follow the official board for moves and standings.');
+      if(e.players?.length)bullets.push('Players to follow: '+e.players.slice(0,4).join(', ')+'. Listing does not confirm pairings.');
+    } else if(e.cat==='math'){
+      bullets.push('Format: '+(e.format||'proof-based mathematics')+'.');
+      if(e.scheduleTime)bullets.push('Organiser-listed start: '+dt(e.scheduleTime)+'.');
+      bullets.push('Problems, scores, medal allocations and named contestants require official publication; no live scoring feed is claimed.');
+    } else if(e.cat==='hack'){
+      bullets.push('Competition type: '+(e.format||'developer hackathon')+'. Check the source for submission rules and judging.');
+      bullets.push('Winner lists and judging decisions are not available from the listing feed unless an organiser publishes them.');
+    }else{
+      bullets.push('Focus: '+(e.format||'quantitative finance competition')+'. Check the official rules for entry and evaluation.');
+      bullets.push('Results, rankings and important trading moments need organiser-released evidence before appearing here.');
+    }
+    if(e.note)bullets.push(e.note);
+    return bullets.slice(0,7);
+  }
+  function storyTimeline(e,roundData){
+    const events=[];
+    if(e.cat==='chess'&&e.rounds?.length){
+      const sorted=e.rounds.filter(r=>r.startsAt).sort((a,b)=>b.startsAt-a.startsAt).slice(0,4);
+      for(const r of sorted){
+        const state=r.ongoing?'Broadcast ongoing':r.finishedAt?'Round finished (source flag)':'Scheduled broadcast round';
+        events.push({time:dt(r.finishedAt||r.startsAt),label:r.name+' · '+state});
+      }
+    }else if(e.roundStart)events.push({time:dt(e.roundStart),label:(e.round||'Broadcast round')+' scheduled start'});
+    if(e.cat==='math'&&e.scheduleTime)events.push({time:dt(e.scheduleTime),label:'Organiser-listed start time'});
+    else if(e.start)events.push({time:pretty(e.start)+' · date only',label:e.tbc?'Expected event window':'Published event start window'});
+    if(roundData?.checkedAt)events.unshift({time:dt(roundData.checkedAt),label:'Lichess round PGN checked · '+(roundData.games?.length||0)+' board(s) accessible'});
+    else if(e.cat==='chess'&&state.latestChess)events.unshift({time:dt(state.latestChess),label:'Chess broadcast index checked; not a last-move timestamp'});
+    return '<div class="story-timeline">'+events.slice(0,6).map(x=>'<div class="story-entry"><time>'+escape(x.time)+'</time>'+escape(x.label)+'</div>').join('')+'</div>';
+  }
+  function showGames(e,roundData){
+    const games=roundData?.games||[];
+    if(e.cat!=='chess'||!e.roundId)return '';
+    if(!games.length)return '<div class="story-games"><div class="story-label">GAME LOG / SOURCE POSITION</div><p class="story-sub">'+escape(roundData?.error||'No verified game positions or results in this round yet. Check again after the broadcast starts.')+'</p></div>';
+    const focus=games[Math.min(state.selectedGame,games.length-1)]||games[0];
+    const moveStrip=(focus.recentMoves||[]).map((m,i)=>{
+      const n=focus.lastMoveIndex-(focus.recentMoves.length||0)+i;
+      return (Math.floor(n/2)+1)+(n%2?'…':'.')+m;
+    }).join('  ');
+    return '<div class="story-games"><div class="story-label">VERIFIED GAME LOG <small> / '+games.length+' BOARDS · CLICK A GAME</small></div>'
+      +'<div class="story-game-grid">'+games.slice(0,12).map((g,i)=>'<button class="story-game '+(g===focus?'active':'')+'" type="button" data-game-index="'+i+'"><strong>'+escape(g.white)+' — '+escape(g.black)+'</strong>'
+        +'<small>'+(g.round?'Round '+escape(g.round)+' · ':'')+escape(g.moveCount)+' moves in source</small>'
+        +'<span class="result">'+escape(g.result==='*'?'NO FINAL SCORE':g.result)+'</span></button>').join('')+'</div>'
+      +'<div class="story-game-focus"><strong>POSITION / MOVE EXPLAINER</strong>'
+      +'<p><strong>'+escape(focus.white)+' vs '+escape(focus.black)+'</strong> · '+escape(focus.verdict)+'.</p>'
+      +'<p>Latest recorded move: <strong>'+escape(focus.lastMove||'Not published')+'</strong> · '+escape(focus.moveCount)+' full-move numbers reached in the PGN.</p>'
+      +(focus.notable?'<p><strong>'+escape(focus.notable.flag)+' · '+escape(focus.notable.move)+'</strong> — '+escape(focus.notable.explanation)+'</p>':'')
+      +'<p><strong>Recent verified notation:</strong> <code>'+escape(moveStrip||'No moves')+'</code></p>'
+      +'<p class="story-sub">This explains the recorded chess notation, not a computer-engine evaluation. The complete board position, alternative moves, and clock times should be inspected on Lichess. Clock comments show remaining time, not a verified move timestamp.</p>'
+      +'<a class="board-link" href="'+escape(safeURL(e.broadcastURL||e.url))+'" target="_blank" rel="noopener noreferrer">VIEW ACTUAL CHESS POSITION & FULL MOVES ↗</a></div></div>';
+  }
+  function renderStory(e){
+    if(!e)return;
+    const panel=el('story-panel'),cache=e.roundId?state.roundCache[e.roundId]:null;
+    const details=cache?.data||null,games=details?.games||[];
+    const bullets=instantSummary(e,games,cache?.data||cache),kind=status(e);
+    panel.hidden=false;
+    panel.innerHTML='<div class="story-top"><span class="story-kicker">AHQ / QUICK CATCH-UP · '+escape(badges[e.cat]||e.cat)+' · '+escape(kind.kind.toUpperCase())+'</span><button type="button" class="story-close" id="story-close" aria-label="Close event summary">CLOSE ✕</button></div>'
+      +'<div class="story-header"><div><h2>'+escape(e.name)+'</h2><p class="story-sub">'+escape((NAME[e.country]||e.country)+' / '+e.city)+' · '+escape(e.players?.slice(0,6).join(' · ')||'Participants not confirmed')+'</p></div>'+eventFacts(e)+'</div>'
+      +'<div class="story-grid"><section><div class="story-label">QUICK CATCH-UP <span class="slash">/</span> WHAT MATTERS</div><ul class="story-bullets">'+bullets.map(x=>'<li>'+escape(x)+'</li>').join('')+'</ul></section>'
+      +'<section><div class="story-label">DEVELOPMENT LOG <span class="slash">/</span> TIMESTAMPS</div>'+storyTimeline(e,details)+'</section></div>'
+      +showGames(e,cache?.error?{error:cache.error}:details)
+      +'<div class="story-actions"><a href="'+escape(safeURL(e.broadcastURL||e.url))+'" target="_blank" rel="noopener noreferrer">OFFICIAL EVENT / BROADCAST ↗</a>'
+      +profileLink(e)
+      +(e.roundId?'<button type="button" id="story-refresh">REFRESH MATCH RECAP ↻</button>':'')+'</div>'
+      +'<p class="story-source-note">Source: '+escape(e.src||'Official calendar / curated links')+'. '
+      +(details?.checkedAt?'Round data checked '+escape(dt(details.checkedAt))+'. ':'')
+      +(cache?.loading?'Loading latest verified game moves… ':'')
+      +'Updates are refreshed while this page is open. Dates and round starts are not timestamps for individual moves. Claims about blunders, winning evaluations, rankings and results appear only when supported by an official source.</p>';
+  }
+  async function loadStory(e,force=false){
+    if(!e?.roundId||!/^[a-zA-Z0-9]{8}$/.test(e.roundId))return;
+    const id=e.roundId,existing=state.roundCache[id],ts=Date.now();
+    if(!force&&existing&&(existing.loading||ts-existing.at<55000))return;
+    state.roundCache[id]={...(existing||{}),loading:true,at:ts};
+    if(state.selectedId===e.id)renderStory(e);
+    try{
+      const data=await fetchJSON('/api/tournaments/round/'+encodeURIComponent(id));
+      state.roundCache[id]={at:Date.now(),data,loading:false};
+    }catch{
+      state.roundCache[id]={at:Date.now(),loading:false,error:'Round PGN could not be retrieved. Live claims and game scores have not been invented.'};
+    }
+    if(state.selectedId){const current=findSelected();if(current?.roundId===id)renderStory(current);}
+  }
+  function openStory(id){
+    const e=state.events.find(x=>x.id===id);if(!e)return;
+    state.selectedId=id;state.selectedGame=0;
+    renderStory(e);
+    const panel=el('story-panel');
+    panel.scrollIntoView({behavior:window.matchMedia('(prefers-reduced-motion: reduce)').matches?'auto':'smooth',block:'start'});
+    panel.focus({preventScroll:true});
+    loadStory(e);
+  }
+  function closeStory(){
+    state.selectedId=null;state.selectedGame=0;
+    const panel=el('story-panel');panel.hidden=true;panel.innerHTML='';
+  }
+  document.addEventListener('click',event=>{
+    if(event.target.closest('#story-close')){closeStory();return;}
+    if(event.target.closest('#story-refresh')){const e=findSelected();if(e)loadStory(e,true);return;}
+    const game=event.target.closest('[data-game-index]');
+    if(game&&state.selectedId){state.selectedGame=Number(game.dataset.gameIndex)||0;renderStory(findSelected());return;}
+    if(event.target.closest('a[href]'))return;
+    const button=event.target.closest('[data-story-event]');
+    if(button){openStory(button.dataset.storyEvent);return;}
+  });
+  document.addEventListener('keydown',event=>{
+    if(event.key==='Escape'&&state.selectedId)closeStory();
+  });
+  setInterval(()=>{
+    if(!state.selectedId)return;
+    const e=findSelected();
+    if(e?.roundId)loadStory(e);
+  },60000);
   function changeTheme(){const dark=document.documentElement.dataset.theme!=='dark';document.documentElement.dataset.theme=dark?'dark':'light';el('theme').textContent=dark?'◐ LIGHT':'◑ DARK';try{localStorage.setItem('ahq-tournament-theme',dark?'dark':'light')}catch{}}
   try{if(localStorage.getItem('ahq-tournament-theme')==='dark')changeTheme()}catch{}el('theme').addEventListener('click',changeTheme);
   el('filters').addEventListener('submit',e=>e.preventDefault());document.querySelectorAll('[data-cat]').forEach(b=>b.addEventListener('click',()=>{state.cat=b.dataset.cat;document.querySelectorAll('[data-cat]').forEach(t=>{t.classList.toggle('on',t===b);t.setAttribute('aria-pressed',String(t===b))});state.showAll=false;render()}));el('search').addEventListener('input',e=>{state.query=e.target.value;state.showAll=false;render()});el('status').addEventListener('change',e=>{state.status=e.target.value;state.showAll=false;render()});el('country').addEventListener('change',e=>{state.country=e.target.value;state.showAll=false;render()});el('indiafirst').addEventListener('change',e=>{state.indiaFirst=e.target.checked;render()});el('showmore').addEventListener('click',()=>{state.showAll=true;render()});el('clear').addEventListener('click',()=>{state.cat='all';state.status='all';state.country='all';state.query='';state.indiaFirst=true;state.showAll=false;el('search').value='';el('status').value='all';el('country').value='all';el('indiafirst').checked=true;document.querySelectorAll('[data-cat]').forEach(b=>{const on=b.dataset.cat==='all';b.classList.toggle('on',on);b.setAttribute('aria-pressed',String(on))});render()});
