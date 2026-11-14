@@ -73,6 +73,7 @@ export default async function CompetitionDetail({params}){
       </dl>
       <a className="cq-primary" href={e.sourceURL} target="_blank" rel="noopener noreferrer">Official source / entry ↗</a>
       <p className="cq-source-note">Source-checked {formatDate(VERIFIED_AS_OF)}. Registration status and deadlines can change. No affiliation with event organisers is implied.</p>
+      <p className="cq-source-note">AlphaHedgeQuant competition profiles are free to read without an account. Individual competitions may have eligibility requirements or entry fees set by their organisers.</p>
      </div>
    </aside>
   </div>
