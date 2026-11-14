@@ -88,6 +88,14 @@
     .story-registration dd{margin:3px 0 0;font-size:12px;line-height:1.6}
     .story-registration a{color:var(--red);font-size:11px;font-weight:900;text-decoration:underline;text-underline-offset:3px}
     .story-registration p{font-size:10px;color:var(--soft)}
+
+    .story-standings{margin:18px 0;padding:18px;border:1px solid var(--border);background:var(--paper);min-width:0}
+    .story-standings #story-standings{margin:9px 0 11px;padding:9px 12px;background:var(--ink);color:var(--paper);border:1px solid var(--border);font-size:10px;font-weight:900;letter-spacing:.07em;cursor:pointer}
+    .story-standings .standings-scroll{max-height:420px;overflow:auto;margin:12px 0}
+    .story-standings table{width:100%;border-collapse:collapse;min-width:380px;font-size:11px}
+    .story-standings th,.story-standings td{text-align:left;padding:10px 9px;border-bottom:1px solid var(--border)}
+    .story-standings th{font-size:10px;letter-spacing:.08em;color:var(--soft)}
+    .story-standings details summary{cursor:pointer;font-size:11px;font-weight:900;text-decoration:underline;text-underline-offset:3px;margin:12px 0}
   </style>
 </head>
 <body>
@@ -258,7 +266,7 @@
       +'<a href="'+escape(safeURL(r.source||e.url))+'" target="_blank" rel="noopener noreferrer">VERIFY APPLICATION DETAILS AT ORGANISER ↗</a>'
       +'<p>Published schedule status may differ from the live form. No payment or registration is processed by AHQ.</p></section>';
   }
-  const state={selectedId:null,selectedGame:0,boardOpen:false,roundCache:Object.create(null),storyLoading:false,liveChess:null,liveHack:null,cacheChess:null,cacheHack:null,snapshot:false,feedChess:'loading',feedHack:'loading',latestChess:null,latestHack:null,cat:'all',country:'all',status:'all',query:'',indiaFirst:true,entryOnly:false,showAll:false,events:[]};
+  const state={selectedId:null,selectedGame:0,boardOpen:false,roundCache:Object.create(null),standingsCache:Object.create(null),storyLoading:false,liveChess:null,liveHack:null,cacheChess:null,cacheHack:null,snapshot:false,feedChess:'loading',feedHack:'loading',latestChess:null,latestHack:null,cat:'all',country:'all',status:'all',query:'',indiaFirst:true,entryOnly:false,showAll:false,events:[]};
   const el=id=>document.getElementById(id), now=()=>new Date(), localDay=()=>{const d=new Date();return Date.UTC(d.getFullYear(),d.getMonth(),d.getDate(),12)}, DAY=86400000;
   const utcDate=s=>{if(!s)return null;const d=new Date(s);return Number.isFinite(d.valueOf())?d:null};
   const dayMs=v=>{if(!v)return null;const d=utcDate(v);return d?Date.UTC(d.getUTCFullYear(),d.getUTCMonth(),d.getUTCDate(),12):null};
@@ -272,7 +280,7 @@
   function country(location,name){const loc=String(location||'');if(/\b(online|virtual|remote|internet|worldwide online)\b/i.test(loc))return'ON';for(const [code,re] of CC)if(re.test(loc))return code;if(/\b(global|worldwide|international)\b/i.test(loc))return'GL';for(const [code,re] of CC)if(re.test(String(name||'')))return code;return'XX';}
   function players(raw){if(Array.isArray(raw))return unique(raw.map(v=>typeof v==='string'?v:(v?.name||v?.player||'')).filter(Boolean)).slice(0,12);if(typeof raw==='string')return unique(raw.split(/[,;\n]/g).map(s=>s.trim()).filter(s=>s.length>3)).slice(0,12);return[];}
   function parseRange(raw){const s=String(raw||'').replace(/\u00a0/g,' ').replace(/[–—]/g,'-').trim();if(!s)return[null,null];const months='jan feb mar apr may jun jul aug sep oct nov dec'.split(' ');const toInt=m=>months.indexOf(m.toLowerCase().slice(0,3))+1;const matches=[...s.matchAll(/\b(Jan(?:uary)?|Feb(?:ruary)?|Mar(?:ch)?|Apr(?:il)?|May|Jun(?:e)?|Jul(?:y)?|Aug(?:ust)?|Sep(?:tember)?|Oct(?:ober)?|Nov(?:ember)?|Dec(?:ember)?)\s+(\d{1,2})(?:,?\s+(20\d{2}))?/ig)];if(!matches.length)return[null,null];const yEnd=(s.match(/20\d{2}/g)||[]).pop();const endMatch=matches[matches.length-1],endYear=Number(endMatch[3]||yEnd||new Date().getFullYear());let endDay=Number(endMatch[2]),endMonth=toInt(endMatch[1]);let startMatch=matches[0],startDay=Number(startMatch[2]),startMonth=toInt(startMatch[1]),startYear=Number(startMatch[3]||endYear);if(matches.length===1){const single=s.match(/-\s*(\d{1,2})\s*,?\s*(20\d{2})?/);if(single){endDay=Number(single[1]);endMonth=startMonth;startYear=Number(startMatch[3]||single[2]||endYear)}}if(startMonth>endMonth && !startMatch[3])startYear=endYear-1;const iso=(y,m,d)=>{if(y<2020||y>2100||m<1||m>12||d<1||d>31)return null;const x=new Date(Date.UTC(y,m-1,d));return x.getUTCFullYear()===y&&x.getUTCMonth()+1===m&&x.getUTCDate()===d?x.toISOString().slice(0,10):null};const start=iso(startYear,startMonth,startDay),end=iso(endYear,endMonth,endDay);return[start,end&&end>=start?end:start];}
-  function normalizedChess(item){const tour=item?.tour||item?.tournament||item||{},rawRound=item?.round||{},rounds=Array.isArray(item?.rounds)?item.rounds:[];const info=tour.info||item?.info||{};const rawDates=Array.isArray(tour.dates)?tour.dates:[];let start=msISO(rawDates[0]??rounds[0]?.startsAt??rawRound.startsAt),end=msISO(rawDates[rawDates.length-1]??rounds[rounds.length-1]?.finishedAt??rounds[rounds.length-1]?.startsAt??rawRound.finishedAt??rawRound.startsAt);const rlist=rounds.length?rounds:[rawRound].filter(x=>x?.name||x?.startsAt);const active=rlist.find(r=>r?.ongoing===true);const future=rlist.filter(r=>r?.startsAt&&Number(r.startsAt)>Date.now()).sort((a,b)=>a.startsAt-b.startsAt)[0];if(!start&&rlist.length)start=msISO(rlist.map(x=>x.startsAt).filter(Boolean).sort()[0]);if(!end&&rlist.length)end=msISO(rlist.map(x=>x.finishedAt||x.startsAt).filter(Boolean).sort().at(-1));const name=String(tour.name||item?.name||'Lichess tournament').trim();const url=safeURL(tour.url||item.url||('https://lichess.org/broadcast/'+String(tour.id||'')));const location=String(info.location||info.venue||'');const plist=players(info.players||tour.topPlayers||item.players);return{id:'l-'+(tour.id||url),cat:'chess',name,start,end,city:location||'Location not stated',country:country(location,name),players:plist,format:String(info.format||info.tc||'Chess broadcast'),url,live:!!active,round:String(active?.name||rawRound.name||''),next:future?.startsAt||null,nextName:String(future?.name||''),roundId:String(active?.id||rawRound.id||[...rlist].sort((a,b)=>(b.startsAt||0)-(a.startsAt||0))[0]?.id||''),roundStart:Number(active?.startsAt||rawRound.startsAt||0),rounds:rlist.map(r=>({name:String(r.name||''),startsAt:Number(r.startsAt||0),finishedAt:Number(r.finishedAt||0),ongoing:!!r.ongoing,id:String(r.id||'')})).slice(-20),tbc:false,featured:Number(tour.tier||0)>=5||plist.filter(x=>ELITE.test(x)).length>=2,note:'Lichess broadcast index',src:'lichess',fin:false};}
+  function normalizedChess(item){const tour=item?.tour||item?.tournament||item||{},rawRound=item?.round||{},rounds=Array.isArray(item?.rounds)?item.rounds:[];const info=tour.info||item?.info||{};const rawDates=Array.isArray(tour.dates)?tour.dates:[];let start=msISO(rawDates[0]??rounds[0]?.startsAt??rawRound.startsAt),end=msISO(rawDates[rawDates.length-1]??rounds[rounds.length-1]?.finishedAt??rounds[rounds.length-1]?.startsAt??rawRound.finishedAt??rawRound.startsAt);const rlist=rounds.length?rounds:[rawRound].filter(x=>x?.name||x?.startsAt);const active=rlist.find(r=>r?.ongoing===true);const future=rlist.filter(r=>r?.startsAt&&Number(r.startsAt)>Date.now()).sort((a,b)=>a.startsAt-b.startsAt)[0];if(!start&&rlist.length)start=msISO(rlist.map(x=>x.startsAt).filter(Boolean).sort()[0]);if(!end&&rlist.length)end=msISO(rlist.map(x=>x.finishedAt||x.startsAt).filter(Boolean).sort().at(-1));const name=String(tour.name||item?.name||'Lichess tournament').trim();const url=safeURL(tour.url||item.url||('https://lichess.org/broadcast/'+String(tour.id||'')));const location=String(info.location||info.venue||'');const plist=players(info.players||tour.topPlayers||item.players);return{id:'l-'+(tour.id||url),cat:'chess',name,start,end,city:location||'Location not stated',country:country(location,name),players:plist,format:String(info.format||info.tc||'Chess broadcast'),url,live:!!active,round:String(active?.name||rawRound.name||''),next:future?.startsAt||null,nextName:String(future?.name||''),tourId:/^[A-Za-z0-9]{8}$/.test(String(tour.id||''))?String(tour.id):null,roundId:String(active?.id||rawRound.id||[...rlist].sort((a,b)=>(b.startsAt||0)-(a.startsAt||0))[0]?.id||''),roundStart:Number(active?.startsAt||rawRound.startsAt||0),rounds:rlist.map(r=>({name:String(r.name||''),startsAt:Number(r.startsAt||0),finishedAt:Number(r.finishedAt||0),ongoing:!!r.ongoing,id:String(r.id||'')})).slice(-20),tbc:false,featured:Number(tour.tier||0)>=5||plist.filter(x=>ELITE.test(x)).length>=2,note:'Lichess broadcast index',src:'lichess',fin:false};}
   function normalizedHack(item){const range=parseRange(item.submission_period_dates||item.submission_period||item.date_range||'');const name=String(item.title||item.name||'Developer hackathon').trim();const location=String(item?.displayed_location?.location||item.location||'Online');const themes=Array.isArray(item.themes)?item.themes.map(t=>typeof t==='string'?t:t?.name).filter(Boolean):[];const format=themes.join(' · ').slice(0,150)||'Hackathon';let prize=String(item.prize_amount||'').replace(/<[^>]*>/g,'').trim();return{id:'d-'+(item.id||item.url||name),cat:'hack',name,start:range[0],end:range[1],city:location,country:country(location,name),players:[],format,url:safeURL(item.url||'https://devpost.com/hackathons'),live:false,round:'',next:null,nextName:'',tbc:!range[0],featured:false,note:[prize?('Prizes: '+prize):'',Number.isFinite(Number(item.registrations_count))?('Registered: '+item.registrations_count):'',item.organization_name||''].filter(Boolean).join(' · ').slice(0,210),src:'devpost',fin:FIN.test(name+' '+format+' '+String(item.organization_name||''))};}
   function status(e,today=localDay()){
     if(e.live===true)return{kind:'live',label:'LIVE broadcast · '+(e.round||'Broadcast round')};
@@ -309,7 +317,7 @@
   function isIndian(e){return e.country==='IN'||e.players.some(p=>INDIAN.test(p));}function important(e){return e.featured||e.players.filter(p=>ELITE.test(p)).length>=2;}
   function relevance(e){return (isIndian(e)?200:0)+(important(e)?100:0)+(status(e).kind==='live'?70:0)+(e.country==='IN'?30:0);}
   function eSort(a,b){if(state.indiaFirst){const pri=(b.country==='IN')-(a.country==='IN')||(Number(isIndian(b))-Number(isIndian(a)));if(pri)return pri;}const order={live:0,progress:1,upcoming:2,expected:3,finished:4};return order[status(a).kind]-order[status(b).kind]||(a.start||'9999').localeCompare(b.start||'9999')||a.name.localeCompare(b.name);}
-  function mergeSource(curated,dynamic){const out=curated.map(x=>({...x,src:'curated',live:false,next:null,nextName:''}));for(const x of dynamic){let idx=-1;if(x.cat==='chess'){idx=out.findIndex(c=>c.cat==='chess'&&c.match&&c.match.test(x.name)&&(!c.start||!x.start||Math.abs(dayMs(c.start)-dayMs(x.start))<=40*DAY));}if(idx>=0){const c=out[idx];out[idx]={...c,live:x.live||c.live,round:x.round||c.round,next:x.next||c.next,nextName:x.nextName||c.nextName,players:unique([...c.players,...x.players]).slice(0,14),featured:true,src:c.src+' + Lichess',broadcastURL:x.url,format:c.format||x.format,roundId:x.roundId||c.roundId,roundStart:x.roundStart||c.roundStart,rounds:x.rounds?.length?x.rounds:c.rounds};}else out.push(x);}const seen=new Set();return out.filter(e=>{const id=(e.cat+'|'+e.name.toLowerCase().replace(/[^a-z0-9]/g,'').slice(0,60)+'|'+(e.start||''));if(seen.has(id))return false;seen.add(id);return true;});}
+  function mergeSource(curated,dynamic){const out=curated.map(x=>({...x,src:'curated',live:false,next:null,nextName:''}));for(const x of dynamic){let idx=-1;if(x.cat==='chess'){idx=out.findIndex(c=>c.cat==='chess'&&c.match&&c.match.test(x.name)&&(!c.start||!x.start||Math.abs(dayMs(c.start)-dayMs(x.start))<=40*DAY));}if(idx>=0){const c=out[idx];out[idx]={...c,live:x.live||c.live,round:x.round||c.round,next:x.next||c.next,nextName:x.nextName||c.nextName,players:unique([...c.players,...x.players]).slice(0,14),featured:true,src:c.src+' + Lichess',broadcastURL:x.url,format:c.format||x.format,tourId:x.tourId||c.tourId,roundId:x.roundId||c.roundId,roundStart:x.roundStart||c.roundStart,rounds:x.rounds?.length?x.rounds:c.rounds};}else out.push(x);}const seen=new Set();return out.filter(e=>{const id=(e.cat+'|'+e.name.toLowerCase().replace(/[^a-z0-9]/g,'').slice(0,60)+'|'+(e.start||''));if(seen.has(id))return false;seen.add(id);return true;});}
   function filtered(){const term=state.query.trim().toLowerCase(),today=localDay();return state.events.filter(e=>{if(e.end&&!e.tbc&&dayMs(e.end)<today-45*DAY)return false;const k=status(e).kind;if(state.status!=='all'&&state.status!==k)return false;if(state.country!=='all'&&state.country!==e.country)return false;if(state.entryOnly&&registration(e).kind!=='open')return false;if(state.cat!=='all'&&e.cat!==state.cat&&!(state.cat==='quant'&&e.fin))return false;if(term&&!([e.name,e.city,e.country,NAME[e.country],e.format,e.note,...e.players].join(' ').toLowerCase().includes(term)))return false;return true;}).sort(eSort);}
   const badges={chess:'CHESS',hack:'HACKATHON',quant:'QUANT',math:'MATHS'};
   const PROFILE_SLUG={
@@ -551,6 +559,45 @@
       return 'https://lichess.org/embed/broadcast/'+parts[1]+'/'+e.roundId+'?theme=brown&bg=dark';
     }catch{return '';}
   }
+  function standingsHTML(e){
+    if(e.cat!=='chess')return '';
+    if(!e.tourId){
+      return '<section class="story-standings"><div class="story-label">PAIRINGS &amp; PUBLISHED GAME POINTS</div>'
+       +'<p class="story-sub">Official tournament standings or full-game PGN not available through this listing. Use the event source for the latest pairings and table.</p></section>';
+    }
+    const saved=state.standingsCache[e.tourId],d=saved?.data;
+    const header='<div class="story-label">PAIRINGS &amp; PUBLISHED GAME POINTS <span class="slash">/</span> PROVISIONAL PGN ONLY</div>'
+      +'<p class="story-sub">Reconstructed from the Lichess tournament PGN, which may omit phases, tiebreaks or boards. No official rank, leader or winner is asserted.</p>';
+    if(!d)return '<section class="story-standings">'+header
+      +'<button type="button" id="story-standings">'+(saved?.loading?'LOADING PUBLISHED POINTS…':saved?.error?'RETRY TO READ TOURNAMENT PGN ↻':'LOAD PUBLISHED GAME POINTS & PAIRINGS ↗')+'</button>'
+      +(saved?.error?'<p class="story-sub">'+escape(saved.error)+'</p>':'')+'</section>';
+    const players=(d.players||[]).slice(0,25);
+    const table=players.length?'<div class="standings-scroll"><table><thead><tr><th>PLAYER</th><th>PTS*</th><th>GAMES</th><th>W/D/L</th></tr></thead><tbody>'
+      +players.map(p=>'<tr><td>'+escape(p.name)+'</td><td>'+escape(p.points)+'</td><td>'+escape(p.played)+'</td><td>'+escape(p.wins)+' / '+escape(p.draws)+' / '+escape(p.losses)+'</td></tr>').join('')+'</tbody></table></div>'
+      :'<p class="story-sub">No games with a verified final result in the accessible PGN.</p>';
+    const pairings=(d.samplePairings||[]).slice(-20);
+    const rounds=pairings.length?'<details><summary>View '+pairings.length+' published pairings / results</summary><div class="standings-scroll"><table><thead><tr><th>ROUND</th><th>WHITE</th><th>BLACK</th><th>RESULT</th></tr></thead><tbody>'
+      +pairings.map(g=>'<tr><td>'+escape(g.round)+'</td><td>'+escape(g.white)+'</td><td>'+escape(g.black)+'</td><td>'+escape(g.result==='*'?'ONGOING / UNREPORTED':g.result)+'</td></tr>').join('')+'</tbody></table></div></details>':'';
+    return '<section class="story-standings">'+header
+      +'<p class="story-sub">Published games: '+escape(d.gameCount)+' · final scores: '+escape(d.scoredGames)+' · pending: '+escape(d.pendingGames)+' · checked '+escape(dt(d.checkedAt))+'</p>'
+      +table+pairings
+      +'<button type="button" id="story-standings">REFRESH TOURNAMENT PGN ↻</button>'
+      +'<p class="story-sub">* Points are sums of results in the accessible PGN. They are not official standings, tiebreak results or proof that all participants and rounds are covered.</p></section>';
+  }
+  async function loadStandings(e,force=false){
+    if(!e?.tourId||!/^[A-Za-z0-9]{8}$/.test(e.tourId))return;
+    const id=e.tourId,existing=state.standingsCache[id],now=Date.now();
+    if(!force&&existing&&(existing.loading||now-existing.at<120000))return;
+    state.standingsCache[id]={...(existing||{}),loading:true,at:now};
+    if(state.selectedId===e.id)renderStory(e);
+    try{
+      const data=await fetchJSON('/api/tournaments/standings/'+encodeURIComponent(id));
+      state.standingsCache[id]={at:Date.now(),data,loading:false};
+    }catch{
+      state.standingsCache[id]={at:Date.now(),loading:false,error:'The full tournament PGN is unavailable or too large. Refer to the official tournament source for standings.'};
+    }
+    if(state.selectedId===e.id)renderStory(findSelected());
+  }
   function showGames(e,roundData){
     const games=roundData?.games||[];
     if(e.cat!=='chess'||!e.roundId)return '';
@@ -588,6 +635,7 @@
       +'<div class="story-grid"><section><div class="story-label">QUICK CATCH-UP <span class="slash">/</span> WHAT MATTERS</div><ul class="story-bullets">'+bullets.map(x=>'<li>'+escape(x)+'</li>').join('')+'</ul></section>'
       +'<section><div class="story-label">DEVELOPMENT LOG <span class="slash">/</span> TIMESTAMPS</div>'+storyTimeline(e,details)+'</section></div>'
       +registrationHTML(e)
+      +standingsHTML(e)
       +showGames(e,cache?.error?{error:cache.error}:details)
       +'<div class="story-actions"><a href="'+escape(safeURL(e.broadcastURL||e.url))+'" target="_blank" rel="noopener noreferrer">OFFICIAL EVENT / BROADCAST ↗</a>'
       +profileLink(e)
@@ -627,6 +675,7 @@
   }
   document.addEventListener('click',event=>{
     if(event.target.closest('#story-close')){closeStory();return;}
+    if(event.target.closest('#story-standings')){const e=findSelected();if(e)loadStandings(e,true);return;}
     if(event.target.closest('#story-board-toggle')){state.boardOpen=!state.boardOpen;renderStory(findSelected());return;}
     if(event.target.closest('#story-refresh')){const e=findSelected();if(e)loadStory(e,true);return;}
     const game=event.target.closest('[data-game-index]');
