@@ -96,6 +96,22 @@
     .story-standings th,.story-standings td{text-align:left;padding:10px 9px;border-bottom:1px solid var(--border)}
     .story-standings th{font-size:10px;letter-spacing:.08em;color:var(--soft)}
     .story-standings details summary{cursor:pointer;font-size:11px;font-weight:900;text-decoration:underline;text-underline-offset:3px;margin:12px 0}
+
+    .news-toolbar{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin:0 0 14px;font-size:11px;color:var(--soft)}
+    .news-toolbar span{margin-right:auto;font-weight:850}
+    .news-toolbar button{cursor:pointer;background:var(--paper);color:var(--ink);border:1px solid var(--border);padding:8px 10px;font-size:10px;font-weight:850}
+    .news-toolbar button:hover{border-color:var(--red)}
+    .news-archive-panel{border:1px solid var(--border);background:var(--paper);margin:15px 0 0;padding:13px 16px}
+    .news-archive-panel>summary{cursor:pointer;font-size:11px;font-weight:900;letter-spacing:.035em}
+    .news-archive-panel>summary span{font-size:10px;font-weight:500;color:var(--soft);margin-left:10px}
+    .news-archive-row{display:flex;justify-content:space-between;gap:15px;padding:14px 0;border-top:1px solid var(--border);align-items:center}
+    .news-archive-row:first-child{margin-top:12px}
+    .news-archive-row.unread{border-left:2px solid var(--red);padding-left:10px}
+    .news-archive-row div{min-width:0;display:flex;flex-direction:column;gap:4px}
+    .news-archive-row strong{font-size:12px}
+    .news-archive-row small{font-size:10px;line-height:1.5;color:var(--soft)}
+    .news-archive-row button,.news-archive-row a{background:transparent;border:0;color:var(--red);font-weight:900;font-size:10px;white-space:nowrap;cursor:pointer;text-decoration:none}
+    @media(max-width:480px){.news-archive-row{align-items:flex-start;flex-direction:column}.news-toolbar button{flex:1}}
   </style>
 </head>
 <body>
@@ -105,7 +121,7 @@
     <section class="stats" aria-label="Event statistics"><div class="stat"><div class="key">Live now</div><div class="value" id="k-live">—</div><div class="annotation">Confirmed live broadcast rounds</div></div><div class="stat"><div class="key">Next 90 days</div><div class="value" id="k-next">—</div><div class="annotation">Scheduled starts</div></div><div class="stat"><div class="key">Countries / regions</div><div class="value" id="k-countries">—</div><div class="annotation">In active 90-day view</div></div><div class="stat"><div class="key">India watchlist</div><div class="value" id="k-india">—</div><div class="annotation">India-based or Indian players</div></div></section>
     <section class="section" aria-labelledby="timeline-title"><div class="sectionhead"><h2 id="timeline-title">01 <span class="slash">/</span> THE RUNNING CALENDAR</h2><span class="detail">TODAY −14D <span class="slash">/</span> +120D</span></div><div class="timeline" id="timeline"><div class="noevents">Building timeline…</div></div></section>
     <section class="section" aria-labelledby="filter-title"><div class="sectionhead"><h2 id="filter-title">02 <span class="slash">/</span> FIND YOUR COMPETITION</h2><span class="detail">FILTER / DISCOVER</span></div><form class="filterbar" id="filters" autocomplete="off"><div class="tabs" role="group" aria-label="Competition category"><button type="button" data-cat="all" class="on" aria-pressed="true">ALL EVENTS</button><button type="button" data-cat="chess" aria-pressed="false">♞ CHESS</button><button type="button" data-cat="hack" aria-pressed="false">⌘ HACKATHONS</button><button type="button" data-cat="math" aria-pressed="false">π MATHS</button><button type="button" data-cat="quant" aria-pressed="false">∑ QUANT & FINANCE</button></div><div class="filterfields"><input id="search" type="search" placeholder="Search event, player, city or tag…" aria-label="Search competitions" /><select id="country" aria-label="Country filter"><option value="all">All countries</option></select><select id="status" aria-label="Status filter"><option value="all">Any status</option><option value="live">Live</option><option value="progress">In progress</option><option value="upcoming">Upcoming</option><option value="expected">Expected / TBC</option><option value="finished">Finished</option></select><label class="ticklabel"><input type="checkbox" id="indiafirst" checked /> India first</label><label class="ticklabel"><input type="checkbox" id="entryonly" /> Published entry window</label></div><div class="filterbottom"><span id="resultcount">Loading event feed…</span><button type="button" id="clear">CLEAR FILTERS ↗</button></div></form></section>
-    <section class="section" aria-labelledby="news-title"><div class="sectionhead"><h2 id="news-title">03 <span class="slash">/</span> LATEST DEVELOPMENTS</h2><span class="detail">SOURCE-LINKED / AUTO REFRESH</span></div><div id="news" class="news-list"><div class="noevents">Checking developments…</div></div></section>
+    <section class="section" aria-labelledby="news-title"><div class="sectionhead"><h2 id="news-title">03 <span class="slash">/</span> LATEST DEVELOPMENTS</h2><span class="detail">SOURCE-LINKED / AUTO REFRESH</span></div><div class="news-toolbar"><span id="news-count">Loading sourced history…</span><button type="button" id="news-mark-read">MARK ALL READ</button><button type="button" id="news-alerts">ENABLE BROWSER ALERTS</button></div><div id="news" class="news-list"><div class="noevents">Checking developments…</div></div><details class="news-archive-panel"><summary>READ PERSISTENT UPDATE HISTORY <span id="news-archive-count">—</span></summary><div id="news-archive"></div></details></section>
     <section id="story-panel" class="story-panel" tabindex="-1" aria-label="Tournament quick catch-up" hidden></section>
     <section class="section" aria-labelledby="featured-title"><div class="sectionhead"><h2 id="featured-title">04 <span class="slash">/</span> HEADLINE EVENTS</h2><span class="detail">ELITE / INDIA / NOTABLE</span></div><div class="features" id="features"><div class="noevents">Checking headline events…</div></div></section>
     <section class="section" aria-labelledby="group-title"><div class="sectionhead"><h2 id="group-title">05 <span class="slash">/</span> COUNTRY-WISE TIMETABLE</h2><span class="detail" id="groupinfo">WORLDWIDE / —</span></div><div id="groups"><div class="noevents">Loading country timetable…</div></div><button type="button" id="showmore" class="showmore" hidden>SHOW MORE COUNTRIES ↓</button></section>
@@ -266,7 +282,7 @@
       +'<a href="'+escape(safeURL(r.source||e.url))+'" target="_blank" rel="noopener noreferrer">VERIFY APPLICATION DETAILS AT ORGANISER ↗</a>'
       +'<p>Published schedule status may differ from the live form. No payment or registration is processed by AHQ.</p></section>';
   }
-  const state={selectedId:null,selectedGame:0,boardOpen:false,roundCache:Object.create(null),standingsCache:Object.create(null),storyLoading:false,liveChess:null,liveHack:null,cacheChess:null,cacheHack:null,snapshot:false,feedChess:'loading',feedHack:'loading',latestChess:null,latestHack:null,cat:'all',country:'all',status:'all',query:'',indiaFirst:true,entryOnly:false,showAll:false,events:[]};
+  const state={selectedId:null,selectedGame:0,boardOpen:false,roundCache:Object.create(null),standingsCache:Object.create(null),storyLoading:false,liveChess:null,liveHack:null,cacheChess:null,cacheHack:null,newsItems:[],newsLatest:null,newsReadAt:0,newsLoaded:false,newsAlertsOn:false,snapshot:false,feedChess:'loading',feedHack:'loading',latestChess:null,latestHack:null,cat:'all',country:'all',status:'all',query:'',indiaFirst:true,entryOnly:false,showAll:false,events:[]};
   const el=id=>document.getElementById(id), now=()=>new Date(), localDay=()=>{const d=new Date();return Date.UTC(d.getFullYear(),d.getMonth(),d.getDate(),12)}, DAY=86400000;
   const utcDate=s=>{if(!s)return null;const d=new Date(s);return Number.isFinite(d.valueOf())?d:null};
   const dayMs=v=>{if(!v)return null;const d=utcDate(v);return d?Date.UTC(d.getUTCFullYear(),d.getUTCMonth(),d.getUTCDate(),12):null};
@@ -445,7 +461,49 @@
     if(e.tbc)return 'Dates expected — the organiser has not confirmed the full schedule';
     return st.label+(e.cat==='math'?' · maths olympiad':'');
   }
+  function newsEvent(n,all){
+    return all.find(e=>e.id===n.eventId||e.tourId===n.tourId)||null;
+  }
+  function sourceNewsItem(n,all){
+    const event=newsEvent(n,all),label=(n.type==='result'?'VERIFIED RESULT':'LIVE BROADCAST SEEN');
+    const title=escape(n.title||"Tournament development"),observed=dt(n.observedAt);
+    const body='<small><b>'+label+'</b> · SOURCE CHECK '+escape(observed)+'</small><strong>'+title+'</strong>'
+      +'<small>'+escape(n.detail||'Published event update')+' · '+escape(n.source||'Lichess')+'</small>';
+    if(event)return '<button type="button" class="news-item" data-story-event="'+escape(event.id)+'">'+body+'</button>';
+    return '<a class="news-item" href="'+escape(safeURL(n.url))+'" target="_blank" rel="noopener noreferrer">'+body+'</a>';
+  }
+  function renderNewsArchive(){
+    const all=state.events;
+    const updates=state.newsItems||[];
+    const unread=updates.filter(x=>Date.parse(x.observedAt)>state.newsReadAt).length;
+    el('news-count').textContent=unread?unread+' unread sourced updates':'No unread sourced updates';
+    el('news-archive-count').textContent=updates.length+' archived events';
+    el('news-alerts').textContent=state.newsAlertsOn?'NOTIFICATIONS ON · WHILE OPEN':'ENABLE BROWSER ALERTS';
+    el('news-archive').innerHTML=updates.length?updates.slice(0,45).map(n=>
+      '<div class="news-archive-row '+(Date.parse(n.observedAt)>state.newsReadAt?'unread':'')+'">'
+      +'<div><strong>'+escape(n.title)+'</strong><small>'+escape(n.source||'Lichess')+' · '+escape(dt(n.observedAt))+' · '+escape(n.detail||'')+'</small></div>'
+      +(newsEvent(n,all)?'<button type="button" data-story-event="'+escape(newsEvent(n,all).id)+'">CATCH-UP ↗</button>':'<a href="'+escape(safeURL(n.url))+'" target="_blank" rel="noopener noreferrer">SOURCE ↗</a>')+'</div>').join('')
+      :'<p class="story-sub">No verified developments archived yet. GitHub Actions records changes from public broadcast status and published PGN scores approximately every 30 minutes when feeds are reachable.</p>';
+  }
+  async function loadNews(){
+    try{
+      const data=await fetchJSON('./tournaments-news.json?v=1');
+      if(data?.version!==1||!Array.isArray(data.items))throw Error('News archive unrecognised');
+      const items=data.items.filter(x=>x&&typeof x.id==='string'&&typeof x.title==='string'&&typeof x.observedAt==='string'&&typeof x.url==='string').slice(0,180);
+      const old=new Set(state.newsItems.map(x=>x.id));
+      if(state.newsLoaded&&state.newsAlertsOn&&window.Notification?.permission==='granted'){
+        const added=items.filter(x=>!old.has(x.id)&&x.type==='result'&&Date.now()-Date.parse(x.observedAt)<3600000).slice(0,2);
+        for(const n of added){try{new window.Notification('AHQ · Chess result verified',{body:n.title+' · '+n.detail,tag:'ahq-'+n.id});}catch{}}
+      }
+      state.newsItems=items;state.newsLatest=data.updatedAt||null;state.newsLoaded=true;
+    }catch{
+      // Keep the last verified archive if a fetch fails. No synthetic headlines.
+    }
+    renderNews(state.events);
+  }
   function renderNews(all){
+    renderNewsArchive();
+    const history=(state.newsItems||[]).slice(0,4).map(n=>sourceNewsItem(n,all));
     const confirmed=[];
     for(const e of all){
       if(!e.roundId)continue;
@@ -477,7 +535,7 @@
        +'<small><b>'+(live?'● LIVE ROUND':e.cat==='math'?'π MATHS WATCH':st.kind==='expected'?'◫ EXPECTED':'UPCOMING')+'</b> · '+escape(time)+'</small>'
        +'<strong>'+escape(e.name)+'</strong><small>'+escape(excerpt(e))+' · Read catch-up ↗</small></button>';
     });
-    el('news').innerHTML=[...results,...calendar].join('')||'<div class="noevents">No verified developments available. The feed will refresh automatically.</div>';
+    el('news').innerHTML=[...history,...results,...calendar].slice(0,10).join('')||'<div class="noevents">No verified developments available. The feed will refresh automatically.</div>';
   }
   let lastHeadlineRead=0;
   function autoHeadlineRecap(){
@@ -694,8 +752,27 @@
   },60000);
   function changeTheme(){const dark=document.documentElement.dataset.theme!=='dark';document.documentElement.dataset.theme=dark?'dark':'light';el('theme').textContent=dark?'◐ LIGHT':'◑ DARK';try{localStorage.setItem('ahq-tournament-theme',dark?'dark':'light')}catch{}}
   try{if(localStorage.getItem('ahq-tournament-theme')==='dark')changeTheme()}catch{}el('theme').addEventListener('click',changeTheme);
+  try{
+    const seen=Number(localStorage.getItem('ahq-competitions-news-read-at')||0);if(Number.isFinite(seen)&&seen>0)state.newsReadAt=seen;
+    state.newsAlertsOn=localStorage.getItem('ahq-competitions-alerts-on')==='1';
+  }catch{}
+  el('news-mark-read').addEventListener('click',()=>{
+    state.newsReadAt=Date.now();try{localStorage.setItem('ahq-competitions-news-read-at',String(state.newsReadAt));}catch{}
+    renderNews(state.events);
+  });
+  el('news-alerts').addEventListener('click',async()=>{
+    if(!('Notification' in window)){el('news-alerts').textContent='NOT AVAILABLE IN THIS BROWSER';return;}
+    if(state.newsAlertsOn){state.newsAlertsOn=false;try{localStorage.setItem('ahq-competitions-alerts-on','0')}catch{}renderNewsArchive();return;}
+    try{
+      const permission=await window.Notification.requestPermission();
+      if(permission==='granted'){
+        state.newsAlertsOn=true;try{localStorage.setItem('ahq-competitions-alerts-on','1')}catch{}
+        renderNewsArchive();
+      }else el('news-alerts').textContent='PERMISSION DENIED / BROWSER SETTINGS';
+    }catch{el('news-alerts').textContent='BROWSER ALERTS UNAVAILABLE IN EMBED';}
+  });
   el('filters').addEventListener('submit',e=>e.preventDefault());document.querySelectorAll('[data-cat]').forEach(b=>b.addEventListener('click',()=>{state.cat=b.dataset.cat;document.querySelectorAll('[data-cat]').forEach(t=>{t.classList.toggle('on',t===b);t.setAttribute('aria-pressed',String(t===b))});state.showAll=false;render()}));el('search').addEventListener('input',e=>{state.query=e.target.value;state.showAll=false;render()});el('status').addEventListener('change',e=>{state.status=e.target.value;state.showAll=false;render()});el('country').addEventListener('change',e=>{state.country=e.target.value;state.showAll=false;render()});el('indiafirst').addEventListener('change',e=>{state.indiaFirst=e.target.checked;render()});el('entryonly').addEventListener('change',e=>{state.entryOnly=e.target.checked;render()});el('showmore').addEventListener('click',()=>{state.showAll=true;render()});el('clear').addEventListener('click',()=>{state.cat='all';state.status='all';state.country='all';state.query='';state.indiaFirst=true;state.entryOnly=false;state.showAll=false;el('entryonly').checked=false;el('search').value='';el('status').value='all';el('country').value='all';el('indiafirst').checked=true;document.querySelectorAll('[data-cat]').forEach(b=>{const on=b.dataset.cat==='all';b.classList.toggle('on',on);b.setAttribute('aria-pressed',String(on))});render()});
-  build();snapshot();chess();hack();setInterval(chess,60000);setInterval(hack,1800000);setInterval(render,60000);
+  build();snapshot();chess();hack();loadNews();setInterval(chess,60000);setInterval(hack,1800000);setInterval(loadNews,90000);setInterval(render,60000);
   // Diagnostic surface used by the deployment's automated smoke checks only.
   window.__AHQ_TOURNAMENTS__={state,parseRange,country,status,readNDJSON};
 })();
