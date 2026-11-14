@@ -44,7 +44,7 @@ export default function Footer() {
             <Link href="/research" className="text-muted hover:text-body">Research</Link>
             <Link href="/ipo" className="text-muted hover:text-body">IPO Intelligence</Link>
             <Link href="/learn" className="text-muted hover:text-body">Learn</Link>
-            <Link href="/tournaments.html" className="text-muted hover:text-body">Competitions</Link>
+            <Link href="/competitions" className="text-muted hover:text-body">Competitions</Link>
           </div>
           <div className="flex flex-col gap-2.5">
             <span className="eyebrow !text-muted">Company</span>
