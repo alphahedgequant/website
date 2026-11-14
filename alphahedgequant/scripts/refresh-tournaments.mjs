@@ -55,6 +55,10 @@ function hackathons(raw) {
 }
 let previous = {};
 try { previous = JSON.parse(await readFile(output, 'utf8')); } catch { /* first run */ }
+try{
+ const live=await json('https://www.alphahedgequant.com/api/tournaments/cache?kind=snapshot');
+ if(live?.version===1&&Array.isArray(live?.lichess?.official))previous=live;
+}catch{/* Keep last known static snapshot until Neon is deployed. */}
 const next = { version: 1, updatedAt: new Date().toISOString(),
   lichess: previous?.lichess || null, devpost: previous?.devpost || null };
 const diagnostics = [];
@@ -134,6 +138,10 @@ async function recentNews(older,newer){
  const file=join(outDir,'tournaments-news.json'),now=new Date().toISOString();
  let previousNews={version:1,items:[]};
  try{const old=JSON.parse(await readFile(file,'utf8'));if(old?.version===1&&Array.isArray(old.items))previousNews=old;}catch{}
+ try{
+   const live=await json('https://www.alphahedgequant.com/api/tournaments/cache?kind=news');
+   if(live?.version===1&&Array.isArray(live.items))previousNews=live;
+ }catch{/* Retain checked-in archive as offline fallback. */}
  const items=new Map(previousNews.items.filter(x=>x?.id&&Date.parse(x.observedAt)>Date.now()-90*86400000).map(x=>[x.id,x]));
  const oldBroadcasts=new Set((older?.lichess?.top?.active||[]).map(x=>x?.tour?.id).filter(Boolean));
  const active=(newer?.lichess?.top?.active||[]).filter(x=>x?.tour?.id&&x?.tour?.name);
