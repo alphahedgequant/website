@@ -29,6 +29,49 @@
 
     .category.math,.eventtype.math{color:#8e67a4!important}
     html[data-theme=dark] .category.math,html[data-theme=dark] .eventtype.math{color:#cdb4ff!important}
+
+    /* News-style quick catch-ups follow the site's Archivo / slate / signal-red UI. */
+    .story-trigger{border:0;background:none;font:inherit;font-weight:inherit;letter-spacing:inherit;color:inherit;text-align:left;padding:0;cursor:pointer}
+    .story-trigger:hover,.story-trigger:focus-visible{color:var(--red)}
+    .feature[data-story-event],.eventrow[data-story-event]{cursor:pointer}
+    .feature[data-story-event]:hover,.eventrow[data-story-event]:hover{border-color:var(--red)}
+    .feature .bottom{flex-wrap:wrap;align-items:center}.story-open{font-weight:900;color:var(--red)!important;font-size:10px}
+    .eventtitle .story-trigger{font-size:13px;font-weight:850;line-height:1.4;overflow-wrap:anywhere}
+    .t-name .story-trigger{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:block;font-size:11px;font-weight:800}
+    .news-list{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+    .news-item{padding:16px;border:1px solid var(--border);background:var(--paper);display:flex;flex-direction:column;gap:8px;min-width:0;text-align:left;cursor:pointer}
+    .news-item:hover,.news-item:focus-visible{border-color:var(--red)}
+    .news-item small{font-size:10px;color:var(--muted);font-weight:700}.news-item b{color:var(--red);font-size:10px;letter-spacing:.08em}
+    .news-item strong{font-size:13px;line-height:1.45;color:var(--ink);font-weight:850}
+    .story-panel{background:var(--paper);border:1px solid var(--border);border-top:3px solid var(--red);padding:clamp(16px,3vw,32px);margin-top:26px;scroll-margin-top:24px}
+    .story-panel[hidden]{display:none!important}
+    .story-top{display:flex;justify-content:space-between;gap:12px;align-items:center;padding-bottom:16px;margin-bottom:21px;border-bottom:1px solid var(--border)}
+    .story-kicker{color:var(--red);font-size:10px;font-weight:900;letter-spacing:.12em}
+    .story-close{border:1px solid var(--border);color:var(--ink);background:var(--subtle);padding:8px 11px;font-weight:850}
+    .story-panel h2{font-size:clamp(25px,3vw,42px);line-height:1.16;letter-spacing:-.05em;margin:0 0 11px}
+    .story-sub{font-size:12px;color:var(--soft)}
+    .story-facts{background:var(--subtle);padding:15px;border:1px solid var(--border);display:grid;gap:9px;font-size:11px}
+    .story-facts div{display:grid;grid-template-columns:82px minmax(0,1fr);gap:8px}.story-facts span{color:var(--muted)}.story-facts strong{color:var(--ink)}
+    .story-header,.story-grid{display:grid;grid-template-columns:minmax(0,1.35fr) minmax(260px,.65fr);gap:25px;align-items:start}
+    .story-grid{grid-template-columns:minmax(0,1fr) minmax(250px,.8fr);margin-top:26px}
+    .story-label{border-bottom:1px solid var(--border);font-size:12px;font-weight:900;letter-spacing:.09em;padding-bottom:12px;margin-bottom:15px}
+    .story-bullets{margin:0;padding:0 0 0 20px;display:grid;gap:12px}
+    .story-bullets li{font-size:14px;line-height:1.55;padding-left:3px}.story-bullets li::marker{color:var(--red)}
+    .story-timeline{border-left:1px solid var(--border);margin:0 0 0 5px;padding:0 0 0 17px;display:grid;gap:13px}
+    .story-entry{position:relative;font-size:12px;line-height:1.5}.story-entry:before{content:'';position:absolute;left:-21px;top:5px;width:7px;height:7px;border-radius:50%;background:var(--red)}
+    .story-entry time{color:var(--muted);font-size:10px;display:block;margin-bottom:3px}
+    .story-actions{display:flex;gap:9px;flex-wrap:wrap;margin-top:21px}.story-actions a,.story-actions button{border:1px solid var(--border);background:var(--subtle);padding:10px 13px;color:var(--ink);font-size:11px;font-weight:800}
+    .story-actions a:hover,.story-actions button:hover{border-color:var(--red)}
+    .story-source-note{margin-top:20px;padding-top:14px;border-top:1px solid var(--border);color:var(--muted);font-size:11px;line-height:1.7}
+    .story-games{margin-top:26px;padding-top:18px;border-top:1px solid var(--border)}
+    .story-game-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}
+    .story-game{display:grid;gap:7px;background:var(--subtle);color:var(--ink);border:1px solid var(--border);padding:13px;text-align:left;cursor:pointer}
+    .story-game.active,.story-game:hover{border-color:var(--red)}.story-game strong{font-size:12px}.story-game small{color:var(--muted);font-size:10px}
+    .story-game-focus{border-left:3px solid var(--red);background:var(--subtle);padding:16px;margin-top:14px;font-size:12px;line-height:1.65}.story-game-focus p{margin:6px 0}
+    .story-game-focus .board-link{color:var(--red);display:inline-block;margin-top:10px;text-decoration:underline;text-underline-offset:3px;font-weight:800}
+    .story-game-focus code{font-family:monospace;font-size:11px;overflow-wrap:anywhere}
+    @media(max-width:860px){.news-list{grid-template-columns:repeat(2,minmax(0,1fr))}.story-grid,.story-header{grid-template-columns:1fr}}
+    @media(max-width:560px){.news-list,.story-game-grid{grid-template-columns:1fr}}
   </style>
 </head>
 <body>
@@ -38,9 +81,11 @@
     <section class="stats" aria-label="Event statistics"><div class="stat"><div class="key">Live now</div><div class="value" id="k-live">—</div><div class="annotation">Confirmed live broadcast rounds</div></div><div class="stat"><div class="key">Next 90 days</div><div class="value" id="k-next">—</div><div class="annotation">Scheduled starts</div></div><div class="stat"><div class="key">Countries / regions</div><div class="value" id="k-countries">—</div><div class="annotation">In active 90-day view</div></div><div class="stat"><div class="key">India watchlist</div><div class="value" id="k-india">—</div><div class="annotation">India-based or Indian players</div></div></section>
     <section class="section" aria-labelledby="timeline-title"><div class="sectionhead"><h2 id="timeline-title">01 <span class="slash">/</span> THE RUNNING CALENDAR</h2><span class="detail">TODAY −14D <span class="slash">/</span> +120D</span></div><div class="timeline" id="timeline"><div class="noevents">Building timeline…</div></div></section>
     <section class="section" aria-labelledby="filter-title"><div class="sectionhead"><h2 id="filter-title">02 <span class="slash">/</span> FIND YOUR COMPETITION</h2><span class="detail">FILTER / DISCOVER</span></div><form class="filterbar" id="filters" autocomplete="off"><div class="tabs" role="group" aria-label="Competition category"><button type="button" data-cat="all" class="on" aria-pressed="true">ALL EVENTS</button><button type="button" data-cat="chess" aria-pressed="false">♞ CHESS</button><button type="button" data-cat="hack" aria-pressed="false">⌘ HACKATHONS</button><button type="button" data-cat="math" aria-pressed="false">π MATHS</button><button type="button" data-cat="quant" aria-pressed="false">∑ QUANT & FINANCE</button></div><div class="filterfields"><input id="search" type="search" placeholder="Search event, player, city or tag…" aria-label="Search competitions" /><select id="country" aria-label="Country filter"><option value="all">All countries</option></select><select id="status" aria-label="Status filter"><option value="all">Any status</option><option value="live">Live</option><option value="progress">In progress</option><option value="upcoming">Upcoming</option><option value="expected">Expected / TBC</option><option value="finished">Finished</option></select><label class="ticklabel"><input type="checkbox" id="indiafirst" checked /> India first</label></div><div class="filterbottom"><span id="resultcount">Loading event feed…</span><button type="button" id="clear">CLEAR FILTERS ↗</button></div></form></section>
-    <section class="section" aria-labelledby="featured-title"><div class="sectionhead"><h2 id="featured-title">03 <span class="slash">/</span> HEADLINE EVENTS</h2><span class="detail">ELITE / INDIA / NOTABLE</span></div><div class="features" id="features"><div class="noevents">Checking headline events…</div></div></section>
-    <section class="section" aria-labelledby="group-title"><div class="sectionhead"><h2 id="group-title">04 <span class="slash">/</span> COUNTRY-WISE TIMETABLE</h2><span class="detail" id="groupinfo">WORLDWIDE / —</span></div><div id="groups"><div class="noevents">Loading country timetable…</div></div><button type="button" id="showmore" class="showmore" hidden>SHOW MORE COUNTRIES ↓</button></section>
-    <section class="section" id="profiles"><div class="sectionhead"><h2>05 <span class="slash">/</span> COMPETITION PROFILES</h2><span class="detail">RULES / ELIGIBILITY / TIMELINES</span></div><p class="profile-intro">Detailed profiles link to official organisers, participation information and registration notes. Unannounced dates are marked as estimates.</p><div class="profile-grid"><a href="/competitions/global-strategy-challenge-2026">Global Strategy Challenge <span>PROFILE ↗</span></a><a href="/competitions/fide-world-chess-championship-2026">FIDE World Championship <span>PROFILE ↗</span></a><a href="/competitions/berkeley-trading-competition-2027">Berkeley Trading Competition <span>PROFILE ↗</span></a><a href="/competitions/rotman-trading-competition-2027">Rotman Trading Competition <span>PROFILE ↗</span></a></div></section>
+    <section class="section" aria-labelledby="news-title"><div class="sectionhead"><h2 id="news-title">03 <span class="slash">/</span> LATEST DEVELOPMENTS</h2><span class="detail">SOURCE-LINKED / AUTO REFRESH</span></div><div id="news" class="news-list"><div class="noevents">Checking developments…</div></div></section>
+    <section id="story-panel" class="story-panel" tabindex="-1" aria-label="Tournament quick catch-up" hidden></section>
+    <section class="section" aria-labelledby="featured-title"><div class="sectionhead"><h2 id="featured-title">04 <span class="slash">/</span> HEADLINE EVENTS</h2><span class="detail">ELITE / INDIA / NOTABLE</span></div><div class="features" id="features"><div class="noevents">Checking headline events…</div></div></section>
+    <section class="section" aria-labelledby="group-title"><div class="sectionhead"><h2 id="group-title">05 <span class="slash">/</span> COUNTRY-WISE TIMETABLE</h2><span class="detail" id="groupinfo">WORLDWIDE / —</span></div><div id="groups"><div class="noevents">Loading country timetable…</div></div><button type="button" id="showmore" class="showmore" hidden>SHOW MORE COUNTRIES ↓</button></section>
+    <section class="section" id="profiles"><div class="sectionhead"><h2>06 <span class="slash">/</span> COMPETITION PROFILES</h2><span class="detail">RULES / ELIGIBILITY / TIMELINES</span></div><p class="profile-intro">Detailed profiles link to official organisers, participation information and registration notes. Unannounced dates are marked as estimates.</p><div class="profile-grid"><a href="/competitions/global-strategy-challenge-2026">Global Strategy Challenge <span>PROFILE ↗</span></a><a href="/competitions/fide-world-chess-championship-2026">FIDE World Championship <span>PROFILE ↗</span></a><a href="/competitions/berkeley-trading-competition-2027">Berkeley Trading Competition <span>PROFILE ↗</span></a><a href="/competitions/rotman-trading-competition-2027">Rotman Trading Competition <span>PROFILE ↗</span></a></div></section>
     <footer class="foot"><div><strong>How the board updates</strong><p>Lichess broadcast listings refresh every 60 seconds; Devpost attempts every 30 minutes. When browser CORS blocks a provider, our same-site read-only bridge is tried; if that also fails, a dated JSON snapshot is used when available, otherwise just the verified/labelled curated index. Statuses follow event dates unless an ongoing chess round is confirmed. Results and complete participant lists live with the organiser.</p><p id="freshness">Last checked: —</p></div><div><strong>Data provenance</strong><p><a href="https://lichess.org/broadcast" target="_blank" rel="noopener noreferrer">Lichess broadcast</a> · <a href="https://devpost.com/hackathons" target="_blank" rel="noopener noreferrer">Devpost hackathons</a> · FIDE and event organisers. Curated event notes were checked on 14 Nov 2026. Dates without official confirmation are prominently labelled <b>Expected</b>; these are not announced fixtures. No affiliation or live-score guarantee is implied.</p><div class="footlinks"><a href="/">AlphaHedgeQuant home</a><a href="/learn">Learning library</a><a href="#profiles">Competition profiles</a></div></div></footer>
   </main>
 <script>
@@ -118,7 +163,7 @@
   const INDIAN=/\b(gukesh|pragg(?:nanandhaa)?|arjun|erigaisi|nihal|vidit|humpy|divya|vaishali|aravindh)\b/i;
   const FIN=/\b(fintech|financial|finance|bank|trading|quant|crypto|web3|defi|blockchain|investment|market.?making|equity|risk modeling|portfolio)\b/i;
   const NAME = {IN:'India',ON:'Online / location-free',GL:'Global / multi-country',XX:'Other / not stated',US:'United States',GB:'United Kingdom',CA:'Canada',DE:'Germany',FR:'France',TR:'Türkiye',CH:'Switzerland',NL:'Netherlands',HU:'Hungary',RS:'Serbia',UZ:'Uzbekistan',KZ:'Kazakhstan',AE:'United Arab Emirates',SG:'Singapore',CN:'China',JP:'Japan',KR:'South Korea',BR:'Brazil',AU:'Australia',PL:'Poland',ES:'Spain',IT:'Italy',AT:'Austria',NO:'Norway',SE:'Sweden',DK:'Denmark',FI:'Finland',IE:'Ireland',ZA:'South Africa',MX:'Mexico'};
-  const state={liveChess:null,liveHack:null,cacheChess:null,cacheHack:null,snapshot:false,feedChess:'loading',feedHack:'loading',latestChess:null,latestHack:null,cat:'all',country:'all',status:'all',query:'',indiaFirst:true,showAll:false,events:[]};
+  const state={selectedId:null,selectedGame:0,roundCache:Object.create(null),storyLoading:false,liveChess:null,liveHack:null,cacheChess:null,cacheHack:null,snapshot:false,feedChess:'loading',feedHack:'loading',latestChess:null,latestHack:null,cat:'all',country:'all',status:'all',query:'',indiaFirst:true,showAll:false,events:[]};
   const el=id=>document.getElementById(id), now=()=>new Date(), localDay=()=>{const d=new Date();return Date.UTC(d.getFullYear(),d.getMonth(),d.getDate(),12)}, DAY=86400000;
   const utcDate=s=>{if(!s)return null;const d=new Date(s);return Number.isFinite(d.valueOf())?d:null};
   const dayMs=v=>{if(!v)return null;const d=utcDate(v);return d?Date.UTC(d.getUTCFullYear(),d.getUTCMonth(),d.getUTCDate(),12):null};
