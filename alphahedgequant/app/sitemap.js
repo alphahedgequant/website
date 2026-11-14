@@ -1,5 +1,6 @@
 import {RESEARCH_LIBRARY,LIBRARY_PUBLISHED} from "../lib/publicResearchLibrary.mjs";
 import {PUBLIC_RESEARCH_SERIES,RESEARCH_PREVIEWS,PREVIEW_RELEASE_DATE} from "../lib/publicResearchPreviews.mjs";
+import {COMPETITIONS,VERIFIED_AS_OF} from "../lib/competitionEvents.mjs";
 // Only public, crawlable pages belong in the sitemap. Product routes
 // currently require Clerk login, so listing them would point crawlers at
 // an authentication redirect instead of indexable content.
@@ -36,5 +37,10 @@ export default function sitemap() {
     lastModified:new Date("2026-11-13T17:30:00Z"),
     changeFrequency:"monthly",priority:0.82
   }];
-  return [...index,...notes,...series,...previews,...publishedMacro];
+  const competitionPages=COMPETITIONS.map(item=>({
+    url:base+"/competitions/"+item.slug,
+    lastModified:new Date(VERIFIED_AS_OF+"T00:00:00Z"),
+    changeFrequency:"weekly",priority:0.55
+  }));
+  return [...index,...notes,...series,...previews,...publishedMacro,...competitionPages];
 }
