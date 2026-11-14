@@ -4,6 +4,7 @@ on:
     paths:
       - "alphahedgequant/components/AnalyticsTracker.jsx"
       - "alphahedgequant/components/OwnerInsightsDashboard.jsx"
+      - "alphahedgequant/app/admin/analytics/page.jsx"
       - "alphahedgequant/components/IpoScreen.jsx"
       - "alphahedgequant/components/InterviewArena.jsx"
       - "alphahedgequant/app/learn/page.jsx"
@@ -14,7 +15,9 @@ on:
       - "alphahedgequant/app/research/page.jsx"
       - "alphahedgequant/app/api/admin/analytics/route.js"
       - "alphahedgequant/lib/firstPartyInsights.mjs"
+      - "alphahedgequant/lib/ownerAudienceSnapshot.mjs"
       - "alphahedgequant/tests/featureAnalytics.test.mjs"
+      - "alphahedgequant/tests/ownerAudienceSnapshot.test.mjs"
       - ".github/workflows/owner-analytics.yml"
   push:
     branches: [main]
@@ -23,6 +26,7 @@ on:
       - "alphahedgequant/components/OwnerInsightsDashboard.jsx"
       - "alphahedgequant/app/api/admin/analytics/route.js"
       - "alphahedgequant/tests/featureAnalytics.test.mjs"
+      - "alphahedgequant/tests/ownerAudienceSnapshot.test.mjs"
       - ".github/workflows/owner-analytics.yml"
 permissions:
   contents: read
@@ -44,4 +48,4 @@ jobs:
         run: npm ci --ignore-scripts --no-audit --no-fund
       - name: Guard first-party privacy, access control, feature actions and user counts
         working-directory: alphahedgequant
-        run: node --test tests/firstPartyInsights.test.mjs tests/featureAnalytics.test.mjs
+        run: node --test tests/firstPartyInsights.test.mjs tests/featureAnalytics.test.mjs tests/ownerAudienceSnapshot.test.mjs
