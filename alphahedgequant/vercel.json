@@ -43,6 +43,10 @@
     {
       "path": "/api/cron/options-flow/7",
       "schedule": "30 8 * * 1-5"
+    },
+    {
+      "path": "/api/cron/tournament-push",
+      "schedule": "25,55 * * * *"
     }
   ]
 }
