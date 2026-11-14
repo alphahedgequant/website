@@ -34,7 +34,7 @@ test("retain only the three historical metric cards without their removed descri
  const dashboard=read("components/OwnerInsightsDashboard.jsx");
  assert.match(dashboard,/historical&&<section/);
  assert.match(dashboard,/Historical website audience snapshot/);
- assert.match(dashboard,/September 2026 baseline/);
+ assert.doesNotMatch(dashboard,/September 2026 baseline/);
  assert.match(dashboard,/Site traffic · page views \/ visitors/);
  assert.match(dashboard,/Registered accounts/);
  assert.match(dashboard,/Daily active users/);
