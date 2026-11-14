@@ -71,9 +71,13 @@ jobs:
           token="$(printf '%s' "$oidc_response" | node -e '
             let d="";process.stdin.on("data",x=>d+=x);
             process.stdin.on("end",()=>{const v=JSON.parse(d).value;if(!v)process.exit(1);process.stdout.write(v)});
-          ')
-          response="$(curl -fsS --retry 2 --retry-delay 2 --max-time 50 \
+          ')"
+          status="$(curl -sS --max-time 50 -o /tmp/ahq-push-result.json -w '%{http_code}' \
             -X POST -H "Authorization: Bearer $token" \
             -H "Content-Type: application/json" -d '{}' \
             "https://www.alphahedgequant.com/api/cron/tournament-push")"
-          printf '%s\n' "$response"
+          if [[ "$status" == "200" ]]; then
+            cat /tmp/ahq-push-result.json
+          else
+            echo "::warning::Push dispatcher returned HTTP $status; the tournament snapshots were still published."
+          fi
