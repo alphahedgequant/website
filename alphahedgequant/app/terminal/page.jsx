@@ -4,6 +4,7 @@ import Link from "next/link";
 import dynamic from "next/dynamic";
 import TerminalIntelligence from "@/components/TerminalIntelligence";
 import TerminalTradingFloor from "./TerminalTradingFloor";
+import MarketBreadthPanel from "@/components/MarketBreadthPanel";
 import UnusualOptionsMonitor from "@/components/UnusualOptionsMonitor";
 import DailyOptionsFlowArchive from "@/components/DailyOptionsFlowArchive";
 import "./terminal.css";
@@ -122,6 +123,7 @@ export default function QuantTerminal(){
  <div className="qt-symbol-bar"><span>ACTIVE NSE SYMBOL</span><div className="qt-symbol-picker"><input aria-label="Search any NSE company across terminal modules" value={query} onChange={e=>setQuery(e.target.value.toUpperCase())} onKeyDown={e=>{if(e.key==="Enter")pickSymbol(query)}} placeholder="Company name or ticker"/><button type="button" onClick={()=>pickSymbol(query)}>OPEN ↗</button>{found.length>0&&<div className="qt-symbol-results">{found.map(z=><button type="button" key={z.symbol} onClick={()=>pickSymbol(z.symbol)}><strong>{z.symbol}</strong><small>{z.name}</small></button>)}</div>}</div><span>ONE TICKER → CHART · FORECAST · REVENUE · PEERS · NETWORK</span></div>
  {quoteError&&<div className="qt-provider-alert" role="alert"><strong>NSE quote connection needs attention.</strong><span>{quoteError} Quotes and options analytics are not confirmed live. An active Upstox broker session may be required.</span><a href="https://zerohedgequant-backend.onrender.com/auth/login" target="_blank" rel="noopener noreferrer">Reconnect Upstox ↗</a></div>}
  {activeTab==="FLOW"&&<div className="qt-module-notice">This panel compares real option-chain snapshots. It is not an exchange trade-by-trade tape and does not classify buyer-initiated trades.</div>}
+ {activeTab==="MARKET"&&<MarketBreadthPanel onChoose={pickSymbol}/>}
  <div id="qt-terminal-panel" role="tabpanel" aria-label={activeTab+" workspace"}>
  {["COMPANY","FORECAST","NETWORK","PEERS"].includes(activeTab)?<TerminalIntelligence key={symbol} symbol={symbol} tab={activeTab} onChoose={s=>{pickSymbol(s);setActiveTab("COMPANY")}} onForecast={()=>setActiveTab("FORECAST")}/>:<>
  {activeTab==="FLOW" ? <div className="qt-flow-workspace"><div className="qt-flow-info"><strong>NSE F&O · Unusual Options Activity</strong><span>{fnoStatus}. Source snapshots are sampled sequentially, not an exchange-wide tape.</span></div><DailyOptionsFlowArchive selectedTicker={optionSymbol} stockOptions={fnoTickers} onOpenChain={ticker=>{setOptionSymbol(ticker);pickSymbol(ticker);selectTab("OPTIONS")}}/><UnusualOptionsMonitor selectedTicker={optionSymbol} stockOptions={fnoTickers} onOpenChain={ticker=>{setOptionSymbol(ticker);if(ticker!=="NIFTY"&&ticker!=="BANKNIFTY"&&ticker!=="FINNIFTY")pickSymbol(ticker);selectTab("OPTIONS")}}/></div>
