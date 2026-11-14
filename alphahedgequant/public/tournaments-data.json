@@ -1,8 +1,8 @@
 {
   "version": 1,
-  "updatedAt": "2026-11-14T20:23:28.867Z",
+  "updatedAt": "2026-11-14T20:26:41.581Z",
   "lichess": {
-    "updatedAt": "2026-11-14T20:23:34.233Z",
+    "updatedAt": "2026-11-14T20:26:47.186Z",
     "top": {
       "active": [
         {
@@ -268,38 +268,6 @@
         },
         {
           "tour": {
-            "id": "By72Ixa0",
-            "name": "XX Festival Xadrez Figueira da Foz - Torneio Sabir Ali",
-            "slug": "xx-festival-xadrez-figueira-da-foz-torneio-sabir-ali",
-            "info": {
-              "format": "9 round Swiss",
-              "fideTC": "standard",
-              "location": "Figueira da Foz, Portugal",
-              "timeZone": "Europe/Lisbon",
-              "website": "https://xadrezfigueira.mfbpro.com/",
-              "standings": "https://s1.chess-results.com/tnr1475235.aspx?art=1",
-              "regulations": "https://s2.chess-results.com/UploadData.aspx?lan=10&tnr=1475235&Uid=1"
-            },
-            "createdAt": 1794242470978,
-            "url": "https://lichess.org/broadcast/xx-festival-xadrez-figueira-da-foz-torneio-sabir-ali/By72Ixa0",
-            "tier": 3,
-            "dates": [
-              1794245426256,
-              1794736800000
-            ],
-            "image": "https://image.lichess.org/display?fmt=webp&h=400&op=thumbnail&path=oSh1_2xMyn_T.webp&w=800&sig=4f5d24daec2fbc5187fcd14bc58969df81b1babc"
-          },
-          "round": {
-            "id": "MBM3biqh",
-            "name": "Round 8",
-            "slug": "round-8",
-            "ongoing": true,
-            "startsAt": 1794677400000,
-            "url": "https://lichess.org/broadcast/xx-festival-xadrez-figueira-da-foz-torneio-sabir-ali/round-8/MBM3biqh"
-          }
-        },
-        {
-          "tour": {
             "id": "yd7I1zmf",
             "name": "2026/27 U.S. National Collegiate Women's Individual Championship",
             "slug": "202627-us-national-collegiate-womens-individual-championship",
@@ -329,6 +297,38 @@
             "ongoing": true,
             "startsAt": 1794684600000,
             "url": "https://lichess.org/broadcast/202627-us-national-collegiate-womens-individual-championship/round-3/gFMwTSfr"
+          }
+        },
+        {
+          "tour": {
+            "id": "By72Ixa0",
+            "name": "XX Festival Xadrez Figueira da Foz - Torneio Sabir Ali",
+            "slug": "xx-festival-xadrez-figueira-da-foz-torneio-sabir-ali",
+            "info": {
+              "format": "9 round Swiss",
+              "fideTC": "standard",
+              "location": "Figueira da Foz, Portugal",
+              "timeZone": "Europe/Lisbon",
+              "website": "https://xadrezfigueira.mfbpro.com/",
+              "standings": "https://s1.chess-results.com/tnr1475235.aspx?art=1",
+              "regulations": "https://s2.chess-results.com/UploadData.aspx?lan=10&tnr=1475235&Uid=1"
+            },
+            "createdAt": 1794242470978,
+            "url": "https://lichess.org/broadcast/xx-festival-xadrez-figueira-da-foz-torneio-sabir-ali/By72Ixa0",
+            "tier": 3,
+            "dates": [
+              1794245426256,
+              1794736800000
+            ],
+            "image": "https://image.lichess.org/display?fmt=webp&h=400&op=thumbnail&path=oSh1_2xMyn_T.webp&w=800&sig=4f5d24daec2fbc5187fcd14bc58969df81b1babc"
+          },
+          "round": {
+            "id": "MBM3biqh",
+            "name": "Round 8",
+            "slug": "round-8",
+            "ongoing": true,
+            "startsAt": 1794677400000,
+            "url": "https://lichess.org/broadcast/xx-festival-xadrez-figueira-da-foz-torneio-sabir-ali/round-8/MBM3biqh"
           }
         },
         {
@@ -428,38 +428,6 @@
         },
         {
           "tour": {
-            "id": "ZPONzjmY",
-            "name": "National Championship Aruba 2026 | Open",
-            "slug": "national-championship-aruba-2026-open",
-            "info": {
-              "format": "10 player round robin",
-              "tc": "90 min + 30 sec / move",
-              "fideTC": "standard",
-              "location": "Noord, Aruba",
-              "timeZone": "America/Aruba",
-              "standings": "https://s2.chess-results.com/tnr1533716.aspx?art=1"
-            },
-            "createdAt": 1793993824509,
-            "url": "https://lichess.org/broadcast/national-championship-aruba-2026-open/ZPONzjmY",
-            "tier": 3,
-            "dates": [
-              1794008400000,
-              1794748200000
-            ],
-            "image": "https://image.lichess.org/display?fmt=webp&h=400&op=thumbnail&path=U333yPcm4Lsl.webp&w=800&sig=3d298844a7067bc54f8b35e06a025a683fd3a6e6"
-          },
-          "round": {
-            "id": "kGphxx8E",
-            "name": "Round 7",
-            "slug": "round-7",
-            "ongoing": true,
-            "startsAt": 1794679800000,
-            "url": "https://lichess.org/broadcast/national-championship-aruba-2026-open/round-7/kGphxx8E"
-          },
-          "group": "National Championship Aruba 2026"
-        },
-        {
-          "tour": {
             "id": "m5SyyCpL",
             "name": "TCEC Cup 17 | Round 32",
             "slug": "tcec-cup-17-round-32",
@@ -490,6 +458,38 @@
             "url": "https://lichess.org/broadcast/tcec-cup-17-round-32/rubichess-vs-quanticade/mv7O4xeN"
           },
           "group": "TCEC Cup 17"
+        },
+        {
+          "tour": {
+            "id": "ZPONzjmY",
+            "name": "National Championship Aruba 2026 | Open",
+            "slug": "national-championship-aruba-2026-open",
+            "info": {
+              "format": "10 player round robin",
+              "tc": "90 min + 30 sec / move",
+              "fideTC": "standard",
+              "location": "Noord, Aruba",
+              "timeZone": "America/Aruba",
+              "standings": "https://s2.chess-results.com/tnr1533716.aspx?art=1"
+            },
+            "createdAt": 1793993824509,
+            "url": "https://lichess.org/broadcast/national-championship-aruba-2026-open/ZPONzjmY",
+            "tier": 3,
+            "dates": [
+              1794008400000,
+              1794748200000
+            ],
+            "image": "https://image.lichess.org/display?fmt=webp&h=400&op=thumbnail&path=U333yPcm4Lsl.webp&w=800&sig=3d298844a7067bc54f8b35e06a025a683fd3a6e6"
+          },
+          "round": {
+            "id": "kGphxx8E",
+            "name": "Round 7",
+            "slug": "round-7",
+            "ongoing": true,
+            "startsAt": 1794679800000,
+            "url": "https://lichess.org/broadcast/national-championship-aruba-2026-open/round-7/kGphxx8E"
+          },
+          "group": "National Championship Aruba 2026"
         },
         {
           "tour": {
@@ -653,6 +653,35 @@
             "finished": true,
             "startsAt": 1794621600000
           }
+        },
+        {
+          "tour": {
+            "id": "Xs9YuoOM",
+            "name": "Penang Age Group 2026 | Under-11 Category",
+            "slug": "penang-age-group-2026-under-11-category",
+            "info": {
+              "format": "7-round Swiss",
+              "tc": "15 min + 10 sec / move",
+              "fideTC": "rapid",
+              "location": "George Town, Penang, Malaysia",
+              "timeZone": "Asia/Kuala_Lumpur",
+              "standings": "https://chess-results.com/tnr1537980.aspx?art=1"
+            },
+            "createdAt": 1794687438080,
+            "url": "https://lichess.org/broadcast/penang-age-group-2026-under-11-category/Xs9YuoOM",
+            "tier": 3,
+            "dates": [
+              1794708000000
+            ]
+          },
+          "round": {
+            "id": "6O1QpqvO",
+            "name": "Round 1",
+            "slug": "round-1",
+            "startsAt": 1794708000000,
+            "url": "https://lichess.org/broadcast/penang-age-group-2026-under-11-category/round-1/6O1QpqvO"
+          },
+          "group": "Penang Age Group 2026"
         },
         {
           "tour": {
@@ -1767,42 +1796,6 @@
             "startsAt": 1795528800000,
             "url": "https://lichess.org/broadcast/fide-world-chess-championship-2026/game-1/xLgOJ6cb"
           }
-        },
-        {
-          "tour": {
-            "id": "IjDgZVUR",
-            "name": "1. Bundesliga Austria 2026/2027",
-            "slug": "1-bundesliga-austria-20262027",
-            "info": {
-              "format": "12-teams round-robin",
-              "tc": "90 min / 40 moves + 30 min + 30 sec / move",
-              "fideTC": "standard",
-              "location": "Mayrhofen, Austria - St. Veit/Glan, Austria",
-              "timeZone": "Europe/Berlin",
-              "players": "GMPranav V, GM Eljanov Pavel, GM Hakobyan Aram, GM Saric Ivan",
-              "website": "https://www.chess.at/",
-              "standings": "https://s3.chess-results.com/tnr1404438.aspx?lan=0&art=0&turdet=YES&SNode=S0",
-              "regulations": "https://chess-results.com/Download/Kalender/2026_11_29_%C3%96SB_2026_2027_1BL_Ausschreibung.pdf"
-            },
-            "createdAt": 1794336050439,
-            "url": "https://lichess.org/broadcast/1-bundesliga-austria-20262027/IjDgZVUR",
-            "tier": 3,
-            "dates": [
-              1795611600000,
-              1805014800000
-            ],
-            "image": "https://image.lichess.org/display?fmt=webp&h=400&op=thumbnail&path=7yApvMe9I2V1.webp&w=800&sig=b48e41203002365e7252f1dc0e44f2c070305f6e",
-            "teamTable": true,
-            "showTeamScores": true
-          },
-          "round": {
-            "id": "L3MX2oE3",
-            "name": "Round 1",
-            "slug": "round-1",
-            "startsAt": 1795611600000,
-            "url": "https://lichess.org/broadcast/1-bundesliga-austria-20262027/round-1/L3MX2oE3"
-          },
-          "group": "Bundesliga Austria 2026/2027"
         }
       ],
       "past": {
@@ -4980,6 +4973,228 @@
       },
       {
         "tour": {
+          "id": "PDFCIVaY",
+          "name": "Penang Age Group 2026 | Under-17 Category",
+          "slug": "penang-age-group-2026-under-17-category",
+          "info": {
+            "format": "7-round Swiss",
+            "tc": "20 min + 10 sec / move",
+            "fideTC": "rapid",
+            "location": "George Town, Penang, Malaysia",
+            "timeZone": "Asia/Kuala_Lumpur",
+            "website": "http://www.penangchess.com/"
+          },
+          "createdAt": 1794687711514,
+          "url": "https://lichess.org/broadcast/penang-age-group-2026-under-17-category/PDFCIVaY",
+          "tier": 3,
+          "dates": [
+            1795917600000
+          ]
+        },
+        "rounds": [
+          {
+            "id": "HJWUKEcq",
+            "name": "Round 1",
+            "slug": "round-1",
+            "startsAt": 1795917600000,
+            "url": "https://lichess.org/broadcast/penang-age-group-2026-under-17-category/round-1/HJWUKEcq"
+          },
+          {
+            "id": "Wr58m9aJ",
+            "name": "Round 2",
+            "slug": "round-2",
+            "startsAfterPrevious": true,
+            "url": "https://lichess.org/broadcast/penang-age-group-2026-under-17-category/round-2/Wr58m9aJ"
+          },
+          {
+            "id": "ffv1ZBvJ",
+            "name": "Round 3",
+            "slug": "round-3",
+            "startsAfterPrevious": true,
+            "url": "https://lichess.org/broadcast/penang-age-group-2026-under-17-category/round-3/ffv1ZBvJ"
+          },
+          {
+            "id": "upQlP75L",
+            "name": "Round 4",
+            "slug": "round-4",
+            "startsAfterPrevious": true,
+            "url": "https://lichess.org/broadcast/penang-age-group-2026-under-17-category/round-4/upQlP75L"
+          },
+          {
+            "id": "TwHqIpac",
+            "name": "Round 5",
+            "slug": "round-5",
+            "startsAfterPrevious": true,
+            "url": "https://lichess.org/broadcast/penang-age-group-2026-under-17-category/round-5/TwHqIpac"
+          },
+          {
+            "id": "YbzPHGCu",
+            "name": "Round 6",
+            "slug": "round-6",
+            "startsAfterPrevious": true,
+            "url": "https://lichess.org/broadcast/penang-age-group-2026-under-17-category/round-6/YbzPHGCu"
+          },
+          {
+            "id": "jJRLFqVS",
+            "name": "Round 7",
+            "slug": "round-7",
+            "startsAfterPrevious": true,
+            "url": "https://lichess.org/broadcast/penang-age-group-2026-under-17-category/round-7/jJRLFqVS"
+          }
+        ],
+        "defaultRoundId": "HJWUKEcq",
+        "group": "Penang Age Group 2026"
+      },
+      {
+        "tour": {
+          "id": "QviOoer4",
+          "name": "Penang Age Group 2026 | Under-13 Category",
+          "slug": "penang-age-group-2026-under-13-category",
+          "info": {
+            "format": "7-round Swiss",
+            "tc": "20 min + 10 sec / move",
+            "fideTC": "rapid",
+            "location": "George Town, Penang, Malaysia",
+            "timeZone": "Asia/Kuala_Lumpur",
+            "website": "http://www.penangchess.com/"
+          },
+          "createdAt": 1794687644604,
+          "url": "https://lichess.org/broadcast/penang-age-group-2026-under-13-category/QviOoer4",
+          "tier": 3,
+          "dates": [
+            1795312800000
+          ]
+        },
+        "rounds": [
+          {
+            "id": "KRrZqy5v",
+            "name": "Round 1",
+            "slug": "round-1",
+            "startsAt": 1795312800000,
+            "url": "https://lichess.org/broadcast/penang-age-group-2026-under-13-category/round-1/KRrZqy5v"
+          },
+          {
+            "id": "i0bRmLOO",
+            "name": "Round 2",
+            "slug": "round-2",
+            "startsAfterPrevious": true,
+            "url": "https://lichess.org/broadcast/penang-age-group-2026-under-13-category/round-2/i0bRmLOO"
+          },
+          {
+            "id": "TFu8ywqC",
+            "name": "Round 3",
+            "slug": "round-3",
+            "startsAfterPrevious": true,
+            "url": "https://lichess.org/broadcast/penang-age-group-2026-under-13-category/round-3/TFu8ywqC"
+          },
+          {
+            "id": "rhRR3Hzn",
+            "name": "Round 4",
+            "slug": "round-4",
+            "startsAfterPrevious": true,
+            "url": "https://lichess.org/broadcast/penang-age-group-2026-under-13-category/round-4/rhRR3Hzn"
+          },
+          {
+            "id": "poyHZUnN",
+            "name": "Round 5",
+            "slug": "round-5",
+            "startsAfterPrevious": true,
+            "url": "https://lichess.org/broadcast/penang-age-group-2026-under-13-category/round-5/poyHZUnN"
+          },
+          {
+            "id": "LEigeEhm",
+            "name": "Round 6",
+            "slug": "round-6",
+            "startsAfterPrevious": true,
+            "url": "https://lichess.org/broadcast/penang-age-group-2026-under-13-category/round-6/LEigeEhm"
+          },
+          {
+            "id": "YStRlAMS",
+            "name": "Round 7",
+            "slug": "round-7",
+            "startsAfterPrevious": true,
+            "url": "https://lichess.org/broadcast/penang-age-group-2026-under-13-category/round-7/YStRlAMS"
+          }
+        ],
+        "defaultRoundId": "KRrZqy5v",
+        "group": "Penang Age Group 2026"
+      },
+      {
+        "tour": {
+          "id": "Xs9YuoOM",
+          "name": "Penang Age Group 2026 | Under-11 Category",
+          "slug": "penang-age-group-2026-under-11-category",
+          "info": {
+            "format": "7-round Swiss",
+            "tc": "15 min + 10 sec / move",
+            "fideTC": "rapid",
+            "location": "George Town, Penang, Malaysia",
+            "timeZone": "Asia/Kuala_Lumpur",
+            "standings": "https://chess-results.com/tnr1537980.aspx?art=1"
+          },
+          "createdAt": 1794687438080,
+          "url": "https://lichess.org/broadcast/penang-age-group-2026-under-11-category/Xs9YuoOM",
+          "tier": 3,
+          "dates": [
+            1794708000000
+          ]
+        },
+        "rounds": [
+          {
+            "id": "6O1QpqvO",
+            "name": "Round 1",
+            "slug": "round-1",
+            "startsAt": 1794708000000,
+            "url": "https://lichess.org/broadcast/penang-age-group-2026-under-11-category/round-1/6O1QpqvO"
+          },
+          {
+            "id": "n4FjpwVj",
+            "name": "Round 2",
+            "slug": "round-2",
+            "startsAfterPrevious": true,
+            "url": "https://lichess.org/broadcast/penang-age-group-2026-under-11-category/round-2/n4FjpwVj"
+          },
+          {
+            "id": "PV7kMEm5",
+            "name": "Round 3",
+            "slug": "round-3",
+            "startsAfterPrevious": true,
+            "url": "https://lichess.org/broadcast/penang-age-group-2026-under-11-category/round-3/PV7kMEm5"
+          },
+          {
+            "id": "mmmBk8KC",
+            "name": "Round 4",
+            "slug": "round-4",
+            "startsAfterPrevious": true,
+            "url": "https://lichess.org/broadcast/penang-age-group-2026-under-11-category/round-4/mmmBk8KC"
+          },
+          {
+            "id": "6hY2y36r",
+            "name": "Round 5",
+            "slug": "round-5",
+            "startsAfterPrevious": true,
+            "url": "https://lichess.org/broadcast/penang-age-group-2026-under-11-category/round-5/6hY2y36r"
+          },
+          {
+            "id": "KA26314G",
+            "name": "Round 6",
+            "slug": "round-6",
+            "startsAfterPrevious": true,
+            "url": "https://lichess.org/broadcast/penang-age-group-2026-under-11-category/round-6/KA26314G"
+          },
+          {
+            "id": "nh6ebGBH",
+            "name": "Round 7",
+            "slug": "round-7",
+            "startsAfterPrevious": true,
+            "url": "https://lichess.org/broadcast/penang-age-group-2026-under-11-category/round-7/nh6ebGBH"
+          }
+        ],
+        "defaultRoundId": "6O1QpqvO",
+        "group": "Penang Age Group 2026"
+      },
+      {
+        "tour": {
           "id": "JWGl6ILE",
           "name": "Bungoma Open Chess Championship - Ladies",
           "slug": "bungoma-open-chess-championship-ladies",
@@ -7181,7 +7396,8 @@
             "id": "InXoJaEQ",
             "name": "Round 6",
             "slug": "round-6",
-            "ongoing": true,
+            "finishedAt": 1794687926223,
+            "finished": true,
             "startsAt": 1794672480000,
             "url": "https://lichess.org/broadcast/north-american-youth-chess-champioship-2026-g18/round-6/InXoJaEQ"
           },
@@ -11122,278 +11338,11 @@
         ],
         "defaultRoundId": "tYivNtUS",
         "group": "37. Staufer-Open 2027"
-      },
-      {
-        "tour": {
-          "id": "OeslJUKC",
-          "name": "Slovenian Team Championship 2026 (Državna članska liga)",
-          "slug": "slovenian-team-championship-2026-drzavna-clanska-liga",
-          "info": {
-            "format": "10-team round robin",
-            "tc": "90 min / 40 moves + 30 min + 30 sec/move",
-            "fideTC": "standard",
-            "location": "Radenci, Ljubljana (Slovenia)",
-            "timeZone": "Europe/Berlin",
-            "players": "Fedoseev, Demchenko, Škoberne, Šubelj",
-            "website": "https://www.sah-zveza.si/prireditve/festival/397",
-            "standings": "https://s1.chess-results.com/tnr1506302.aspx?lan=1&art=0&turdet=YES&SNode=S0"
-          },
-          "createdAt": 1790951617746,
-          "url": "https://lichess.org/broadcast/slovenian-team-championship-2026-drzavna-clanska-liga/OeslJUKC",
-          "tier": 3,
-          "dates": [
-            1790951400000,
-            1794733200000
-          ],
-          "image": "https://image.lichess.org/display?fmt=webp&h=400&op=thumbnail&path=sU02qTcvbptz.webp&w=800&sig=fbea2ee9496151067df12fdc3b80cb9914739273",
-          "teamTable": true
-        },
-        "rounds": [
-          {
-            "id": "ZlJdJjJb",
-            "name": "Round 1",
-            "slug": "round-1",
-            "finishedAt": 1790972029608,
-            "finished": true,
-            "startsAt": 1790951400000,
-            "url": "https://lichess.org/broadcast/slovenian-team-championship-2026-drzavna-clanska-liga/round-1/ZlJdJjJb"
-          },
-          {
-            "id": "q2SwySRI",
-            "name": "Round 2",
-            "slug": "round-2",
-            "finishedAt": 1791050662093,
-            "finished": true,
-            "startsAt": 1791032400000,
-            "url": "https://lichess.org/broadcast/slovenian-team-championship-2026-drzavna-clanska-liga/round-2/q2SwySRI"
-          },
-          {
-            "id": "2unO1nXK",
-            "name": "Round 3",
-            "slug": "round-3",
-            "finishedAt": 1791119462937,
-            "finished": true,
-            "startsAt": 1791100800000,
-            "url": "https://lichess.org/broadcast/slovenian-team-championship-2026-drzavna-clanska-liga/round-3/2unO1nXK"
-          },
-          {
-            "id": "rOtCQ0iz",
-            "name": "Round 4",
-            "slug": "round-4",
-            "finishedAt": 1791576104165,
-            "finished": true,
-            "startsAt": 1791556200000,
-            "url": "https://lichess.org/broadcast/slovenian-team-championship-2026-drzavna-clanska-liga/round-4/rOtCQ0iz"
-          },
-          {
-            "id": "jW6R6k38",
-            "name": "Round 5",
-            "slug": "round-5",
-            "finishedAt": 1791655771350,
-            "finished": true,
-            "startsAt": 1791637200000,
-            "url": "https://lichess.org/broadcast/slovenian-team-championship-2026-drzavna-clanska-liga/round-5/jW6R6k38"
-          },
-          {
-            "id": "o0z6Nmr5",
-            "name": "Round 6",
-            "slug": "round-6",
-            "finishedAt": 1791724516567,
-            "finished": true,
-            "startsAt": 1791705600000,
-            "url": "https://lichess.org/broadcast/slovenian-team-championship-2026-drzavna-clanska-liga/round-6/o0z6Nmr5"
-          },
-          {
-            "id": "5Q02uSJA",
-            "name": "Round 7",
-            "slug": "round-7",
-            "finishedAt": 1794603147573,
-            "finished": true,
-            "startsAt": 1794583800000,
-            "url": "https://lichess.org/broadcast/slovenian-team-championship-2026-drzavna-clanska-liga/round-7/5Q02uSJA"
-          },
-          {
-            "id": "bqazI8nB",
-            "name": "Round 8",
-            "slug": "round-8",
-            "finishedAt": 1794685094007,
-            "finished": true,
-            "startsAt": 1794664800000,
-            "url": "https://lichess.org/broadcast/slovenian-team-championship-2026-drzavna-clanska-liga/round-8/bqazI8nB"
-          },
-          {
-            "id": "z9YLkHSE",
-            "name": "Round 9",
-            "slug": "round-9",
-            "startsAt": 1794733200000,
-            "url": "https://lichess.org/broadcast/slovenian-team-championship-2026-drzavna-clanska-liga/round-9/z9YLkHSE"
-          }
-        ],
-        "defaultRoundId": "bqazI8nB"
-      },
-      {
-        "tour": {
-          "id": "Bl4zXcxI",
-          "name": "1st SCC Standard OPEN",
-          "slug": "1st-scc-standard-open",
-          "info": {
-            "format": "6-round Swiss",
-            "tc": "90 min + 30 sec / move",
-            "fideTC": "standard",
-            "location": "Goyang, Korea",
-            "timeZone": "Asia/Seoul",
-            "players": "Lee Junhyeok",
-            "standings": "https://s3.chess-results.com/tnr1509584.aspx"
-          },
-          "createdAt": 1790844575051,
-          "url": "https://lichess.org/broadcast/1st-scc-standard-open/Bl4zXcxI",
-          "tier": 3,
-          "dates": [
-            1795826400000,
-            1796018400000
-          ],
-          "image": "https://image.lichess.org/display?fmt=webp&h=400&op=thumbnail&path=hmsj3TVQoedz.webp&w=800&sig=a10850e2031abda89ba8a9f90264e893d7a2d57a"
-        },
-        "rounds": [
-          {
-            "id": "OOQBpMbI",
-            "name": "Round 1",
-            "slug": "round-1",
-            "startsAt": 1795826400000,
-            "url": "https://lichess.org/broadcast/1st-scc-standard-open/round-1/OOQBpMbI"
-          },
-          {
-            "id": "r4rQG93n",
-            "name": "Round 2",
-            "slug": "round-2",
-            "startsAt": 1795845600000,
-            "url": "https://lichess.org/broadcast/1st-scc-standard-open/round-2/r4rQG93n"
-          },
-          {
-            "id": "kypv42Og",
-            "name": "Round 3",
-            "slug": "round-3",
-            "startsAt": 1795912800000,
-            "url": "https://lichess.org/broadcast/1st-scc-standard-open/round-3/kypv42Og"
-          },
-          {
-            "id": "VJYKPT0p",
-            "name": "Round 4",
-            "slug": "round-4",
-            "startsAt": 1795932000000,
-            "url": "https://lichess.org/broadcast/1st-scc-standard-open/round-4/VJYKPT0p"
-          },
-          {
-            "id": "zBCw8p0r",
-            "name": "Round 5",
-            "slug": "round-5",
-            "startsAt": 1795999200000,
-            "url": "https://lichess.org/broadcast/1st-scc-standard-open/round-5/zBCw8p0r"
-          },
-          {
-            "id": "nJHPCNmb",
-            "name": "Round 6",
-            "slug": "round-6",
-            "startsAt": 1796018400000,
-            "url": "https://lichess.org/broadcast/1st-scc-standard-open/round-6/nJHPCNmb"
-          }
-        ],
-        "defaultRoundId": "OOQBpMbI"
-      },
-      {
-        "tour": {
-          "id": "mJvXvBWG",
-          "name": "52 Abierto Internacional \"CIUDAD DE SEVILLA\" 2027",
-          "slug": "52-abierto-internacional-ciudad-de-sevilla-2027",
-          "info": {
-            "format": "9-round Swiss",
-            "tc": "90 min + 30 sec",
-            "fideTC": "standard",
-            "location": "Sevilla, Spain",
-            "timeZone": "Europe/Madrid",
-            "website": "https://sevillaopenajedrez.com/",
-            "standings": "https://info64.org/52-abierto-internacional-ciudad-de-sevilla-2027/standings"
-          },
-          "createdAt": 1789792192235,
-          "url": "https://lichess.org/broadcast/52-abierto-internacional-ciudad-de-sevilla-2027/mJvXvBWG",
-          "tier": 3,
-          "dates": [
-            1799426400000,
-            1800088800000
-          ],
-          "image": "https://image.lichess.org/display?fmt=webp&h=400&op=thumbnail&path=Zz8agzi_X_Js.webp&w=800&sig=06828095a52993d9152002edb13b3490efb5385d"
-        },
-        "rounds": [
-          {
-            "id": "p9BXg1ye",
-            "name": "Round 1",
-            "slug": "round-1",
-            "startsAt": 1799426400000,
-            "url": "https://lichess.org/broadcast/52-abierto-internacional-ciudad-de-sevilla-2027/round-1/p9BXg1ye"
-          },
-          {
-            "id": "xLHKKjAW",
-            "name": "Round 2",
-            "slug": "round-2",
-            "startsAt": 1799512800000,
-            "url": "https://lichess.org/broadcast/52-abierto-internacional-ciudad-de-sevilla-2027/round-2/xLHKKjAW"
-          },
-          {
-            "id": "P5VbdH1Q",
-            "name": "Round 3",
-            "slug": "round-3",
-            "startsAt": 1799599200000,
-            "url": "https://lichess.org/broadcast/52-abierto-internacional-ciudad-de-sevilla-2027/round-3/P5VbdH1Q"
-          },
-          {
-            "id": "omq03WXx",
-            "name": "Round 4",
-            "slug": "round-4",
-            "startsAt": 1799685600000,
-            "url": "https://lichess.org/broadcast/52-abierto-internacional-ciudad-de-sevilla-2027/round-4/omq03WXx"
-          },
-          {
-            "id": "JOxuPAdG",
-            "name": "Round 5",
-            "slug": "round-5",
-            "startsAt": 1799772000000,
-            "url": "https://lichess.org/broadcast/52-abierto-internacional-ciudad-de-sevilla-2027/round-5/JOxuPAdG"
-          },
-          {
-            "id": "S7wID5RY",
-            "name": "Round 6",
-            "slug": "round-6",
-            "startsAt": 1799858400000,
-            "url": "https://lichess.org/broadcast/52-abierto-internacional-ciudad-de-sevilla-2027/round-6/S7wID5RY"
-          },
-          {
-            "id": "L7vYPhSG",
-            "name": "Round 7",
-            "slug": "round-7",
-            "startsAt": 1799944800000,
-            "url": "https://lichess.org/broadcast/52-abierto-internacional-ciudad-de-sevilla-2027/round-7/L7vYPhSG"
-          },
-          {
-            "id": "lIzwtUUv",
-            "name": "Round 8",
-            "slug": "round-8",
-            "startsAt": 1800031200000,
-            "url": "https://lichess.org/broadcast/52-abierto-internacional-ciudad-de-sevilla-2027/round-8/lIzwtUUv"
-          },
-          {
-            "id": "ddIQiJjD",
-            "name": "Round 9",
-            "slug": "round-9",
-            "startsAt": 1800088800000,
-            "url": "https://lichess.org/broadcast/52-abierto-internacional-ciudad-de-sevilla-2027/round-9/ddIQiJjD"
-          }
-        ],
-        "defaultRoundId": "p9BXg1ye"
       }
     ]
   },
   "devpost": {
-    "updatedAt": "2026-11-14T20:23:34.436Z",
+    "updatedAt": "2026-11-14T20:26:47.398Z",
     "hackathons": [
       {
         "id": 31667,
@@ -11427,7 +11376,7 @@
           "cash": 15,
           "other": 2
         },
-        "registrations_count": 13885,
+        "registrations_count": 13886,
         "featured": true,
         "organization_name": "Kiro",
         "winners_announced": false,
@@ -11508,8 +11457,8 @@
         ],
         "prize_amount": "$<span data-currency-value>120,000</span>",
         "prizes_counts": {
-          "cash": 7,
-          "other": 1
+          "cash": 1,
+          "other": 0
         },
         "registrations_count": 3410,
         "featured": false,
@@ -11550,10 +11499,10 @@
         ],
         "prize_amount": "$<span data-currency-value>46,000</span>",
         "prizes_counts": {
-          "cash": 4,
+          "cash": 1,
           "other": 0
         },
-        "registrations_count": 2548,
+        "registrations_count": 2549,
         "featured": true,
         "organization_name": "UGREEN",
         "winners_announced": false,
@@ -11798,7 +11747,7 @@
         ],
         "prize_amount": "$<span data-currency-value>25,000</span>",
         "prizes_counts": {
-          "cash": 6,
+          "cash": 1,
           "other": 0
         },
         "registrations_count": 613,
@@ -12469,7 +12418,7 @@
           "cash": 6,
           "other": 11
         },
-        "registrations_count": 303,
+        "registrations_count": 304,
         "featured": false,
         "organization_name": "Princeton University",
         "winners_announced": false,
