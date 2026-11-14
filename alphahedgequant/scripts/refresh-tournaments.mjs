@@ -74,9 +74,22 @@ if (topValid || official.length) {
 } else diagnostics.push('Lichess: unreachable; keeping existing data or curated-only fallback');
 if (devpostResult.status === 'fulfilled') {
   try {
-    const items = hackathons(devpostResult.value);
-    next.devpost = { updatedAt: new Date().toISOString(), hackathons: items.slice(0, 400) };
-    diagnostics.push('Devpost: refreshed (' + items.length + ' listings)');
+    const first = hackathons(devpostResult.value);
+    // Public discovery is paginated. Later pages are optional, not required
+    // to retain the verified first page or the earlier healthy cache.
+    const extra=await Promise.allSettled([2,3,4,5].map(page=>
+      json('https://devpost.com/api/hackathons?status%5B%5D=upcoming&status%5B%5D=open&page='+page)));
+    const merged=[...first];
+    for(const response of extra){
+      if(response.status!=='fulfilled')continue;
+      try{merged.push(...hackathons(response.value));}catch{}
+    }
+    const seen=new Set(),items=merged.filter(x=>{
+      const id=String(x?.id||x?.url||x?.title||"").trim();
+      if(!id||seen.has(id))return false;seen.add(id);return true;
+    }).slice(0,200);
+    next.devpost = { updatedAt: new Date().toISOString(), hackathons: items };
+    diagnostics.push('Devpost: refreshed (' + items.length + ' distinct listings, ' + first.length + ' on first page)');
   } catch (error) { diagnostics.push('Devpost: ' + error.message); }
 } else diagnostics.push('Devpost: unreachable; keeping existing data or curated-only fallback');
 // Avoid replacing a healthy previous snapshot with a collection of nulls.
