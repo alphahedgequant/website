@@ -7,6 +7,7 @@ const isPublicRoute = createRouteMatcher([
   "/about",
   "/competitions(.*)",
   "/api/competitions/live-chess",
+  "/api/tournaments/feed",
   // Public, read-only IPO calendar and listing intelligence for visitors and search engines.
   "/ipo",
   // Open educational library only. Do not expose authenticated research tools or APIs.
