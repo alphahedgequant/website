@@ -31,7 +31,7 @@ async function dispatch(){
    if(!events.length)return Response.json({ok:true,checked:0,sent:0,note:"No recent published results"},{headers:{"Cache-Control":"no-store"}});
    const db=await ensurePushTable();
    const rows=await db`SELECT endpoint,p256dh,auth,last_seen_at FROM ahq_tournament_push
-     ORDER BY updated_at DESC LIMIT 24`;
+     ORDER BY last_seen_at ASC LIMIT 24`;
    let sent=0,invalid=0,failed=0,checked=0;
    for(let start=0;start<rows.length;start+=4){
      const batch=rows.slice(start,start+4);
