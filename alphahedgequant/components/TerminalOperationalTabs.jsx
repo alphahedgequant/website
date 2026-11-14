@@ -2,6 +2,7 @@
 import {useEffect,useMemo,useState} from "react";
 import Link from "next/link";
 import OptionIVAnalytics from "@/components/OptionIVAnalytics";
+import OptionOIProfile from "@/components/OptionOIProfile";
 import {computeTerminalRisk} from "@/lib/terminalRisk.mjs";
 const finite=x=>x!==null&&x!==undefined&&x!==""&&Number.isFinite(Number(x))?Number(x):null;
 const total=(rows,side,key)=>rows.reduce((sum,r)=>sum+(finite(r?.[side]?.[key])??0),0);
@@ -51,6 +52,7 @@ export function TerminalOptionAnalytics({symbol,chain,chainError,onRefresh}){
      <Metric label="ATM CALL IV" value={finite(atm?.call?.iv)===null?"—":n(finite(atm.call.iv))} detail="Provider units, unchanged"/>
      <Metric label="ATM PUT IV" value={finite(atm?.put?.iv)===null?"—":n(finite(atm.put.iv))} detail="Provider units, unchanged"/>
     </div>
+    <OptionOIProfile rows={rows} spot={spot} expiry={expiry} symbol={symbol} receivedAt={chain?.received_at||null}/>
     <OptionIVAnalytics chain={rows} spot={spot} expiry={expiry} history={history} marketOpen={duringNseSession()} lastUpdated={chain?.received_at&&Number.isFinite(Date.parse(chain.received_at))?chain.received_at:null}/>
     <p className="qt-operational-caveat">The ATM IV history begins during this browser visit only. OI ratios describe positioning, not buyer-initiated trades. Changes may remain unavailable when the broker feed is offline.</p>
    </>}
