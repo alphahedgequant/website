@@ -121,7 +121,7 @@ export const SPECIALIST_LESSONS=[
     "question": "A corporate bond yields 8.5% and a comparable government bond 6.5%. How many basis points is the spread?",
     "answer": 200,
     "formula": "Spread in bp = (corporate yield − government yield) × 100",
-    "solution": "2.0 percentage points × 100 = 200 basis points."
+    "solution": "2.0 percentage points × 100 = 200 basis points. Confirm that the displayed result uses the requested units and that the simplified model omits trading and funding risks."
   },
   {
     "id": "quant-practice-13-03",
@@ -143,7 +143,7 @@ export const SPECIALIST_LESSONS=[
     "question": "A call expires with spot ₹113, strike ₹100 and premium ₹7. Find profit per unit before costs.",
     "answer": 6,
     "formula": "Call profit = max(spot − strike, 0) − premium",
-    "solution": "Intrinsic value is ₹13, so net expiry profit is ₹13−₹7 = ₹6."
+    "solution": "Intrinsic value is ₹13, so net expiry profit is ₹13−₹7 = ₹6. Confirm that the displayed result uses the requested units and that the simplified model omits trading and funding risks."
   },
   {
     "id": "quant-practice-14-02",
@@ -165,7 +165,7 @@ export const SPECIALIST_LESSONS=[
     "question": "A European call costs ₹8, spot is ₹100, and discounted strike is ₹96. What is the put worth in parity?",
     "answer": 4,
     "formula": "Put = call − spot + PV(strike)",
-    "solution": "Put = call−spot+discounted strike = 8−100+96 = ₹4."
+    "solution": "Put = call−spot+discounted strike = 8−100+96 = ₹4. Confirm that the displayed result uses the requested units and that the simplified model omits trading and funding risks."
   },
   {
     "id": "quant-practice-15-01",
@@ -176,7 +176,7 @@ export const SPECIALIST_LESSONS=[
     "question": "A signal earns 12 basis points gross and costs 8 basis points round-trip. What is its net edge, in basis points?",
     "answer": 4,
     "formula": "Net return = gross return − round-trip costs",
-    "solution": "12−8=4 basis points, before other financing or market impact."
+    "solution": "12−8=4 basis points, before other financing or market impact. Confirm that the displayed result uses the requested units and that the simplified model omits trading and funding risks."
   },
   {
     "id": "quant-practice-15-02",
@@ -187,7 +187,7 @@ export const SPECIALIST_LESSONS=[
     "question": "Stock A trades at ₹110, stock B at ₹92, and the illustrative hedge ratio is 1. What is A−B?",
     "answer": 18,
     "formula": "Spread = A − hedge ratio × B",
-    "solution": "110−1×92=18. This does not establish cointegration."
+    "solution": "110−1×92=18. This does not establish cointegration. Confirm that the displayed result uses the requested units and that the simplified model omits trading and funding risks."
   },
   {
     "id": "quant-practice-15-03",
@@ -198,7 +198,7 @@ export const SPECIALIST_LESSONS=[
     "question": "60% of a portfolio earns 5% and 40% earns −2%. What is total return, in percent?",
     "answer": 2.2,
     "formula": "Portfolio return (%) = sum(weight × asset return %)",
-    "solution": "0.6×5+0.4×(−2)=2.2%. This ignores rebalance costs."
+    "solution": "0.6×5+0.4×(−2)=2.2%. This ignores rebalance costs. Confirm that the displayed result uses the requested units and that the simplified model omits trading and funding risks."
   },
   {
     "id": "quant-practice-16-01",
@@ -220,7 +220,7 @@ export const SPECIALIST_LESSONS=[
     "question": "Testing ends on day 20 and a three-day embargo excludes days 21–23. What is the next allowable day?",
     "answer": 24,
     "formula": "Next day = test end + embargo days + 1",
-    "solution": "20+3+1=24, assuming trading days are numbered consecutively."
+    "solution": "20+3+1=24, assuming trading days are numbered consecutively. Confirm that the displayed result uses the requested units and that the simplified model omits trading and funding risks."
   },
   {
     "id": "quant-practice-16-03",
@@ -231,7 +231,7 @@ export const SPECIALIST_LESSONS=[
     "question": "An illustrative position can lose ₹250 per unit and your stated loss budget is ₹2,000. How many whole units fit?",
     "answer": 8,
     "formula": "Units = risk budget / assumed unit loss",
-    "solution": "2000÷250=8. Stop losses may not execute at assumed prices."
+    "solution": "2000÷250=8. Stop losses may not execute at assumed prices. Confirm that the displayed result uses the requested units and that the simplified model omits trading and funding risks."
   },
   {
     "id": "quant-practice-17-01",
@@ -242,7 +242,7 @@ export const SPECIALIST_LESSONS=[
     "question": "A short future sells at ₹120 and is closed at ₹113. Profit per unit before charges?",
     "answer": 7,
     "formula": "Short futures profit = entry price − exit price",
-    "solution": "120−113=7 per unit; daily cash flows can differ."
+    "solution": "120−113=7 per unit; daily cash flows can differ. Confirm that the displayed result uses the requested units and that the simplified model omits trading and funding risks."
   },
   {
     "id": "quant-practice-17-02",
@@ -264,6 +264,6 @@ export const SPECIALIST_LESSONS=[
     "question": "An inventory exposure is 500 units and each futures contract covers 100. How many contracts provide an equal-unit hedge?",
     "answer": 5,
     "formula": "Contracts = inventory units / units per contract",
-    "solution": "500÷100=5 contracts, with basis risk remaining."
+    "solution": "500÷100=5 contracts, with basis risk remaining. Confirm that the displayed result uses the requested units and that the simplified model omits trading and funding risks."
   }
 ];
