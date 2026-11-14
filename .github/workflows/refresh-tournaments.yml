@@ -1,5 +1,13 @@
 name: AHQ tournament fallback refresh
 on:
+  # Self-test the updater when its workflow or script changes. Data-only
+  # commits never retrigger it, avoiding a refresh/deployment loop.
+  push:
+    branches:
+      - main
+    paths:
+      - .github/workflows/refresh-tournaments.yml
+      - alphahedgequant/scripts/refresh-tournaments.mjs
   schedule:
     - cron: "17,47 * * * *"
   workflow_dispatch:
