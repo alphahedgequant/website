@@ -84,7 +84,7 @@ export default function CompetitionBoardFrame(){
     <section className="ahq-tournament-integrated" aria-label="Global chess, hackathon and quant tournament board">
       <div className="ahq-tournament-integrated-inner">
         <div className="ahq-tournament-integration-bar">
-          <span>ALPHAHEDGEQUANT / GLOBAL COMPETITIONS</span>
+          <span>ALPHAHEDGEQUANT / GLOBAL COMPETITIONS · FREE TO EXPLORE · NO SIGN-IN</span>
           <a href="/tournaments.html" target="_blank" rel="noopener noreferrer">
             Open standalone board ↗
           </a>
