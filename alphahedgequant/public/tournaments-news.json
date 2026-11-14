@@ -1,9 +1,37 @@
 {
   "version": 1,
-  "updatedAt": "2026-11-14T19:53:46.714Z",
+  "updatedAt": "2026-11-14T20:00:21.420Z",
   "source": "Lichess index & published PGN; cached by scheduled GitHub Actions",
   "roundsChecked": 3,
   "items": [
+    {
+      "id": "result-69d88d9ab7cc58f54bda",
+      "type": "result",
+      "cat": "chess",
+      "title": "Keymer, Vincent defeated Artemiev, Vladislav",
+      "detail": "Confirmed score 1-0 in published round PGN; no engine analysis claimed.",
+      "eventId": "l-wLrwkC0C",
+      "tourId": "wLrwkC0C",
+      "roundId": "VkpQSrsF",
+      "url": "https://lichess.org/broadcast/total-chess-world-championship-tour-pilot-2026-group-stage-combined/wLrwkC0C",
+      "observedAt": "2026-11-14T20:00:22.695Z",
+      "source": "Lichess broadcast PGN",
+      "timeType": "source_check"
+    },
+    {
+      "id": "result-8961c32e1ca4e056f38d",
+      "type": "result",
+      "cat": "chess",
+      "title": "Praggnanandhaa R drew with Rapport, Richard",
+      "detail": "Confirmed score 1/2-1/2 in published round PGN; no engine analysis claimed.",
+      "eventId": "l-wLrwkC0C",
+      "tourId": "wLrwkC0C",
+      "roundId": "VkpQSrsF",
+      "url": "https://lichess.org/broadcast/total-chess-world-championship-tour-pilot-2026-group-stage-combined/wLrwkC0C",
+      "observedAt": "2026-11-14T20:00:22.695Z",
+      "source": "Lichess broadcast PGN",
+      "timeType": "source_check"
+    },
     {
       "id": "result-4036bc6a4e0e3830ce98",
       "type": "result",
