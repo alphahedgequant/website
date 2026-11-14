@@ -11,7 +11,7 @@ export const COMPETITIONS = [
     format:"World championship match", participants:["Gukesh D","Javokhir Sindarov"],
     participantLabel:"Players named in the Lichess championship broadcast",
     description:"The world championship match in Geneva. Follow round schedules, games and confirmed competitors through the official coverage.",
-    sourceURL:"https://www.fide.com/fide-circuit-2026-2027/", broadcastURL:"https://lichess.org/broadcast",
+    sourceURL:"https://worldchampionship.fide.com/", broadcastURL:"https://lichess.org/broadcast",
     eligibility:"Spectator event; consult organisers for attendance", tags:["Classical","World championship"], featured:true
   },
   {
@@ -57,37 +57,37 @@ export const COMPETITIONS = [
     slug:"kiroween-2026", title:"Kiroween 2026", category:"Hackathons", country:"Worldwide", city:"Online", mode:"Online", organiser:"Kiro",
     start:"2026-10-30", end:"2026-12-04", format:"Online developer hackathon", participants:[],
     description:"Build and submit developer projects in this global online hackathon. Official Devpost listing contains current entry rules and submission details.",
-    sourceURL:"https://devpost.com/hackathons?challenge_type%5B%5D=online&managed_by_devpost_badge=1", eligibility:"Check host and jurisdiction rules", tags:["AI","Developer tools"], featured:true
+    sourceURL:"https://kiroween.devpost.com/", eligibility:"Check entry age and excluded jurisdictions in official rules", tags:["AI","Developer tools"], featured:true
   },
   {
     slug:"codegeist-2026", title:"Codegeist 2026", category:"Hackathons", country:"Worldwide", city:"Online", mode:"Online", organiser:"Atlassian",
     start:"2026-10-27", end:"2026-12-22", format:"Online builder competition", participants:[],
     description:"Atlassian's Codegeist developer challenge, focused on building useful software and workflows.",
-    sourceURL:"https://devpost.com/hackathons?challenge_type%5B%5D=online&managed_by_devpost_badge=1", eligibility:"See Devpost entry requirements", tags:["Enterprise","AI"]
+    sourceURL:"https://codegeist2026.devpost.com/", eligibility:"See official entry rules and excluded jurisdictions", tags:["Enterprise","AI"]
   },
   {
     slug:"build-hybrid-ai-2026", title:"#BuildHybridAI 2026", category:"Hackathons", country:"Worldwide", city:"Online", mode:"Online", organiser:"Google",
     start:"2026-11-11", end:"2026-11-30", format:"Online hackathon", participants:[],
     description:"An online build competition with hybrid AI, mobile and web categories.",
-    sourceURL:"https://devpost.com/hackathons?challenge_type%5B%5D=online&managed_by_devpost_badge=1", eligibility:"See host eligibility and project guidelines", tags:["AI","Mobile","Web"]
+    sourceURL:"https://firebasehybridaihackathon.devpost.com/", eligibility:"Check official regional exclusions and project rules", tags:["AI","Mobile","Web"]
   },
   {
     slug:"meta-vr-start-2026", title:"Meta VR Start Developer Competition 2026", category:"Hackathons", country:"Worldwide", city:"Online", mode:"Online", organiser:"Meta",
     start:"2026-09-24", end:"2026-11-18", format:"Online developer competition", participants:[],
     description:"A global AR/VR and immersive development competition. The listing shows the published submission window.",
-    sourceURL:"https://devpost.com/hackathons?challenge_type%5B%5D=online&managed_by_devpost_badge=1", eligibility:"See host rules", tags:["AR / VR","AI"]
+    sourceURL:"https://start-developer-competition-26.devpost.com/", eligibility:"Meta VR Start program membership, developer account and other rules required", tags:["AR / VR","AI"]
   },
   {
     slug:"qnx-global-hackathon-2026", title:"QNX Global Hackathon 2026", category:"Hackathons", country:"Worldwide", city:"Online", mode:"Online", organiser:"QNX",
     start:"2026-11-02", end:"2026-12-15", format:"Online hackathon", participants:[],
     description:"Global developer hackathon on the QNX ecosystem and embedded technology.",
-    sourceURL:"https://devpost.com/hackathons?status=open", eligibility:"See official competition listing", tags:["IoT","AI"]
+    sourceURL:"https://qnx.devpost.com/", eligibility:"See official competition rules", tags:["IoT","AI"]
   },
   {
     slug:"reddit-game-day-2026", title:"Reddit Game of the Day Hackathon", category:"Hackathons", country:"Worldwide", city:"Online", mode:"Online", organiser:"Reddit",
     start:"2026-11-11", end:"2026-12-08", format:"Online hackathon", participants:[],
     description:"Build an interactive experience for the Reddit ecosystem.",
-    sourceURL:"https://devpost.com/hackathons?challenge_type%5B%5D=online&eligibility=1", eligibility:"See official host rules", tags:["Games","Developer tools"]
+    sourceURL:"https://redditgameofday2026.devpost.com/", eligibility:"See official entry age and regional rules", tags:["Games","Developer tools"]
   },
   {
     slug:"global-strategy-challenge-2026", title:"Global Strategy Challenge", category:"Quant", country:"Worldwide", city:"Online", mode:"Online", organiser:"PM.finance",
