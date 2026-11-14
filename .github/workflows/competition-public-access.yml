@@ -1,0 +1,36 @@
+name: Competition Board Public Access Regression
+on:
+  push:
+    branches: [main]
+    paths:
+      - ".github/workflows/competition-public-access.yml"
+      - "alphahedgequant/scripts/audit-competitions-public.mjs"
+      - "alphahedgequant/middleware.js"
+      - "alphahedgequant/app/competitions/**"
+      - "alphahedgequant/components/CompetitionBoardFrame.jsx"
+      - "alphahedgequant/public/tournaments.html"
+      - "alphahedgequant/app/api/tournaments/**"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  public-access-audit:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 6
+    steps:
+      - name: Checkout source
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+      - name: Set up Node 22
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version: "22"
+      - name: Verify no-login access and protected-route isolation
+        working-directory: alphahedgequant
+        run: node scripts/audit-competitions-public.mjs
+      - name: Probe anonymously published competition routes
+        working-directory: alphahedgequant
+        env:
+          AHQ_LIVE_COMPETITIONS_SMOKE: "1"
+        run: node scripts/audit-competitions-public.mjs
