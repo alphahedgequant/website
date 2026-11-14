@@ -7,6 +7,8 @@ const isPublicRoute = createRouteMatcher([
   "/about",
   "/competitions(.*)",
   "/api/competitions/live-chess",
+  // Source-verified public JSON snapshot for browser fallback when feeds are unreachable.
+  "/tournaments-data.json",
   "/api/tournaments/feed",
   "/api/tournaments/round(.*)",
   // Public, read-only IPO calendar and listing intelligence for visitors and search engines.
