@@ -285,6 +285,7 @@
       }
     }
     build();
+    if(state.feedChess==='live')autoHeadlineRecap();
   }
   async function hack(){
     try{
@@ -320,17 +321,46 @@
     return st.label+(e.cat==='math'?' · maths olympiad':'');
   }
   function renderNews(all){
+    const confirmed=[];
+    for(const e of all){
+      if(!e.roundId)continue;
+      const saved=state.roundCache[e.roundId]?.data;
+      if(!saved?.games?.length)continue;
+      const finished=saved.games.filter(g=>g.result&&g.result!=='*').sort((a,b)=>{
+        const decisive=r=>r.result==='1-0'||r.result==='0-1';
+        return Number(decisive(b))-Number(decisive(a));
+      }).slice(0,2);
+      for(const game of finished){
+        const title=game.result==='1/2-1/2'?game.white+' and '+game.black+' drew':
+          game.result==='1-0'?game.white+' beat '+game.black:game.black+' beat '+game.white;
+        confirmed.push({e,title,checkedAt:saved.checkedAt,game});
+      }
+    }
+    const results=confirmed.slice(0,3).map(({e,title,checkedAt,game})=>
+      '<button type="button" class="news-item" data-story-event="'+escape(e.id)+'">'
+      +'<small><b>● VERIFIED GAME RESULT</b> · PGN CHECKED '+escape(dt(checkedAt))+'</small>'
+      +'<strong>'+escape(title)+'</strong>'
+      +'<small>'+escape(e.name)+' · '+escape(game.playedAt?'Game listed '+dt(game.playedAt):'Game time not published')+' · View moves ↗</small></button>'
+    );
     const live=all.filter(e=>e.cat==='chess'&&e.live===true).sort((a,b)=>relevance(b)-relevance(a));
     const soon=all.filter(e=>e.cat==='math'&&e.start&&dayMs(e.start)>=localDay()&&dayMs(e.start)<=localDay()+30*DAY).sort((a,b)=>dayMs(a.start)-dayMs(b.start));
     const notable=all.filter(e=>important(e)&&!e.live&&e.start&&dayMs(e.start)>=localDay()).sort((a,b)=>dayMs(a.start)-dayMs(b.start));
-    const picks=unique([...live.slice(0,2),...soon.slice(0,1),...notable].map(e=>e.id)).map(id=>all.find(e=>e.id===id)).filter(Boolean).slice(0,6);
-    el('news').innerHTML=picks.map(e=>{
-      const st=status(e),live=st.kind==='live';
-      const time=live&&e.roundStart?dt(e.roundStart):e.start?'DATE / '+pretty(e.start):'DATE / TBC';
+    const picks=unique([...live.slice(0,3),...soon.slice(0,2),...notable].map(e=>e.id)).map(id=>all.find(e=>e.id===id)).filter(Boolean).slice(0,6-results.length);
+    const calendar=picks.map(e=>{
+      const st=status(e),live=st.kind==='live',time=live&&e.roundStart?dt(e.roundStart):e.start?'DATE / '+pretty(e.start):'DATE / TBC';
       return '<button type="button" class="news-item" data-story-event="'+escape(e.id)+'">'
        +'<small><b>'+(live?'● LIVE ROUND':e.cat==='math'?'π MATHS WATCH':st.kind==='expected'?'◫ EXPECTED':'UPCOMING')+'</b> · '+escape(time)+'</small>'
        +'<strong>'+escape(e.name)+'</strong><small>'+escape(excerpt(e))+' · Read catch-up ↗</small></button>';
-    }).join('')||'<div class="noevents">No new verified developments available. The feed will refresh automatically.</div>';
+    });
+    el('news').innerHTML=[...results,...calendar].join('')||'<div class="noevents">No verified developments available. The feed will refresh automatically.</div>';
+  }
+  let lastHeadlineRead=0;
+  function autoHeadlineRecap(){
+    const tick=Date.now();
+    if(tick-lastHeadlineRead<180000)return;
+    lastHeadlineRead=tick;
+    const events=state.events.filter(e=>e.cat==='chess'&&e.live&&e.roundId).sort((a,b)=>relevance(b)-relevance(a)).slice(0,2);
+    for(const e of events)loadStory(e);
   }
   function findSelected(){return state.events.find(e=>e.id===state.selectedId);}
   function eventFacts(e){
@@ -448,6 +478,7 @@
     }catch{
       state.roundCache[id]={at:Date.now(),loading:false,error:'Round PGN could not be retrieved. Live claims and game scores have not been invented.'};
     }
+    renderNews(state.events);
     if(state.selectedId){const current=findSelected();if(current?.roundId===id)renderStory(current);}
   }
   function openStory(id){
