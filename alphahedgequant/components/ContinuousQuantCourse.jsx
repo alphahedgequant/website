@@ -10,14 +10,20 @@ import {MORE_TOPICS_1} from "@/lib/quantMoreTopics1.mjs";
 import {MORE_TOPICS_2} from "@/lib/quantMoreTopics2.mjs";
 import {MORE_TOPICS_3} from "@/lib/quantMoreTopics3.mjs";
 import {MORE_TOPICS_4} from "@/lib/quantMoreTopics4.mjs";
+import {SPECIALIST_SECTIONS,SPECIALIST_GUIDES,SPECIALIST_LESSONS,SPECIALIST_BRIDGES} from "@/lib/quantSpecialistModules.mjs";
+import {SPECIALIST_TOPICS_A} from "@/lib/quantSpecialistTopicsA.mjs";
+import {SPECIALIST_TOPICS_B} from "@/lib/quantSpecialistTopicsB.mjs";
 import "./continuous-course.css";
 
 const lpad=n=>String(n).padStart(2,"0");
 const ALL_SECTIONS=[...QUANT_SECTIONS,...EXTENDED_SECTIONS];
+ALL_SECTIONS.push(...SPECIALIST_SECTIONS);
 const ALL_GUIDES=[...MODULE_GUIDES,...EXTENDED_MODULE_GUIDES];
-const ALL_TOPICS=[...MODULE_TOPICS,...EXTENDED_MODULE_TOPICS,...MORE_TOPICS_1,...MORE_TOPICS_2,...MORE_TOPICS_3,...MORE_TOPICS_4];
-const ALL_LESSONS=[...QUANT_LESSONS,...EXTENDED_LESSONS.map(lesson=>({...lesson,example:"Work it out before checking the answer. Use the requested unit."}))];
+ALL_GUIDES.push(...SPECIALIST_GUIDES);
+const ALL_TOPICS=[...MODULE_TOPICS,...EXTENDED_MODULE_TOPICS,...MORE_TOPICS_1,...MORE_TOPICS_2,...MORE_TOPICS_3,...MORE_TOPICS_4,...SPECIALIST_TOPICS_A,...SPECIALIST_TOPICS_B];
+const ALL_LESSONS=[...QUANT_LESSONS,...EXTENDED_LESSONS.map(lesson=>({...lesson,example:"Work it out before checking the answer. Use the requested unit."})),...SPECIALIST_LESSONS];
 const ALL_BRIDGES=[...MODULE_LEARNING_BRIDGES,...EXTENDED_BRIDGES];
+ALL_BRIDGES.push(...SPECIALIST_BRIDGES);
 function MiniFigure({section,topic}){
  const i=topic.index;
  if(section===2&&(i===3||i===2))return <figure className="ac-figure">
@@ -105,7 +111,7 @@ export default function ContinuousQuantCourse({progress={},save,sync}){
  const total=ALL_LESSONS.length+ALL_TOPICS.length+ALL_SECTIONS.length;
  const choose=i=>{setSection(i);setTimeout(()=>document.getElementById("ac-module-top")?.scrollIntoView({block:"start",behavior:"smooth"}),60)};
  return <section className="ac-course" id="learn-quant" aria-label="Quantitative finance course">
-  <div className="ac-intro"><p>ALPHAHEDGEQUANT / LEARN QUANT</p><h2>Twelve modules, one clear learning path.</h2><span>Read the chapters in order, study worked examples, check your understanding, then try the Python exercise. Everything is written to be understandable with basic maths.</span></div>
+  <div className="ac-intro"><p>ALPHAHEDGEQUANT / LEARN QUANT</p><h2>Seventeen modules, one clear learning path.</h2><span>Read the chapters in order, study worked examples, check your understanding, then try the Python exercise. Everything is written to be understandable with basic maths.</span></div>
   <div className="ac-layout">
    <aside className="ac-sidebar" aria-label="Module progress and navigation"><div className="ac-sidebar-title"><strong>YOUR PROGRESS</strong><span>{doneLessons+doneTopics+doneLabs} / {total}</span><div className="ac-progress"><span style={{width:(doneLessons+doneTopics+doneLabs)/total*100+"%"}}/></div></div>
     {ALL_SECTIONS.map((s,i)=>{const chItems=ALL_TOPICS.filter(t=>t.module===i),mathItems=ALL_LESSONS.filter(l=>l.section===i),lab=Boolean(progress["quant-lab-"+(i+1)]?.completed),d=chItems.filter(t=>progress[t.id]?.completed).length+mathItems.filter(l=>progress[l.id]?.completed).length+Number(lab),t=chItems.length+mathItems.length+1;return <button key={s.id} type="button" onClick={()=>choose(i)} aria-current={i===section?"page":undefined} className={"ac-sidebar-item "+(i===section?"selected":"")}><span>MODULE {lpad(i+1)} <small>{d}/{t}</small></span><strong>{s.title}</strong><span className="ac-progress"><span style={{width:d/t*100+"%"}}/></span></button>})}

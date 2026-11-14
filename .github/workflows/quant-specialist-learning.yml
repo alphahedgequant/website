@@ -1,0 +1,45 @@
+name: Specialist Quant Learning Modules
+on:
+  pull_request:
+    paths:
+      - "alphahedgequant/lib/quantSpecialist*.mjs"
+      - "alphahedgequant/components/ContinuousQuantCourse.jsx"
+      - "alphahedgequant/app/learn/**"
+      - "alphahedgequant/tests/quantSpecialistModules.test.mjs"
+      - "alphahedgequant/tests/extendedModules.test.mjs"
+      - ".github/workflows/quant-specialist-learning.yml"
+  push:
+    branches: [main]
+    paths:
+      - "alphahedgequant/lib/quantSpecialist*.mjs"
+      - "alphahedgequant/components/ContinuousQuantCourse.jsx"
+      - "alphahedgequant/app/learn/**"
+      - "alphahedgequant/tests/quantSpecialistModules.test.mjs"
+      - "alphahedgequant/tests/extendedModules.test.mjs"
+      - ".github/workflows/quant-specialist-learning.yml"
+permissions:
+  contents: read
+jobs:
+  curriculum:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 16
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: alphahedgequant/package-lock.json
+      - name: Install reproducible dependencies
+        working-directory: alphahedgequant
+        run: npm ci --ignore-scripts --no-audit --no-fund
+      - name: Verify original course materials, metadata, progress, Python labs and old modules
+        working-directory: alphahedgequant
+        run: node --test tests/quantSpecialistModules.test.mjs tests/continuousCourse.test.mjs tests/extendedModules.test.mjs tests/moreTopics.test.mjs tests/quantCourse.test.mjs tests/quantModules.test.mjs
+      - name: Build whole Next.js website
+        working-directory: alphahedgequant
+        env:
+          NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY: "pk_test_ZXhhbXBsZS5jbGVyay5hY2NvdW50cy5kZXYk"
+        run: npm run build
