@@ -91,7 +91,7 @@ export const COMPETITIONS = [
   },
   {
     slug:"global-strategy-challenge-2026", title:"Global Strategy Challenge", category:"Quant", country:"Worldwide", city:"Online", mode:"Online", organiser:"PM.finance",
-    start:"2026-12-15", end:null, endLabel:"Finals begin 1 February 2027 (closing date unannounced)", registrationOpens:"2026-11-15", registrationDeadline:"2026-12-13",
+    start:"2026-12-15", end:null, endLabel:"Finals begin 1 February 2027 (closing date unannounced)", registrationOpens:"2026-11-15", registrationOpensAt:"2026-11-15T15:00:00+08:00", registrationDeadline:"2026-12-13", registrationDeadlineAt:"2026-12-13T03:00:00+08:00",
     format:"Paper-trading qualifier, then trading finals", participants:[],
     description:"Quant strategy championship with separate crypto and US-equity divisions. Qualifier begins 15 December 2026; finals scheduled from 1 February 2027.",
     sourceURL:"https://pm.finance/contest", eligibility:"Individual or institution; eligibility verification required", tags:["Trading","Crypto","US equities"], featured:true
@@ -105,17 +105,17 @@ export const COMPETITIONS = [
   },
   {
     slug:"berkeley-trading-competition-2027", title:"Berkeley Trading Competition 2027", category:"Quant", country:"United States", city:"Berkeley", mode:"In person", organiser:"Traders at Berkeley",
-    start:"2027-02-27", end:"2027-02-28", registrationDeadline:"2026-12-06",
+    start:"2027-02-27", end:"2027-02-28", registrationDeadline:"2026-12-06", registrationDeadlineAt:"2026-12-06T23:59:00-08:00", registrationOpenConfirmed:true,
     format:"Intercollegiate trading and quant research", participants:[],
     description:"Two days of trading cases and quantitative research challenges at UC Berkeley. Applications close 6 December 2026 (PST).",
     sourceURL:"https://traders.studentorg.berkeley.edu/competition/", eligibility:"Students; check application rules", tags:["Trading","Research"]
   },
   {
     slug:"mit-trading-competition-2027", title:"MIT Trading Competition 2027", category:"Quant", country:"United States", city:"Cambridge, Massachusetts", mode:"In person", organiser:"Traders@MIT",
-    start:"2027-03-06", end:"2027-03-07", registrationDeadline:"2026-12-06",
+    start:"2027-03-06", end:"2027-03-07", registrationDeadline:"2026-12-06", registrationDeadlineAt:"2026-12-06T23:59:00-05:00", registrationOpenConfirmed:true,
     format:"Individual trading cases", participants:[],
     description:"A two-day intercollegiate trading championship. Organiser lists an application deadline of 6 December 2026 (ET).",
-    sourceURL:"https://traders.mit.edu/competition.html", eligibility:"See university-level applicant requirements", tags:["Trading","Probability"]
+    sourceURL:"https://traders.mit.edu/competition", eligibility:"See university-level applicant requirements", tags:["Trading","Probability"]
   },
   {
     slug:"rotman-trading-competition-2027", title:"Rotman International Trading Competition 2027", category:"Quant", country:"Canada", city:"Toronto", mode:"In person", organiser:"University of Toronto",
@@ -127,10 +127,10 @@ export const COMPETITIONS = [
   },
   {
     slug:"stevens-hft-competition-2027", title:"Stevens High-Frequency Trading Competition", category:"Quant", country:"United States", city:"Online", mode:"Online", organiser:"Stevens Institute of Technology",
-    start:"2027-04-02", end:"2027-05-07", registrationDeadline:"2027-02-15",
+    start:"2027-04-02", end:"2027-05-07", registrationDeadline:"2027-02-15", registrationOpenConfirmed:true,
     format:"Multi-round algorithmic trading", participants:[],
     description:"Students build Python trading algorithms for the SHIFT simulator. Application deadline is 15 February 2027; contest days are in April and May.",
-    sourceURL:"https://www.stevens.edu/events/high-frequency-trading-competition", eligibility:"Accredited-university undergraduates and graduates; published team fee follows selection", tags:["HFT","Python","Simulation"]
+    sourceURL:"https://fsc.stevens.edu/hftc/", eligibility:"Accredited-university undergraduates and graduates; published team fee follows selection", tags:["HFT","Python","Simulation"]
   },
   {
     slug:"alberta-commodities-2027", title:"International Commodities Trading Competition 2027", category:"Quant", country:"Worldwide", city:"Online", mode:"Online", organiser:"University of Alberta",
@@ -168,10 +168,20 @@ export function competitionStatus(event, today = new Date().toISOString().slice(
   return "Schedule TBA";
 }
 export function registrationStatus(event, today = new Date().toISOString().slice(0,10)) {
-  if (event.registrationDeadline && today > event.registrationDeadline) return "Applications closed";
-  if (event.registrationOpens && today < event.registrationOpens) return "Opens " + event.registrationOpens;
-  if (event.registrationDeadline && today <= event.registrationDeadline) return "Applications open · check eligibility";
-  if (event.registrationOpens && today >= event.registrationOpens) return "Check registration availability";
+  const now=Date.now();
+  if (event.registrationClosedConfirmed) return "Registration closed · organiser";
+  if (event.registrationOpensAt && now < Date.parse(event.registrationOpensAt))
+    return "Registration opens " + new Date(event.registrationOpensAt).toLocaleString("en-IN",{timeZone:"Asia/Kolkata",day:"2-digit",month:"short",hour:"2-digit",minute:"2-digit"})+" IST";
+  if (event.registrationDeadlineAt && now >= Date.parse(event.registrationDeadlineAt))
+    return "Deadline elapsed · verify organiser";
+  if (event.registrationDeadline && today > event.registrationDeadline)
+    return "Deadline elapsed · verify organiser";
+  if (event.registrationOpens && today < event.registrationOpens)
+    return "Opens " + event.registrationOpens;
+  if ((event.registrationOpenConfirmed||event.registrationOpensAt)&&(!event.registrationDeadlineAt||now<Date.parse(event.registrationDeadlineAt)))
+    return "Within published application window · verify organiser";
+  if (event.registrationDeadline) return "Deadline published · live acceptance unverified";
+  if (event.registrationOpens) return "Opening date published · check organiser";
   return event.registrationNote || "Check official event page";
 }
 export function eventBySlug(slug) { return COMPETITIONS.find(event=>event.slug===slug); }
