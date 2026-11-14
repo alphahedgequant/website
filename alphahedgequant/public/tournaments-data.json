@@ -1,46 +1,10 @@
 {
   "version": 1,
-  "updatedAt": "2026-11-14T20:00:16.095Z",
+  "updatedAt": "2026-11-14T20:23:28.867Z",
   "lichess": {
-    "updatedAt": "2026-11-14T20:00:21.289Z",
+    "updatedAt": "2026-11-14T20:23:34.233Z",
     "top": {
       "active": [
-        {
-          "tour": {
-            "id": "wLrwkC0C",
-            "name": "Total Chess World Championship Tour Pilot 2026 | Group Stage | Combined",
-            "slug": "total-chess-world-championship-tour-pilot-2026-group-stage-combined",
-            "info": {
-              "format": "6-player double round-robin",
-              "tc": "45 min + 30 sec / move",
-              "fideTC": "standard",
-              "location": "Budapest, Hungary",
-              "timeZone": "Europe/Budapest",
-              "players": "Carlsen, Caruana, Abdusattorov, So, Praggnanandhaa, Keymer, Firouzja, Giri",
-              "website": "https://www.totalchess.com/tournaments/budapest-2026",
-              "standings": "https://www.totalchess.com/tournaments/budapest-2026/groups",
-              "regulations": "https://www.totalchess.com/pilot-2026/regulations"
-            },
-            "createdAt": 1794387021694,
-            "url": "https://lichess.org/broadcast/total-chess-world-championship-tour-pilot-2026-group-stage-combined/wLrwkC0C",
-            "tier": 5,
-            "dates": [
-              1794405600000,
-              1794763800000
-            ],
-            "image": "https://image.lichess.org/display?fmt=webp&h=400&op=thumbnail&path=_WwmlE0iq-Ad.webp&w=800&sig=5edfa195b3f5d5dc40df60a6807ee8f85d9f10ab",
-            "teamTable": true
-          },
-          "round": {
-            "id": "VkpQSrsF",
-            "name": "Round 8",
-            "slug": "round-8",
-            "ongoing": true,
-            "startsAt": 1794677400000,
-            "url": "https://lichess.org/broadcast/total-chess-world-championship-tour-pilot-2026-group-stage-combined/round-8/VkpQSrsF"
-          },
-          "group": "Total Chess World Championship Tour Pilot 2026"
-        },
         {
           "tour": {
             "id": "jJzJv14g",
@@ -81,6 +45,49 @@
             "finishedAt": 1794682857849,
             "finished": true,
             "startsAt": 1794662100000
+          }
+        },
+        {
+          "tour": {
+            "id": "wLrwkC0C",
+            "name": "Total Chess World Championship Tour Pilot 2026 | Group Stage | Combined",
+            "slug": "total-chess-world-championship-tour-pilot-2026-group-stage-combined",
+            "info": {
+              "format": "6-player double round-robin",
+              "tc": "45 min + 30 sec / move",
+              "fideTC": "standard",
+              "location": "Budapest, Hungary",
+              "timeZone": "Europe/Budapest",
+              "players": "Carlsen, Caruana, Abdusattorov, So, Praggnanandhaa, Keymer, Firouzja, Giri",
+              "website": "https://www.totalchess.com/tournaments/budapest-2026",
+              "standings": "https://www.totalchess.com/tournaments/budapest-2026/groups",
+              "regulations": "https://www.totalchess.com/pilot-2026/regulations"
+            },
+            "createdAt": 1794387021694,
+            "url": "https://lichess.org/broadcast/total-chess-world-championship-tour-pilot-2026-group-stage-combined/wLrwkC0C",
+            "tier": 5,
+            "dates": [
+              1794405600000,
+              1794763800000
+            ],
+            "image": "https://image.lichess.org/display?fmt=webp&h=400&op=thumbnail&path=_WwmlE0iq-Ad.webp&w=800&sig=5edfa195b3f5d5dc40df60a6807ee8f85d9f10ab",
+            "teamTable": true
+          },
+          "round": {
+            "id": "VAvN8M7d",
+            "name": "Round 9",
+            "slug": "round-9",
+            "startsAt": 1794751200000,
+            "url": "https://lichess.org/broadcast/total-chess-world-championship-tour-pilot-2026-group-stage-combined/round-9/VAvN8M7d"
+          },
+          "group": "Total Chess World Championship Tour Pilot 2026",
+          "roundToLink": {
+            "id": "VkpQSrsF",
+            "name": "Round 8",
+            "slug": "round-8",
+            "finishedAt": 1794687346455,
+            "finished": true,
+            "startsAt": 1794677400000
           }
         },
         {
@@ -229,38 +236,6 @@
         },
         {
           "tour": {
-            "id": "4jZflFpE",
-            "name": "XIV Torneo Internacional y Nacional de Ajedrez Copa Revolución 2026 |Abierta",
-            "slug": "xiv-torneo-internacional-y-nacional-de-ajedrez-copa-revolucion-2026-abierta",
-            "info": {
-              "format": "9-round Swiss",
-              "tc": "90 min + 30 seg",
-              "fideTC": "standard",
-              "location": "CDMX, Mexico",
-              "timeZone": "America/Mexico_City",
-              "standings": "https://s2.chess-results.com/tnr1448217.aspx?art=1"
-            },
-            "createdAt": 1794418228395,
-            "url": "https://lichess.org/broadcast/xiv-torneo-internacional-y-nacional-de-ajedrez-copa-revolucion-2026-abierta/4jZflFpE",
-            "tier": 3,
-            "dates": [
-              1794438000000,
-              1794844800000
-            ],
-            "image": "https://image.lichess.org/display?fmt=webp&h=400&op=thumbnail&path=duN32_RTytWx.webp&w=800&sig=83621261cae858f8c3514496e76f9e8d4424e82a"
-          },
-          "round": {
-            "id": "ga23WiZt",
-            "name": "Round 6",
-            "slug": "round-6",
-            "ongoing": true,
-            "startsAt": 1794672480000,
-            "url": "https://lichess.org/broadcast/xiv-torneo-internacional-y-nacional-de-ajedrez-copa-revolucion-2026-abierta/round-6/ga23WiZt"
-          },
-          "group": "XIV Torneo Internacional y Nacional de Ajedrez Copa Revolución 2026"
-        },
-        {
-          "tour": {
             "id": "dlKwJPL0",
             "name": "10th Annual New York State Girls Championship 2026",
             "slug": "10th-annual-new-york-state-girls-championship-2026",
@@ -289,6 +264,38 @@
             "ongoing": true,
             "startsAt": 1794679500000,
             "url": "https://lichess.org/broadcast/10th-annual-new-york-state-girls-championship-2026/round-2/JD1XZEd5"
+          }
+        },
+        {
+          "tour": {
+            "id": "By72Ixa0",
+            "name": "XX Festival Xadrez Figueira da Foz - Torneio Sabir Ali",
+            "slug": "xx-festival-xadrez-figueira-da-foz-torneio-sabir-ali",
+            "info": {
+              "format": "9 round Swiss",
+              "fideTC": "standard",
+              "location": "Figueira da Foz, Portugal",
+              "timeZone": "Europe/Lisbon",
+              "website": "https://xadrezfigueira.mfbpro.com/",
+              "standings": "https://s1.chess-results.com/tnr1475235.aspx?art=1",
+              "regulations": "https://s2.chess-results.com/UploadData.aspx?lan=10&tnr=1475235&Uid=1"
+            },
+            "createdAt": 1794242470978,
+            "url": "https://lichess.org/broadcast/xx-festival-xadrez-figueira-da-foz-torneio-sabir-ali/By72Ixa0",
+            "tier": 3,
+            "dates": [
+              1794245426256,
+              1794736800000
+            ],
+            "image": "https://image.lichess.org/display?fmt=webp&h=400&op=thumbnail&path=oSh1_2xMyn_T.webp&w=800&sig=4f5d24daec2fbc5187fcd14bc58969df81b1babc"
+          },
+          "round": {
+            "id": "MBM3biqh",
+            "name": "Round 8",
+            "slug": "round-8",
+            "ongoing": true,
+            "startsAt": 1794677400000,
+            "url": "https://lichess.org/broadcast/xx-festival-xadrez-figueira-da-foz-torneio-sabir-ali/round-8/MBM3biqh"
           }
         },
         {
@@ -358,38 +365,6 @@
         },
         {
           "tour": {
-            "id": "By72Ixa0",
-            "name": "XX Festival Xadrez Figueira da Foz - Torneio Sabir Ali",
-            "slug": "xx-festival-xadrez-figueira-da-foz-torneio-sabir-ali",
-            "info": {
-              "format": "9 round Swiss",
-              "fideTC": "standard",
-              "location": "Figueira da Foz, Portugal",
-              "timeZone": "Europe/Lisbon",
-              "website": "https://xadrezfigueira.mfbpro.com/",
-              "standings": "https://s1.chess-results.com/tnr1475235.aspx?art=1",
-              "regulations": "https://s2.chess-results.com/UploadData.aspx?lan=10&tnr=1475235&Uid=1"
-            },
-            "createdAt": 1794242470978,
-            "url": "https://lichess.org/broadcast/xx-festival-xadrez-figueira-da-foz-torneio-sabir-ali/By72Ixa0",
-            "tier": 3,
-            "dates": [
-              1794245426256,
-              1794736800000
-            ],
-            "image": "https://image.lichess.org/display?fmt=webp&h=400&op=thumbnail&path=oSh1_2xMyn_T.webp&w=800&sig=4f5d24daec2fbc5187fcd14bc58969df81b1babc"
-          },
-          "round": {
-            "id": "MBM3biqh",
-            "name": "Round 8",
-            "slug": "round-8",
-            "ongoing": true,
-            "startsAt": 1794677400000,
-            "url": "https://lichess.org/broadcast/xx-festival-xadrez-figueira-da-foz-torneio-sabir-ali/round-8/MBM3biqh"
-          }
-        },
-        {
-          "tour": {
             "id": "uxynWlhv",
             "name": "2026 Fall NYC Chess Norms",
             "slug": "2026-fall-nyc-chess-norms",
@@ -453,35 +428,35 @@
         },
         {
           "tour": {
-            "id": "S2bxmcEz",
-            "name": "4o Torneo Regional Colegio Morelos Lizardi 2026 | Libre",
-            "slug": "4o-torneo-regional-colegio-morelos-lizardi-2026-libre",
+            "id": "ZPONzjmY",
+            "name": "National Championship Aruba 2026 | Open",
+            "slug": "national-championship-aruba-2026-open",
             "info": {
-              "format": "5 round Swiss",
-              "tc": "20 min + 5 sec / move",
+              "format": "10 player round robin",
+              "tc": "90 min + 30 sec / move",
               "fideTC": "standard",
-              "location": "Carmen, Campeche - México",
-              "timeZone": "America/Mexico_City",
-              "standings": "https://vesus.org/tournament/JdpjZf34?&selectedTab=tournament.standing",
-              "regulations": "https://ajedrezcampeche.com/torneo_colegio_morelos_lizardi.html"
+              "location": "Noord, Aruba",
+              "timeZone": "America/Aruba",
+              "standings": "https://s2.chess-results.com/tnr1533716.aspx?art=1"
             },
-            "createdAt": 1794321304225,
-            "url": "https://lichess.org/broadcast/4o-torneo-regional-colegio-morelos-lizardi-2026-libre/S2bxmcEz",
+            "createdAt": 1793993824509,
+            "url": "https://lichess.org/broadcast/national-championship-aruba-2026-open/ZPONzjmY",
             "tier": 3,
             "dates": [
-              1794670800000
+              1794008400000,
+              1794748200000
             ],
-            "image": "https://image.lichess.org/display?fmt=webp&h=400&op=thumbnail&path=-YrxYv7dQqhD.webp&w=800&sig=f07bce2d933892e512dc062dc77b8cb3fc40b879"
+            "image": "https://image.lichess.org/display?fmt=webp&h=400&op=thumbnail&path=U333yPcm4Lsl.webp&w=800&sig=3d298844a7067bc54f8b35e06a025a683fd3a6e6"
           },
           "round": {
-            "id": "XS08INqz",
-            "name": "Round 4",
-            "slug": "round-4",
+            "id": "kGphxx8E",
+            "name": "Round 7",
+            "slug": "round-7",
             "ongoing": true,
-            "startsAt": 1794684000000,
-            "url": "https://lichess.org/broadcast/4o-torneo-regional-colegio-morelos-lizardi-2026-libre/round-4/XS08INqz"
+            "startsAt": 1794679800000,
+            "url": "https://lichess.org/broadcast/national-championship-aruba-2026-open/round-7/kGphxx8E"
           },
-          "group": "4o Torneo Regional Colegio Morelos Lizardi 2026"
+          "group": "National Championship Aruba 2026"
         },
         {
           "tour": {
@@ -518,35 +493,34 @@
         },
         {
           "tour": {
-            "id": "ZPONzjmY",
-            "name": "National Championship Aruba 2026 | Open",
-            "slug": "national-championship-aruba-2026-open",
+            "id": "S2bxmcEz",
+            "name": "4o Torneo Regional Colegio Morelos Lizardi 2026 | Libre",
+            "slug": "4o-torneo-regional-colegio-morelos-lizardi-2026-libre",
             "info": {
-              "format": "10 player round robin",
-              "tc": "90 min + 30 sec / move",
+              "format": "5 round Swiss",
+              "tc": "20 min + 5 sec / move",
               "fideTC": "standard",
-              "location": "Noord, Aruba",
-              "timeZone": "America/Aruba",
-              "standings": "https://s2.chess-results.com/tnr1533716.aspx?art=1"
+              "location": "Carmen, Campeche - México",
+              "timeZone": "America/Mexico_City",
+              "standings": "https://vesus.org/tournament/JdpjZf34?&selectedTab=tournament.standing",
+              "regulations": "https://ajedrezcampeche.com/torneo_colegio_morelos_lizardi.html"
             },
-            "createdAt": 1793993824509,
-            "url": "https://lichess.org/broadcast/national-championship-aruba-2026-open/ZPONzjmY",
+            "createdAt": 1794321304225,
+            "url": "https://lichess.org/broadcast/4o-torneo-regional-colegio-morelos-lizardi-2026-libre/S2bxmcEz",
             "tier": 3,
             "dates": [
-              1794008400000,
-              1794748200000
+              1794670800000
             ],
-            "image": "https://image.lichess.org/display?fmt=webp&h=400&op=thumbnail&path=U333yPcm4Lsl.webp&w=800&sig=3d298844a7067bc54f8b35e06a025a683fd3a6e6"
+            "image": "https://image.lichess.org/display?fmt=webp&h=400&op=thumbnail&path=-YrxYv7dQqhD.webp&w=800&sig=f07bce2d933892e512dc062dc77b8cb3fc40b879"
           },
           "round": {
-            "id": "kGphxx8E",
-            "name": "Round 7",
-            "slug": "round-7",
-            "ongoing": true,
-            "startsAt": 1794679800000,
-            "url": "https://lichess.org/broadcast/national-championship-aruba-2026-open/round-7/kGphxx8E"
+            "id": "nIJ8UTgp",
+            "name": "Round 5",
+            "slug": "round-5",
+            "startsAt": 1794688200000,
+            "url": "https://lichess.org/broadcast/4o-torneo-regional-colegio-morelos-lizardi-2026-libre/round-5/nIJ8UTgp"
           },
-          "group": "National Championship Aruba 2026"
+          "group": "4o Torneo Regional Colegio Morelos Lizardi 2026"
         },
         {
           "tour": {
@@ -607,14 +581,6 @@
             "slug": "round-3",
             "startsAt": 1794690600000,
             "url": "https://lichess.org/broadcast/24th-annual-turkey-bowl/round-3/xZqDhaZ1"
-          },
-          "roundToLink": {
-            "id": "auSk9yq5",
-            "name": "Round 2",
-            "slug": "round-2",
-            "finishedAt": 1794683487968,
-            "finished": true,
-            "startsAt": 1794669000000
           }
         },
         {
@@ -645,14 +611,6 @@
             "slug": "round-3",
             "startsAt": 1794690900000,
             "url": "https://lichess.org/broadcast/3rd-annual-thanksgiving-open/round-3/w1G8BPAG"
-          },
-          "roundToLink": {
-            "id": "Pg7U6RLC",
-            "name": "Round 2",
-            "slug": "round-2",
-            "finishedAt": 1794684978573,
-            "finished": true,
-            "startsAt": 1794669300000
           }
         },
         {
@@ -812,46 +770,6 @@
         },
         {
           "tour": {
-            "id": "IAUjsYGc",
-            "name": "Czech Youth Championship 2026 | U10",
-            "slug": "czech-youth-championship-2026-u10",
-            "info": {
-              "format": "9-round Swiss",
-              "tc": "90 min + 30 sec / move",
-              "fideTC": "standard",
-              "location": "Most, Czechia",
-              "timeZone": "Europe/Prague",
-              "website": "https://www.chess.cz/mistrovske-souteze/souteze-mladeze/mistrovstvi-cech-8-10-le",
-              "standings": "https://s2.chess-results.com/tnr1529672.aspx?art=1",
-              "regulations": "https://www.chess.cz/wp-content/uploads/2026/05/MCech_HD10_2026__Most_prop.pdf"
-            },
-            "createdAt": 1794064346920,
-            "url": "https://lichess.org/broadcast/czech-youth-championship-2026-u10/IAUjsYGc",
-            "tier": 3,
-            "dates": [
-              1794386700000,
-              1794730500000
-            ],
-            "image": "https://image.lichess.org/display?fmt=webp&h=400&op=thumbnail&path=qK6K1E8_gWfW.webp&w=800&sig=c7608cadfb3c9a1dab67ad8a2d1bd121547e4b27"
-          },
-          "round": {
-            "id": "4fbU9YKv",
-            "name": "Round 9",
-            "slug": "round-9",
-            "startsAt": 1794730500000,
-            "url": "https://lichess.org/broadcast/czech-youth-championship-2026-u10/round-9/4fbU9YKv"
-          },
-          "roundToLink": {
-            "id": "thQcAbia",
-            "name": "Round 8",
-            "slug": "round-8",
-            "finishedAt": 1794678282336,
-            "finished": true,
-            "startsAt": 1794663900000
-          }
-        },
-        {
-          "tour": {
             "id": "4YTdiRuu",
             "name": "Cascade Open 2026",
             "slug": "cascade-open-2026",
@@ -886,6 +804,46 @@
             "name": "Round 6",
             "slug": "round-6",
             "finishedAt": 1794677088990,
+            "finished": true,
+            "startsAt": 1794663900000
+          }
+        },
+        {
+          "tour": {
+            "id": "IAUjsYGc",
+            "name": "Czech Youth Championship 2026 | U10",
+            "slug": "czech-youth-championship-2026-u10",
+            "info": {
+              "format": "9-round Swiss",
+              "tc": "90 min + 30 sec / move",
+              "fideTC": "standard",
+              "location": "Most, Czechia",
+              "timeZone": "Europe/Prague",
+              "website": "https://www.chess.cz/mistrovske-souteze/souteze-mladeze/mistrovstvi-cech-8-10-le",
+              "standings": "https://s2.chess-results.com/tnr1529672.aspx?art=1",
+              "regulations": "https://www.chess.cz/wp-content/uploads/2026/05/MCech_HD10_2026__Most_prop.pdf"
+            },
+            "createdAt": 1794064346920,
+            "url": "https://lichess.org/broadcast/czech-youth-championship-2026-u10/IAUjsYGc",
+            "tier": 3,
+            "dates": [
+              1794386700000,
+              1794730500000
+            ],
+            "image": "https://image.lichess.org/display?fmt=webp&h=400&op=thumbnail&path=qK6K1E8_gWfW.webp&w=800&sig=c7608cadfb3c9a1dab67ad8a2d1bd121547e4b27"
+          },
+          "round": {
+            "id": "4fbU9YKv",
+            "name": "Round 9",
+            "slug": "round-9",
+            "startsAt": 1794730500000,
+            "url": "https://lichess.org/broadcast/czech-youth-championship-2026-u10/round-9/4fbU9YKv"
+          },
+          "roundToLink": {
+            "id": "thQcAbia",
+            "name": "Round 8",
+            "slug": "round-8",
+            "finishedAt": 1794678282336,
             "finished": true,
             "startsAt": 1794663900000
           }
@@ -1013,45 +971,6 @@
         },
         {
           "tour": {
-            "id": "6Kb85jF0",
-            "name": "Oberliga Baden-Württemberg 2026/27",
-            "slug": "oberliga-baden-wurttemberg-202627",
-            "info": {
-              "format": "12-team round-robin",
-              "tc": "90 min / 40 moves + 30 min + 30 sec / move",
-              "fideTC": "standard",
-              "location": "Germany",
-              "timeZone": "Europe/Berlin",
-              "standings": "https://ergebnisdienst.schachbund.de/bedh.php?liga=olbw"
-            },
-            "createdAt": 1791591128678,
-            "url": "https://lichess.org/broadcast/oberliga-baden-wurttemberg-202627/6Kb85jF0",
-            "tier": 3,
-            "dates": [
-              1791634500000,
-              1794734100000
-            ],
-            "image": "https://image.lichess.org/display?fmt=webp&h=400&op=thumbnail&path=kA5OsRJ0RZxg.webp&w=800&sig=987e9ba2e33ab40e3d1d003a5b59791a8a5f2281",
-            "teamTable": true
-          },
-          "round": {
-            "id": "jkfgKTb7",
-            "name": "Round 3",
-            "slug": "round-3",
-            "startsAt": 1794734100000,
-            "url": "https://lichess.org/broadcast/oberliga-baden-wurttemberg-202627/round-3/jkfgKTb7"
-          },
-          "roundToLink": {
-            "id": "rQY0mYLq",
-            "name": "Round 2",
-            "slug": "round-2",
-            "finishedAt": 1791727201745,
-            "finished": true,
-            "startsAt": 1791706500000
-          }
-        },
-        {
-          "tour": {
             "id": "wsPlBQao",
             "name": "Oberliga Baden 2026/27",
             "slug": "oberliga-baden-202627",
@@ -1088,6 +1007,45 @@
             "finishedAt": 1791732881553,
             "finished": true,
             "startsAt": 1791710100000
+          }
+        },
+        {
+          "tour": {
+            "id": "6Kb85jF0",
+            "name": "Oberliga Baden-Württemberg 2026/27",
+            "slug": "oberliga-baden-wurttemberg-202627",
+            "info": {
+              "format": "12-team round-robin",
+              "tc": "90 min / 40 moves + 30 min + 30 sec / move",
+              "fideTC": "standard",
+              "location": "Germany",
+              "timeZone": "Europe/Berlin",
+              "standings": "https://ergebnisdienst.schachbund.de/bedh.php?liga=olbw"
+            },
+            "createdAt": 1791591128678,
+            "url": "https://lichess.org/broadcast/oberliga-baden-wurttemberg-202627/6Kb85jF0",
+            "tier": 3,
+            "dates": [
+              1791634500000,
+              1794734100000
+            ],
+            "image": "https://image.lichess.org/display?fmt=webp&h=400&op=thumbnail&path=kA5OsRJ0RZxg.webp&w=800&sig=987e9ba2e33ab40e3d1d003a5b59791a8a5f2281",
+            "teamTable": true
+          },
+          "round": {
+            "id": "jkfgKTb7",
+            "name": "Round 3",
+            "slug": "round-3",
+            "startsAt": 1794734100000,
+            "url": "https://lichess.org/broadcast/oberliga-baden-wurttemberg-202627/round-3/jkfgKTb7"
+          },
+          "roundToLink": {
+            "id": "rQY0mYLq",
+            "name": "Round 2",
+            "slug": "round-2",
+            "finishedAt": 1791727201745,
+            "finished": true,
+            "startsAt": 1791706500000
           }
         },
         {
@@ -1336,6 +1294,45 @@
             "url": "https://lichess.org/broadcast/bringas-chess-monterrey-2026libre/round-1/U9i6CS2N"
           },
           "group": "Bringas Chess Monterrey 2026"
+        },
+        {
+          "tour": {
+            "id": "4jZflFpE",
+            "name": "XIV Torneo Internacional y Nacional de Ajedrez Copa Revolución 2026 |Abierta",
+            "slug": "xiv-torneo-internacional-y-nacional-de-ajedrez-copa-revolucion-2026-abierta",
+            "info": {
+              "format": "9-round Swiss",
+              "tc": "90 min + 30 seg",
+              "fideTC": "standard",
+              "location": "CDMX, Mexico",
+              "timeZone": "America/Mexico_City",
+              "standings": "https://s2.chess-results.com/tnr1448217.aspx?art=1"
+            },
+            "createdAt": 1794418228395,
+            "url": "https://lichess.org/broadcast/xiv-torneo-internacional-y-nacional-de-ajedrez-copa-revolucion-2026-abierta/4jZflFpE",
+            "tier": 3,
+            "dates": [
+              1794438000000,
+              1794844800000
+            ],
+            "image": "https://image.lichess.org/display?fmt=webp&h=400&op=thumbnail&path=duN32_RTytWx.webp&w=800&sig=83621261cae858f8c3514496e76f9e8d4424e82a"
+          },
+          "round": {
+            "id": "bgQIyQF5",
+            "name": "Round 7",
+            "slug": "round-7",
+            "startsAt": 1794758400000,
+            "url": "https://lichess.org/broadcast/xiv-torneo-internacional-y-nacional-de-ajedrez-copa-revolucion-2026-abierta/round-7/bgQIyQF5"
+          },
+          "group": "XIV Torneo Internacional y Nacional de Ajedrez Copa Revolución 2026",
+          "roundToLink": {
+            "id": "ga23WiZt",
+            "name": "Round 6",
+            "slug": "round-6",
+            "finishedAt": 1794686830223,
+            "finished": true,
+            "startsAt": 1794672480000
+          }
         },
         {
           "tour": {
@@ -2706,7 +2703,8 @@
             "id": "VkpQSrsF",
             "name": "Round 8",
             "slug": "round-8",
-            "ongoing": true,
+            "finishedAt": 1794687346455,
+            "finished": true,
             "startsAt": 1794677400000,
             "customScoring": {
               "white": {
@@ -5309,7 +5307,7 @@
             "url": "https://lichess.org/broadcast/24th-annual-turkey-bowl/round-5/tBwWAW81"
           }
         ],
-        "defaultRoundId": "auSk9yq5"
+        "defaultRoundId": "xZqDhaZ1"
       },
       {
         "tour": {
@@ -5456,7 +5454,7 @@
             "url": "https://lichess.org/broadcast/3rd-annual-thanksgiving-open/round-5/wikV3yY1"
           }
         ],
-        "defaultRoundId": "Pg7U6RLC"
+        "defaultRoundId": "w1G8BPAG"
       },
       {
         "tour": {
@@ -5585,7 +5583,8 @@
             "id": "3hKLlHRy",
             "name": "Round 3",
             "slug": "round-3",
-            "ongoing": true,
+            "finishedAt": 1794687630573,
+            "finished": true,
             "startsAt": 1794672480000,
             "url": "https://lichess.org/broadcast/xiv-torneo-internacional-y-nacional-de-ajedrez-copa-revolucion-2026-expertos/round-3/3hKLlHRy"
           },
@@ -5944,7 +5943,8 @@
             "id": "ga23WiZt",
             "name": "Round 6",
             "slug": "round-6",
-            "ongoing": true,
+            "finishedAt": 1794686830223,
+            "finished": true,
             "startsAt": 1794672480000,
             "url": "https://lichess.org/broadcast/xiv-torneo-internacional-y-nacional-de-ajedrez-copa-revolucion-2026-abierta/round-6/ga23WiZt"
           },
@@ -6560,7 +6560,8 @@
             "id": "3NPHVmdW",
             "name": "Round 6",
             "slug": "round-6",
-            "ongoing": true,
+            "finishedAt": 1794686549325,
+            "finished": true,
             "startsAt": 1794672480000,
             "url": "https://lichess.org/broadcast/north-american-youth-chess-champioship-2026-g12/round-6/3NPHVmdW"
           },
@@ -6663,7 +6664,8 @@
             "id": "yumiiLTZ",
             "name": "Round 6",
             "slug": "round-6",
-            "ongoing": true,
+            "finishedAt": 1794686520110,
+            "finished": true,
             "startsAt": 1794672480000,
             "url": "https://lichess.org/broadcast/north-american-youth-chess-champioship-2026-o12/round-6/yumiiLTZ"
           },
@@ -6766,7 +6768,8 @@
             "id": "rL9fdXA6",
             "name": "Round 6",
             "slug": "round-6",
-            "ongoing": true,
+            "finishedAt": 1794687576154,
+            "finished": true,
             "startsAt": 1794672480000,
             "url": "https://lichess.org/broadcast/north-american-youth-chess-champioship-2026-g14/round-6/rL9fdXA6"
           },
@@ -7725,7 +7728,8 @@
             "id": "LTs79cQs",
             "name": "Round 4",
             "slug": "round-4",
-            "ongoing": true,
+            "finishedAt": 1794687139860,
+            "finished": true,
             "startsAt": 1794684000000,
             "url": "https://lichess.org/broadcast/4o-torneo-regional-colegio-morelos-lizardi-2026-secundaria/round-4/LTs79cQs"
           },
@@ -7737,7 +7741,7 @@
             "url": "https://lichess.org/broadcast/4o-torneo-regional-colegio-morelos-lizardi-2026-secundaria/round-5/HaV4FX0G"
           }
         ],
-        "defaultRoundId": "LTs79cQs",
+        "defaultRoundId": "HaV4FX0G",
         "group": "4o Torneo Regional Colegio Morelos Lizardi 2026"
       },
       {
@@ -7794,6 +7798,8 @@
             "id": "NzPJaG3v",
             "name": "Round 4",
             "slug": "round-4",
+            "finishedAt": 1794687659897,
+            "finished": true,
             "startsAt": 1794684000000,
             "url": "https://lichess.org/broadcast/4o-torneo-regional-colegio-morelos-lizardi-2026-bachillerato/round-4/NzPJaG3v"
           },
@@ -7805,7 +7811,7 @@
             "url": "https://lichess.org/broadcast/4o-torneo-regional-colegio-morelos-lizardi-2026-bachillerato/round-5/FYAcy30C"
           }
         ],
-        "defaultRoundId": "NzPJaG3v",
+        "defaultRoundId": "FYAcy30C",
         "group": "4o Torneo Regional Colegio Morelos Lizardi 2026"
       },
       {
@@ -7862,7 +7868,8 @@
             "id": "XS08INqz",
             "name": "Round 4",
             "slug": "round-4",
-            "ongoing": true,
+            "finishedAt": 1794687416358,
+            "finished": true,
             "startsAt": 1794684000000,
             "url": "https://lichess.org/broadcast/4o-torneo-regional-colegio-morelos-lizardi-2026-libre/round-4/XS08INqz"
           },
@@ -7874,7 +7881,7 @@
             "url": "https://lichess.org/broadcast/4o-torneo-regional-colegio-morelos-lizardi-2026-libre/round-5/nIJ8UTgp"
           }
         ],
-        "defaultRoundId": "XS08INqz",
+        "defaultRoundId": "nIJ8UTgp",
         "group": "4o Torneo Regional Colegio Morelos Lizardi 2026"
       },
       {
@@ -11386,7 +11393,7 @@
     ]
   },
   "devpost": {
-    "updatedAt": "2026-11-14T20:00:21.412Z",
+    "updatedAt": "2026-11-14T20:23:34.436Z",
     "hackathons": [
       {
         "id": 31667,
@@ -11420,7 +11427,7 @@
           "cash": 15,
           "other": 2
         },
-        "registrations_count": 13881,
+        "registrations_count": 13885,
         "featured": true,
         "organization_name": "Kiro",
         "winners_announced": false,
@@ -11462,7 +11469,7 @@
           "cash": 19,
           "other": 0
         },
-        "registrations_count": 6243,
+        "registrations_count": 6245,
         "featured": true,
         "organization_name": "Meta",
         "winners_announced": false,
@@ -11504,7 +11511,7 @@
           "cash": 7,
           "other": 1
         },
-        "registrations_count": 3408,
+        "registrations_count": 3410,
         "featured": false,
         "organization_name": "Atlassian",
         "winners_announced": false,
@@ -11546,7 +11553,7 @@
           "cash": 4,
           "other": 0
         },
-        "registrations_count": 2549,
+        "registrations_count": 2548,
         "featured": true,
         "organization_name": "UGREEN",
         "winners_announced": false,
@@ -11588,7 +11595,7 @@
           "cash": 6,
           "other": 0
         },
-        "registrations_count": 2208,
+        "registrations_count": 2212,
         "featured": false,
         "organization_name": "Google",
         "winners_announced": false,
@@ -11630,7 +11637,7 @@
           "cash": 14,
           "other": 1
         },
-        "registrations_count": 1600,
+        "registrations_count": 1601,
         "featured": false,
         "organization_name": "QNX",
         "winners_announced": false,
@@ -11668,7 +11675,7 @@
           "cash": 5,
           "other": 0
         },
-        "registrations_count": 1172,
+        "registrations_count": 1175,
         "featured": false,
         "organization_name": "reddit",
         "winners_announced": false,
@@ -11689,7 +11696,7 @@
         "thumbnail_url": "//d112y698adiu2z.cloudfront.net/photos/production/challenge_thumbnails/005/152/677/datas/medium_square.png",
         "analytics_identifier": "DSH Hacks V2 ($100k+ in prizes!) (30500)",
         "url": "https://dsh-hacks-v2.devpost.com/",
-        "time_left_to_submission": "about 12 hours left",
+        "time_left_to_submission": "about 11 hours left",
         "submission_period_dates": "Jun 24 - Nov 15, 2026",
         "themes": [
           {
@@ -11710,7 +11717,7 @@
           "cash": 0,
           "other": 5
         },
-        "registrations_count": 1248,
+        "registrations_count": 1249,
         "featured": false,
         "organization_name": "STEMise",
         "winners_announced": false,
@@ -11752,7 +11759,7 @@
           "cash": 5,
           "other": 0
         },
-        "registrations_count": 1132,
+        "registrations_count": 1135,
         "featured": false,
         "organization_name": "Arbiter ",
         "winners_announced": false,
@@ -11794,7 +11801,7 @@
           "cash": 6,
           "other": 0
         },
-        "registrations_count": 610,
+        "registrations_count": 613,
         "featured": false,
         "organization_name": "Google",
         "winners_announced": false,
@@ -11833,10 +11840,10 @@
         ],
         "prize_amount": "$<span data-currency-value>10,000</span>",
         "prizes_counts": {
-          "cash": 3,
-          "other": 1
+          "cash": 1,
+          "other": 0
         },
-        "registrations_count": 592,
+        "registrations_count": 593,
         "featured": false,
         "organization_name": "Cognizant",
         "winners_announced": false,
@@ -11878,7 +11885,7 @@
           "cash": 0,
           "other": 5
         },
-        "registrations_count": 889,
+        "registrations_count": 891,
         "featured": false,
         "organization_name": "nill",
         "winners_announced": false,
@@ -12000,7 +12007,7 @@
           "cash": 1,
           "other": 2
         },
-        "registrations_count": 564,
+        "registrations_count": 565,
         "featured": false,
         "organization_name": "Hack4TodayOrg",
         "winners_announced": false,
@@ -12126,7 +12133,7 @@
           "cash": 0,
           "other": 4
         },
-        "registrations_count": 503,
+        "registrations_count": 504,
         "featured": false,
         "organization_name": "STEM2Connect",
         "winners_announced": false,
@@ -12166,9 +12173,9 @@
         "prize_amount": "$<span data-currency-value>280</span>",
         "prizes_counts": {
           "cash": 1,
-          "other": 3
+          "other": 0
         },
-        "registrations_count": 454,
+        "registrations_count": 456,
         "featured": false,
         "organization_name": "SafeSpace",
         "winners_announced": false,
@@ -12210,7 +12217,7 @@
           "cash": 0,
           "other": 6
         },
-        "registrations_count": 434,
+        "registrations_count": 435,
         "featured": false,
         "organization_name": "Student Organization",
         "winners_announced": false,
@@ -12252,7 +12259,7 @@
           "cash": 0,
           "other": 3
         },
-        "registrations_count": 315,
+        "registrations_count": 316,
         "featured": false,
         "organization_name": "Neo4j",
         "winners_announced": false,
@@ -12294,7 +12301,7 @@
           "cash": 0,
           "other": 4
         },
-        "registrations_count": 388,
+        "registrations_count": 389,
         "featured": false,
         "organization_name": "STEMergent",
         "winners_announced": false,
@@ -12336,7 +12343,7 @@
           "cash": 7,
           "other": 1
         },
-        "registrations_count": 380,
+        "registrations_count": 381,
         "featured": false,
         "organization_name": "Shail & Sharaf",
         "winners_announced": false,
@@ -12378,7 +12385,7 @@
           "cash": 3,
           "other": 0
         },
-        "registrations_count": 377,
+        "registrations_count": 378,
         "featured": false,
         "organization_name": "HETIC",
         "winners_announced": false,
@@ -12431,6 +12438,48 @@
         "managed_by_devpost_badge": false
       },
       {
+        "id": 31990,
+        "title": "HackPrinceton Fall '26",
+        "displayed_location": {
+          "icon": "map-marker-alt",
+          "location": "JRR, LAS, Robertson, Friend"
+        },
+        "open_state": "open",
+        "thumbnail_url": "//d112y698adiu2z.cloudfront.net/photos/production/challenge_thumbnails/005/789/397/datas/medium_square.png",
+        "analytics_identifier": "HackPrinceton Fall '26 (31990)",
+        "url": "https://hackprinceton-fall-26.devpost.com/",
+        "time_left_to_submission": "about 17 hours left",
+        "submission_period_dates": "Nov 13 - 15, 2026",
+        "themes": [
+          {
+            "id": 19,
+            "name": "Education"
+          },
+          {
+            "id": 6,
+            "name": "Machine Learning/AI"
+          },
+          {
+            "id": 13,
+            "name": "Social Good"
+          }
+        ],
+        "prize_amount": "$<span data-currency-value>10,312</span>",
+        "prizes_counts": {
+          "cash": 6,
+          "other": 11
+        },
+        "registrations_count": 303,
+        "featured": false,
+        "organization_name": "Princeton University",
+        "winners_announced": false,
+        "submission_gallery_url": "https://hackprinceton-fall-26.devpost.com/project-gallery",
+        "start_a_submission_url": "https://hackprinceton-fall-26.devpost.com/challenges/start_a_submission",
+        "invite_only": false,
+        "eligibility_requirement_invite_only_description": null,
+        "managed_by_devpost_badge": false
+      },
+      {
         "id": 31746,
         "title": "University Blockchain Conference Hackathon 2026",
         "displayed_location": {
@@ -12459,10 +12508,10 @@
         ],
         "prize_amount": "$<span data-currency-value>22,000</span>",
         "prizes_counts": {
-          "cash": 16,
-          "other": 3
+          "cash": 1,
+          "other": 0
         },
-        "registrations_count": 297,
+        "registrations_count": 298,
         "featured": false,
         "organization_name": "college.xyz",
         "winners_announced": false,
@@ -12473,43 +12522,43 @@
         "managed_by_devpost_badge": false
       },
       {
-        "id": 31990,
-        "title": "HackPrinceton Fall '26",
+        "id": 26475,
+        "title": "Dakar Bitcoin Hack by BTrust",
         "displayed_location": {
-          "icon": "map-marker-alt",
-          "location": "JRR, LAS, Robertson, Friend"
+          "icon": "globe",
+          "location": "Online"
         },
         "open_state": "open",
-        "thumbnail_url": "//d112y698adiu2z.cloudfront.net/photos/production/challenge_thumbnails/005/789/397/datas/medium_square.png",
-        "analytics_identifier": "HackPrinceton Fall '26 (31990)",
-        "url": "https://hackprinceton-fall-26.devpost.com/",
-        "time_left_to_submission": "about 18 hours left",
-        "submission_period_dates": "Nov 13 - 15, 2026",
+        "thumbnail_url": "//d112y698adiu2z.cloudfront.net/photos/production/challenge_thumbnails/005/640/846/datas/medium_square.jpg",
+        "analytics_identifier": "Dakar Bitcoin Hack by BTrust (26475)",
+        "url": "https://dakar-bitcoin-hack-2026.devpost.com/",
+        "time_left_to_submission": "6 days left",
+        "submission_period_dates": "Oct 26 - Nov 20, 2026",
         "themes": [
           {
-            "id": 19,
-            "name": "Education"
+            "id": 1,
+            "name": "Blockchain"
+          },
+          {
+            "id": 3,
+            "name": "Fintech"
           },
           {
             "id": 6,
             "name": "Machine Learning/AI"
-          },
-          {
-            "id": 13,
-            "name": "Social Good"
           }
         ],
-        "prize_amount": "$<span data-currency-value>10,312</span>",
+        "prize_amount": "$<span data-currency-value>900</span>",
         "prizes_counts": {
-          "cash": 6,
-          "other": 11
+          "cash": 3,
+          "other": 0
         },
-        "registrations_count": 293,
+        "registrations_count": 263,
         "featured": false,
-        "organization_name": "Princeton University",
+        "organization_name": "Dakar Bitcoin Days",
         "winners_announced": false,
-        "submission_gallery_url": "https://hackprinceton-fall-26.devpost.com/project-gallery",
-        "start_a_submission_url": "https://hackprinceton-fall-26.devpost.com/challenges/start_a_submission",
+        "submission_gallery_url": "https://dakar-bitcoin-hack-2026.devpost.com/project-gallery",
+        "start_a_submission_url": "https://dakar-bitcoin-hack-2026.devpost.com/challenges/start_a_submission",
         "invite_only": false,
         "eligibility_requirement_invite_only_description": null,
         "managed_by_devpost_badge": false
@@ -12552,48 +12601,6 @@
         "winners_announced": false,
         "submission_gallery_url": "https://accessed-hacks.devpost.com/project-gallery",
         "start_a_submission_url": "https://accessed-hacks.devpost.com/challenges/start_a_submission",
-        "invite_only": false,
-        "eligibility_requirement_invite_only_description": null,
-        "managed_by_devpost_badge": false
-      },
-      {
-        "id": 26475,
-        "title": "Dakar Bitcoin Hack by BTrust",
-        "displayed_location": {
-          "icon": "globe",
-          "location": "Online"
-        },
-        "open_state": "open",
-        "thumbnail_url": "//d112y698adiu2z.cloudfront.net/photos/production/challenge_thumbnails/005/640/846/datas/medium_square.jpg",
-        "analytics_identifier": "Dakar Bitcoin Hack by BTrust (26475)",
-        "url": "https://dakar-bitcoin-hack-2026.devpost.com/",
-        "time_left_to_submission": "6 days left",
-        "submission_period_dates": "Oct 26 - Nov 20, 2026",
-        "themes": [
-          {
-            "id": 1,
-            "name": "Blockchain"
-          },
-          {
-            "id": 3,
-            "name": "Fintech"
-          },
-          {
-            "id": 6,
-            "name": "Machine Learning/AI"
-          }
-        ],
-        "prize_amount": "$<span data-currency-value>900</span>",
-        "prizes_counts": {
-          "cash": 3,
-          "other": 0
-        },
-        "registrations_count": 262,
-        "featured": false,
-        "organization_name": "Dakar Bitcoin Days",
-        "winners_announced": false,
-        "submission_gallery_url": "https://dakar-bitcoin-hack-2026.devpost.com/project-gallery",
-        "start_a_submission_url": "https://dakar-bitcoin-hack-2026.devpost.com/challenges/start_a_submission",
         "invite_only": false,
         "eligibility_requirement_invite_only_description": null,
         "managed_by_devpost_badge": false
@@ -12672,7 +12679,7 @@
           "cash": 4,
           "other": 1
         },
-        "registrations_count": 237,
+        "registrations_count": 238,
         "featured": false,
         "organization_name": "cite & slayy",
         "winners_announced": false,
@@ -12811,7 +12818,7 @@
         "thumbnail_url": "//d112y698adiu2z.cloudfront.net/photos/production/challenge_thumbnails/005/557/957/datas/medium_square.png",
         "analytics_identifier": "CSC Winter Sparkathon (31682)",
         "url": "https://csc-winter-sparkathon.devpost.com/",
-        "time_left_to_submission": "16 days left",
+        "time_left_to_submission": "15 days left",
         "submission_period_dates": "Oct 29 - Nov 30, 2026",
         "themes": [
           {
@@ -12853,7 +12860,7 @@
         "thumbnail_url": "//d112y698adiu2z.cloudfront.net/photos/production/challenge_thumbnails/005/889/830/datas/medium_square.png",
         "analytics_identifier": "Emory Hacks 2026 (32117)",
         "url": "https://emory-hacks-202.devpost.com/",
-        "time_left_to_submission": "about 18 hours left",
+        "time_left_to_submission": "about 17 hours left",
         "submission_period_dates": "Nov 13 - 15, 2026",
         "themes": [
           {
@@ -13084,7 +13091,7 @@
           "cash": 1,
           "other": 9
         },
-        "registrations_count": 122,
+        "registrations_count": 123,
         "featured": false,
         "organization_name": "Silicon Hacks Team",
         "winners_announced": false,
@@ -13092,6 +13099,48 @@
         "start_a_submission_url": "https://silicon-valley-buildathon.devpost.com/challenges/start_a_submission",
         "invite_only": false,
         "eligibility_requirement_invite_only_description": null,
+        "managed_by_devpost_badge": false
+      },
+      {
+        "id": 31922,
+        "title": "AI@USC",
+        "displayed_location": {
+          "icon": "map-marker-alt",
+          "location": "Ginsburg Hall, USC"
+        },
+        "open_state": "open",
+        "thumbnail_url": "//d112y698adiu2z.cloudfront.net/photos/production/challenge_thumbnails/005/796/905/datas/medium_square.png",
+        "analytics_identifier": "AI@USC (31922)",
+        "url": "https://ai-usc.devpost.com/",
+        "time_left_to_submission": "about 23 hours left",
+        "submission_period_dates": "Nov 14 - 15, 2026",
+        "themes": [
+          {
+            "id": 23,
+            "name": "Beginner Friendly"
+          },
+          {
+            "id": 6,
+            "name": "Machine Learning/AI"
+          },
+          {
+            "id": 13,
+            "name": "Social Good"
+          }
+        ],
+        "prize_amount": "$<span data-currency-value>14,000</span>",
+        "prizes_counts": {
+          "cash": 3,
+          "other": 3
+        },
+        "registrations_count": 121,
+        "featured": false,
+        "organization_name": "HackSC",
+        "winners_announced": false,
+        "submission_gallery_url": "https://ai-usc.devpost.com/project-gallery",
+        "start_a_submission_url": "https://ai-usc.devpost.com/challenges/start_a_submission",
+        "invite_only": true,
+        "eligibility_requirement_invite_only_description": "Currently enrolled USC students, all majors",
         "managed_by_devpost_badge": false
       },
       {
@@ -13168,7 +13217,7 @@
           "cash": 0,
           "other": 28
         },
-        "registrations_count": 113,
+        "registrations_count": 114,
         "featured": false,
         "organization_name": "HackUMass",
         "winners_announced": false,
@@ -13210,7 +13259,7 @@
           "cash": 0,
           "other": 6
         },
-        "registrations_count": 112,
+        "registrations_count": 113,
         "featured": false,
         "organization_name": "Open Health AI Collective",
         "winners_announced": false,
@@ -13218,48 +13267,6 @@
         "start_a_submission_url": "https://ai-for-medicine.devpost.com/challenges/start_a_submission",
         "invite_only": false,
         "eligibility_requirement_invite_only_description": null,
-        "managed_by_devpost_badge": false
-      },
-      {
-        "id": 31915,
-        "title": "BUHACK 2.0",
-        "displayed_location": {
-          "icon": "globe",
-          "location": "Online"
-        },
-        "open_state": "open",
-        "thumbnail_url": "//d112y698adiu2z.cloudfront.net/photos/production/challenge_thumbnails/005/727/171/datas/medium_square.PNG",
-        "analytics_identifier": "BUHACK 2.0 (31915)",
-        "url": "https://buhack-2.devpost.com/",
-        "time_left_to_submission": "about 7 hours left",
-        "submission_period_dates": "Nov 12 - 14, 2026",
-        "themes": [
-          {
-            "id": 23,
-            "name": "Beginner Friendly"
-          },
-          {
-            "id": 17,
-            "name": "Low/No Code"
-          },
-          {
-            "id": 25,
-            "name": "Web"
-          }
-        ],
-        "prize_amount": "$<span data-currency-value>0</span>",
-        "prizes_counts": {
-          "cash": 0,
-          "other": 5
-        },
-        "registrations_count": 111,
-        "featured": false,
-        "organization_name": "HKBU Coding Club",
-        "winners_announced": false,
-        "submission_gallery_url": "https://buhack-2.devpost.com/project-gallery",
-        "start_a_submission_url": "https://buhack-2.devpost.com/challenges/start_a_submission",
-        "invite_only": true,
-        "eligibility_requirement_invite_only_description": "Hong Kong Students",
         "managed_by_devpost_badge": false
       }
     ]
