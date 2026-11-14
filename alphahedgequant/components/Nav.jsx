@@ -19,7 +19,7 @@ const research = [
   { href: "/library/series/research-papers", label: "Research Papers" },
   { href: "/library/series/quant-models", label: "Quant Research" },
   { href: "/library/series/macro-outlook", label: "Macro Outlook" },
-  { href: "/tournaments.html", label: "Competitions & Championships" },
+  { href: "/competitions", label: "Competitions & Championships" },
 ];
 const isActive = (path, links) => links.some(l => path === l.href || path.startsWith(l.href + "/"));
 
@@ -100,11 +100,11 @@ export default function Nav() {
             {[
               {href:"/ipo",label:"IPO Intelligence"},
               {href:"/learn",label:"Learn, Interviews & Mental Math 🧩"},
-            {href:"/tournaments.html",label:"Competitions"},
+            {href:"/competitions",label:"Competitions"},
               
               {href:"/about",label:"About"}
             ].map(item=><Link key={item.href} href={item.href}
-              className={`whitespace-nowrap text-[13px] xl:text-sm transition-colors hover:text-body ${item.href==="/tournaments.html"?"hidden xl:inline":""} ${path===item.href || path.startsWith(item.href+"/") ? "text-amber" : "text-muted"}`}>
+              className={`whitespace-nowrap text-[13px] xl:text-sm transition-colors hover:text-body ${item.href==="/competitions"?"hidden xl:inline":""} ${path===item.href || path.startsWith(item.href+"/") ? "text-amber" : "text-muted"}`}>
               {item.label}
             </Link>)}
           </nav>
@@ -146,7 +146,7 @@ export default function Nav() {
           {[
             {href:"/ipo",label:"IPO Intelligence"},
             {href:"/learn",label:"Learn, Interviews & Mental Math 🧩"},
-            {href:"/tournaments.html",label:"Competitions"},
+            {href:"/competitions",label:"Competitions"},
             {href:"/about",label:"About"}
           ].map(item=><Link key={item.href} href={item.href} onClick={()=>setMobileOpen(false)}
             className={`block rounded-lg px-3 py-2.5 text-sm ${path===item.href?"text-amber":"text-body"} hover:bg-raised`}>{item.label}</Link>)}
