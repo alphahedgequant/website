@@ -1,6 +1,7 @@
 "use client";
 import { useState, useEffect, useMemo, useRef, useCallback } from "react";
 import OptionIVAnalytics from "@/components/OptionIVAnalytics";
+import OptionOIProfile from "@/components/OptionOIProfile";
 import UnusualOptionsMonitor from "@/components/UnusualOptionsMonitor";
 import {
   XAxis, YAxis, CartesianGrid, Tooltip,
@@ -281,6 +282,7 @@ export default function OptionsPage({initialUnderlying=null,embedded=false}) {
         <UnusualOptionsMonitor selectedTicker={underlying} stockOptions={stockOptions} onOpenChain={ticker=>{chooseUnderlying(ticker);setTab("chain");}} />
         : <>
           <OptionIVAnalytics chain={chain} spot={spot} history={ivHistory} expiry={expiry} marketOpen={sessionOpen} lastUpdated={lastUpdated}/>
+          {tab==="chain"&&<OptionOIProfile rows={chain||[]} spot={spot||null} expiry={expiry} symbol={underlying} receivedAt={providerReceivedAt||lastUpdated}/>}
           {tab === "chain"
             ? <OptionChainTable chain={chain} spot={spot} atmStrike={atmStrike} maxOI={maxOI} status={status} onAdd={addLeg} />
             : <StrategyBuilder legs={legs} setLegs={setLegs} spot={spot} lotSize={lotSize} underlying={underlying} chain={chain} />}
