@@ -1,10 +1,7 @@
-name: AHQ tournament fallback refresh
+name: AHQ tournament live snapshot + push refresh
 on:
-  # Self-test the updater when its workflow or script changes. Data-only
-  # commits never retrigger it, avoiding a refresh/deployment loop.
   push:
-    branches:
-      - main
+    branches: [main]
     paths:
       - .github/workflows/refresh-tournaments.yml
       - alphahedgequant/scripts/refresh-tournaments.mjs
@@ -13,11 +10,11 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: write
+  contents: read
   id-token: write
 
 concurrency:
-  group: ahq-tournament-snapshot
+  group: ahq-tournament-cache-refresh
   cancel-in-progress: false
 
 jobs:
@@ -27,44 +24,16 @@ jobs:
     steps:
       - name: Checkout source
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
-        with:
-          persist-credentials: true
       - name: Check Node runtime
         run: node --version
-      - name: Refresh upstream snapshots
+      - name: Refresh official-source snapshots locally
         run: node "alphahedgequant/scripts/refresh-tournaments.mjs"
-      - name: Publish JSON snapshots and sourced news if content changed
+      - name: Publish to Neon and dispatch opt-in push with GitHub OIDC
         shell: bash
         run: |
           set -euo pipefail
-          file="alphahedgequant/public/tournaments-data.json"
-          if [[ ! -f "$file" ]]; then exit 0; fi
-          git add "$file" "alphahedgequant/public/tournaments-news.json"
-          if git diff --cached --quiet; then exit 0; fi
-          git config user.name "AHQ Data Refresh"
-          git config user.email "actions@users.noreply.github.com"
-          git commit -m "data: refresh tournament feeds [skip ci]"
-          # Concurrent website commits can advance main during a feed refresh.
-          # Rebase the data-only commit; never force-push and never overwrite
-          # updated site code. Retry a bounded number of times.
-          for attempt in 1 2 3; do
-            git fetch origin main
-            git rebase origin/main
-            if git push origin HEAD:main; then
-              echo "Tournament JSON and news archive published."
-              exit 0
-            fi
-            sleep "$attempt"
-          done
-          echo "Failed to publish source data after safe rebase retries." >&2
-          exit 1
-      - name: Dispatch opt-in background notifications using signed GitHub OIDC
-        if: ${{ success() && github.ref == 'refs/heads/main' }}
-        shell: bash
-        run: |
-          set -euo pipefail
-          # Allow the fresh news archive to deploy before dispatch.
-          sleep 75
+          # This job does NOT commit refreshed JSON. No Vercel deployment is
+          # triggered by a 30-minute data update; the static fallback stays.
           oidc_response="$(curl -fsS --max-time 15 \
             -H "Authorization: Bearer ${ACTIONS_ID_TOKEN_REQUEST_TOKEN}" \
             "${ACTIONS_ID_TOKEN_REQUEST_URL}&audience=ahq-tournament-push-v1")"
@@ -72,12 +41,31 @@ jobs:
             let d="";process.stdin.on("data",x=>d+=x);
             process.stdin.on("end",()=>{const v=JSON.parse(d).value;if(!v)process.exit(1);process.stdout.write(v)});
           ')"
-          status="$(curl -sS --max-time 50 -o /tmp/ahq-push-result.json -w '%{http_code}' \
+          node -e '
+            const fs=require("node:fs");
+            const base="alphahedgequant/public/";
+            const snapshot=JSON.parse(fs.readFileSync(base+"tournaments-data.json","utf8"));
+            const news=JSON.parse(fs.readFileSync(base+"tournaments-news.json","utf8"));
+            process.stdout.write(JSON.stringify({snapshot,news}));
+          ' > /tmp/ahq-snapshot-payload.json
+          status="$(curl -sS --max-time 50 -o /tmp/ahq-cache-result.json -w '%{http_code}' \
+            -X POST -H "Authorization: Bearer $token" \
+            -H "Content-Type: application/json" \
+            --data-binary @/tmp/ahq-snapshot-payload.json \
+            "https://www.alphahedgequant.com/api/tournaments/cache" || true)"
+          if [[ "$status" != "200" ]]; then
+            echo "::warning::Live tournament cache returned HTTP $status. Public static backup remains available; production deployment may still be pending."
+            exit 0
+          fi
+          cat /tmp/ahq-cache-result.json
+          echo ""
+          push_status="$(curl -sS --max-time 50 -o /tmp/ahq-push-result.json -w '%{http_code}' \
             -X POST -H "Authorization: Bearer $token" \
             -H "Content-Type: application/json" -d '{}' \
-            "https://www.alphahedgequant.com/api/cron/tournament-push")"
-          if [[ "$status" == "200" ]]; then
+            "https://www.alphahedgequant.com/api/cron/tournament-push" || true)"
+          if [[ "$push_status" == "200" ]]; then
             cat /tmp/ahq-push-result.json
+            echo ""
           else
-            echo "::warning::Push dispatcher returned HTTP $status; the tournament snapshots were still published."
+            echo "::warning::Opt-in push dispatcher returned HTTP $push_status; source data is nevertheless saved."
           fi
