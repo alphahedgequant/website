@@ -78,7 +78,7 @@ test("reader retains the original site style, free access and progression",()=>{
  assert.match(reader,/section<ALL_SECTIONS\.length-1/);
  assert.match(reader,/className="ac-sidebar"/);
  assert.match(reader,/className="ac-paper"/);
- assert.match(page,/Twelve-module open quantitative finance curriculum/);
- assert.match(publicCourse,/All twelve modules/);
+ assert.match(page,/Seventeen-module open quantitative finance curriculum/);
+ assert.match(publicCourse,/All seventeen modules/);
  assert.doesNotMatch(css,/#e3be4f|amber|yellow|gold/i);
 });
