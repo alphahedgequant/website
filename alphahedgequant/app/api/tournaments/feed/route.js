@@ -25,15 +25,15 @@ async function source(url, accept, max = 100) {
   if (!r.ok) throw Error("Upstream HTTP " + r.status);
   if (accept.includes("ndjson")) {
     const str = await r.text();
+    if (str.trimStart().startsWith("[")) {
+      try { const arr = JSON.parse(str); if (Array.isArray(arr)) return arr.slice(0, max); } catch { /* continue NDJSON parsing */ }
+    }
     const rows = [];
     for (const line of str.split(/\r?\n/)) {
       if (!line.trim()) continue;
       try { const item = JSON.parse(line); if (item && typeof item === "object") rows.push(item); }
       catch { /* skip malformed NDJSON rows */ }
       if (rows.length >= max) break;
-    }
-    if (!rows.length && str.trim().startsWith("[")) {
-      try { return JSON.parse(str).slice(0, max); } catch { /* no rows */ }
     }
     return rows;
   }
