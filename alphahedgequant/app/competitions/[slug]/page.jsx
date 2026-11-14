@@ -3,6 +3,9 @@ import {notFound} from "next/navigation";
 import {COMPETITIONS,eventBySlug,competitionStatus,registrationStatus,VERIFIED_AS_OF} from "@/lib/competitionEvents.mjs";
 import "../competitions.css";
 
+// Re-evaluate deadline statuses on each request; pre-rendered dates go stale.
+export const dynamic = "force-dynamic";
+
 const formatDate=date=>!date?"Not announced":new Intl.DateTimeFormat("en",{month:"long",day:"numeric",year:"numeric",timeZone:"UTC"}).format(new Date(date+"T12:00:00Z"));
 export function generateStaticParams(){return COMPETITIONS.map(e=>({slug:e.slug}));}
 export async function generateMetadata({params}){
