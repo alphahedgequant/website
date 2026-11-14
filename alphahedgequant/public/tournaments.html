@@ -606,6 +606,11 @@
         bullets.push(roundData.games.length+' board(s) are visible in the published round PGN; '+done.length+' have a recorded final result: '+done.filter(g=>g.result==='1/2-1/2').length+' draws and '+done.filter(g=>g.result==='1-0'||g.result==='0-1').length+' decisive games.');
         const examples=done.slice(0,2);
         for(const g of examples)bullets.push(g.verdict+'. Result: '+g.result+'.');
+        const annotated=games.filter(g=>g.annotatedSwing).sort((a,b)=>Math.abs(b.annotatedSwing.change)-Math.abs(a.annotatedSwing.change))[0];
+        if(annotated){
+          const a=annotated.annotatedSwing;
+          bullets.push('Source-annotated evaluation change in '+annotated.white+'–'+annotated.black+': '+a.before+' → '+a.after+' after '+a.move+'. This is a broadcaster annotation, not independent engine confirmation or proof of a blunder.');
+        }
         const highlight=games.find(g=>g.notable?.flag==='CHECKMATE'||g.notable?.flag==='CHECK');
         if(highlight)bullets.push('Move to notice: '+highlight.white+'–'+highlight.black+', '+highlight.notable.move+'. '+highlight.notable.explanation);
         else if(games.length)bullets.push('Game moves are available. No independently verified tactical turning point is identified in the current feed.');
@@ -713,6 +718,7 @@
       +'<p><strong>'+escape(focus.white)+' vs '+escape(focus.black)+'</strong> · '+escape(focus.verdict)+'.</p>'
       +'<p>Latest recorded move: <strong>'+escape(focus.lastMove||'Not published')+'</strong> · '+escape(focus.moveCount)+' full-move numbers reached in the PGN.</p>'
       +(focus.notable?'<p><strong>'+escape(focus.notable.flag)+' · '+escape(focus.notable.move)+'</strong> — '+escape(focus.notable.explanation)+'</p>':'')
+      +(focus.annotatedSwing?'<p><strong>BROADCASTER-ANNOTATED EVAL CHANGE:</strong> '+escape(focus.annotatedSwing.before)+' → '+escape(focus.annotatedSwing.after)+' at '+escape(focus.annotatedSwing.move)+'. '+escape(focus.annotatedSwing.attribution)+'</p>':'')
       +'<p><strong>Recent verified notation:</strong> <code>'+escape(moveStrip||'No moves')+'</code></p>'
       +'<p class="story-sub">This explains the recorded chess notation, not a computer-engine evaluation. The complete board position, alternative moves, and clock times should be inspected on Lichess. Clock comments show remaining time, not a verified move timestamp.</p>'
       +(boardURL?'<p><button type="button" id="story-board-toggle">'+(state.boardOpen?'HIDE LIVE CHESS BOARD −':'SHOW OFFICIAL CHESS BOARD +')+'</button></p>':'')
