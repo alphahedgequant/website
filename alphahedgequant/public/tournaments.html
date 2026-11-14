@@ -72,6 +72,12 @@
     .story-game-focus code{font-family:monospace;font-size:11px;overflow-wrap:anywhere}
     @media(max-width:860px){.news-list{grid-template-columns:repeat(2,minmax(0,1fr))}.story-grid,.story-header{grid-template-columns:1fr}}
     @media(max-width:560px){.news-list,.story-game-grid{grid-template-columns:1fr}}
+
+    .story-game-focus #story-board-toggle{margin:11px 0 5px;padding:10px 14px;background:var(--paper);border:1px solid var(--border);color:var(--red);font-weight:850;cursor:pointer}
+    .story-game-focus #story-board-toggle:hover{border-color:var(--red)}
+    .story-board{margin-top:14px;display:grid;gap:6px;width:100%;max-width:800px}
+    .story-board iframe{width:100%;height:min(600px,80vh);min-height:370px;border:1px solid var(--border);background:var(--subtle)}
+    .story-board small{font-size:10px;color:var(--muted)}
   </style>
 </head>
 <body>
@@ -172,7 +178,7 @@
   const INDIAN=/\b(gukesh|pragg(?:nanandhaa)?|arjun|erigaisi|nihal|vidit|humpy|divya|vaishali|aravindh)\b/i;
   const FIN=/\b(fintech|financial|finance|bank|trading|quant|crypto|web3|defi|blockchain|investment|market.?making|equity|risk modeling|portfolio)\b/i;
   const NAME = {IN:'India',ON:'Online / location-free',GL:'Global / multi-country',XX:'Other / not stated',US:'United States',GB:'United Kingdom',CA:'Canada',DE:'Germany',FR:'France',TR:'Türkiye',CH:'Switzerland',HR:'Croatia',NL:'Netherlands',HU:'Hungary',RS:'Serbia',UZ:'Uzbekistan',KZ:'Kazakhstan',AE:'United Arab Emirates',SG:'Singapore',CN:'China',JP:'Japan',KR:'South Korea',BR:'Brazil',AU:'Australia',PL:'Poland',ES:'Spain',IT:'Italy',AT:'Austria',NO:'Norway',SE:'Sweden',DK:'Denmark',FI:'Finland',IE:'Ireland',ZA:'South Africa',MX:'Mexico'};
-  const state={selectedId:null,selectedGame:0,roundCache:Object.create(null),storyLoading:false,liveChess:null,liveHack:null,cacheChess:null,cacheHack:null,snapshot:false,feedChess:'loading',feedHack:'loading',latestChess:null,latestHack:null,cat:'all',country:'all',status:'all',query:'',indiaFirst:true,showAll:false,events:[]};
+  const state={selectedId:null,selectedGame:0,boardOpen:false,roundCache:Object.create(null),storyLoading:false,liveChess:null,liveHack:null,cacheChess:null,cacheHack:null,snapshot:false,feedChess:'loading',feedHack:'loading',latestChess:null,latestHack:null,cat:'all',country:'all',status:'all',query:'',indiaFirst:true,showAll:false,events:[]};
   const el=id=>document.getElementById(id), now=()=>new Date(), localDay=()=>{const d=new Date();return Date.UTC(d.getFullYear(),d.getMonth(),d.getDate(),12)}, DAY=86400000;
   const utcDate=s=>{if(!s)return null;const d=new Date(s);return Number.isFinite(d.valueOf())?d:null};
   const dayMs=v=>{if(!v)return null;const d=utcDate(v);return d?Date.UTC(d.getUTCFullYear(),d.getUTCMonth(),d.getUTCDate(),12):null};
@@ -424,6 +430,15 @@
     else if(e.cat==='chess'&&state.latestChess)events.unshift({time:dt(state.latestChess),label:'Chess broadcast index checked; not a last-move timestamp'});
     return '<div class="story-timeline">'+events.slice(0,6).map(x=>'<div class="story-entry"><time>'+escape(x.time)+'</time>'+escape(x.label)+'</div>').join('')+'</div>';
   }
+  function embedBoardURL(e){
+    if(!e?.roundId||!/^[a-zA-Z0-9]{8}$/.test(e.roundId))return '';
+    try{
+      const u=new URL(e.broadcastURL||e.url);
+      const parts=u.pathname.split('/').filter(Boolean);
+      if(u.hostname!=='lichess.org'||parts[0]!=='broadcast'||!/^[a-z0-9-]{3,150}$/.test(parts[1]||''))return '';
+      return 'https://lichess.org/embed/broadcast/'+parts[1]+'/'+e.roundId+'?theme=brown&bg=dark';
+    }catch{return '';}
+  }
   function showGames(e,roundData){
     const games=roundData?.games||[];
     if(e.cat!=='chess'||!e.roundId)return '';
@@ -431,6 +446,7 @@
     const mateIndex=games.findIndex(g=>g.notable?.flag==='CHECKMATE'),decisiveIndex=games.findIndex(g=>g.result==='1-0'||g.result==='0-1');
     const focusIndex=state.selectedGame>=0?Math.min(state.selectedGame,games.length-1):mateIndex>=0?mateIndex:decisiveIndex>=0?decisiveIndex:0;
     const focus=games[focusIndex]||games[0];
+    const boardURL=embedBoardURL(e);
     const moveStrip=(focus.recentMoves||[]).map((m,i)=>{
       const n=focus.lastMoveIndex-(focus.recentMoves.length||0)+i;
       return (Math.floor(n/2)+1)+(n%2?'…':'.')+m;
@@ -445,6 +461,8 @@
       +(focus.notable?'<p><strong>'+escape(focus.notable.flag)+' · '+escape(focus.notable.move)+'</strong> — '+escape(focus.notable.explanation)+'</p>':'')
       +'<p><strong>Recent verified notation:</strong> <code>'+escape(moveStrip||'No moves')+'</code></p>'
       +'<p class="story-sub">This explains the recorded chess notation, not a computer-engine evaluation. The complete board position, alternative moves, and clock times should be inspected on Lichess. Clock comments show remaining time, not a verified move timestamp.</p>'
+      +(boardURL?'<p><button type="button" id="story-board-toggle">'+(state.boardOpen?'HIDE LIVE CHESS BOARD −':'SHOW OFFICIAL CHESS BOARD +')+'</button></p>':'')
+      +(boardURL&&state.boardOpen?'<div class="story-board"><iframe title="Live Lichess broadcast board for '+escape(e.name)+'" src="'+escape(boardURL)+'" loading="lazy" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe><small>Official Lichess broadcast embed · select games and moves in the player above</small></div>':'')
       +'<a class="board-link" href="'+escape(safeURL(e.broadcastURL||e.url))+'" target="_blank" rel="noopener noreferrer">VIEW ACTUAL CHESS POSITION & FULL MOVES ↗</a></div></div>';
   }
   function renderStory(e){
@@ -483,7 +501,7 @@
   }
   function openStory(id){
     const e=state.events.find(x=>x.id===id);if(!e)return;
-    state.selectedId=id;state.selectedGame=-1;
+    state.selectedId=id;state.selectedGame=-1;state.boardOpen=false;
     renderStory(e);
     const panel=el('story-panel');
     panel.scrollIntoView({behavior:window.matchMedia('(prefers-reduced-motion: reduce)').matches?'auto':'smooth',block:'start'});
@@ -496,6 +514,7 @@
   }
   document.addEventListener('click',event=>{
     if(event.target.closest('#story-close')){closeStory();return;}
+    if(event.target.closest('#story-board-toggle')){state.boardOpen=!state.boardOpen;renderStory(findSelected());return;}
     if(event.target.closest('#story-refresh')){const e=findSelected();if(e)loadStory(e,true);return;}
     const game=event.target.closest('[data-game-index]');
     if(game&&state.selectedId){state.selectedGame=Number(game.dataset.gameIndex)||0;renderStory(findSelected());return;}
