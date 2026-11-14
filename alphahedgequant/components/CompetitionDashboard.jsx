@@ -8,9 +8,8 @@ const monthFmt=new Intl.DateTimeFormat("en",{month:"long",year:"numeric",timeZon
 const dateFmt=new Intl.DateTimeFormat("en",{month:"short",day:"numeric",year:"numeric",timeZone:"UTC"});
 const parseDay=s=>s?new Date(s+"T12:00:00Z"):null;
 const dateLabel=s=>s?dateFmt.format(parseDay(s)):"Date to be confirmed";
-const rangeLabel=e=>!e.start?"Date to be confirmed":e.end&&e.end!==e.start?dateLabel(e.start)+" — "+dateLabel(e.end):dateLabel(e.start);
+const rangeLabel=e=>!e.start?"Date to be confirmed":e.end&&e.end!==e.start?dateLabel(e.start)+" — "+dateLabel(e.end):e.endLabel?dateLabel(e.start)+" — "+e.endLabel:dateLabel(e.start);
 const symbols={Chess:"♞",Hackathons:"⌘",Quant:"∑"};
-const noOp=()=>{};
 function EventCard({event,today}){
  const status=competitionStatus(event,today);
  return <article className="cq-event">
@@ -84,7 +83,7 @@ export default function CompetitionDashboard({initialEvents,verifiedAsOf}){
  const [view,setView]=useState("cards");
  const [sort,setSort]=useState("soonest");
  const [month,setMonth]=useState(()=>new Date(Date.UTC(new Date().getUTCFullYear(),new Date().getUTCMonth(),1)));
- const [live,setLive]=useState({status:"loading",events:[]});
+ const [live,setLive]=useState({status:"loading",events:[],fetchedAt:null});
  const today=new Date().toISOString().slice(0,10);
  useEffect(()=>{
    let alive=true;
@@ -93,7 +92,7 @@ export default function CompetitionDashboard({initialEvents,verifiedAsOf}){
        const response=await fetch("/api/competitions/live-chess",{cache:"no-store"});
        if(!response.ok)throw Error("Unavailable");
        const result=await response.json();
-       if(alive)setLive({status:result.status==="ok"?"ok":"unavailable",events:Array.isArray(result.events)?result.events:[]});
+       if(alive)setLive({status:result.status==="ok"?"ok":"unavailable",events:Array.isArray(result.events)?result.events:[],fetchedAt:result.fetchedAt||null});
      }catch{if(alive)setLive({status:"unavailable",events:[]});}
    }
    reload();
@@ -147,9 +146,9 @@ export default function CompetitionDashboard({initialEvents,verifiedAsOf}){
        {live.status==="loading"?<div className="cq-live-empty">Checking the Lichess live broadcast feed…</div>:
         live.status==="unavailable"?<div className="cq-live-empty">Live feed is temporarily unavailable. <a href="https://lichess.org/broadcast" target="_blank" rel="noopener noreferrer">Check broadcasts directly ↗</a></div>:
         live.events.length===0?<div className="cq-live-empty">No active broadcasts were returned. <a href="https://lichess.org/broadcast" target="_blank" rel="noopener noreferrer">See the complete calendar ↗</a></div>:
-        <div className="cq-live-list">{live.events.slice(0,6).map(item=><a key={item.id} href={item.url} target="_blank" rel="noopener noreferrer" className="cq-live-row"><span className="cq-live-mark"/><div><strong>{item.title}</strong><small>{item.round}{item.players.length?" · "+item.players.join(", "):""}</small></div><span>Watch ↗</span></a>)}</div>
+        <div className="cq-live-list">{live.events.slice(0,6).map(item=><a key={item.id} href={item.url} target="_blank" rel="noopener noreferrer" className="cq-live-row"><span className="cq-live-mark" style={{opacity:item.isLive?1:.35}}/><div><strong>{item.title}</strong><small>{item.isLive?"Live round":"Round scheduled"} · {item.round}{item.players.length?" · "+item.players.join(", "):""}</small></div><span>{item.isLive?"Watch ↗":"Details ↗"}</span></a>)}</div>
        }
-       <p className="cq-live-disclosure">Broadcast availability depends on Lichess coverage and feed availability; game boards, moves and standings remain on the source website.</p>
+       <p className="cq-live-disclosure">Broadcast availability depends on Lichess coverage and feed availability; live-round labels reflect source status, while game boards, moves and standings remain on Lichess.</p>
      </section>
      <section id="events" className="cq-section cq-directory">
        <div className="cq-section-heading"><div><p className="cq-overline">EXPLORE / DISCOVER / FOLLOW</p><h2>Competition <i>directory.</i></h2><p>Verified source links and event windows. Use the filters to focus your search.</p></div><span className="cq-index-count">{filtered.length} matching events</span></div>
@@ -159,7 +158,7 @@ export default function CompetitionDashboard({initialEvents,verifiedAsOf}){
            <label className="cq-search"><span className="sr-only">Search competitions</span><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="10.5" cy="10.5" r="7.5"/><path d="m16 16 5 5"/></svg><input type="search" value={query} onChange={e=>setQuery(e.target.value)} placeholder="Search events, hosts, players…"/></label>
            <label className="cq-select"><span className="sr-only">Country</span><select value={country} onChange={e=>setCountry(e.target.value)}>{COUNTRY_LIST.map(c=><option key={c}>{c}</option>)}</select></label>
            <label className="cq-select"><span className="sr-only">Mode</span><select value={mode} onChange={e=>setMode(e.target.value)}>{["All formats","Online","In person","Hybrid"].map(c=><option key={c}>{c}</option>)}</select></label>
-           <label className="cq-select"><span className="sr-only">Status</span><select value={statusFilter} onChange={e=>setStatusFilter(e.target.value)}>{["All","Upcoming","In progress","Completed"].map(c=><option key={c} value={c}>{c==="All"?"Any status":c}</option>)}</select></label>
+           <label className="cq-select"><span className="sr-only">Status</span><select value={statusFilter} onChange={e=>setStatusFilter(e.target.value)}>{["All","Upcoming","In progress","Schedule started","Completed"].map(c=><option key={c} value={c}>{c==="All"?"Any status":c}</option>)}</select></label>
          </div>
          <div className="cq-subcontrols">
            <div className="cq-view-toggle"><button type="button" aria-pressed={view==="cards"} className={view==="cards"?"active":""} onClick={()=>setView("cards")}>▤ List view</button><button type="button" aria-pressed={view==="calendar"} className={view==="calendar"?"active":""} onClick={()=>setView("calendar")}>▦ Calendar</button></div>
