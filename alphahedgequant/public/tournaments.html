@@ -465,20 +465,21 @@
     if(state.feedChess==='live')autoHeadlineRecap();
   }
   async function hack(){
+    // Prefer the same-origin paginated bridge for broader, CORS-safe coverage.
     try{
-      const url='https://devpost.com/api/hackathons?status%5B%5D=upcoming&status%5B%5D=open';
-      const data=await fetchJSON(url);
-      if(!Array.isArray(data)&&!Array.isArray(data?.hackathons)&&!Array.isArray(data?.data)&&!Array.isArray(data?.results))throw Error('Unexpected Devpost format');
+      const data=await fetchJSON('/api/tournaments/feed?source=hack');
+      if(!Array.isArray(data?.hackathons))throw Error('Devpost bridge unavailable');
       state.liveHack=readDevpost(data);
       state.feedHack='live';
-      state.latestHack=new Date().toISOString();
+      state.latestHack=data.checkedAt||new Date().toISOString();
     }catch{
       try{
-        const data=await fetchJSON('/api/tournaments/feed?source=hack');
-        if(!Array.isArray(data?.hackathons))throw Error('Devpost bridge unavailable');
+        const url='https://devpost.com/api/hackathons?status%5B%5D=upcoming&status%5B%5D=open';
+        const data=await fetchJSON(url);
+        if(!Array.isArray(data)&&!Array.isArray(data?.hackathons)&&!Array.isArray(data?.data)&&!Array.isArray(data?.results))throw Error('Unexpected Devpost format');
         state.liveHack=readDevpost(data);
         state.feedHack='live';
-        state.latestHack=data.checkedAt||new Date().toISOString();
+        state.latestHack=new Date().toISOString();
       }catch{
         state.liveHack=null;
         state.feedHack=state.cacheHack!==null?'snapshot':'down';
