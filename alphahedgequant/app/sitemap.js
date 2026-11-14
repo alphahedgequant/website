@@ -6,7 +6,7 @@ import {COMPETITIONS,VERIFIED_AS_OF} from "../lib/competitionEvents.mjs";
 // an authentication redirect instead of indexable content.
 export default function sitemap() {
   const base = "https://www.alphahedgequant.com";
-  const routes = ["", "/about", "/ipo", "/tracker", "/library", "/learn", "/tournaments.html", "/privacy", "/terms", "/disclaimer"];
+  const routes = ["", "/about", "/ipo", "/tracker", "/library", "/learn", "/competitions", "/privacy", "/terms", "/disclaimer"];
   const index=routes.map(route => ({
     url: base + route,
     changeFrequency: route === "" ? "weekly" : "monthly",
