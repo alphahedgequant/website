@@ -98,7 +98,7 @@
     .story-standings details summary{cursor:pointer;font-size:11px;font-weight:900;text-decoration:underline;text-underline-offset:3px;margin:12px 0}
 
     .news-toolbar{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin:0 0 14px;font-size:11px;color:var(--soft)}
-    .news-toolbar span{margin-right:auto;font-weight:850}
+    .news-toolbar span{margin-right:auto;font-weight:850}.news-toolbar #push-status{width:100%;font-size:10px;line-height:1.5;color:var(--soft)}
     .news-toolbar button{cursor:pointer;background:var(--paper);color:var(--ink);border:1px solid var(--border);padding:8px 10px;font-size:10px;font-weight:850}
     .news-toolbar button:hover{border-color:var(--red)}
     .news-archive-panel{border:1px solid var(--border);background:var(--paper);margin:15px 0 0;padding:13px 16px}
@@ -126,7 +126,7 @@
     <section class="stats" aria-label="Event statistics"><div class="stat"><div class="key">Live now</div><div class="value" id="k-live">—</div><div class="annotation">Confirmed live broadcast rounds</div></div><div class="stat"><div class="key">Next 90 days</div><div class="value" id="k-next">—</div><div class="annotation">Scheduled starts</div></div><div class="stat"><div class="key">Countries / regions</div><div class="value" id="k-countries">—</div><div class="annotation">In active 90-day view</div></div><div class="stat"><div class="key">India watchlist</div><div class="value" id="k-india">—</div><div class="annotation">India-based or Indian players</div></div></section>
     <section class="section" aria-labelledby="timeline-title"><div class="sectionhead"><h2 id="timeline-title">01 <span class="slash">/</span> THE RUNNING CALENDAR</h2><span class="detail">TODAY −14D <span class="slash">/</span> +120D</span></div><div class="timeline" id="timeline"><div class="noevents">Building timeline…</div></div></section>
     <section class="section" aria-labelledby="filter-title"><div class="sectionhead"><h2 id="filter-title">02 <span class="slash">/</span> FIND YOUR COMPETITION</h2><span class="detail">FILTER / DISCOVER</span></div><form class="filterbar" id="filters" autocomplete="off"><div class="tabs" role="group" aria-label="Competition category"><button type="button" data-cat="all" class="on" aria-pressed="true">ALL EVENTS</button><button type="button" data-cat="chess" aria-pressed="false">♞ CHESS</button><button type="button" data-cat="hack" aria-pressed="false">⌘ HACKATHONS</button><button type="button" data-cat="math" aria-pressed="false">π MATHS</button><button type="button" data-cat="quant" aria-pressed="false">∑ QUANT & FINANCE</button></div><div class="filterfields"><input id="search" type="search" placeholder="Search event, player, city or tag…" aria-label="Search competitions" /><select id="country" aria-label="Country filter"><option value="all">All countries</option></select><select id="status" aria-label="Status filter"><option value="all">Any status</option><option value="live">Live</option><option value="progress">In progress</option><option value="upcoming">Upcoming</option><option value="expected">Expected / TBC</option><option value="finished">Finished</option></select><label class="ticklabel"><input type="checkbox" id="indiafirst" checked /> India first</label><label class="ticklabel"><input type="checkbox" id="entryonly" /> Published entry window</label></div><div class="filterbottom"><span id="resultcount">Loading event feed…</span><button type="button" id="clear">CLEAR FILTERS ↗</button></div></form></section>
-    <section class="section" aria-labelledby="news-title"><div class="sectionhead"><h2 id="news-title">03 <span class="slash">/</span> LATEST DEVELOPMENTS</h2><span class="detail">SOURCE-LINKED / AUTO REFRESH</span></div><div class="news-toolbar"><span id="news-count">Loading sourced history…</span><button type="button" id="news-mark-read">MARK ALL READ</button><button type="button" id="news-alerts">ENABLE BROWSER ALERTS</button></div><div id="news" class="news-list"><div class="noevents">Checking developments…</div></div><details class="news-archive-panel"><summary>READ PERSISTENT UPDATE HISTORY <span id="news-archive-count">—</span></summary><div id="news-archive"></div></details></section>
+    <section class="section" aria-labelledby="news-title"><div class="sectionhead"><h2 id="news-title">03 <span class="slash">/</span> LATEST DEVELOPMENTS</h2><span class="detail">SOURCE-LINKED / AUTO REFRESH</span></div><div class="news-toolbar"><span id="news-count">Loading sourced history…</span><button type="button" id="news-mark-read">MARK ALL READ</button><button type="button" id="news-alerts">ENABLE BACKGROUND ALERTS</button><small id="push-status">Browser permission required · Notifications only for verified results</small></div><div id="news" class="news-list"><div class="noevents">Checking developments…</div></div><details class="news-archive-panel"><summary>READ PERSISTENT UPDATE HISTORY <span id="news-archive-count">—</span></summary><div id="news-archive"></div></details></section>
     <section id="story-panel" class="story-panel" tabindex="-1" aria-label="Tournament quick catch-up" hidden></section>
     <section class="section" aria-labelledby="featured-title"><div class="sectionhead"><h2 id="featured-title">04 <span class="slash">/</span> HEADLINE EVENTS</h2><span class="detail">ELITE / INDIA / NOTABLE</span></div><div class="features" id="features"><div class="noevents">Checking headline events…</div></div></section>
     <section class="section" aria-labelledby="group-title"><div class="sectionhead"><h2 id="group-title">05 <span class="slash">/</span> COUNTRY-WISE TIMETABLE</h2><span class="detail" id="groupinfo">WORLDWIDE / —</span></div><div id="groups"><div class="noevents">Loading country timetable…</div></div><button type="button" id="showmore" class="showmore" hidden>SHOW MORE COUNTRIES ↓</button></section>
@@ -315,7 +315,7 @@
       +'<a href="'+escape(safeURL(r.source||e.url))+'" target="_blank" rel="noopener noreferrer">VERIFY APPLICATION DETAILS AT ORGANISER ↗</a>'
       +'<p>Published schedule status may differ from the live form. No payment or registration is processed by AHQ.</p></section>';
   }
-  const state={selectedId:null,selectedGame:0,boardOpen:false,roundCache:Object.create(null),standingsCache:Object.create(null),storyLoading:false,liveChess:null,liveHack:null,cacheChess:null,cacheHack:null,newsItems:[],newsLatest:null,newsReadAt:0,newsLoaded:false,newsAlertsOn:false,snapshot:false,feedChess:'loading',feedHack:'loading',latestChess:null,latestHack:null,cat:'all',country:'all',status:'all',query:'',indiaFirst:true,entryOnly:false,showAll:false,events:[]};
+  const state={selectedId:null,selectedGame:0,boardOpen:false,roundCache:Object.create(null),standingsCache:Object.create(null),storyLoading:false,liveChess:null,liveHack:null,cacheChess:null,cacheHack:null,newsItems:[],newsLatest:null,newsReadAt:0,newsLoaded:false,newsAlertsOn:false,pushMessage:"Background alerts require permission and a supported browser.",snapshot:false,feedChess:'loading',feedHack:'loading',latestChess:null,latestHack:null,cat:'all',country:'all',status:'all',query:'',indiaFirst:true,entryOnly:false,showAll:false,events:[]};
   const el=id=>document.getElementById(id), now=()=>new Date(), localDay=()=>{const d=new Date();return Date.UTC(d.getFullYear(),d.getMonth(),d.getDate(),12)}, DAY=86400000;
   const utcDate=s=>{if(!s)return null;const d=new Date(s);return Number.isFinite(d.valueOf())?d:null};
   const dayMs=v=>{if(!v)return null;const d=utcDate(v);return d?Date.UTC(d.getUTCFullYear(),d.getUTCMonth(),d.getUTCDate(),12):null};
@@ -515,7 +515,7 @@
     const unread=updates.filter(x=>Date.parse(x.observedAt)>state.newsReadAt).length;
     el('news-count').textContent=unread?unread+' unread sourced updates':'No unread sourced updates';
     el('news-archive-count').textContent=updates.length+' archived events';
-    el('news-alerts').textContent=state.newsAlertsOn?'NOTIFICATIONS ON · WHILE OPEN':'ENABLE BROWSER ALERTS';
+    el('news-alerts').textContent=state.newsAlertsOn?'DISABLE BACKGROUND ALERTS':'ENABLE BACKGROUND ALERTS';el('push-status').textContent=state.pushMessage;
     el('news-archive').innerHTML=updates.length?updates.slice(0,45).map(n=>
       '<div class="news-archive-row '+(Date.parse(n.observedAt)>state.newsReadAt?'unread':'')+'">'
       +'<div><strong>'+escape(n.title)+'</strong><small>'+escape(n.source||'Lichess')+' · '+escape(dt(n.observedAt))+' · '+escape(n.detail||'')+'</small></div>'
@@ -527,11 +527,6 @@
       const data=await fetchJSON('./tournaments-news.json?v=1');
       if(data?.version!==1||!Array.isArray(data.items))throw Error('News archive unrecognised');
       const items=data.items.filter(x=>x&&typeof x.id==='string'&&typeof x.title==='string'&&typeof x.observedAt==='string'&&typeof x.url==='string').slice(0,180);
-      const old=new Set(state.newsItems.map(x=>x.id));
-      if(state.newsLoaded&&state.newsAlertsOn&&window.Notification?.permission==='granted'){
-        const added=items.filter(x=>!old.has(x.id)&&x.type==='result'&&Date.now()-Date.parse(x.observedAt)<3600000).slice(0,2);
-        for(const n of added){try{new window.Notification('AHQ · Chess result verified',{body:n.title+' · '+n.detail,tag:'ahq-'+n.id});}catch{}}
-      }
       state.newsItems=items;state.newsLatest=data.updatedAt||null;state.newsLoaded=true;
     }catch{
       // Keep the last verified archive if a fetch fails. No synthetic headlines.
@@ -797,23 +792,67 @@
   try{if(localStorage.getItem('ahq-tournament-theme')==='dark')changeTheme()}catch{}el('theme').addEventListener('click',changeTheme);
   try{
     const seen=Number(localStorage.getItem('ahq-competitions-news-read-at')||0);if(Number.isFinite(seen)&&seen>0)state.newsReadAt=seen;
-    state.newsAlertsOn=localStorage.getItem('ahq-competitions-alerts-on')==='1';
   }catch{}
   el('news-mark-read').addEventListener('click',()=>{
     state.newsReadAt=Date.now();try{localStorage.setItem('ahq-competitions-news-read-at',String(state.newsReadAt));}catch{}
     renderNews(state.events);
   });
-  el('news-alerts').addEventListener('click',async()=>{
-    if(!('Notification' in window)){el('news-alerts').textContent='NOT AVAILABLE IN THIS BROWSER';return;}
-    if(state.newsAlertsOn){state.newsAlertsOn=false;try{localStorage.setItem('ahq-competitions-alerts-on','0')}catch{}renderNewsArchive();return;}
+  function pushSupported(){return 'serviceWorker' in navigator&&'PushManager' in window&&'Notification' in window&&window.isSecureContext}
+  const b64bytes=s=>{
+    const normalized=s.replace(/-/g,'+').replace(/_/g,'/');
+    const raw=atob(normalized+'='.repeat((4-normalized.length%4)%4));
+    return Uint8Array.from(raw,c=>c.charCodeAt(0));
+  };
+  async function syncPushState(){
+    if(!pushSupported()){
+      state.pushMessage='Browser push unsupported here. On iPhone/iPad, add the site to the Home Screen first.';
+      renderNewsArchive();return;
+    }
     try{
-      const permission=await window.Notification.requestPermission();
-      if(permission==='granted'){
-        state.newsAlertsOn=true;try{localStorage.setItem('ahq-competitions-alerts-on','1')}catch{}
-        renderNewsArchive();
-      }else el('news-alerts').textContent='PERMISSION DENIED / BROWSER SETTINGS';
-    }catch{el('news-alerts').textContent='BROWSER ALERTS UNAVAILABLE IN EMBED';}
+      const registration=await navigator.serviceWorker.getRegistration('/');
+      const sub=await registration?.pushManager?.getSubscription();
+      state.newsAlertsOn=Boolean(sub);
+      state.pushMessage=sub?'Push subscription active · only newly confirmed chess results':'No background subscription · opt in to start notifications';
+      renderNewsArchive();
+    }catch{
+      state.pushMessage='Push permission/state unavailable on this device';renderNewsArchive();
+    }
+  }
+  el('news-alerts').addEventListener('click',async()=>{
+    if(window.self!==window.top){
+      window.top.location.assign('/tournaments.html?notifications=1');
+      return;
+    }
+    if(!pushSupported()){state.pushMessage='This browser does not support Push API (or requires an installed Home Screen app).';renderNewsArchive();return;}
+    const button=el('news-alerts');button.disabled=true;
+    try{
+      const registration=await navigator.serviceWorker.register('/competitions-sw.js',{scope:'/'});
+      const existing=await registration.pushManager.getSubscription();
+      if(existing){
+        try{await fetch('/api/tournaments/push',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'unsubscribe',subscription:existing.toJSON()})});}catch{}
+        await existing.unsubscribe();
+        state.newsAlertsOn=false;
+        state.pushMessage='Background notifications disabled on this device.';
+      }else{
+        const permission=await window.Notification.requestPermission();
+        if(permission!=='granted')throw Error('Permission not granted. Use browser settings to allow notifications.');
+        const config=await fetchJSON('/api/tournaments/push');
+        if(!config?.enabled||!config.publicKey)throw Error('Server notification delivery is unavailable.');
+        const sub=await registration.pushManager.subscribe({userVisibleOnly:true,applicationServerKey:b64bytes(config.publicKey)});
+        let ok=false;
+        try{
+          const res=await fetch('/api/tournaments/push',{method:'POST',headers:{'Content-Type':'application/json'},
+            body:JSON.stringify({action:'subscribe',subscription:sub.toJSON()})});
+          ok=res.ok;
+        }catch{}
+        if(!ok){await sub.unsubscribe();throw Error('Could not save the subscription. No alert will be sent.');}
+        state.newsAlertsOn=true;
+        state.pushMessage='Subscribed · new published chess results can notify you even when this page is closed.';
+      }
+    }catch(err){state.pushMessage=String(err?.message||'Unable to subscribe').slice(0,200);}
+    finally{button.disabled=false;renderNewsArchive();}
   });
+  syncPushState();
   el('filters').addEventListener('submit',e=>e.preventDefault());document.querySelectorAll('[data-cat]').forEach(b=>b.addEventListener('click',()=>{state.cat=b.dataset.cat;document.querySelectorAll('[data-cat]').forEach(t=>{t.classList.toggle('on',t===b);t.setAttribute('aria-pressed',String(t===b))});state.showAll=false;render()}));el('search').addEventListener('input',e=>{state.query=e.target.value;state.showAll=false;render()});el('status').addEventListener('change',e=>{state.status=e.target.value;state.showAll=false;render()});el('country').addEventListener('change',e=>{state.country=e.target.value;state.showAll=false;render()});el('indiafirst').addEventListener('change',e=>{state.indiaFirst=e.target.checked;render()});el('entryonly').addEventListener('change',e=>{state.entryOnly=e.target.checked;render()});el('showmore').addEventListener('click',()=>{state.showAll=true;render()});el('clear').addEventListener('click',()=>{state.cat='all';state.status='all';state.country='all';state.query='';state.indiaFirst=true;state.entryOnly=false;state.showAll=false;el('entryonly').checked=false;el('search').value='';el('status').value='all';el('country').value='all';el('indiafirst').checked=true;document.querySelectorAll('[data-cat]').forEach(b=>{const on=b.dataset.cat==='all';b.classList.toggle('on',on);b.setAttribute('aria-pressed',String(on))});render()});
   build();snapshot();chess();hack();loadNews();setInterval(chess,60000);setInterval(hack,1800000);setInterval(loadNews,90000);setInterval(render,60000);
   // Diagnostic surface used by the deployment's automated smoke checks only.
