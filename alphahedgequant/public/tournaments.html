@@ -436,7 +436,7 @@
     }
     return [...merged.values()].map(normalizedChess).filter(x=>x.name&&x.url!=='#').slice(0,500);
   }
-  async function snapshot(){try{const d=await fetchJSON('./tournaments-data.json?v=1');if(d?.version!==1)return;state.snapshot=true;if(d.lichess?.top||d.lichess?.official){state.cacheChess=readLichess(d.lichess.top,d.lichess.official).map(x=>({...x,live:false,round:''}));state.latestChess=d.lichess.updatedAt||null;}if(d.devpost?.hackathons){state.cacheHack=readDevpost(d.devpost.hackathons);state.latestHack=d.devpost.updatedAt||null;}if(state.feedChess==='down'&&state.cacheChess)state.feedChess='snapshot';if(state.feedHack==='down'&&state.cacheHack)state.feedHack='snapshot';build();}catch{} }
+  async function snapshot(){try{const d=await fetchJSON('/api/tournaments/cache?kind=snapshot').catch(()=>fetchJSON('./tournaments-data.json?v=1'));if(d?.version!==1)return;state.snapshot=true;if(d.lichess?.top||d.lichess?.official){state.cacheChess=readLichess(d.lichess.top,d.lichess.official).map(x=>({...x,live:false,round:''}));state.latestChess=d.lichess.updatedAt||null;}if(d.devpost?.hackathons){state.cacheHack=readDevpost(d.devpost.hackathons);state.latestHack=d.devpost.updatedAt||null;}if(state.feedChess==='down'&&state.cacheChess)state.feedChess='snapshot';if(state.feedHack==='down'&&state.cacheHack)state.feedHack='snapshot';build();}catch{} }
   async function chess(){
     try{
       const results=await Promise.allSettled([
@@ -524,7 +524,7 @@
   }
   async function loadNews(){
     try{
-      const data=await fetchJSON('./tournaments-news.json?v=1');
+      const data=await fetchJSON('/api/tournaments/cache?kind=news').catch(()=>fetchJSON('./tournaments-news.json?v=1'));
       if(data?.version!==1||!Array.isArray(data.items))throw Error('News archive unrecognised');
       const items=data.items.filter(x=>x&&typeof x.id==='string'&&typeof x.title==='string'&&typeof x.observedAt==='string'&&typeof x.url==='string').slice(0,180);
       state.newsItems=items;state.newsLatest=data.updatedAt||null;state.newsLoaded=true;
