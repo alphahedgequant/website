@@ -67,7 +67,7 @@ check("Tournament snapshot and news fallbacks exist",()=>{
 });
 
 if(process.env.AHQ_LIVE_COMPETITIONS_SMOKE==="1"){
- for(const path of ["/competitions","/tournaments.html","/tournaments-data.json"]){
+ for(const path of ["/competitions","/competitions/fide-world-chess-championship-2026","/competitions/global-strategy-challenge-2026","/tournaments.html","/tournaments-data.json","/tournaments-news.json","/api/tournaments/feed?source=chess"]){
    const result=await fetch("https://www.alphahedgequant.com"+path,{redirect:"manual",signal:AbortSignal.timeout(12000)});
    check("Unauthenticated public GET "+path,()=>assert.equal(result.status,200));
  }
