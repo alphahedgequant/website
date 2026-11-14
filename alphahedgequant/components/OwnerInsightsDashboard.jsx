@@ -79,7 +79,7 @@ const download=(data)=>{
  const a=document.createElement("a");a.href=url;a.download="ahq-insights-aggregates.csv";a.click();
  setTimeout(()=>URL.revokeObjectURL(url),1000);
 };
-export default function OwnerInsightsDashboard(){
+export default function OwnerInsightsDashboard({ownerReported=null}){
  const [days,setDays]=useState(7),[refresh,setRefresh]=useState(0),[data,setData]=useState(null),[error,setError]=useState(""),[loading,setLoading]=useState(true);
  useEffect(()=>{
   const ctrl=new AbortController();
@@ -112,6 +112,20 @@ export default function OwnerInsightsDashboard(){
       className="border border-line text-sm text-body rounded-lg px-4 py-2.5 hover:bg-raised disabled:opacity-40">Export CSV</button>
    </div>
   </div>
+  {ownerReported&&<section className="mt-7 border border-line rounded-xl bg-surface/80 p-5 md:p-7" aria-label="Owner-reported audience reference">
+   <div className="flex flex-wrap justify-between items-start gap-3 mb-4">
+    <div>
+     <p className="text-[11px] font-mono uppercase tracking-[.12em] text-muted">Owner-reported audience reference</p>
+     <h2 className="font-display text-xl md:text-2xl text-body mt-2">Audience snapshot</h2>
+    </div>
+    <p className="text-xs text-muted font-mono">As reported · {new Date(ownerReported.asOf+"T12:00:00Z").toLocaleDateString("en-IN",{timeZone:"UTC",day:"numeric",month:"long",year:"numeric"})}</p>
+   </div>
+   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+    <Metric label="Total users · reported" value={nf(ownerReported.totalUsers)} foot="Owner-provided reference · not verified against Clerk"/>
+    <Metric label="Daily active users · reported" value={nf(ownerReported.dau)} foot="Owner-provided reference · not the live DAU counter"/>
+   </div>
+   <p className="text-xs text-muted mt-4 leading-relaxed">These figures are recorded as supplied, not automatically measured or continuously updated. Live visitor, registered-account and activity totals appear separately below and may differ. The reported figures are not used to calculate charts, conversion rates or CSV event exports.</p>
+  </section>}
   {loading?<p role="status" className="py-16 text-muted">Loading your private analytics…</p>:error?<div role="alert" className="mt-8 border border-line p-6 rounded-xl"><h2 className="text-xl text-body">Analytics unavailable</h2><p className="text-muted mt-2">{error}</p><p className="text-muted text-sm mt-2">No fabricated statistics are displayed. Check the database and owner permissions.</p></div>:<>
    <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mt-7">
     <Metric label="Visitors · chosen period" value={nf(o.visitors)} foot="Unique pseudonymous browsers"/>
