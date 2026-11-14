@@ -99,18 +99,20 @@ if (!next.lichess && !next.devpost) {
  * completed PGN Result tags. No positions, engines or claimed move timestamps.
  */
 function resultTags(raw,roundId,tour){
- const starts=[...raw.matchAll(/^\\[Event\\s+"/gm)].map(x=>x.index),found=[];
+ const starts=[...raw.matchAll(/^\[Event\s+"/gm)].map(x=>x.index),found=[];
  for(let i=0;i<starts.length&&found.length<32;i++){
    const block=raw.slice(starts[i],starts[i+1]??raw.length),tags={};
-   for(const m of block.matchAll(/^\\[([A-Za-z0-9_]+)\\s+"((?:\\\\.|[^"\\\\])*)"\\]\\s*$/gm))tags[m[1]]=m[2];
+   for(const m of block.matchAll(/^\[([A-Za-z0-9_]+)\s+"((?:\\.|[^"\\])*)"\]\s*$/gm))
+     tags[m[1]]=m[2].replace(/\\"/g,'"');
    const white=String(tags.White||'').slice(0,100),black=String(tags.Black||'').slice(0,100),result=tags.Result;
    if(!white||!black||!['1-0','0-1','1/2-1/2'].includes(result))continue;
    if(/^(?:white player|black player|unknown)$/i.test(white)||/^(?:white player|black player|unknown)$/i.test(black))continue;
    const id='result-'+createHash('sha256').update(roundId+'|'+white.toLowerCase()+'|'+black.toLowerCase()+'|'+result).digest('hex').slice(0,20);
    const title=result==='1-0'?white+' defeated '+black:result==='0-1'?black+' defeated '+white:white+' drew with '+black;
+   const url=String(tour.url||'');
    found.push({id,type:'result',cat:'chess',title,detail:'Confirmed score '+result+' in published round PGN; no engine analysis claimed.',
       eventId:'l-'+tour.id,tourId:String(tour.id),roundId,
-      url:String(tour.url||'https://lichess.org/broadcast').startsWith('https://lichess.org/')?tour.url:'https://lichess.org/broadcast',
+      url:url.startsWith('https://lichess.org/')?url:'https://lichess.org/broadcast',
       observedAt:new Date().toISOString(),source:'Lichess broadcast PGN',timeType:'source_check'});
  }
  return found;
@@ -154,7 +156,7 @@ async function recentNews(older,newer){
  }
  const arr=[...items.values()].sort((a,b)=>String(b.observedAt).localeCompare(String(a.observedAt))).slice(0,180);
  const output={version:1,updatedAt:now,source:'Lichess index & published PGN; cached by scheduled GitHub Actions',roundsChecked,items:arr};
- const tmp=file+'.tmp';await writeFile(tmp,JSON.stringify(output,null,2)+'\\n','utf8');await rename(tmp,file);
+ const tmp=file+'.tmp';await writeFile(tmp,JSON.stringify(output,null,2)+'\n','utf8');await rename(tmp,file);
  console.log('News archive: '+arr.length+' entries, '+additions+' new, '+roundsChecked+' recent PGNs checked');
 }
 await recentNews(previous,next);
