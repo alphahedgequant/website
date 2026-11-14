@@ -5,7 +5,7 @@ import {PUBLIC_RESEARCH_SERIES,RESEARCH_PREVIEWS,PREVIEW_RELEASE_DATE} from "../
 // an authentication redirect instead of indexable content.
 export default function sitemap() {
   const base = "https://www.alphahedgequant.com";
-  const routes = ["", "/about", "/ipo", "/tracker", "/library", "/learn", "/privacy", "/terms", "/disclaimer"];
+  const routes = ["", "/about", "/ipo", "/tracker", "/library", "/learn", "/competitions", "/privacy", "/terms", "/disclaimer"];
   const index=routes.map(route => ({
     url: base + route,
     changeFrequency: route === "" ? "weekly" : "monthly",
