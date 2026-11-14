@@ -46,7 +46,7 @@
     },
     {
       "path": "/api/cron/tournament-push",
-      "schedule": "25,55 * * * *"
+      "schedule": "25 20 * * *"
     }
   ]
 }
