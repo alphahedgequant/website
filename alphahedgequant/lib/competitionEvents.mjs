@@ -91,7 +91,7 @@ export const COMPETITIONS = [
   },
   {
     slug:"global-strategy-challenge-2026", title:"Global Strategy Challenge", category:"Quant", country:"Worldwide", city:"Online", mode:"Online", organiser:"PM.finance",
-    start:"2026-12-15", end:"2027-02-01", registrationOpens:"2026-11-15", registrationDeadline:"2026-12-13",
+    start:"2026-12-15", end:null, endLabel:"Finals begin 1 February 2027 (closing date unannounced)", registrationOpens:"2026-11-15", registrationDeadline:"2026-12-13",
     format:"Paper-trading qualifier, then trading finals", participants:[],
     description:"Quant strategy championship with separate crypto and US-equity divisions. Qualifier begins 15 December 2026; finals scheduled from 1 February 2027.",
     sourceURL:"https://pm.finance/contest", eligibility:"Individual or institution; eligibility verification required", tags:["Trading","Crypto","US equities"], featured:true
@@ -142,14 +142,14 @@ export const COMPETITIONS = [
   },
   {
     slug:"cfa-research-challenge-2027", title:"CFA Institute Research Challenge 2027", category:"Quant", country:"Worldwide", city:"Singapore (global final)", mode:"Hybrid", organiser:"CFA Institute",
-    start:"2027-04-06", end:"2027-05-16", dateNote:"Regional semifinals 6–7 April; finals 8–9 April; global final during week of 10 May 2027.",
+    start:"2027-04-06", end:null, endLabel:"Week of 10 May 2027 (global final)", dateNote:"Regional semifinals 6–7 April; finals 8–9 April; global final during week of 10 May 2027.",
     format:"Equity research and valuation presentations", participants:[],
     description:"University teams advance through local, subregional and regional rounds toward a global research final in Singapore.",
     sourceURL:"https://www.cfainstitute.org/insights/events/research-challenge", eligibility:"University teams through local CFA Society competitions", tags:["Equity research","Valuation"]
   },
   {
     slug:"worldquant-iqc-2026", title:"WorldQuant International Quant Championship 2026", category:"Quant", country:"Worldwide", city:"Singapore (finals)", mode:"Hybrid", organiser:"WorldQuant BRAIN",
-    start:"2026-03-17", end:"2026-09-30", dateNote:"Global finals took place during September 2026; precise concluding day not stated in organiser overview.",
+    start:"2026-03-17", end:null, endLabel:"September 2026 (exact day not published)", statusOverride:"Completed", dateNote:"Global finals took place during September 2026; precise concluding day not stated in organiser overview.",
     format:"University teams · alpha research", participants:[],
     description:"The 2026 championship completed its advertised March–September competition cycle. Follow the official organiser for the next announced edition.",
     sourceURL:"https://www.worldquant.com/brain/iqc/", eligibility:"2026 university teams; registration period has ended", tags:["Alpha research","Quant signals"]
@@ -160,9 +160,11 @@ export const CATEGORIES = ["All","Chess","Hackathons","Quant"];
 export const COUNTRY_LIST = ["All countries",...Array.from(new Set(COMPETITIONS.map(event=>event.country))).sort((a,b)=>a.localeCompare(b))];
 
 export function competitionStatus(event, today = new Date().toISOString().slice(0,10)) {
+  if (event.statusOverride) return event.statusOverride;
   if (event.end && event.end < today) return "Completed";
   if (event.start && event.start > today) return "Upcoming";
-  if (event.start && event.start <= today && (!event.end || event.end >= today)) return "In progress";
+  if (event.start && event.start <= today && !event.end) return "Schedule started";
+  if (event.start && event.end && event.start <= today && event.end >= today) return "In progress";
   return "Schedule TBA";
 }
 export function registrationStatus(event, today = new Date().toISOString().slice(0,10)) {
