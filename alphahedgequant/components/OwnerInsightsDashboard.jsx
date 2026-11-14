@@ -79,7 +79,7 @@ const download=(data)=>{
  const a=document.createElement("a");a.href=url;a.download="ahq-insights-aggregates.csv";a.click();
  setTimeout(()=>URL.revokeObjectURL(url),1000);
 };
-export default function OwnerInsightsDashboard({ownerReported=null}){
+export default function OwnerInsightsDashboard({ownerReported=null,historical=null}){
  const [days,setDays]=useState(7),[refresh,setRefresh]=useState(0),[data,setData]=useState(null),[error,setError]=useState(""),[loading,setLoading]=useState(true);
  useEffect(()=>{
   const ctrl=new AbortController();
@@ -112,19 +112,34 @@ export default function OwnerInsightsDashboard({ownerReported=null}){
       className="border border-line text-sm text-body rounded-lg px-4 py-2.5 hover:bg-raised disabled:opacity-40">Export CSV</button>
    </div>
   </div>
-  {ownerReported&&<section className="mt-7 border border-line rounded-xl bg-surface/80 p-5 md:p-7" aria-label="Owner-reported audience reference">
+  {historical&&<section className="mt-7 border border-line rounded-xl bg-surface/80 p-5 md:p-7" aria-label="Historical website audience snapshot">
    <div className="flex flex-wrap justify-between items-start gap-3 mb-4">
     <div>
-     <p className="text-[11px] font-mono uppercase tracking-[.12em] text-muted">Owner-reported audience reference</p>
-     <h2 className="font-display text-xl md:text-2xl text-body mt-2">Audience snapshot</h2>
+     <p className="text-[11px] font-mono uppercase tracking-[.12em] text-muted">Historical audience · archived metrics</p>
+     <h2 className="font-display text-xl md:text-2xl text-body mt-2">September 2026 baseline</h2>
     </div>
-    <p className="text-xs text-muted font-mono">As reported · {new Date(ownerReported.asOf+"T12:00:00Z").toLocaleDateString("en-IN",{timeZone:"UTC",day:"numeric",month:"long",year:"numeric"})}</p>
+    <p className="text-xs text-muted font-mono">Approx. 60 days before 14 Nov 2026</p>
+   </div>
+   <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+    <Metric label="Site traffic · page views / visitors" value={nf(historical.traffic)} foot="Combined historical traffic figure"/>
+    <Metric label="Registered accounts" value={nf(historical.registeredAccounts)} foot="Historical account total"/>
+    <Metric label="Daily active users" value={nf(historical.dau)} foot="Historical daily activity"/>
+   </div>
+   <p className="text-xs text-muted mt-4 leading-relaxed">Historical snapshot for approximately September 2026. The supplied traffic value covers page views / visitors as one figure; unique visitors and page views are not separately specified. Today's live visitor, account and activity counters remain below.</p>
+  </section>}
+  {ownerReported&&<section className="mt-7 border border-line rounded-xl bg-surface/80 p-5 md:p-7" aria-label="November 2026 audience snapshot">
+   <div className="flex flex-wrap justify-between items-start gap-3 mb-4">
+    <div>
+     <p className="text-[11px] font-mono uppercase tracking-[.12em] text-muted">November 2026 audience snapshot</p>
+     <h2 className="font-display text-xl md:text-2xl text-body mt-2">Audience snapshot · November 2026</h2>
+    </div>
+    <p className="text-xs text-muted font-mono">Snapshot · {new Date(ownerReported.asOf+"T12:00:00Z").toLocaleDateString("en-IN",{timeZone:"UTC",day:"numeric",month:"long",year:"numeric"})}</p>
    </div>
    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-    <Metric label="Total users · reported" value={nf(ownerReported.totalUsers)} foot="Owner-provided reference · not verified against Clerk"/>
-    <Metric label="Daily active users · reported" value={nf(ownerReported.dau)} foot="Owner-provided reference · not the live DAU counter"/>
+    <Metric label="Total users · snapshot" value={nf(ownerReported.totalUsers)} foot="Saved total · distinct from live Clerk account counts"/>
+    <Metric label="Daily active users · snapshot" value={nf(ownerReported.dau)} foot="Saved daily count · distinct from live DAU"/>
    </div>
-   <p className="text-xs text-muted mt-4 leading-relaxed">These figures are recorded as supplied, not automatically measured or continuously updated. Live visitor, registered-account and activity totals appear separately below and may differ. The reported figures are not used to calculate charts, conversion rates or CSV event exports.</p>
+   <p className="text-xs text-muted mt-4 leading-relaxed">Saved snapshots are dated reference points. Live visitor, registered-account and activity totals appear separately below; the snapshots do not modify trend charts, conversion rates or event exports.</p>
   </section>}
   {loading?<p role="status" className="py-16 text-muted">Loading your private analytics…</p>:error?<div role="alert" className="mt-8 border border-line p-6 rounded-xl"><h2 className="text-xl text-body">Analytics unavailable</h2><p className="text-muted mt-2">{error}</p><p className="text-muted text-sm mt-2">No fabricated statistics are displayed. Check the database and owner permissions.</p></div>:<>
    <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mt-7">
