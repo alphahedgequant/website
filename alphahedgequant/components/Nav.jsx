@@ -146,6 +146,7 @@ export default function Nav() {
           {[
             {href:"/ipo",label:"IPO Intelligence"},
             {href:"/learn",label:"Learn, Interviews & Mental Math 🧩"},
+            {href:"/competitions",label:"Competitions"},
             {href:"/about",label:"About"}
           ].map(item=><Link key={item.href} href={item.href} onClick={()=>setMobileOpen(false)}
             className={`block rounded-lg px-3 py-2.5 text-sm ${path===item.href?"text-amber":"text-body"} hover:bg-raised`}>{item.label}</Link>)}
