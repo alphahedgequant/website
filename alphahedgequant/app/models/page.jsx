@@ -29,7 +29,8 @@ const SECTION_BY_ID = {
  R1:"market-risk",R2:"market-risk",R3:"market-risk",R4:"market-risk",R5:"market-risk",R6:"market-risk",R9:"portfolio",
  O1:"volatility",O2:"microstructure",O3:"volatility",O4:"volatility",
  M1:"machine-learning",M2:"machine-learning",M3:"machine-learning",M4:"machine-learning",M5:"machine-learning",
- B1:"banking",B2:"banking",B3:"banking",B4:"banking",B5:"banking",B6:"banking"
+ B1:"banking",B2:"banking",B3:"banking",B4:"banking",B5:"banking",B6:"banking",
+ S7:"strategies",S8:"strategies",O5:"microstructure",G6:"microstructure"
 };
 
 const MODELS = [
@@ -497,6 +498,119 @@ const MODELS = [
     params:["10–20 comparable trading days","Same elapsed session time","Use median as robust baseline"],
     when:"Useful for spotting unusual participation, not predicting direction."
   },
+{
+  "id": "S7",
+  "cat": "statarb",
+  "name": "Opening-Range & Previous-Day Breakout",
+  "tag": "Intraday Structure",
+  "summary": "A testable PDH/PDL and opening-range scanner, not an unverified trading signal.",
+  "intuition": "Yesterday's high and low are observed price levels. Once the first 5–15 minute range is complete, a completed bar beyond both that range and yesterday's boundary becomes a breakout candidate. The thresholds must be known before the bar closes.",
+  "beginner": "A stock above yesterday's high has exceeded its old range, not proved that it will keep climbing.",
+  "example": "Hypothetical: previous-day high ₹100, opening-15-minute high ₹101, last completed 5m close ₹102: the price qualifies as a breakout candidate. Slippage and tomorrow's outcome remain unknown.",
+  "risks": "Intrabar look-ahead, gap openings, split-adjusted levels, missing candles, stale data, slippage, and untested stops.",
+  "math": [
+    {
+      "label": "REPRODUCIBLE CLOSED-BAR CONDITIONS",
+      "lines": "Upper = max(previous_day_high, opening_range_high)\nLower = min(previous_day_low, opening_range_low)\nUpBreak_t = 1{Close_t > Upper}\nDownBreak_t = 1{Close_t < Lower}"
+    },
+    {
+      "label": "DISTANCE FROM REFERENCE LEVEL",
+      "lines": "PDH_distance(%) = 100 × (LatestPrice / PreviousDayHigh − 1)\nA positive value does not guarantee continuation."
+    }
+  ],
+  "params": [
+    "Prior complete session high/low with corporate-action adjustments",
+    "Completed opening-range 5m or 15m bars; exchange timestamp",
+    "Confirm volume using comparable session time",
+    "Walk-forward validation including fees, spread and slippage"
+  ],
+  "when": "Candidate screening for eligible NSE F&O and US stocks when historical candles are available; not an active strategy or recommendation."
+},
+{
+  "id": "S8",
+  "cat": "statarb",
+  "name": "VWAP–EMA Commodity Session Filter",
+  "tag": "Energy & Metals",
+  "summary": "A crossover model for gold, silver and crude oil with session and volume checks.",
+  "intuition": "VWAP prices the average trade weighted by volume. EMA follows recent closes. Detect an EMA crossing only using prior and current fully completed bars. MCX futures require their own licensed contract data and correct evening session boundaries.",
+  "beginner": "Price above VWAP is an observed difference, not a prediction. Crossovers can reverse immediately.",
+  "example": "Hypothetical: VWAP ₹100, EMA(9) ₹100.5, completed close ₹101. This is above both; a verified crossover still requires the preceding bar.",
+  "risks": "Unreliable volume, contract rolls, gaps, sessions reset at different times, impact, stop execution and look-ahead.",
+  "math": [
+    {
+      "label": "INTRADAY VWAP",
+      "lines": "VWAP_t = Σ_{i≤t}(TypicalPrice_i × Volume_i) / Σ_{i≤t} Volume_i\nTypicalPrice_i = (High_i + Low_i + Close_i)/3"
+    },
+    {
+      "label": "EXPONENTIAL MOVING-AVERAGE CROSS",
+      "lines": "EMA_t = α Close_t + (1−α)EMA_{t−1};  α = 2/(N+1)\nCross_up = 1{Close_{t−1} ≤ EMA_{t−1}, Close_t > EMA_t}"
+    }
+  ],
+  "params": [
+    "A specific MCX futures contract and valid volume",
+    "Complete 5m bars and EMA warm-up",
+    "Correct session boundary and no overnight look-ahead",
+    "Include transaction costs and roll assumptions"
+  ],
+  "when": "Educational setup for metals and energy futures; not a claim that MCX live data or profitable signals are connected."
+},
+{
+  "id": "O5",
+  "cat": "options",
+  "name": "Strike Open Interest & Put–Call Ratio",
+  "tag": "OI Concentration",
+  "summary": "Explain put/call ratios, concentration zones and comparable change in outstanding positions.",
+  "intuition": "OI counts open contracts, not buyer-initiated trades. Same-expiry call and put sums provide the OI PCR, while strike concentration highlights where positions cluster. Neither confirms dealer inventory, support/resistance, or direction.",
+  "beginner": "An outstanding contract has a long holder and a short holder. Its open interest alone cannot tell which party initiated a trade.",
+  "example": "Hypothetical: same-expiry put OI = 12 lakh, call OI = 10 lakh. PCR = 1.2. The ratio itself does not tell you whether premium is cheap or expensive.",
+  "risks": "Stale OI, changing strike coverage, mixed expiries, missing units and inferring dealer positions without the trade tape.",
+  "math": [
+    {
+      "label": "PUT-CALL OPEN-INTEREST RATIO",
+      "lines": "PCR_OI = Σ_k PutOI(k) / Σ_k CallOI(k)\nSame underlying, expiration, units and strike universe."
+    },
+    {
+      "label": "CONCENTRATION & MATCHED SNAPSHOT CHANGE",
+      "lines": "CallShare(k) = CallOI(k) / Σ CallOI\nΔOI(k) = OI(k,t₂) − OI(k,t₁)\nA snapshot Δ is not necessarily change since session open."
+    }
+  ],
+  "params": [
+    "Same selected expiry and consistent provider units",
+    "Nearest strikes surrounding a verified spot quote",
+    "Matched strike snapshots with distinct observation times",
+    "Reject missing OI rather than inventing zero"
+  ],
+  "when": "Descriptive options positioning in the AHQ Options Analytics window, not a directional signal."
+},
+{
+  "id": "G6",
+  "cat": "general",
+  "name": "Market Breadth & Sector Dispersion",
+  "tag": "Cross-Sectional Pulse",
+  "summary": "Quantify stock participation rather than confusing the index level with all constituent returns.",
+  "intuition": "A cap-weighted index may rise despite many constituent stocks falling. Count advancing and declining stocks in a specified sample and compute sector equal-weight returns separately. Do not label large stock movers as index-point contributors without official weights.",
+  "beginner": "If 60 of 100 stocks rise, this means 60 stocks—not 60% of the index's market value.",
+  "example": "Hypothetical: 60 advancing, 30 declining, 10 unchanged. Normalized breadth = (60−30)/100 = +30%. This is not a NIFTY index-point contribution.",
+  "risks": "Partial samples, stale provider prices, overnight US quotes, sector classifications and cap-weight distortions.",
+  "math": [
+    {
+      "label": "NORMALIZED ADVANCE–DECLINE BREADTH",
+      "lines": "Breadth = (N_up − N_down) / (N_up + N_down + N_flat)\nOnly count stocks with valid price and day change."
+    },
+    {
+      "label": "SECTOR EQUAL-WEIGHT RETURN",
+      "lines": "R_sector = (1/N) Σ_i R_i\nThis is not the exchange's market-cap-weighted index return."
+    }
+  ],
+  "params": [
+    "Explicit NSE or US universe",
+    "Provider timestamps and valid price/change pairs",
+    "Sector grouping and coverage",
+    "Avoid inferring index-point drag without constituent weights"
+  ],
+  "when": "Descriptive market pulse; not a backtested regime predictor or trading rule."
+},
+
 ];
 
 // ════════════════════════════════════════════════════════════════════
@@ -544,6 +658,7 @@ function ModelCard({ m, open, onToggle }) {
             <p className="model-notebook-kicker">ALPHAHEDGEQUANT / QUANT RESEARCH NOTES / {m.id}</p>
             <h4 className="model-notebook-headline">{m.name}</h4>
             <p className="model-notebook-note">Start with intuition, then work through the mathematics ↗</p>
+           {["S7","S8","O5","G6"].includes(m.id)&&<div className="rounded-lg border border-line bg-raised p-4 mt-3 space-y-3 text-sm"><p><strong className="text-body">In simple language:</strong> <span className="text-muted">{m.beginner}</span></p><p><strong className="text-body">Worked example:</strong> <span className="text-muted">{m.example}</span></p><p><strong className="text-body">Where it can fail:</strong> <span className="text-muted">{m.risks}</span></p></div>}
           <BeginnerChapter model={m} />
           {["O1","R1","O2","G4","G5"].includes(m.id) ? <ModelLesson key={m.id} model={m} /> : !["S4","R2"].includes(m.id) ? <ModelMasterclass key={m.id} model={m} /> : null}
           <p className="model-notebook-note">Equations & assumptions ✎</p>
