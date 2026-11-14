@@ -16,7 +16,9 @@ export async function POST(req){
 async function dispatch(){
  if(!configured())return Response.json({error:"Push configuration missing"},{status:503});
  try{
-   const res=await fetch("https://www.alphahedgequant.com/tournaments-news.json",{
+   let res=await fetch("https://www.alphahedgequant.com/api/tournaments/cache?kind=news",{
+     cache:"no-store",signal:AbortSignal.timeout(7000)});
+   if(!res.ok)res=await fetch("https://www.alphahedgequant.com/tournaments-news.json",{
      cache:"no-store",signal:AbortSignal.timeout(7000)});
    if(!res.ok)throw Error("News archive unreadable");
    const archive=await res.json();
