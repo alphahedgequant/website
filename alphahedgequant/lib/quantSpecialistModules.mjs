@@ -129,7 +129,7 @@ export const SPECIALIST_LESSONS=[
     "title": "Duration shock",
     "explain": "Work this small, explicitly hypothetical financial scenario using the stated assumptions; distinguish what the arithmetic demonstrates from risks the model does not include.",
     "example": "A ₹1,000 bond has modified duration 4. Estimate the price change for a 1% yield increase, in rupees.",
-    "question": "A ₹1,000 bond has modified duration 4. Estimate the price change for a 1% yield increase, in rupees.",
+    "question": "A ₹1,000 bond has modified duration 4. Estimate the price change for a 1% yield increase, in rupees?",
     "answer": -40,
     "formula": "Price change ≈ −price × duration × yield change",
     "solution": "−1000 × 4 × .01 = −₹40. This first-order estimate ignores convexity."
@@ -140,7 +140,7 @@ export const SPECIALIST_LESSONS=[
     "title": "Call expiry profit",
     "explain": "Work this small, explicitly hypothetical financial scenario using the stated assumptions; distinguish what the arithmetic demonstrates from risks the model does not include.",
     "example": "A call expires with spot ₹113, strike ₹100 and premium ₹7. Find profit per unit before costs.",
-    "question": "A call expires with spot ₹113, strike ₹100 and premium ₹7. Find profit per unit before costs.",
+    "question": "A call expires with spot ₹113, strike ₹100 and premium ₹7. Find profit per unit before costs?",
     "answer": 6,
     "formula": "Call profit = max(spot − strike, 0) − premium",
     "solution": "Intrinsic value is ₹13, so net expiry profit is ₹13−₹7 = ₹6. Confirm that the displayed result uses the requested units and that the simplified model omits trading and funding risks."
@@ -151,7 +151,7 @@ export const SPECIALIST_LESSONS=[
     "title": "Risk-neutral probability",
     "explain": "Work this small, explicitly hypothetical financial scenario using the stated assumptions; distinguish what the arithmetic demonstrates from risks the model does not include.",
     "example": "A tree has up factor 1.1, down factor 0.9, and gross risk-free growth 1.02. Find the risk-neutral up weight.",
-    "question": "A tree has up factor 1.1, down factor 0.9, and gross risk-free growth 1.02. Find the risk-neutral up weight.",
+    "question": "A tree has up factor 1.1, down factor 0.9, and gross risk-free growth 1.02. Find the risk-neutral up weight?",
     "answer": 0.6,
     "formula": "q = (gross growth − down) / (up − down)",
     "solution": "(1.02−0.9)/(1.1−0.9)=0.6. Pricing weight is not the real-world probability of a rise."
