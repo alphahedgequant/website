@@ -38,7 +38,7 @@
     <section class="section" aria-labelledby="featured-title"><div class="sectionhead"><h2 id="featured-title">03 <span class="slash">/</span> HEADLINE EVENTS</h2><span class="detail">ELITE / INDIA / NOTABLE</span></div><div class="features" id="features"><div class="noevents">Checking headline events…</div></div></section>
     <section class="section" aria-labelledby="group-title"><div class="sectionhead"><h2 id="group-title">04 <span class="slash">/</span> COUNTRY-WISE TIMETABLE</h2><span class="detail" id="groupinfo">WORLDWIDE / —</span></div><div id="groups"><div class="noevents">Loading country timetable…</div></div><button type="button" id="showmore" class="showmore" hidden>SHOW MORE COUNTRIES ↓</button></section>
     <section class="section" id="profiles"><div class="sectionhead"><h2>05 <span class="slash">/</span> COMPETITION PROFILES</h2><span class="detail">RULES / ELIGIBILITY / TIMELINES</span></div><p class="profile-intro">Detailed profiles link to official organisers, participation information and registration notes. Unannounced dates are marked as estimates.</p><div class="profile-grid"><a href="/competitions/global-strategy-challenge-2026">Global Strategy Challenge <span>PROFILE ↗</span></a><a href="/competitions/fide-world-chess-championship-2026">FIDE World Championship <span>PROFILE ↗</span></a><a href="/competitions/berkeley-trading-competition-2027">Berkeley Trading Competition <span>PROFILE ↗</span></a><a href="/competitions/rotman-trading-competition-2027">Rotman Trading Competition <span>PROFILE ↗</span></a></div></section>
-    <footer class="foot"><div><strong>How the board updates</strong><p>Lichess broadcast listings refresh every 60 seconds; Devpost attempts every 30 minutes. If a feed cannot be reached, a dated JSON snapshot is used when available, otherwise just the verified/labelled curated index. Statuses follow event dates unless an ongoing chess round is confirmed. Results and complete participant lists live with the organiser.</p><p id="freshness">Last checked: —</p></div><div><strong>Data provenance</strong><p><a href="https://lichess.org/broadcast" target="_blank" rel="noopener noreferrer">Lichess broadcast</a> · <a href="https://devpost.com/hackathons" target="_blank" rel="noopener noreferrer">Devpost hackathons</a> · FIDE and event organisers. Curated event notes were checked on 14 Nov 2026. Dates without official confirmation are prominently labelled <b>Expected</b>; these are not announced fixtures. No affiliation or live-score guarantee is implied.</p><div class="footlinks"><a href="/">AlphaHedgeQuant home</a><a href="/learn">Learning library</a><a href="#profiles">Competition profiles</a></div></div></footer>
+    <footer class="foot"><div><strong>How the board updates</strong><p>Lichess broadcast listings refresh every 60 seconds; Devpost attempts every 30 minutes. When browser CORS blocks a provider, our same-site read-only bridge is tried; if that also fails, a dated JSON snapshot is used when available, otherwise just the verified/labelled curated index. Statuses follow event dates unless an ongoing chess round is confirmed. Results and complete participant lists live with the organiser.</p><p id="freshness">Last checked: —</p></div><div><strong>Data provenance</strong><p><a href="https://lichess.org/broadcast" target="_blank" rel="noopener noreferrer">Lichess broadcast</a> · <a href="https://devpost.com/hackathons" target="_blank" rel="noopener noreferrer">Devpost hackathons</a> · FIDE and event organisers. Curated event notes were checked on 14 Nov 2026. Dates without official confirmation are prominently labelled <b>Expected</b>; these are not announced fixtures. No affiliation or live-score guarantee is implied.</p><div class="footlinks"><a href="/">AlphaHedgeQuant home</a><a href="/learn">Learning library</a><a href="#profiles">Competition profiles</a></div></div></footer>
   </main>
 <script>
 'use strict';
@@ -159,9 +159,55 @@
   function readNDJSON(txt){const out=[];const raw=txt.trim();if(raw.startsWith('[')){try{return JSON.parse(raw)}catch{return[]}}for(const line of raw.split(/\r?\n/)){try{const v=JSON.parse(line);if(v&&typeof v==='object')out.push(v)}catch{}}return out;}
   function readDevpost(json){const data=Array.isArray(json)?json:Array.isArray(json?.hackathons)?json.hackathons:Array.isArray(json?.data)?json.data:Array.isArray(json?.results)?json.results:[];return data.map(normalizedHack).filter(x=>x.name&&x.url!=='#').slice(0,400);}
   function readLichess(top,official){const one=[...(Array.isArray(top?.active)?top.active:[]),...(Array.isArray(top?.past?.currentPageResults)?top.past.currentPageResults:[])];const xs=unique([...one,...(Array.isArray(official)?official:[])].filter(Boolean).map(x=>JSON.stringify(x))).map(s=>JSON.parse(s));return xs.map(normalizedChess).filter(x=>x.name&&x.url!=='#').slice(0,500);}
-  async function snapshot(){try{const d=await fetchJSON('./tournaments-data.json?v=1');if(d?.version!==1)return;state.snapshot=true;if(d.lichess?.top||d.lichess?.official){state.cacheChess=readLichess(d.lichess.top,d.lichess.official);state.latestChess=d.lichess.updatedAt||null;}if(d.devpost?.hackathons){state.cacheHack=readDevpost(d.devpost.hackathons);state.latestHack=d.devpost.updatedAt||null;}if(state.feedChess==='down'&&state.cacheChess)state.feedChess='snapshot';if(state.feedHack==='down'&&state.cacheHack)state.feedHack='snapshot';build();}catch{} }
-  async function chess(){try{const results=await Promise.allSettled([fetchJSON('https://lichess.org/api/broadcast/top'),fetchText('https://lichess.org/api/broadcast?nb=100')]);const top=results[0].status==='fulfilled'?results[0].value:null;const official=results[1].status==='fulfilled'?readNDJSON(results[1].value):[];if(!top&&!official.length)throw Error('Lichess unavailable');state.liveChess=readLichess(top,official);state.feedChess='live';state.latestChess=new Date().toISOString();}catch{state.feedChess=state.cacheChess!==null?'snapshot':'down';state.liveChess=null;}build();}
-  async function hack(){try{const url='https://devpost.com/api/hackathons?status%5B%5D=upcoming&status%5B%5D=open';const data=await fetchJSON(url);if(!Array.isArray(data)&&!Array.isArray(data?.hackathons)&&!Array.isArray(data?.data)&&!Array.isArray(data?.results))throw Error('Unexpected Devpost format');state.liveHack=readDevpost(data);state.feedHack='live';state.latestHack=new Date().toISOString();}catch{state.feedHack=state.cacheHack!==null?'snapshot':'down';state.liveHack=null;}build();}
+  async function snapshot(){try{const d=await fetchJSON('./tournaments-data.json?v=1');if(d?.version!==1)return;state.snapshot=true;if(d.lichess?.top||d.lichess?.official){state.cacheChess=readLichess(d.lichess.top,d.lichess.official).map(x=>({...x,live:false,round:''}));state.latestChess=d.lichess.updatedAt||null;}if(d.devpost?.hackathons){state.cacheHack=readDevpost(d.devpost.hackathons);state.latestHack=d.devpost.updatedAt||null;}if(state.feedChess==='down'&&state.cacheChess)state.feedChess='snapshot';if(state.feedHack==='down'&&state.cacheHack)state.feedHack='snapshot';build();}catch{} }
+  async function chess(){
+    try{
+      const results=await Promise.allSettled([
+        fetchJSON('https://lichess.org/api/broadcast/top'),
+        fetchText('https://lichess.org/api/broadcast?nb=100')
+      ]);
+      const top=results[0].status==='fulfilled'?results[0].value:null;
+      const official=results[1].status==='fulfilled'?readNDJSON(results[1].value):[];
+      if(!top&&!official.length)throw Error('Direct Lichess feed unavailable');
+      state.liveChess=readLichess(top,official);
+      state.feedChess='live';
+      state.latestChess=new Date().toISOString();
+    }catch{
+      try{
+        const data=await fetchJSON('/api/tournaments/feed?source=chess');
+        if(!data?.top&&(!Array.isArray(data?.official)||!data.official.length))throw Error('Lichess bridge unavailable');
+        state.liveChess=readLichess(data.top,data.official);
+        state.feedChess='live';
+        state.latestChess=data.checkedAt||new Date().toISOString();
+      }catch{
+        state.liveChess=null;
+        state.feedChess=state.cacheChess!==null?'snapshot':'down';
+      }
+    }
+    build();
+  }
+  async function hack(){
+    try{
+      const url='https://devpost.com/api/hackathons?status%5B%5D=upcoming&status%5B%5D=open';
+      const data=await fetchJSON(url);
+      if(!Array.isArray(data)&&!Array.isArray(data?.hackathons)&&!Array.isArray(data?.data)&&!Array.isArray(data?.results))throw Error('Unexpected Devpost format');
+      state.liveHack=readDevpost(data);
+      state.feedHack='live';
+      state.latestHack=new Date().toISOString();
+    }catch{
+      try{
+        const data=await fetchJSON('/api/tournaments/feed?source=hack');
+        if(!Array.isArray(data?.hackathons))throw Error('Devpost bridge unavailable');
+        state.liveHack=readDevpost(data);
+        state.feedHack='live';
+        state.latestHack=data.checkedAt||new Date().toISOString();
+      }catch{
+        state.liveHack=null;
+        state.feedHack=state.cacheHack!==null?'snapshot':'down';
+      }
+    }
+    build();
+  }
   function changeTheme(){const dark=document.documentElement.dataset.theme!=='dark';document.documentElement.dataset.theme=dark?'dark':'light';el('theme').textContent=dark?'◐ LIGHT':'◑ DARK';try{localStorage.setItem('ahq-tournament-theme',dark?'dark':'light')}catch{}}
   try{if(localStorage.getItem('ahq-tournament-theme')==='dark')changeTheme()}catch{}el('theme').addEventListener('click',changeTheme);
   el('filters').addEventListener('submit',e=>e.preventDefault());document.querySelectorAll('[data-cat]').forEach(b=>b.addEventListener('click',()=>{state.cat=b.dataset.cat;document.querySelectorAll('[data-cat]').forEach(t=>{t.classList.toggle('on',t===b);t.setAttribute('aria-pressed',String(t===b))});state.showAll=false;render()}));el('search').addEventListener('input',e=>{state.query=e.target.value;state.showAll=false;render()});el('status').addEventListener('change',e=>{state.status=e.target.value;state.showAll=false;render()});el('country').addEventListener('change',e=>{state.country=e.target.value;state.showAll=false;render()});el('indiafirst').addEventListener('change',e=>{state.indiaFirst=e.target.checked;render()});el('showmore').addEventListener('click',()=>{state.showAll=true;render()});el('clear').addEventListener('click',()=>{state.cat='all';state.status='all';state.country='all';state.query='';state.indiaFirst=true;state.showAll=false;el('search').value='';el('status').value='all';el('country').value='all';el('indiafirst').checked=true;document.querySelectorAll('[data-cat]').forEach(b=>{const on=b.dataset.cat==='all';b.classList.toggle('on',on);b.setAttribute('aria-pressed',String(on))});render()});
