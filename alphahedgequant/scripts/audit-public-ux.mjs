@@ -4,7 +4,7 @@ import {chromium} from "playwright";
 import {mkdir,writeFile} from "node:fs/promises";
 const root=process.env.AHQ_AUDIT_URL||"https://www.alphahedgequant.com";
 const out="ahq-audit";
-const pages=["/","/about","/privacy","/terms","/disclaimer","/sign-in","/sign-up"];
+const pages=["/","/about","/competitions","/tournaments.html","/privacy","/terms","/disclaimer","/sign-in","/sign-up"];
 const protectedPages=["/terminal","/learn","/screener","/ipo","/research"];
 const results=[];
 let critical=0;
@@ -67,6 +67,29 @@ async function auditPage(context,device,path){
 for(const [device,width,height] of [["desktop",1440,900],["mobile",390,844]]){
  const context=await browser.newContext({viewport:{width,height},deviceScaleFactor:1,locale:"en-IN",timezoneId:"Asia/Kolkata",colorScheme:"dark"});
  for(const path of pages)await auditPage(context,device,path);
+ // Verify real competition UI, iframe interaction and mobile layout in Chromium.
+ {
+  const page=await context.newPage();
+  const errors=[];
+  page.on("pageerror",e=>errors.push(String(e.message||e).slice(0,180)));
+  let row={device,interaction:"competition-quick-catchup",status:null,featureCount:0,opened:false,hasSource:false,overflow:0,errors};
+  try{
+   const res=await page.goto(root+"/competitions",{waitUntil:"domcontentloaded",timeout:30000});
+   row.status=res?.status()??null;
+   const board=page.frameLocator('iframe[src^="/tournaments.html"]');
+   await board.locator("#features .feature").first().waitFor({state:"visible",timeout:18000});
+   row.featureCount=await board.locator("#features .feature").count();
+   await board.locator("#features button.story-trigger[data-story-event]").first().click({timeout:15000});
+   await board.locator("#story-panel:not([hidden])").waitFor({state:"visible",timeout:10000});
+   row.opened=await board.locator("#story-panel").isVisible();
+   const recap=await board.locator("#story-panel").innerText();
+   row.hasSource=recap.includes("QUICK CATCH-UP")&&recap.includes("OFFICIAL EVENT / BROADCAST");
+   row.overflow=await page.evaluate(()=>Math.max(0,document.documentElement.scrollWidth-innerWidth));
+   await page.screenshot({path:out+"/"+device+"-competitions-catchup.png",animations:"disabled",timeout:16000}).catch(()=>{});
+   if(row.status!==200||!row.opened||!row.hasSource||row.overflow>8){row.critical="competition board interaction or mobile layout failed";critical++;}
+  }catch(e){row.critical=String(e.message||e).slice(0,260);critical++;}
+  finally{results.push(row);console.log("AHQ_COMPETITIONS_INTERACTION",JSON.stringify(row));await page.close()}
+ }
  // Test actual mobile menu interaction, not just its HTML existence.
  if(device==="mobile"){
   const page=await context.newPage();
