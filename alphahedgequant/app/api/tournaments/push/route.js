@@ -1,4 +1,4 @@
-import {configured,getPublicKey,ensurePushTable,validateSubscription} from "@/lib/tournamentWebPush.mjs";
+import {configured,getPublicKey,ensurePushTable,validateSubscription,deliverPush} from "@/lib/tournamentWebPush.mjs";
 export const runtime="nodejs";
 export const dynamic="force-dynamic";
 function sameOrigin(req){
@@ -15,9 +15,35 @@ export async function POST(req){
  let input;try{input=await req.json()}catch{return Response.json({error:"Invalid JSON"},{status:400})}
  const subscription=validateSubscription(input?.subscription);
  if(!subscription)return Response.json({error:"Unsupported or malformed push subscription"},{status:400});
- if(input?.action!=="subscribe"&&input?.action!=="unsubscribe")return Response.json({error:"Unknown action"},{status:400});
+ if(!["subscribe","unsubscribe","test"].includes(input?.action))return Response.json({error:"Unknown action"},{status:400});
  try{
    const db=await ensurePushTable();
+   if(input.action==="test"){
+     // A user-initiated, rate-limited test to a subscription already registered
+     // for this exact endpoint and cryptographic key pair.
+     await db`ALTER TABLE ahq_tournament_push ADD COLUMN IF NOT EXISTS last_test_at TIMESTAMPTZ NULL`;
+     const rows=await db`UPDATE ahq_tournament_push
+       SET last_test_at=NOW()
+       WHERE endpoint=${subscription.endpoint}
+         AND p256dh=${subscription.p256dh}
+         AND auth=${subscription.auth}
+         AND (last_test_at IS NULL OR last_test_at < NOW()-INTERVAL '10 minutes')
+       RETURNING endpoint`;
+     if(rows.length!==1)return Response.json(
+       {error:"Subscription not found or a test was sent within the last 10 minutes."},
+       {status:429,headers:{"Cache-Control":"no-store"}});
+     const payload={title:"AHQ · Test notification",
+       body:"Your Competition Dashboard push subscription is active. This is a requested test, not a tournament result.",
+       url:"/competitions",tag:"ahq-test-competitions"};
+     const result=await deliverPush({endpoint:subscription.endpoint,keys:{p256dh:subscription.p256dh,auth:subscription.auth}},payload);
+     if(result.invalid)await db`DELETE FROM ahq_tournament_push WHERE endpoint=${subscription.endpoint}`;
+     if(!result.ok)return Response.json(
+       {ok:false,error:"The push provider did not accept the test message.",providerStatus:result.status},
+       {status:502,headers:{"Cache-Control":"no-store"}});
+     return Response.json({ok:true,accepted:true,
+       note:"Push provider accepted the test. Check your device notification settings; display is not independently confirmed."},
+       {headers:{"Cache-Control":"no-store"}});
+   }
    if(input.action==="unsubscribe"){
      await db`DELETE FROM ahq_tournament_push WHERE endpoint=${subscription.endpoint}`;
      return Response.json({ok:true,subscribed:false},{headers:{"Cache-Control":"no-store"}});
