@@ -6,7 +6,8 @@ on:
       - .github/workflows/refresh-tournaments.yml
       - alphahedgequant/scripts/refresh-tournaments.mjs
   schedule:
-    - cron: "17,47 * * * *"
+    # Every 15 minutes; GitHub may still delay scheduled jobs under load.
+    - cron: "7,22,37,52 * * * *"
   workflow_dispatch:
 
 permissions:
