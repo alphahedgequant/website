@@ -293,6 +293,7 @@
       return{kind:"unknown",label:"ENTRY RULES NOT VERIFIED",detail:{source:e.url,eligibility:"See organiser"}};
     }
     const ms=Date.now(),nowISO=new Date().toISOString().slice(0,10);
+    if(e.end&&dayMs(e.end)<localDay())return{kind:'closed',label:'EVENT ENDED · APPLICATIONS CLOSED',detail:r};
     if(r.inviteOnly)return{kind:"invite",label:"QUALIFICATION / INVITATION REQUIRED",detail:r};
     if(r.closedConfirmed)return{kind:"closed",label:"REGISTRATION CLOSED (ORGANISER)",detail:r};
     if(r.opensAt&&ms<Date.parse(r.opensAt))return{kind:"soon",label:"OPENS "+dt(r.opensAt),detail:r};
@@ -393,11 +394,17 @@
   const profileLink=e=>PROFILE_SLUG[e.id]?'<a class="profile-link" href="/competitions/'+PROFILE_SLUG[e.id]+'">PROFILE ↗</a>':'';
 
   function playerHTML(e,max=4){const xs=e.players.slice(0,max);if(!xs.length)return'<span>Roster not listed</span>';return xs.map(n=>'<span class="'+(INDIAN.test(n)?'indian':'')+'">'+escape(n)+(INDIAN.test(n)?' · IND':'')+'</span>').join('');}
-  function feedText(which){const type=state['feed'+which],stamp=state[which==='Chess'?'latestChess':'latestHack'];const label=which==='Chess'?'Chess':'Hackathons';return'<span class="feed-indicator '+(type==='live'?'ok':type==='snapshot'?'fallback':type==='loading'?'loading':'down')+'" title="'+escape(stamp?('Source timestamp '+stamp):'')+'">'+label+': '+(type==='live'?'live feed':type==='snapshot'?'saved snapshot':type==='loading'?'checking…':'feed unreachable')+'</span>';}
+  function feedText(which){const type=state['feed'+which],stamp=state[which==='Chess'?'latestChess':'latestHack'];const label=which==='Chess'?'Chess':'Hackathons';
+    const ms=stamp?Date.parse(stamp):NaN,age=Number.isFinite(ms)?Math.max(0,Date.now()-ms):null;
+    const ageLabel=age===null?'age unknown':age<120000?'just checked':age<3600000?Math.floor(age/60000)+'m old':age<86400000?Math.floor(age/3600000)+'h old':Math.floor(age/86400000)+'d old';
+    const stale=type==='snapshot'&&(age===null||age>2*3600000);
+    return'<span class="feed-indicator '+(type==='live'?'ok':type==='snapshot'?'fallback':type==='loading'?'loading':'down')+'" title="'+escape(stamp?('Source check '+stamp):'No source timestamp')+'">'
+      +label+': '+(type==='live'?'live feed · '+ageLabel:type==='snapshot'?(stale?'STALE saved data · ':'saved data · ')+ageLabel:type==='loading'?'checking…':'feed unreachable')+'</span>';
+  }
   function build(){const ch=state.liveChess??state.cacheChess??[],h=state.liveHack??state.cacheHack??[],curated=CURATED.filter(e=>!(e.snapshot&&state.liveHack!==null));state.events=mergeSource(curated,[...ch,...h]);render();}
   function render(){el('sources').innerHTML=feedText('Chess')+feedText('Hack');const all=state.events,day=localDay(),latest=day+90*DAY;el('k-live').textContent=all.filter(e=>e.live).length.toLocaleString('en-IN');el('k-next').textContent=all.filter(e=>e.start&&!e.tbc&&dayMs(e.start)>=day&&dayMs(e.start)<=latest).length.toLocaleString('en-IN');el('k-countries').textContent=new Set(all.filter(e=>e.start&&(!e.end||dayMs(e.end)>=day)&&dayMs(e.start)<=latest).map(e=>e.country).filter(c=>!['ON','GL','XX'].includes(c))).size.toLocaleString('en-IN');el('k-india').textContent=all.filter(e=>isIndian(e)&&(!e.end||dayMs(e.end)>=day-45*DAY)).length.toLocaleString('en-IN');
     const countrySelect=el('country'),current=state.country,codes=unique(all.map(e=>e.country)).sort((a,b)=>(a==='IN'?-1:b==='IN'?1:(NAME[a]||a).localeCompare(NAME[b]||b)));countrySelect.innerHTML='<option value="all">All countries</option>'+codes.map(c=>'<option value="'+escape(c)+'">'+escape(NAME[c]||c)+'</option>').join('');countrySelect.value=codes.includes(current)?current:'all';if(countrySelect.value!==current)state.country='all';
-    el('clock').textContent='CHECKED '+new Date().toLocaleString('en-GB',{dateStyle:'medium',timeStyle:'short',timeZone:'UTC'})+' UTC';el('freshness').textContent='Latest source checks — Lichess: '+(state.latestChess||state.feedChess)+'; Devpost: '+(state.latestHack||state.feedHack)+'. Auto-refresh active while this page is open.';
+    el('clock').textContent='CHECKED '+new Date().toLocaleString('en-GB',{dateStyle:'medium',timeStyle:'short',timeZone:'UTC'})+' UTC';el('freshness').textContent='Latest source checks — Lichess: '+(state.latestChess||state.feedChess)+'; Devpost: '+(state.latestHack||state.feedHack)+'. Browser polls live providers while the page is open. Saved results may be older when those providers are unavailable; GitHub Actions runs its scheduled refresh on a best-effort basis.';
     const arr=filtered();el('resultcount').textContent=arr.length.toLocaleString('en-IN')+' matching events · '+all.length.toLocaleString('en-IN')+' indexed';renderTimeline(arr);renderFeatures(arr);renderGroups(arr);renderNews(all);if(state.selectedId)renderStory(findSelected());
   }
   function renderTimeline(items){const today=localDay(),start=today-14*DAY,end=today+120*DAY,total=end-start,highlight=items.filter(e=>e.start&&dayMs(e.start)<=end&&dayMs(e.end||e.start)>=start).sort((a,b)=>relevance(b)-relevance(a)||(a.start||'').localeCompare(b.start||'')).slice(0,12);const mark=((today-start)/total*100).toFixed(3);let head='<div class="t-head"><div>EVENT / WINDOW</div><div class="t-months">';let cur=new Date(start),months=[];cur.setUTCDate(1);for(let i=0;i<7;i++){let x=Date.UTC(cur.getUTCFullYear(),cur.getUTCMonth()+i,1,12);if(x>start&&x<end)months.push({pct:(x-start)/total*100,label:new Date(x).toLocaleDateString('en-GB',{month:'short',year:'2-digit',timeZone:'UTC'})});}head+=months.map(m=>'<span style="left:'+m.pct.toFixed(2)+'%">'+escape(m.label)+'</span>').join('')+'</div></div>';if(!highlight.length){el('timeline').innerHTML=head+'<div class="noevents">No dated events match this window. Adjust filters to see more.</div>';return;}const rows=highlight.map(e=>{const a=Math.max(start,dayMs(e.start)),b=Math.min(end,dayMs(e.end||e.start)+DAY);const left=(a-start)/total*100,w=Math.max(0.8,(b-a)/total*100),s=status(e);return'<div class="t-row"><div class="t-name"><button class="story-trigger" type="button" data-story-event="'+escape(e.id)+'" title="Read quick catch-up: '+escape(e.name)+'">'+escape(e.name)+'</button><small>'+escape(NAME[e.country]||e.country)+' · '+escape(short(e.start))+'</small></div><div class="t-track"><span class="t-now" style="left:'+mark+'%"></span><a class="t-bar '+escape(e.cat)+(s.kind==='live'?' live':'')+(e.tbc?' tbc':'')+'" style="left:'+left.toFixed(3)+'%;width:'+w.toFixed(3)+'%" title="'+escape(e.name+' · '+s.label)+'" href="'+escape(safeURL(e.broadcastURL||e.url))+'" target="_blank" rel="noopener noreferrer"></a></div></div>';}).join('');el('timeline').innerHTML=head+rows+'<div class="t-legend"><span><i class="dot"></i> Live <i class="dot hack"></i> Hackathons <i class="dot quant"></i> Quant & finance <b>▥</b> Striped = expected</span><span>'+escape(new Date().toLocaleDateString('en-GB',{day:'numeric',month:'short'}))+' · TODAY</span></div>';}
@@ -809,7 +816,7 @@
       renderNewsArchive();return;
     }
     try{
-      const registration=await navigator.serviceWorker.getRegistration('/');
+      const registration=await navigator.serviceWorker.getRegistration('/competitions');
       const sub=await registration?.pushManager?.getSubscription();
       state.newsAlertsOn=Boolean(sub);
       state.pushMessage=sub?'Push subscription active · only newly confirmed chess results':'No background subscription · opt in to start notifications';
@@ -826,7 +833,7 @@
     if(!pushSupported()){state.pushMessage='This browser does not support Push API (or requires an installed Home Screen app).';renderNewsArchive();return;}
     const button=el('news-alerts');button.disabled=true;
     try{
-      const registration=await navigator.serviceWorker.register('/competitions-sw.js',{scope:'/'});
+      const registration=await navigator.serviceWorker.register('/competitions-sw.js',{scope:'/competitions'});
       const existing=await registration.pushManager.getSubscription();
       if(existing){
         try{await fetch('/api/tournaments/push',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'unsubscribe',subscription:existing.toJSON()})});}catch{}
