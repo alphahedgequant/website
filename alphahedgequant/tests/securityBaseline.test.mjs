@@ -9,11 +9,20 @@ test("Next.js responses include baseline security headers and no framework signa
  const conf=mod.default;
  assert.equal(conf.poweredByHeader,false);
  const list=await conf.headers();
- const keys=new Map(list.flatMap(x=>x.headers).map(x=>[x.key,x.value]));
+ const baseline=list.find(x=>x.source==="/:path*");
+ assert.ok(baseline,"default security headers must apply to all routes");
+ const keys=new Map(baseline.headers.map(x=>[x.key,x.value]));
  assert.equal(keys.get("X-Content-Type-Options"),"nosniff");
  assert.equal(keys.get("X-Frame-Options"),"DENY");
  assert.ok(keys.get("Referrer-Policy"));
  assert.ok(keys.get("Strict-Transport-Security"));
+ // The free competition board is embedded only by AHQ's own origin.
+ // It must never be frameable on a different site.
+ const board=list.find(x=>x.source==="/tournaments.html");
+ assert.ok(board,"the board must have a narrow exception to support same-origin integration");
+ const boardHeaders=new Map(board.headers.map(x=>[x.key,x.value]));
+ assert.equal(boardHeaders.get("X-Frame-Options"),"SAMEORIGIN");
+ assert.equal(boardHeaders.get("Content-Security-Policy"),"frame-ancestors 'self'");
 });
 test("private account progress is bound to authenticated user and never stored with a client-supplied user id",()=>{
  const s=read("app/api/learn/progress/route.js");
