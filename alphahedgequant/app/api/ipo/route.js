@@ -5,7 +5,7 @@ export const dynamic="force-dynamic";
 // Xflot's documented free API requires a maximum of one origin fetch per
 // minute. Never add rapid client or server polling of the upstream.
 const ORIGIN="https://www.xflot.com";
-const cacheHeaders={"Cache-Control":"public,s-maxage=60,stale-while-revalidate=30"};
+const cacheHeaders={"Cache-Control":"public,s-maxage=60,stale-while-revalidate=30","X-Content-Type-Options":"nosniff"};
 const isSlug=x=>typeof x==="string"&&/^[a-z0-9][a-z0-9-]{1,119}$/.test(x);
 async function load(path){
  const res=await fetch(ORIGIN+path,{
@@ -70,7 +70,7 @@ export async function GET(request){
   if(view!==null)return Response.json({ok:false,error:"Invalid view."},{status:400,headers:{"Cache-Control":"no-store"}});
   const payload=await load("/api/public/market/ipos?limit=200");
   if(!Array.isArray(payload.ipos))throw Error("IPO issue list missing");
-  const {buckets,unknownStatuses,invalid,duplicates,correctedStatuses,accepted}=buildIpoBuckets(payload.ipos);
+  const {buckets,unknownStatuses,invalid,duplicates,correctedStatuses,priceAlerts,accepted}=buildIpoBuckets(payload.ipos);
   const freshness=ipoFreshness(payload.updatedAt??payload.lastUpdated);
   if(payload.ipos.length>0&&accepted===0)throw Error("No valid IPO records in source response");
   return Response.json({
@@ -79,8 +79,8 @@ export async function GET(request){
    source:"Xflot",sourceUrl:"https://www.xflot.com/api-docs",
    fetchedAt:new Date().toISOString(),upstreamUpdatedAt:freshness.upstreamUpdatedAt,
    stale:freshness.stale,freshness:freshness.freshness,
-   correctedStatuses,
-   partial:invalid>0||duplicates>0||Object.keys(unknownStatuses).length>0,
+   correctedStatuses,priceAlerts,pipelineCount:buckets.pipeline.length,invalidRecords:invalid,duplicateRecords:duplicates,
+   partial:invalid>0||duplicates>0||priceAlerts>0||Object.keys(unknownStatuses).length>0,
    unknownStatusCounts:unknownStatuses,
    disclaimer:payload.disclaimer||"GMP is unofficial and not exchange verified; implied listing prices are not predictions."
   },{headers:cacheHeaders});
