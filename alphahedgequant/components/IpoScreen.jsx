@@ -222,6 +222,17 @@ export default function IpoScreen(){
    {error&&<p className="ipo-alert" role="alert">{error}</p>}
    {meta?.partial&&<p className="ipo-alert">Some source records were duplicated, incomplete or used unrecognized statuses. Counts reflect validated, deduplicated records only.</p>}
     {meta?.priceAlerts>0&&<p className="ipo-alert">{meta.priceAlerts} implausible or inconsistent issue-price values were withheld pending verification.</p>}
+   {openingSoon.length>0&&<section className="ipo-opening-soon" aria-label="IPO openings in the next fourteen days">
+     <div className="ipo-opening-top"><span className="ipo-eyebrow">NEXT 14 DAYS / ISSUE CALENDAR</span><h3>Confirmed upcoming bidding windows.</h3><p>Terms come from the connected IPO provider. Verify the issuer prospectus and exchange notices before applying.</p></div>
+     <div className="ipo-opening-grid">{openingSoon.map(x=>{
+       const ref=verifiedIpoReference(x.id);
+       return <article className="ipo-opening-item" key={x.id}>
+         <div className="ipo-opening-label">{x.segment} · Opens {dateLabel(x.open)}</div><h4>{x.name}</h4>
+         <p>{dateLabel(x.open)} – {dateLabel(x.close)} · {x.priceBand||"Price pending"} · {number(x.lotSize)!==null?plain(x.lotSize)+" shares/lot":"Lot pending"}</p>
+         <div className="ipo-opening-actions"><button type="button" onClick={()=>setSelected(x)}>Issue details ↗</button>{ref&&<a href={ref.sourceUrl} target="_blank" rel="noopener noreferrer">Issuer / exchange ↗</a>}</div>
+       </article>;
+     })}</div>
+   </section>}
    {soon.length>0&&<section className="ipo-listing-soon"><div className="ipo-listing-title"><span className="ipo-eyebrow">NEXT 7 DAYS</span><h3>Expected listing dates</h3></div><div className="ipo-soon-grid">{soon.map(({ipo,days})=><button type="button" key={ipo.id} data-ahq-event="ipo_issue_opened" onClick={()=>setSelected(ipo)}><strong>{ipo.name}</strong><span>{days===0?"Scheduled today":days===1?"Scheduled tomorrow":"In "+days+" days"} · {dateLabel(ipo.listingDate)}</span></button>)}</div></section>}
    <div className="ipo-controls"><div className="ipo-tabs" role="tablist" aria-label="IPO status">{TABS.map(t=><button type="button" role="tab" aria-selected={tab===t.key} aria-controls="ahq-ipo-results" key={t.key} data-ahq-event={tab===t.key?undefined:"ipo_tab_selected"} onClick={()=>setTab(t.key)} className={tab===t.key?"active":""}>{t.label}<span>{buckets?plain((buckets[t.key]||[]).length):"—"}</span></button>)}</div>
     <div className="ipo-filters"><label className="ipo-search"><span className="sr-only">Search company or ticker</span><input type="search" value={query} onChange={e=>setQuery(e.target.value)} placeholder="Search company or ticker…" aria-label="Search IPOs"/></label>
