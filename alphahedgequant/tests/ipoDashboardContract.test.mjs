@@ -67,8 +67,8 @@ test("IPO SEO and open access remain unchanged while real-risk explanations grow
  assert.match(page,/FAQPage/);
  assert.match(page,/Indian IPO Intelligence/);
  assert.match(page,/GMP is an unofficial/);
- assert.match(middleware,/"\\/ipo\\(\\.\\*\\)"/);
- assert.match(middleware,/"\\/api\\/ipo\\(\\.\\*\\)"/);
+ assert.ok(middleware.includes('"/ipo(.*)"'));
+ assert.ok(middleware.includes('"/api/ipo(.*)"'));
  assert.match(page,/<IpoScreen \/>/);
 });
 test("privacy: new feature interactions use fixed event names, not search terms or IPO IDs",()=>{
