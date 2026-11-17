@@ -25,7 +25,7 @@ html[data-theme="light"] .ahq-ipo-page,html[data-theme="light"] .ahq-ipo-screen,
 .ipo-refresh{flex-shrink:0;border:1px solid var(--ipo-line);background:var(--ipo-panel);color:var(--ipo-text);padding:12px 16px;font-size:12px!important;font-weight:700!important;transition:border .2s,background .2s}
 .ipo-refresh:hover:not(:disabled){border-color:var(--ipo-gold);background:var(--ipo-raised)}
 .ipo-refresh:disabled{opacity:.6;cursor:wait}
-.ipo-metrics{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:1px;border:1px solid var(--ipo-line);background:var(--ipo-line)}
+.ipo-metrics{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:1px;border:1px solid var(--ipo-line);background:var(--ipo-line)}
 .ipo-metric{display:flex;flex-direction:column;gap:10px;min-width:0;background:var(--ipo-panel);padding:24px 24px 22px}
 .ipo-metric>span{color:var(--ipo-muted);font-size:11px;font-weight:600;letter-spacing:.045em}
 .ipo-metric strong{color:var(--ipo-text);font:650 clamp(28px,3.2vw,39px)/1 Manrope,"Archivo",sans-serif;letter-spacing:-.06em}
@@ -214,3 +214,22 @@ html[data-theme="light"] .ipo-page-hero{background:radial-gradient(ellipse at 82
  .ipo-education{padding:62px 0 80px}
  .ipo-education h2{font-size:38px}
 }
+
+
+/* Dated issue-window highlights reuse the existing AHQ IPO navy/ivory tokens. */
+.ipo-opening-soon{margin:35px 0 8px;padding:23px 25px;border:1px solid var(--ipo-line);background:linear-gradient(120deg,var(--ipo-raised),var(--ipo-panel))}
+.ipo-opening-top h3{margin:9px 0 9px;color:var(--ipo-text);font:640 clamp(20px,2.4vw,29px)/1.3 Manrope,"Archivo",sans-serif;letter-spacing:-.045em}
+.ipo-opening-top p{margin:0 0 18px;max-width:820px;color:var(--ipo-muted);font-size:12px;line-height:1.8}
+.ipo-opening-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:10px}
+.ipo-opening-item{min-width:0;border:1px solid var(--ipo-line);background:var(--ipo-bg);padding:17px 19px;display:flex;flex-direction:column}
+.ipo-opening-label{color:var(--ipo-gold);font:700 10px/1.4 "JetBrains Mono",monospace;letter-spacing:.04em}
+.ipo-opening-item h4{margin:9px 0 8px;color:var(--ipo-text);font:630 17px/1.35 Manrope,"Archivo",sans-serif;letter-spacing:-.03em;overflow-wrap:anywhere}
+.ipo-opening-item p{color:var(--ipo-muted);font-size:11px;line-height:1.7;margin:0 0 13px}
+.ipo-opening-actions{display:flex;flex-wrap:wrap;gap:12px;margin-top:auto;align-items:center}
+.ipo-opening-actions button{border:0;background:transparent;padding:4px 0;color:var(--ipo-gold);cursor:pointer;font-size:11px;font-weight:700}
+.ipo-opening-actions a{color:var(--ipo-text);font-size:11px}
+.ipo-issuer-source{margin:11px 0 5px;display:flex;justify-content:space-between;gap:12px;align-items:flex-start;font-size:11px;line-height:1.6}
+.ipo-issuer-source small{font-size:10px;color:var(--ipo-muted);white-space:nowrap}
+.ipo-gmp-latest{padding:11px 13px;margin:8px 0 16px;background:var(--ipo-raised);border:1px solid var(--ipo-line);color:var(--ipo-text);font-size:12px;line-height:1.8}
+@media(max-width:980px){.ipo-metrics{grid-template-columns:repeat(3,minmax(0,1fr))}}
+@media(max-width:600px){.ipo-metrics{grid-template-columns:repeat(2,minmax(0,1fr))}.ipo-opening-soon{padding:17px}.ipo-opening-grid{grid-template-columns:1fr}}
