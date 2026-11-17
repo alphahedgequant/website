@@ -3,16 +3,17 @@
 // Renders only the sections for which data is present.
 
 import { useEffect, useState } from "react";
+import "../ipo-intro.css";
 import { useParams } from "next/navigation";
 
-const AMBER = "#F0A93B", GAIN = "#34d39a", LOSS = "#f87171", INK = "#0d0f13";
+const AMBER = "var(--ipo-gold)", GAIN = "var(--ipo-positive)", LOSS = "var(--ipo-negative)", INK = "var(--ipo-bg)";
 
 function Stat({ label, value, accent }) {
   if (value === null || value === undefined || value === "") return null;
   return (
-    <div style={{ background: "#14161c", border: "1px solid #232733", borderRadius: 10, padding: "14px 16px" }}>
-      <div style={{ color: "#6b6b6b", fontSize: 10, textTransform: "uppercase", letterSpacing: 0.5 }}>{label}</div>
-      <div style={{ color: accent || "#f5f5f5", fontSize: 18, fontWeight: 700, marginTop: 4 }}>{value}</div>
+    <div style={{ background: "var(--ipo-panel)", border: "1px solid var(--ipo-line)", borderRadius: 10, padding: "14px 16px" }}>
+      <div style={{ color: "var(--ipo-muted)", fontSize: 10, textTransform: "uppercase", letterSpacing: 0.5 }}>{label}</div>
+      <div style={{ color: accent || "var(--ipo-text)", fontSize: 18, fontWeight: 700, marginTop: 4 }}>{value}</div>
     </div>
   );
 }
@@ -20,13 +21,13 @@ function Stat({ label, value, accent }) {
 function SubBar({ label, x }) {
   if (x === null || x === undefined) return null;
   const pct = Math.min(100, (x / 50) * 100); // scale: 50x = full bar
-  const color = x >= 1 ? GAIN : "#5a5f6b";
+  const color = x >= 1 ? GAIN : "var(--ipo-muted)";
   return (
     <div style={{ marginBottom: 10 }}>
-      <div style={{ display: "flex", justifyContent: "space-between", fontSize: 12, color: "#cfcfcf", marginBottom: 4 }}>
+      <div style={{ display: "flex", justifyContent: "space-between", fontSize: 12, color: "var(--ipo-text)", marginBottom: 4 }}>
         <span>{label}</span><span style={{ fontWeight: 600 }}>{x}x</span>
       </div>
-      <div style={{ height: 8, background: "#1e2129", borderRadius: 4, overflow: "hidden" }}>
+      <div style={{ height: 8, background: "var(--ipo-raised)", borderRadius: 4, overflow: "hidden" }}>
         <div style={{ width: `${pct}%`, height: "100%", background: color, borderRadius: 4 }} />
       </div>
     </div>
@@ -45,10 +46,10 @@ function Timeline({ ipo }) {
     <div style={{ display: "flex", gap: 0, marginTop: 8 }}>
       {steps.map((s, i) => (
         <div key={i} style={{ flex: 1, position: "relative", textAlign: "center" }}>
-          <div style={{ height: 2, background: "#2a2f3a", position: "absolute", top: 6, left: i === 0 ? "50%" : 0, right: i === steps.length - 1 ? "50%" : 0 }} />
+          <div style={{ height: 2, background: "var(--ipo-line)", position: "absolute", top: 6, left: i === 0 ? "50%" : 0, right: i === steps.length - 1 ? "50%" : 0 }} />
           <div style={{ width: 12, height: 12, borderRadius: 6, background: AMBER, margin: "0 auto", position: "relative", zIndex: 1 }} />
-          <div style={{ color: "#9a9a9a", fontSize: 10, textTransform: "uppercase", marginTop: 6 }}>{s.label}</div>
-          <div style={{ color: "#e5e5e5", fontSize: 12, marginTop: 2 }}>{s.date}</div>
+          <div style={{ color: "var(--ipo-muted)", fontSize: 10, textTransform: "uppercase", marginTop: 6 }}>{s.label}</div>
+          <div style={{ color: "var(--ipo-text)", fontSize: 12, marginTop: 2 }}>{s.date}</div>
         </div>
       ))}
     </div>
@@ -73,38 +74,38 @@ export default function IpoDetail() {
     return () => { alive = false; };
   }, [sym]);
 
-  if (loading) return <Wrap><div style={{ color: "#8a8a8a" }}>Loading…</div></Wrap>;
+  if (loading) return <Wrap><div style={{ color: "var(--ipo-muted)" }}>Loading…</div></Wrap>;
   if (error) return <Wrap><div style={{ color: LOSS }}>Couldn’t load this IPO: {error}</div></Wrap>;
-  if (!ipo) return <Wrap><div style={{ color: "#8a8a8a" }}>No data.</div></Wrap>;
+  if (!ipo) return <Wrap><div style={{ color: "var(--ipo-muted)" }}>No data.</div></Wrap>;
 
-  const gmpGain = ipo.gmp && ipo.gmp.price != null && ipo.issuePrice
-    ? Math.round((ipo.gmp.price / Number(String(ipo.issuePrice).replace(/[^\d.]/g, "")) ) * 100)
-    : (ipo.gmp ? ipo.gmp.percentage : null);
+  const gmpGain=ipo.gmp?.percentage ?? null;
 
   return (
     <Wrap>
       <a href="/ipo" style={{ color: AMBER, fontSize: 13, textDecoration: "none" }}>← All IPOs</a>
       <div style={{ display: "flex", alignItems: "center", gap: 12, margin: "12px 0 4px" }}>
-        <h1 style={{ color: "#f5f5f5", fontSize: 30, fontWeight: 700, margin: 0 }}>{ipo.name}</h1>
-        {ipo.type && <span style={{ color: "#9a9a9a", fontSize: 12, border: "1px solid #2a2f3a", borderRadius: 6, padding: "2px 8px", textTransform: "uppercase" }}>{ipo.type}</span>}
+        <h1 style={{ color: "var(--ipo-text)", fontSize: 30, fontWeight: 700, margin: 0 }}>{ipo.name}</h1>
+        {ipo.type && <span style={{ color: "var(--ipo-muted)", fontSize: 12, border: "1px solid var(--ipo-line)", borderRadius: 6, padding: "2px 8px", textTransform: "uppercase" }}>{ipo.type}</span>}
       </div>
       {ipo.status && <div style={{ color: AMBER, fontSize: 13, textTransform: "uppercase", letterSpacing: 1, marginBottom: 20 }}>{ipo.status}</div>}
 
       <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(150px, 1fr))", gap: 12, marginBottom: 28 }}>
         <Stat label="Price Band" value={ipo.priceBand} />
-        <Stat label="Issue Price" value={ipo.issuePrice} accent={AMBER} />
+        <Stat label="Issue Price" value={ipo.issuePrice!=null?"₹"+ipo.issuePrice:null} accent={AMBER} />
         <Stat label="Lot Size" value={ipo.lotSize} />
         <Stat label="Min Investment" value={ipo.minAmount ? `₹${ipo.minAmount}` : null} />
-        <Stat label="Issue Size" value={ipo.issueSize} />
+        <Stat label="Issue Size" value={ipo.issueSize!=null?"₹"+ipo.issueSize+" Cr":null} />
         <Stat label="Face Value" value={ipo.faceValue} />
         {ipo.gmp && ipo.gmp.price != null && (
-          <Stat label="GMP" value={`₹${ipo.gmp.price}${gmpGain ? ` (${gmpGain}%)` : ""}`} accent={GAIN} />
+          <Stat label="GMP" value={`₹${ipo.gmp.price}${gmpGain != null ? ` (${gmpGain}%)` : ""}`} accent={GAIN} />
         )}
         {ipo.listingGain != null && (
           <Stat label="Listing Gain" value={`${ipo.listingGain >= 0 ? "+" : ""}${ipo.listingGain}%`} accent={ipo.listingGain >= 0 ? GAIN : LOSS} />
         )}
       </div>
 
+      {ipo.priceSuspect&&<p style={{padding:12,color:"var(--ipo-gold)",border:"1px solid var(--ipo-line)"}}>Unusual source issue-price value withheld until it can be verified against the prospectus.</p>}
+      {ipo.statusReason&&<p style={{padding:12,color:"var(--ipo-muted)"}}>{ipo.statusReason}</p>}
       {(ipo.openDate || ipo.listingDate) && (
         <Section title="Timeline"><Timeline ipo={ipo} /></Section>
       )}
@@ -115,12 +116,12 @@ export default function IpoDetail() {
           <SubBar label="NII" x={ipo.subscription.nii} />
           <SubBar label="Retail" x={ipo.subscription.retail} />
           <SubBar label="Total" x={ipo.subscription.total} />
-          {ipo.subscription.updatedAt && <div style={{ color: "#6b6b6b", fontSize: 11, marginTop: 4 }}>Updated {ipo.subscription.updatedAt}</div>}
+          {ipo.subscription.updatedAt && <div style={{ color: "var(--ipo-muted)", fontSize: 11, marginTop: 4 }}>Updated {ipo.subscription.updatedAt}</div>}
         </Section>
       )}
 
       {ipo.about && (
-        <Section title="About"><p style={{ color: "#cfcfcf", lineHeight: 1.7, fontSize: 14 }}>{ipo.about}</p></Section>
+        <Section title="About"><p style={{ color: "var(--ipo-text)", lineHeight: 1.7, fontSize: 14 }}>{ipo.about}</p></Section>
       )}
 
       {ipo.strengths && ipo.strengths.length > 0 && (
@@ -132,20 +133,20 @@ export default function IpoDetail() {
 
       {(ipo.registrar || ipo.listingOn || ipo.saleType) && (
         <Section title="Details">
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "8px 20px", fontSize: 13, color: "#cfcfcf" }}>
-            {ipo.registrar && <div><span style={{ color: "#6b6b6b" }}>Registrar: </span>{ipo.registrar}</div>}
-            {ipo.listingOn && <div><span style={{ color: "#6b6b6b" }}>Listing On: </span>{ipo.listingOn}</div>}
-            {ipo.saleType && <div><span style={{ color: "#6b6b6b" }}>Type: </span>{ipo.saleType}</div>}
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "8px 20px", fontSize: 13, color: "var(--ipo-text)" }}>
+            {ipo.registrar && <div><span style={{ color: "var(--ipo-muted)" }}>Registrar: </span>{ipo.registrar}</div>}
+            {ipo.listingOn && <div><span style={{ color: "var(--ipo-muted)" }}>Listing On: </span>{ipo.listingOn}</div>}
+            {ipo.saleType && <div><span style={{ color: "var(--ipo-muted)" }}>Type: </span>{ipo.saleType}</div>}
           </div>
         </Section>
       )}
 
       <div style={{ display: "flex", gap: 16, marginTop: 24 }}>
-        {ipo.prospectus && <a href={ipo.prospectus} target="_blank" rel="noopener noreferrer" style={{ color: AMBER, fontSize: 13, textDecoration: "none" }}>Prospectus (RHP/DRHP) →</a>}
+        {ipo.prospectus && <a href={ipo.prospectus} target="_blank" rel="noopener noreferrer" style={{ color: AMBER, fontSize: 13, textDecoration: "none" }}>Issuer / exchange reference →</a>}
         {ipo.nseInfo && <a href={ipo.nseInfo} target="_blank" rel="noopener noreferrer" style={{ color: AMBER, fontSize: 13, textDecoration: "none" }}>NSE Info →</a>}
       </div>
 
-      <p style={{ color: "#5a5f6b", fontSize: 11, marginTop: 32, lineHeight: 1.6 }}>
+      <p style={{ color: "var(--ipo-muted)", fontSize: 11, marginTop: 32, lineHeight: 1.6 }}>
         Data aggregated from public sources for research and education only — not investment advice.
         GMP is an informal, unregulated sentiment indicator and not a guarantee of listing performance.
       </p>
@@ -154,7 +155,7 @@ export default function IpoDetail() {
 }
 
 function Wrap({ children }) {
-  return <section style={{ maxWidth: 820, margin: "0 auto", padding: "48px 24px" }}>{children}</section>;
+  return <main className="ahq-ipo-page" style={{minHeight:"75vh",background:"var(--ipo-bg)",color:"var(--ipo-text)"}}><section style={{maxWidth:1020,margin:"0 auto",padding:"52px 24px 90px"}}>{children}</section></main>;
 }
 function Section({ title, children }) {
   return (
@@ -168,7 +169,7 @@ function PointList({ items, color }) {
   return (
     <ul style={{ listStyle: "none", padding: 0, margin: 0 }}>
       {items.map((t, i) => (
-        <li key={i} style={{ color: "#cfcfcf", fontSize: 14, lineHeight: 1.6, paddingLeft: 18, position: "relative", marginBottom: 6 }}>
+        <li key={i} style={{ color: "var(--ipo-text)", fontSize: 14, lineHeight: 1.6, paddingLeft: 18, position: "relative", marginBottom: 6 }}>
           <span style={{ position: "absolute", left: 0, color }}>•</span>{t}
         </li>
       ))}
