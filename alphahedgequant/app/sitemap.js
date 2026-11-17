@@ -1,6 +1,7 @@
 import {RESEARCH_LIBRARY,LIBRARY_PUBLISHED} from "../lib/publicResearchLibrary.mjs";
 import {PUBLIC_RESEARCH_SERIES,RESEARCH_PREVIEWS,PREVIEW_RELEASE_DATE} from "../lib/publicResearchPreviews.mjs";
 import {COMPETITIONS,VERIFIED_AS_OF} from "../lib/competitionEvents.mjs";
+import {VERIFIED_IPO_REFERENCES,IPO_REFERENCE_AS_OF} from "../lib/ipoVerifiedEvents.mjs";
 // Only public, crawlable pages belong in the sitemap. Product routes
 // currently require Clerk login, so listing them would point crawlers at
 // an authentication redirect instead of indexable content.
@@ -42,5 +43,10 @@ export default function sitemap() {
     lastModified:new Date(VERIFIED_AS_OF+"T00:00:00Z"),
     changeFrequency:"weekly",priority:0.55
   }));
-  return [...index,...notes,...series,...previews,...publishedMacro,...competitionPages];
+  const verifiedIpos=Object.keys(VERIFIED_IPO_REFERENCES).map(slug=>({
+    url:base+"/ipo/"+slug,
+    lastModified:new Date(IPO_REFERENCE_AS_OF+"T00:00:00Z"),
+    changeFrequency:"daily",priority:0.62
+  }));
+  return [...index,...notes,...series,...previews,...publishedMacro,...competitionPages,...verifiedIpos];
 }
