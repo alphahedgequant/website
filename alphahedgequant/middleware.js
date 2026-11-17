@@ -16,7 +16,7 @@ const isPublicRoute = createRouteMatcher([
   "/api/tournaments/push",
   "/api/tournaments/cache",
   // Public, read-only IPO calendar and listing intelligence for visitors and search engines.
-  "/ipo",
+  "/ipo(.*)",
   // Open educational library only. Do not expose authenticated research tools or APIs.
   "/library(.*)",
   // All six Quant Learning modules are free; interview and mental maths routes remain protected.
@@ -26,7 +26,7 @@ const isPublicRoute = createRouteMatcher([
   "/api/tracker/leaderboard",
   "/api/tracker/calls(.*)",
   "/api/tracker/editor",
-  "/api/ipo",
+  "/api/ipo(.*)",
   "/sign-in(.*)",
   "/sign-up(.*)",
   "/privacy",
