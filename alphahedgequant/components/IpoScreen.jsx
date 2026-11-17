@@ -150,6 +150,7 @@ export default function IpoScreen(){
  const [buckets,setBuckets]=useState(null),[meta,setMeta]=useState(null),[loading,setLoading]=useState(true),[refreshing,setRefreshing]=useState(false),[error,setError]=useState(null);
  const [selected,setSelected]=useState(null),[board,setBoard]=useState(null),[boardError,setBoardError]=useState(false);
  const [lastCheck,setLastCheck]=useState(null);
+ const autoSelected=useRef(false);
  const closeDetails=useCallback(()=>setSelected(null),[]);
  const load=useCallback(async(initial=false)=>{
   if(!initial)setRefreshing(true);
@@ -158,6 +159,7 @@ export default function IpoScreen(){
    const j=await r.json();
    if(!r.ok||!j.ok||!j.buckets)throw Error(j.error||"IPO feed unavailable");
    setBuckets(j.buckets);setMeta(j);setLastCheck(new Date().toISOString());setError(null);
+   if(initial&&!autoSelected.current){autoSelected.current=true;if((j.buckets.open||[]).length===0&&(j.buckets.upcoming||[]).length>0)setTab("upcoming");}
   }catch(e){setError("The live IPO feed is temporarily unavailable. Displayed records, if any, are from an earlier successful check.");}
   finally{setLoading(false);setRefreshing(false);}
  },[]);
