@@ -4,8 +4,8 @@ import {chromium} from "playwright";
 import {mkdir,writeFile} from "node:fs/promises";
 const root=process.env.AHQ_AUDIT_URL||"https://www.alphahedgequant.com";
 const out="ahq-audit";
-const pages=["/","/about","/competitions","/tournaments.html","/privacy","/terms","/disclaimer","/sign-in","/sign-up"];
-const protectedPages=["/terminal","/learn","/screener","/ipo","/research"];
+const pages=["/","/about","/competitions","/tournaments.html","/ipo","/ipo/crystalcropprotection-ipo","/privacy","/terms","/disclaimer","/sign-in","/sign-up"];
+const protectedPages=["/terminal","/options","/models","/screener","/research"];
 const results=[];
 let critical=0;
 await mkdir(out,{recursive:true});
@@ -89,6 +89,32 @@ for(const [device,width,height] of [["desktop",1440,900],["mobile",390,844]]){
    if(row.status!==200||!row.opened||!row.hasSource||row.overflow>8){row.critical="competition board interaction or mobile layout failed";critical++;}
   }catch(e){row.critical=String(e.message||e).slice(0,260);critical++;}
   finally{results.push(row);console.log("AHQ_COMPETITIONS_INTERACTION",JSON.stringify(row));await page.close()}
+ }
+ // IPO cards and modal must be usable without authentication at both widths.
+ {
+  const page=await context.newPage(),exceptions=[];
+  page.on("pageerror",err=>exceptions.push(String(err.message||err).slice(0,220)));
+  const row={device,interaction:"public-ipo-drawer",status:null,confirmedUpcoming:null,pipeline:null,detailsOpen:false,hasPriceBand:false,overflow:0,exceptions};
+  try{
+   const r=await page.goto(root+"/ipo",{waitUntil:"domcontentloaded",timeout:30000});
+   row.status=r?.status()||null;
+   await page.locator(".ipo-metrics").waitFor({state:"visible",timeout:15000});
+   await page.getByRole("tab",{name:/Upcoming/}).click();
+   const cards=page.locator("#ahq-ipo-results .ipo-issue");
+   await cards.first().waitFor({state:"visible",timeout:18000});
+   row.confirmedUpcoming=await cards.count();
+   row.hasPriceBand=await cards.first().innerText().then(t=>/₹/.test(t));
+   await cards.first().getByRole("button",{name:/View details/}).click();
+   row.detailsOpen=await page.getByRole("dialog",{name:/IPO details/}).isVisible();
+   await page.getByRole("button",{name:"Close details"}).click();
+   await page.getByRole("tab",{name:/Awaiting dates/}).click();
+   row.pipeline=await page.locator("#ahq-ipo-results .ipo-issue").count();
+   row.overflow=await page.evaluate(()=>Math.max(0,document.documentElement.scrollWidth-innerWidth));
+   if(!row.status||row.status!==200||!row.detailsOpen||!row.hasPriceBand||row.overflow>8||exceptions.length)
+      {row.critical="IPO public interactive UI failed";critical++}
+   await page.screenshot({path:out+"/"+device+"-ipo-pipeline.png",animations:"disabled",timeout:15000}).catch(()=>{});
+  }catch(err){row.critical=String(err.message||err).slice(0,240);critical++}
+  finally{results.push(row);console.log("AHQ_IPO_INTERACTION",JSON.stringify(row));await page.close()}
  }
  // Test actual mobile menu interaction, not just its HTML existence.
  if(device==="mobile"){
