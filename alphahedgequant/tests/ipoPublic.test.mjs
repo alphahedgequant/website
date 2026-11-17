@@ -6,8 +6,8 @@ const read=p=>readFileSync(new URL(p,root),"utf8");
 
 test("IPO calendar and read-only feed are public, account features remain private",()=>{
   const middleware=read("middleware.js");
- assert.match(middleware,/"\\/ipo\\(\\.\\*\\)"/);
- assert.match(middleware,/"\\/api\\/ipo\\(\\.\\*\\)"/);
+ assert.ok(middleware.includes('"/ipo(.*)"'));
+ assert.ok(middleware.includes('"/api/ipo(.*)"'));
   assert.doesNotMatch(middleware,/\/api\/admin\/analytics",/);
   assert.doesNotMatch(middleware,/\/terminal",/);
   assert.match(middleware,/await auth\.protect\(\)/);
