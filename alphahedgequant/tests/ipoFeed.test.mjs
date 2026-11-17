@@ -10,7 +10,8 @@ test("status evolution never silently hides source records",()=>{
  const feed=[{slug:"one-ipo",status:"OPEN",name:"One"},{slug:"two-ipo",status:"ALLOTTED",name:"Two"},{slug:"three-ipo",status:"STALLED",name:"Three"}];
  const parsed=buildIpoBuckets(feed);
  assert.equal(parsed.accepted,3);
- assert.equal(parsed.buckets.open.length,1);
+ assert.equal(parsed.buckets.open.length,0);
+ assert.equal(parsed.buckets.pipeline.length,1);
  assert.equal(parsed.buckets.closed.length,1);
  assert.equal(parsed.buckets.other.length,1);
  assert.equal(parsed.unknownStatuses.STALLED,1);
@@ -90,4 +91,37 @@ test("never classify an unknown or postponed source status as open",()=>{
  const x=buildIpoBuckets([{slug:"postponed-issue",name:"Postponed",status:"Issue postponed",openDate:"2026-11-09",closeDate:"2026-11-12"}],"2026-11-10");
  assert.equal(x.buckets.open.length,0);
  assert.equal(x.buckets.other.length,1);
+});
+
+test("confirmed opening dates stay upcoming; undated source pipeline is separated",()=>{
+ const result=buildIpoBuckets([
+  {slug:"crystal-ipo",name:"Crystal Crop",status:"UPCOMING",openDate:"2026-11-18",closeDate:"2026-11-20",priceMax:272},
+  {slug:"no-schedule-ipo",name:"Undated issuer",status:"UPCOMING"},
+  {slug:"no-end-ipo",name:"No closing date",status:"OPEN",openDate:"2026-11-10"},
+ ],"2026-11-17");
+ assert.equal(result.buckets.upcoming.length,1);
+ assert.equal(result.buckets.open.length,0);
+ assert.equal(result.buckets.pipeline.length,2);
+ assert.equal(result.buckets.upcoming[0].name,"Crystal Crop");
+ assert.ok(result.buckets.pipeline.every(x=>x.statusReason));
+});
+test("same issuer from stale upcoming source cannot duplicate a listed IPO",()=>{
+ const parsed=buildIpoBuckets([
+  {slug:"hgs-ipo",name:"HGS (India) Limited",status:"CLOSED",openDate:"2026-10-30",closeDate:"2026-11-03"},
+  {slug:"hgsindia-ipo",name:"HGS (India)",status:"LISTED",openDate:"2026-10-30",closeDate:"2026-11-03",listingDate:"2026-11-06"},
+  {slug:"aone-ipo",name:"A-One Steels India Limited",status:"UPCOMING"},
+  {slug:"aoneindia-ipo",name:"A-One Steels India Limited",status:"LISTED",listingDate:"2026-10-01"},
+ ],"2026-11-17");
+ assert.equal(parsed.accepted,2);
+ assert.equal(parsed.buckets.listed.length,2);
+ assert.equal(parsed.buckets.pipeline.length,0);
+ assert.equal(parsed.duplicates,2);
+});
+test("suspicious under-rupee per-share prices are withheld rather than scaled",()=>{
+ const issue=normalizeIpo({slug:"weird-ipo",name:"Example",status:"CLOSED",priceMin:0.15,priceMax:0.18,lotSize:100,lastGmp:1},"2026-11-17");
+ assert.equal(issue.priceSuspect,true);
+ assert.equal(issue.issuePrice,null);
+ assert.equal(issue.minimumInvestment,null);
+ assert.equal(issue.gmpPct,null);
+ assert.equal(issue.estimatedListingPrice,null);
 });
