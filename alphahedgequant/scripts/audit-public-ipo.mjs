@@ -21,6 +21,31 @@ await check("IPO read-only API",async()=>{
  const passed=response.status===200&&j.ok===true&&j.buckets&&typeof j.count==="number"&&typeof j.disclaimer==="string";
  return {status:response.status,passed,note:passed?"Returns structured IPO calendar with source disclaimer":"Feed unavailable or invalid"};
 });
+await check("IPO stages never advertise undated pipeline as upcoming",async()=>{
+ const {response,text}=await get("/api/ipo");
+ const d=JSON.parse(text),b=d.buckets||{};
+ const upcoming=Array.isArray(b.upcoming)?b.upcoming:[],pipeline=Array.isArray(b.pipeline)?b.pipeline:[];
+ const dated=upcoming.every(x=>/^\\d{4}-\\d{2}-\\d{2}$/.test(x.open||""));
+ const withheld=pipeline.every(x=>!x.open);
+ const uniqueIds=new Set(Object.values(b).flat().map(x=>x.id));
+ const count=Object.values(b).flat().length;
+ return {status:response.status,passed:response.ok&&dated&&withheld&&uniqueIds.size===count,
+  note:dated&&withheld?"Upcoming="+upcoming.length+" dated; pipeline="+pipeline.length+" undated; unique="+count:"Undated/duplicate records leaked"};
+});
+await check("source-reviewed public IPO profile and read-only detail API",async()=>{
+ const [page,detail]=await Promise.all([
+   get("/ipo/crystalcropprotection-ipo"),get("/api/ipo/crystalcropprotection-ipo")]);
+ const j=JSON.parse(detail.text);
+ const passed=page.response.status===200&&detail.response.status===200&&
+   /Crystal Crop Protection IPO/.test(page.text)&&j.ok===true&&
+   j.ipo?.name==="Crystal Crop Protection"&&j.ipo?.issuePrice===272;
+ return {status:page.response.status,passed,note:passed?"Public issue profile, verified price and issue name":"Missing/mismatched public IPO profile"};
+});
+await check("historical listing scorecard is available",async()=>{
+ const {response,text}=await get("/api/ipo?view=scoreboard"),j=JSON.parse(text);
+ return {status:response.status,passed:response.ok&&j.ok===true&&Array.isArray(j.rows),
+   note:"Historical sample "+(j.rows?.length||0)+" issues; null GMP remains null"};
+});
 await check("sitemap contains IPO",async()=>{
  const {response,text}=await get("/sitemap.xml");
  const passed=response.status===200&&text.includes("https://www.alphahedgequant.com/ipo");
