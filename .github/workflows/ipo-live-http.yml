@@ -4,6 +4,9 @@ on:
     paths:
       - "alphahedgequant/scripts/audit-public-ipo.mjs"
       - ".github/workflows/ipo-live-http.yml"
+  schedule:
+    # Daily read-only production check: approximately 10:00 AM Asia/Kolkata.
+    - cron: "30 4 * * *"
   workflow_dispatch:
 permissions:
   contents: read
