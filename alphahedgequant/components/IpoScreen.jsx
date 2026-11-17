@@ -1,9 +1,11 @@
 "use client";
 import {useCallback,useEffect,useMemo,useRef,useState} from "react";
+import {verifiedIpoReference,IPO_REFERENCE_AS_OF} from "@/lib/ipoVerifiedEvents.mjs";
 
 const TABS=[
  {key:"open",label:"Open now",empty:"No IPOs with a confirmed active bidding window are in the current feed."},
  {key:"upcoming",label:"Upcoming",empty:"No upcoming IPOs with announced dates are in the current feed."},
+ {key:"pipeline",label:"Awaiting dates",empty:"No tracked offers without a confirmed bidding window."},
  {key:"closed",label:"Closed issues",empty:"No closed IPOs are in the current feed."},
  {key:"listed",label:"Recently listed",empty:"No recent listings are available in the current feed."},
  {key:"other",label:"Other statuses",empty:"No issues with an unrecognized source status."}
@@ -51,6 +53,7 @@ function Gmp({ipo,showPercent=true}){
 function IpoCard({ipo,actual,onOpen}){
  const listed=ipo.status==="listed";
  const gain=number(actual?.actualPct)!==null?actual.actualPct:ipo.listingGain;
+ const reference=verifiedIpoReference(ipo.id);
  return <article className="ipo-issue">
   <div className="ipo-issue-head">
    <div className="ipo-issue-title"><span className="ipo-issue-label">{ipo.segment} <span aria-hidden="true">·</span> {listed?"LISTED":ipo.status.toUpperCase()}</span><h3>{ipo.name}</h3>{ipo.symbol&&<span className="ipo-issue-symbol">{ipo.symbol}</span>}</div>
@@ -63,19 +66,22 @@ function IpoCard({ipo,actual,onOpen}){
    <Fact label="Closes">{dateLabel(ipo.close)}</Fact>
    <Fact label="Lot size">{number(ipo.lotSize)===null?"—":plain(ipo.lotSize)+" shares"}</Fact>
    <Fact label="Issue size">{number(ipo.issueSize)===null?"—":"₹"+plain(ipo.issueSize)+" Cr"}</Fact>
-   {listed?<><Fact label="Listing date">{dateLabel(actual?.listedOn||ipo.listingDate)}</Fact><Fact label="Reported listing price">{rupees(actual?.listingPrice)}</Fact></>:
+   {listed?<><Fact label="Listing date">{dateLabel(actual?.listedOn||ipo.listingDate)}</Fact><Fact label="Reported listing price">{rupees(actual?.listingPrice??ipo.listingPrice)}</Fact></>:
    <><Fact label="Indicative listing price">{number(ipo.estimatedListingPrice)===null?"Not available":rupees(ipo.estimatedListingPrice)}</Fact><Fact label="Minimum lot at top band">{rupees(ipo.minimumInvestment)}</Fact></>}
   </div>
-  {ipo.dateAdjusted&&<p className="ipo-correction">Bidding status adjusted because the published issue dates have elapsed or changed.</p>}
+  {ipo.dateAdjusted&&<p className="ipo-correction">{ipo.statusReason||"Source bidding status reconciled using published dates."}</p>}
+  {ipo.priceSuspect&&<p className="ipo-correction">Unusual issue-price value withheld pending document verification.</p>}
+  {ipo.status==="pipeline"&&<p className="ipo-correction">No confirmed public bidding date; not counted as an upcoming issue.</p>}
   {ipo.gmpDisputed&&<p className="ipo-correction">Reported GMP sources materially disagree. No implied price is shown.</p>}
+  {reference&&<p className="ipo-issuer-source"><a href={reference.sourceUrl} target="_blank" rel="noopener noreferrer">Issuer / exchange reference ↗</a><small>Checked {dateLabel(IPO_REFERENCE_AS_OF)}</small></p>}
   <div className="ipo-issue-bottom">
-   <span>{listed?"ACTUAL REPORTED DEBUT, NOT GMP":"GMP IS NOT A LISTING FORECAST"}</span>
+   <span>{listed?"ACTUAL REPORTED DEBUT, NOT GMP":ipo.status==="pipeline"?"DATES AWAIT ISSUER CONFIRMATION":"GMP IS NOT A LISTING FORECAST"}</span>
    <button type="button" data-ahq-event="ipo_issue_opened" onClick={()=>onOpen(ipo)}>View details <span aria-hidden="true">↗</span></button>
   </div>
  </article>;
 }
 function Chart({history}){
- const rows=(history||[]).filter(x=>number(x.gmp)!==null).slice(-24);
+ const rows=(history||[]).filter(x=>number(x.gmp)!==null&&day(x.observedAt)).slice().sort((a,b)=>a.observedAt.localeCompare(b.observedAt)).slice(-24);
  if(rows.length<2)return null;
  const vals=rows.map(x=>x.gmp),low=Math.min(...vals),high=Math.max(...vals),span=Math.max(1,high-low);
  const points=rows.map((x,i)=>[14+i*(492/Math.max(1,rows.length-1)),102-(x.gmp-low)*80/span].join(",")).join(" ");
@@ -110,25 +116,30 @@ function IpoDetails({ipo,onClose}){
   return()=>{document.body.style.overflow=oldOverflow;document.removeEventListener("keydown",handler);};
  },[onClose]);
  const subs=detail?.subscriptions||[];
- const history=detail?.gmpHistory||[];
+ const history=(detail?.gmpHistory||[]).filter(x=>number(x.gmp)!==null&&day(x.observedAt)).sort((a,b)=>a.observedAt.localeCompare(b.observedAt));
+ const lastGmp=history.at(-1),previousGmp=history.at(-2);
+ const gmpChange=lastGmp&&previousGmp?lastGmp.gmp-previousGmp.gmp:null;
+ const reference=verifiedIpoReference(ipo.id);
  return <div className="ipo-modal-root">
   <button type="button" className="ipo-modal-scrim" onClick={onClose} aria-label="Close IPO detail panel"/>
   <aside ref={panelRef} className="ipo-detail-panel" role="dialog" aria-modal="true" aria-label={ipo.name+" IPO details"}>
    <div className="ipo-detail-top"><span className="ipo-eyebrow">AHQ / IPO DETAILS</span><button type="button" ref={closeRef} onClick={onClose} className="ipo-detail-close" aria-label="Close details">×</button></div>
    <p className="ipo-detail-segment">{ipo.segment} · {ipo.status.toUpperCase()}</p><h2>{ipo.name}</h2>
    <p className="ipo-detail-sub">Issue details and observed demand. Values may be delayed; reported GMP is not exchange-verified.</p>
+    {reference&&<p className="ipo-correction">Source checked {dateLabel(IPO_REFERENCE_AS_OF)}: {reference.note} <a href={reference.sourceUrl} target="_blank" rel="noopener noreferrer">View primary reference ↗</a></p>}
    <div className="ipo-detail-grid">
     <Fact label="Price band">{ipo.priceBand||"—"}</Fact><Fact label="Minimum application">{rupees(ipo.minimumInvestment)}</Fact>
     <Fact label="Issue size">{number(ipo.issueSize)===null?"—":"₹"+plain(ipo.issueSize)+" Cr"}</Fact>
     <Fact label="Overall demand">{times(ipo.subscription)}</Fact>
     <Fact label="Opening date">{dateLabel(ipo.open)}</Fact><Fact label="Closing date">{dateLabel(ipo.close)}</Fact>
     <Fact label="Listing date">{dateLabel(ipo.listingDate)}</Fact><Fact label="Reported GMP"><Gmp ipo={ipo} showPercent={false}/></Fact>
+     {number(ipo.listingPrice)!==null&&<Fact label="Actual debut price">{rupees(ipo.listingPrice)}</Fact>}
    </div>
    {loading?<p className="ipo-detail-state" role="status">Loading available subscription categories and GMP history…</p>:error?<p className="ipo-detail-state" role="alert">{error}</p>:<>
     <section className="ipo-detail-section"><h3>Subscription by investor category</h3>{subs.length?
       <div className="ipo-subscriptions">{subs.map((s,i)=><div className="ipo-subscription" key={s.category+"-"+i}><span>{s.category}</span><strong>{times(s.timesSub)}</strong></div>)}</div>:
       <p className="ipo-detail-muted">Category-wise subscription was not available from the connected feed.</p>}</section>
-    <section className="ipo-detail-section"><h3>Reported GMP history</h3><p className="ipo-detail-muted">Historical grey-market observations, not prices quoted on a regulated exchange.</p>{ipo.gmpDisputed?<p className="ipo-correction">Current GMP is disputed. Historical observations below are not a consensus price.</p>:null}<Chart history={history}/>{history.length===0?<p className="ipo-detail-muted">No reported GMP history available.</p>:null}</section>
+    <section className="ipo-detail-section"><h3>Reported GMP history</h3><p className="ipo-detail-muted">Historical grey-market observations, not prices quoted on a regulated exchange.</p>{lastGmp&&<p className="ipo-gmp-latest">Last recorded observation: <b>{dateLabel(lastGmp.observedAt)}</b> · {rupees(lastGmp.gmp)}{gmpChange!==null&&<> · Change vs previous observation: <b>{gmpChange>0?"+":""}{rupees(gmpChange)}</b></>}. The date does not establish intraday quote freshness.</p>}{ipo.gmpDisputed?<p className="ipo-correction">Current GMP is disputed. Historical observations below are not a consensus price.</p>:null}<Chart history={history}/>{history.length===0?<p className="ipo-detail-muted">No reported GMP history available.</p>:null}</section>
    </>}
    <div className="ipo-detail-sources"><p>For authoritative bid and issue information, verify on the exchanges. Data aggregated by <a href="https://www.xflot.com/ipo" target="_blank" rel="noopener noreferrer">Xflot</a>; GMP is unofficial.</p><div><a href="https://www.nseindia.com/market-data/all-upcoming-issues-ipo" target="_blank" rel="noopener noreferrer">NSE issue details ↗</a><a href="https://www.bseindia.com/markets/PublicIssues/IPOIssues_new.aspx?id=1&Type=p" target="_blank" rel="noopener noreferrer">BSE public issues ↗</a></div></div>
   </aside>
@@ -168,6 +179,7 @@ export default function IpoScreen(){
  },[tab,board,boardError]);
  const actualById=useMemo(()=>Object.fromEntries((board?.rows||[]).map(x=>[x.slug,x])),[board]);
  const today=todayInIndia();
+ const openingSoon=useMemo(()=>[...(buckets?.upcoming||[])].filter(x=>day(x.open)&&daysBetween(today,x.open)>=0&&daysBetween(today,x.open)<=14).sort((a,b)=>a.open.localeCompare(b.open)).slice(0,6),[buckets,today]);
  const soon=useMemo(()=>{
   if(!buckets)return [];
   return [...(buckets.closed||[]),...(buckets.open||[]),...(buckets.upcoming||[])]
@@ -194,8 +206,9 @@ export default function IpoScreen(){
    </div>
    <div className="ipo-metrics" aria-label="IPO coverage counts">
     <Metric label="Open for bidding" value={buckets?plain(buckets.open.length):"—"} note="Date-checked status"/>
-    <Metric label="Announced upcoming" value={buckets?plain(buckets.upcoming.length):"—"} note="Tracked by the feed"/>
-    <Metric label="Closed issues" value={buckets?plain(buckets.closed.length):"—"} note="Not open for bids"/>
+    <Metric label="Announced upcoming" value={buckets?plain(buckets.upcoming.length):"—"} note="Confirmed opening dates"/>
+    <Metric label="Awaiting dates" value={buckets?plain((buckets.pipeline||[]).length):"—"} note="Undated source records"/>
+     <Metric label="Closed issues" value={buckets?plain(buckets.closed.length):"—"} note="Not open for bids"/>
     <Metric label="Recently listed" value={buckets?plain(buckets.listed.length):"—"} note="Recent provider coverage"/>
    </div>
    <div className="ipo-feed-meta" role="status">
@@ -207,7 +220,8 @@ export default function IpoScreen(){
    </div>
    <p className="ipo-feed-caveat">A successful check is not proof that GMP or subscription figures updated at that moment. The source permits a maximum refresh of once per minute; this page follows that limit.</p>
    {error&&<p className="ipo-alert" role="alert">{error}</p>}
-   {meta?.partial&&<p className="ipo-alert">Some source records were duplicated, incomplete or used unrecognized statuses. Counts reflect valid records only.</p>}
+   {meta?.partial&&<p className="ipo-alert">Some source records were duplicated, incomplete or used unrecognized statuses. Counts reflect validated, deduplicated records only.</p>}
+    {meta?.priceAlerts>0&&<p className="ipo-alert">{meta.priceAlerts} implausible or inconsistent issue-price values were withheld pending verification.</p>}
    {soon.length>0&&<section className="ipo-listing-soon"><div className="ipo-listing-title"><span className="ipo-eyebrow">NEXT 7 DAYS</span><h3>Expected listing dates</h3></div><div className="ipo-soon-grid">{soon.map(({ipo,days})=><button type="button" key={ipo.id} data-ahq-event="ipo_issue_opened" onClick={()=>setSelected(ipo)}><strong>{ipo.name}</strong><span>{days===0?"Scheduled today":days===1?"Scheduled tomorrow":"In "+days+" days"} · {dateLabel(ipo.listingDate)}</span></button>)}</div></section>}
    <div className="ipo-controls"><div className="ipo-tabs" role="tablist" aria-label="IPO status">{TABS.map(t=><button type="button" role="tab" aria-selected={tab===t.key} aria-controls="ahq-ipo-results" key={t.key} data-ahq-event={tab===t.key?undefined:"ipo_tab_selected"} onClick={()=>setTab(t.key)} className={tab===t.key?"active":""}>{t.label}<span>{buckets?plain((buckets[t.key]||[]).length):"—"}</span></button>)}</div>
     <div className="ipo-filters"><label className="ipo-search"><span className="sr-only">Search company or ticker</span><input type="search" value={query} onChange={e=>setQuery(e.target.value)} placeholder="Search company or ticker…" aria-label="Search IPOs"/></label>
