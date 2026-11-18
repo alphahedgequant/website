@@ -893,3 +893,163 @@
  .qt-shell .qt-archive-controls input{min-width:0;width:100%}
  .qt-shell .qt-archive-controls label{flex:1 1 45%}
 }
+
+
+/* 2026-11-18 · Quant Terminal fast-reading options flow redesign.
+   Keep scan data factual: colour expresses metric movement, never signed trade flow. */
+.qt-shell .qt-flow-workspace{background:#030508!important;padding:18px clamp(12px,2.1vw,30px) 32px}
+.qt-shell .qt-flow-info{background:#10151e!important;border:1px solid #324052!important;border-radius:10px;padding:15px 18px;gap:12px}
+.qt-shell .qt-flow-info strong{font:700 17px/1.45 "DM Sans",ui-sans-serif,system-ui,sans-serif;color:#fff!important}
+.qt-shell .qt-flow-info span{font-size:14px;line-height:1.5;color:#d1d9e5!important}
+.qt-shell [data-testid="unusual-options-monitor"][data-design="quickscan"]{
+ background:#070a10!important;color:#fff!important;border:1px solid #303947!important;
+ border-radius:16px!important;margin-top:18px!important;padding:clamp(16px,2vw,28px)!important;
+ font-family:"DM Sans",ui-sans-serif,system-ui,sans-serif
+}
+.qt-shell [data-design="quickscan"]>header{
+ display:flex;gap:20px;align-items:flex-start;justify-content:space-between;
+ border-bottom:1px solid #283442!important;padding-bottom:22px
+}
+.qt-shell [data-design="quickscan"]>header h2{font-size:clamp(27px,2.5vw,38px)!important;line-height:1.17;font-weight:750!important;letter-spacing:-.035em;color:#fff!important;margin-top:12px}
+.qt-shell [data-design="quickscan"]>header p:not(:first-child){font-size:15px!important;line-height:1.65!important;color:#d8e2ef!important;max-width:900px}
+.qt-shell [data-design="quickscan"]>header p:first-child{font-size:12px!important;letter-spacing:.08em!important;color:#99b4d5!important}
+.qt-shell [data-design="quickscan"]>header button{
+ background:#171f2c!important;border:1px solid #66748a!important;border-radius:9px!important;
+ min-height:44px;font:700 13px/1.4 "DM Sans",system-ui,sans-serif!important;color:#fff!important;padding:11px 15px!important
+}
+.qt-shell [data-design="quickscan"]>header button:hover{background:#22334e!important;border-color:#85aaf7!important}
+.qt-shell [data-design="quickscan"]>p{font-size:13px!important;line-height:1.75!important;color:#cbd5e1!important}
+.qt-shell [data-design="quickscan"] .ahq-flow-cards{
+ display:grid!important;grid-template-columns:repeat(5,minmax(0,1fr))!important;gap:12px!important;margin:21px 0 18px!important
+}
+.qt-shell [data-design="quickscan"] .ahq-flow-card,
+.qt-shell [data-design="quickscan"] .ahq-flow-coverage{
+ background:#111722!important;border:1px solid #354256!important;
+ border-radius:13px!important;padding:17px!important;min-height:252px;min-width:0;
+ box-shadow:0 3px 18px #0003
+}
+.qt-shell [data-design="quickscan"] .ahq-flow-card h3{
+ font:750 18px/1.35 "DM Sans",ui-sans-serif,system-ui,sans-serif!important;color:#fff!important;letter-spacing:-.01em!important
+}
+.qt-shell [data-design="quickscan"] .ahq-flow-card>div:first-child p{
+ font-size:13px!important;line-height:1.5!important;color:#d2dce9!important;margin-top:8px!important
+}
+.qt-shell [data-design="quickscan"] .ahq-flow-card>div:first-child>span{
+ font-size:11px!important;font-family:"DM Sans",system-ui,sans-serif!important;
+ font-weight:700!important;border-color:#62748b!important;padding:6px 8px!important;color:#eef4fc!important
+}
+.qt-shell [data-design="quickscan"] .ahq-flow-card>p[role=status]{
+ font-size:14px!important;line-height:1.6!important;color:#f0f5fd!important;min-height:0!important;margin-top:15px!important
+}
+.qt-shell [data-design="quickscan"] .ahq-flow-card>div:not(:first-child){font-size:13px!important;line-height:1.5}
+.qt-shell [data-design="quickscan"] .ahq-flow-card .ahq-flow-event{font-size:13px!important;line-height:1.65!important;padding:8px 0!important}
+.qt-shell [data-design="quickscan"] .ahq-flow-card .ahq-flow-event button{font-size:13px!important;font-weight:750!important}
+.qt-shell [data-design="quickscan"] .ahq-flow-card>div:last-of-type span,
+.qt-shell [data-design="quickscan"] .ahq-flow-card>p:last-child{font-size:12px!important;color:#c6d0df!important}
+.qt-shell [data-design="quickscan"] .ahq-flow-coverage{display:flex;flex-direction:column;gap:9px}
+.qt-shell [data-design="quickscan"] .ahq-flow-coverage small{
+ font-size:12px;color:#c5d7f2!important;line-height:1.4;font-weight:750;letter-spacing:.03em
+}
+.qt-shell [data-design="quickscan"] .ahq-flow-coverage>strong{font-size:clamp(28px,2.3vw,37px)!important;line-height:1.1;color:#fff!important;font-variant-numeric:tabular-nums}
+.qt-shell [data-design="quickscan"] .ahq-flow-coverage>span{font-size:13px!important;color:#d2deed!important}
+.qt-shell [data-design="quickscan"] .ahq-flow-coverage>div{
+ margin-top:8px;border-top:1px solid #39475a;padding-top:13px;
+ font-size:13px;line-height:1.7;color:#e6eef9;display:flex;flex-wrap:wrap;column-gap:8px;align-items:baseline
+}
+.qt-shell [data-design="quickscan"] .ahq-flow-coverage b{font-size:18px;color:#fff!important}
+.qt-shell [data-design="quickscan"] .ahq-flow-coverage p{font-size:12px!important;line-height:1.5;color:#bac9dc!important;margin-top:auto}
+.qt-shell [data-design="quickscan"] [aria-label="NSE options unusual moves"]{
+ background:#10141b!important;border:1px solid #354256!important;
+ border-radius:13px!important;padding:clamp(16px,1.7vw,24px)!important
+}
+.qt-shell [data-design="quickscan"] [aria-label="NSE options unusual moves"] h3{
+ font:750 22px/1.3 "DM Sans",ui-sans-serif,system-ui,sans-serif!important;color:#fff!important
+}
+.qt-shell [data-design="quickscan"] [aria-label="NSE options unusual moves"] p{
+ font-size:14px!important;line-height:1.6!important;color:#d3deea!important
+}
+.qt-shell [data-design="quickscan"] [aria-label="NSE options unusual moves"]>div:first-child>div:last-child{
+ font-size:13px!important;font-family:"DM Sans",system-ui,sans-serif!important;font-weight:700!important;color:#ecf4ff!important
+}
+.qt-shell [data-design="quickscan"] [aria-label="NSE options unusual moves"]>div:nth-child(3){
+ background:#151c28!important;border:1px solid #3a4b61!important;
+ padding:15px 17px!important;border-radius:10px!important;font-size:14px!important;gap:12px!important
+}
+.qt-shell [data-design="quickscan"] [aria-label="NSE options unusual moves"]>div:nth-child(3) span{font-size:14px!important;color:#d3deea!important}
+.qt-shell [data-design="quickscan"] [aria-label="NSE options unusual moves"]>div:nth-child(3) button{
+ font-size:17px!important;font-weight:750!important;color:#fff!important
+}
+.qt-shell [data-design="quickscan"] .ahq-flow-explanation{
+ font-size:14px!important;line-height:1.55!important;color:#f2f6fd!important;
+ border-left:3px solid #579aff;padding:9px 13px!important;margin:12px 0 16px!important;background:#152037
+}
+.qt-shell [data-design="quickscan"] .ahq-flow-table-scroll{
+ width:100%;max-width:100%;overflow-x:auto;-webkit-overflow-scrolling:touch;
+ border:1px solid #354357;border-radius:10px
+}
+.qt-shell [data-design="quickscan"] .ahq-flow-table{
+ width:100%;min-width:790px;border-collapse:collapse;
+ font:500 15px/1.5 "DM Sans",ui-sans-serif,system-ui,sans-serif;
+ font-variant-numeric:tabular-nums
+}
+.qt-shell [data-design="quickscan"] .ahq-flow-table th{
+ background:#1c2736!important;color:#ecf3fd!important;
+ font:750 12px/1.4 "DM Sans",system-ui,sans-serif!important;
+ letter-spacing:.025em;padding:14px 13px;text-align:left;white-space:nowrap
+}
+.qt-shell [data-design="quickscan"] .ahq-flow-table td{
+ padding:15px 13px!important;border-top:1px solid #2b3747!important;
+ white-space:nowrap;color:#f3f7fc!important;font-size:15px!important
+}
+.qt-shell [data-design="quickscan"] .ahq-flow-table tr:nth-child(even) td{background:#141b25!important}
+.qt-shell [data-design="quickscan"] .ahq-flow-table tr:hover td{background:#1d3152!important}
+.qt-shell [data-design="quickscan"] .ahq-flow-table button{
+ font:750 15px/1.4 "DM Sans",system-ui,sans-serif!important;background:transparent!important;
+ color:#fff!important;border:0!important;cursor:pointer;text-decoration:underline;text-decoration-color:#648bce;text-underline-offset:4px
+}
+.qt-shell [data-design="quickscan"] .ahq-flow-table .ahq-flow-number{font-variant-numeric:tabular-nums}
+.qt-shell [data-design="quickscan"] .ahq-flow-table .ahq-flow-kind{
+ color:#d7e8ff!important;background:#25384f!important;border:1px solid #486381!important;
+ padding:3px 6px;border-radius:5px;font-size:12px!important;font-weight:750
+}
+.qt-shell [data-design="quickscan"] .ahq-flow-table .ahq-flow-up{
+ color:#3fe38b!important;font-weight:800!important
+}
+.qt-shell [data-design="quickscan"] .ahq-flow-table .ahq-flow-down{
+ color:#ff6e7b!important;font-weight:800!important
+}
+.qt-shell [data-design="quickscan"] .ahq-flow-empty{
+ background:#121c2a!important;color:#e6f0ff!important;
+ border:1px solid #41536e!important;font-size:15px!important;line-height:1.6!important
+}
+.qt-shell .qt-unusual-intro{padding:15px 16px}
+.qt-shell .qt-unusual-intro strong{font-size:15px!important}
+.qt-shell .qt-unusual-intro span,.qt-shell .qt-unusual-caption{font-size:13px!important;line-height:1.6!important;color:#d7e1ef!important}
+.qt-shell .qt-unusual-intro button{font-size:12px!important;min-height:40px;padding:9px 12px}
+.qt-shell .qt-unusual-summary{padding:13px 16px;gap:12px 20px}
+.qt-shell .qt-unusual-summary span{font-size:13px!important}
+.qt-shell .qt-unusual-summary b{font-size:16px!important}
+.qt-shell .qt-unusual-scroll table{min-width:540px;font-size:14px!important;font-variant-numeric:tabular-nums}
+.qt-shell .qt-unusual-scroll th{font-size:12px!important;padding:11px 12px!important}
+.qt-shell .qt-unusual-scroll td{font-size:14px!important;padding:12px!important}
+.qt-shell .qt-archive-head p:not(.qt-archive-kicker){font-size:14px!important}
+.qt-shell .qt-archive-scroll table{font-size:14px!important}
+.qt-shell .qt-archive-scroll th{font-size:12px!important;padding:13px 12px!important}
+.qt-shell .qt-archive-scroll td{font-size:14px!important;padding:13px 12px!important}
+.qt-shell .qt-archive-controls label{font-size:14px}
+.qt-shell .qt-archive-caption{font-size:12px;line-height:1.7}
+@media(max-width:1500px){
+ .qt-shell [data-design="quickscan"] .ahq-flow-cards{grid-template-columns:repeat(3,minmax(0,1fr))!important}
+}
+@media(max-width:960px){
+ .qt-shell [data-design="quickscan"] .ahq-flow-cards{grid-template-columns:repeat(2,minmax(0,1fr))!important}
+ .qt-shell [data-design="quickscan"]>header{flex-wrap:wrap}
+}
+@media(max-width:620px){
+ .qt-shell .qt-flow-workspace{padding:10px!important}
+ .qt-shell [data-design="quickscan"] .ahq-flow-cards{grid-template-columns:1fr!important}
+ .qt-shell [data-design="quickscan"] .ahq-flow-card,.qt-shell [data-design="quickscan"] .ahq-flow-coverage{min-height:0}
+ .qt-shell [data-design="quickscan"]>header h2{font-size:28px!important}
+ .qt-shell [data-design="quickscan"]>header button{flex:1 1 130px}
+ .qt-shell [data-design="quickscan"] .ahq-flow-table td{padding:12px 10px!important}
+}
