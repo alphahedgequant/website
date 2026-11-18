@@ -7,8 +7,8 @@ const CORE=[
   {id:"BANKNIFTY",label:"BANK NIFTY",desc:"Bank index options · unusual volatility and delta shifts"},
 ];
 const COMMODITIES=[
-  {id:"CRUDEOIL",label:"CRUDE OIL",desc:"MCX options · independent Greeks feed required"},
-  {id:"GOLD",label:"GOLD",desc:"MCX options · independent Greeks feed required"},
+  {id:"CRUDEOIL",label:"CRUDEOIL",kind:"MCX",desc:"MCX options · independent Greeks feed required"},
+  {id:"GOLD",label:"GOLD",kind:"MCX",desc:"MCX options · independent Greeks feed required"},
 ];
 const DEFAULT_SYMBOLS=["RELIANCE","HDFCBANK","ICICIBANK","INFY","TCS","SBIN","ITC","LT","AXISBANK","BHARTIARTL","MARUTI","BAJFINANCE","TATAMOTORS","SUNPHARMA","ADANIENT","HINDALCO"];
 const PACE_MS=15_000, RECENT_MS=5*60_000;
