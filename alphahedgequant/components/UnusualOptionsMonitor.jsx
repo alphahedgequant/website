@@ -28,10 +28,21 @@ function EventRow({event,onOpen}){
     <span className="text-slate-300">{nowIST(event.observedAt)} IST</span>
   </div>;
 }
+function MarketRow({event,onOpen}){
+  const move=Number.isFinite(event.relative)?(event.direction==="UP"?"+":"−")+(event.relative*100).toFixed(2)+"%":(event.direction==="UP"?"+":"")+numericDisplay(event.change);
+  return <tr data-event-metric={event.metric}>
+    <td><button type="button" onClick={()=>onOpen(event.symbol)} title={"Open "+event.symbol+" option chain"}>{event.symbol} ↗</button></td>
+    <td className="ahq-flow-number">{numericDisplay(event.strike,2)} <span className="ahq-flow-kind">{event.kind}</span></td>
+    <td>{event.label}</td><td className="ahq-flow-number">{numericDisplay(event.previous)}</td>
+    <td className="ahq-flow-number">{numericDisplay(event.current)}</td>
+    <td><span className={event.direction==="UP"?"ahq-flow-up":"ahq-flow-down"}>{event.direction==="UP"?"↑":"↓"} {move}</span></td>
+    <td className="ahq-flow-number">{nowIST(event.observedAt)}</td>
+  </tr>;
+}
 function Card({label,description,kind,error,last,events,onOpen,children,checked}){
   const top=events?.[0]||null;
   const status = kind==="MCX"?"NOT CONNECTED":error?"NO DATA":last?"OBSERVING":"AWAITING BASELINE";
-  return <section className="rounded-xl border border-white/15 bg-[#102847] p-4 sm:p-5 flex flex-col min-h-[270px]" aria-label={label+" unusual options movements"} data-unusual-card={label}>
+  return <section className="ahq-flow-card rounded-xl border border-white/15 bg-[#102847] p-4 sm:p-5 flex flex-col min-h-[240px]" aria-label={label+" unusual options movements"} data-unusual-card={label}>
     <div className="flex justify-between gap-3 items-start">
       <div><h3 className="font-semibold text-white text-base tracking-wide">{label}</h3><p className="text-slate-200 text-xs mt-1">{description}</p></div>
       <span className={"text-[10px] font-mono border px-2 py-1 rounded shrink-0 "+(error||kind==="MCX"?"border-red-900/60 text-red-300":top?"border-emerald-700/60 text-emerald-300":"border-white/20 text-slate-100")}>{status}</span>
@@ -40,8 +51,8 @@ function Card({label,description,kind,error,last,events,onOpen,children,checked}
       {top ? top.explanation :
         kind==="MCX" ? "Upstox's standard option-chain endpoint excludes MCX. No crude or gold Greeks will be invented; an MCX contract-level V3 Greeks subscription must be integrated first." :
         error ? error :
-        last ? "Watching observed changes across successive quotes. A new snapshot is not, by itself, an unusual movement." :
-        "Waiting for a usable option-chain response. Two distinct observations are needed before any change can be assessed."}
+        last ? "Observing changes across successive option-chain snapshots." :
+        "Waiting for two valid option-chain observations."}
     </p>
     {top&&<div className={"mt-3 rounded-lg border px-3 py-2 text-sm "+(top.direction==="UP"?"border-emerald-800/40 bg-emerald-950/20":"border-red-900/40 bg-red-950/20")}>
       <span className="font-semibold text-white">{top.label} {top.direction==="UP"?"spike ↑":"drop ↓"}</span>
@@ -124,17 +135,22 @@ export default function UnusualOptionsMonitor({selectedTicker="NIFTY",stockOptio
   const eventsFor=(symbol)=>fresh.filter(e=>e.symbol===symbol).sort((a,b)=>b.score-a.score);
   const marketEvents=fresh.filter(e=>e.symbol!=="NIFTY"&&e.symbol!=="BANKNIFTY").sort((a,b)=>b.score-a.score);
   const activeMarket=isNseSession();
-  return <section className="mt-6 rounded-2xl bg-[#091c35] border border-white/15 p-4 md:p-6 text-white" aria-label="Unusual options movements scanner" data-testid="unusual-options-monitor">
+  return <section className="mt-6 rounded-2xl bg-[#091c35] border border-white/15 p-4 md:p-6 text-white" aria-label="Unusual options movements scanner" data-testid="unusual-options-monitor" data-design="quickscan">
     <header className="flex flex-wrap gap-4 justify-between items-start border-b border-white/10 pb-5">
       <div><p className="text-xs tracking-widest font-mono text-slate-200">ALPHAHEDGEQUANT / OPTIONS INTELLIGENCE</p>
-      <h2 className="mt-2 text-2xl font-semibold tracking-tight">Unusual Options Movements</h2>
-      <p className="mt-2 text-sm text-slate-200 max-w-[760px]">Look for sudden changes in delta, gamma, theta, vega, IV, option LTP or open interest between actual option-chain responses. Green means a metric rose; red means it fell — neither is automatically a LONG or SHORT signal.</p></div>
+      <h2 className="mt-2 text-2xl font-semibold tracking-tight">Unusual Options Flow</h2>
+      <p className="mt-2 text-sm text-slate-200 max-w-[760px]">Track large changes in option Greeks, implied volatility, premium and open interest. Colours indicate metric changes, not buy or sell signals.</p></div>
       <div className="flex gap-2 flex-wrap">
         <button type="button" aria-pressed={auto} onClick={()=>setAuto(v=>!v)} className={"rounded border px-3 py-2 text-xs font-mono "+(auto?"border-emerald-700 text-emerald-300":"border-white/20 text-slate-100")}>{auto?"AUTO ON · 15s":"AUTO OFF"}</button>
         <button type="button" onClick={()=>setPulse(n=>n+1)} className="rounded border border-white/25 px-3 py-2 text-xs font-mono hover:bg-white/10">REFRESH NOW ↻</button>
       </div>
     </header>
     <p className="text-xs mt-4 text-slate-200">{activeMarket?"NSE regular hours (holidays not verified).":"Outside regular NSE hours; manual refresh available."} Monitoring runs only while this tab is open. It requires two distinct responses and is not a persisted, exchange-certified tick feed.</p>
+    <div className="ahq-flow-cards grid grid-cols-1 gap-3 mt-4">
+      {CORE.map(item=><Card key={item.id} label={item.label} description={item.desc} error={status[item.id]?.error} last={status[item.id]?.last} events={eventsFor(item.id)} onOpen={openChain}/>)}
+      {COMMODITIES.map(item=><Card key={item.id} label={item.label} description={item.desc} kind="MCX" onOpen={openChain}/>)}
+      <div className="ahq-flow-coverage"><small>ALL NSE F&O · ROLLING SAMPLE</small><strong>{candidates.length}</strong><span>candidate symbols</span><div><b>{seenCount}</b> chains observed <b>{unsupportedCount}</b> unavailable</div><p>Partial NSE F&O coverage — not a market-wide ranking.</p></div>
+    </div>
     <div className="mt-5 rounded-xl border border-white/15 bg-[#102847] p-4 sm:p-5" aria-label="NSE options unusual moves">
       <div className="flex flex-wrap justify-between items-start gap-3">
         <div><h3 className="font-semibold text-white">NSE F&O · Unusual Movers</h3>
@@ -149,14 +165,13 @@ export default function UnusualOptionsMonitor({selectedTicker="NIFTY",stockOptio
         {eventsFor(selectedTicker).length>0&&<span className="font-semibold text-emerald-400">{eventsFor(selectedTicker).length} recent metric movements</span>}
       </div>
       {marketEvents.length ? <div className="mt-4">
-        <p className="text-sm text-white mb-2">{marketEvents[0].explanation}</p>
-        {marketEvents.slice(0,15).map(e=><EventRow key={e.id} event={e} onOpen={openChain}/>)}
-      </div> : <div className="mt-5 rounded-lg border border-white/10 p-5 text-center text-slate-200 text-sm">No qualifying options movements observed in the sampled feed yet. This is not a market-wide “no signal” conclusion.</div>}
+        <p className="ahq-flow-explanation">{marketEvents[0].explanation}</p>
+        <div className="ahq-flow-table-scroll"><table className="ahq-flow-table" aria-label="Recently observed NSE options metric movements">
+          <thead><tr><th scope="col">SYMBOL</th><th scope="col">STRIKE / TYPE</th><th scope="col">METRIC</th><th scope="col">PREVIOUS</th><th scope="col">CURRENT</th><th scope="col">CHANGE</th><th scope="col">OBSERVED · IST</th></tr></thead>
+          <tbody>{marketEvents.slice(0,20).map(e=><MarketRow key={e.id} event={e} onOpen={openChain}/>)}</tbody>
+        </table></div>
+      </div> : <div className="ahq-flow-empty mt-5 rounded-lg border border-white/10 p-5 text-center text-slate-200 text-sm">No qualifying options movements observed in the sampled feed yet. This is not a market-wide “no signal” conclusion.</div>}
       <div className="mt-4 text-xs text-slate-300">Click a ticker to open its option chain. Rankings are based on observed percent/absolute changes, not projected profits or order-book trade prints.</div>
-    </div>
-    <div className="grid grid-cols-1 xl:grid-cols-2 gap-3 mt-4">
-      {CORE.map(item=><Card key={item.id} label={item.label} description={item.desc} error={status[item.id]?.error} last={status[item.id]?.last} events={eventsFor(item.id)} onOpen={openChain}/>)}
-      {COMMODITIES.map(item=><Card key={item.id} label={item.label} description={item.desc} kind="MCX" onOpen={openChain}/>)}
     </div>
     <p className="mt-4 text-[11px] leading-relaxed text-slate-300">Detection rules: IV ≥15% relative and ≥0.002 provider units; Delta ≥0.08; Gamma ≥40%; Theta/Vega ≥40%; option LTP ≥20% and ≥₹1; OI ≥12% and ≥100. Same-expiry, same-strike comparisons only, within 150 seconds. Metric units are preserved from Upstox. Alert timestamps are local observation times unless the upstream explicitly provides an exchange timestamp. Alerts expire after five minutes. Trading or institutional intent cannot be inferred from these readings alone.</p>
   </section>;
