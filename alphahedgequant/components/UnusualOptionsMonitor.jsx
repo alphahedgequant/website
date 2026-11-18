@@ -19,60 +19,55 @@ function isNseSession(){
   const mins=Number(parts.hour)*60+Number(parts.minute);
   return parts.weekday!=="Sat"&&parts.weekday!=="Sun"&&mins>=555&&mins<930;
 }
-function EventRow({event,onOpen}){
-  return <div className="flex flex-wrap gap-x-3 gap-y-1 items-center border-b border-white/10 py-2 last:border-b-0 text-xs" data-event-metric={event.metric}>
-    <button type="button" onClick={()=>onOpen(event.symbol)} className="font-semibold text-white hover:underline focus-visible:outline focus-visible:outline-2 focus-visible:outline-white" title={"Open "+event.symbol+" option chain"}>{event.symbol} ↗</button>
-    <span className="text-slate-100 font-mono">{numericDisplay(event.strike,2)} {event.kind}</span>
-    <span className={"font-bold "+(event.direction==="UP"?"text-emerald-400":"text-red-400")}>{event.label} {event.direction==="UP"?"↑":"↓"}</span>
-    <span className="text-slate-100 font-mono">{numericDisplay(event.previous)} → {numericDisplay(event.current)}</span>
-    <span className="text-slate-300">{nowIST(event.observedAt)} IST</span>
-  </div>;
+
+const pctMove=e=>!e?"—":Number.isFinite(e.relative)?(e.direction==="UP"?"+":"−")+(e.relative*100).toFixed(1)+"%":(e.direction==="UP"?"+":"")+numericDisplay(e.change);
+const numberOrDash=(v,dec=2)=>v===null||v===undefined||!Number.isFinite(Number(v))?"—":Number(v).toLocaleString("en-IN",{maximumFractionDigits:dec});
+function FlowGlyph({type}){
+  const paths={
+    NIFTY:<><rect x="4" y="12" width="3" height="7" rx=".7"/><rect x="10.5" y="8" width="3" height="11" rx=".7"/><rect x="17" y="4" width="3" height="15" rx=".7"/></>,
+    BANKNIFTY:<><path d="M3 9l9-5 9 5M4 20h16M5 11v7m4-7v7m6-7v7m4-7v7"/></>,
+    CRUDEOIL:<path d="M12 2c-2 4-7 9-7 13a7 7 0 0 0 14 0c0-4-5-9-7-13Z"/>,
+    GOLD:<><path d="m7 6 10 0 4 6-9 9L3 12Z"/><path d="M3 12h18M7 6l5 6 5-6M12 12v9"/></>,
+    ALL:<><rect x="4" y="4" width="16" height="5" rx="1"/><rect x="6" y="11" width="14" height="4" rx="1"/><rect x="8" y="17" width="12" height="4" rx="1"/></>
+  };
+  return <span className="ahq2-icon"><svg viewBox="0 0 24 24" width="23" height="23" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" fill="none" aria-hidden="true">{paths[type]||paths.ALL}</svg></span>;
 }
-function MarketRow({event,onOpen}){
-  const move=Number.isFinite(event.relative)?(event.direction==="UP"?"+":"−")+(event.relative*100).toFixed(2)+"%":(event.direction==="UP"?"+":"")+numericDisplay(event.change);
-  return <tr data-event-metric={event.metric}>
-    <td><button type="button" onClick={()=>onOpen(event.symbol)} title={"Open "+event.symbol+" option chain"}>{event.symbol} ↗</button></td>
-    <td className="ahq-flow-number">{numericDisplay(event.strike,2)} <span className="ahq-flow-kind">{event.kind}</span></td>
-    <td>{event.label}</td><td className="ahq-flow-number">{numericDisplay(event.previous)}</td>
-    <td className="ahq-flow-number">{numericDisplay(event.current)}</td>
-    <td><span className={event.direction==="UP"?"ahq-flow-up":"ahq-flow-down"}>{event.direction==="UP"?"↑":"↓"} {move}</span></td>
-    <td className="ahq-flow-number">{nowIST(event.observedAt)}</td>
+function InstrumentCard({item,state,events}){
+  const connected=item.kind!=="MCX", last=state?.last, top=events[0], error=state?.error;
+  const feed=connected?(error?"Unavailable":last?"Observing":"Waiting"):"No MCX feed";
+  return <article className="ahq2-instrument" aria-label={item.label+" unusual options movements"} data-unusual-card={item.label}>
+    <div className="ahq2-instrument-head">
+      <FlowGlyph type={item.id}/><div className="ahq2-instrument-title"><h3>{item.label}</h3><span className="ahq2-feed" data-state={last?"ok":error?"error":"waiting"}>{feed}</span></div>
+    </div>
+    <div className="ahq2-instrument-value">{last?numberOrDash(last.spot,2):"—"}<small>{connected?"Underlying spot · latest snapshot":"Awaiting verified MCX options feed"}</small></div>
+    <div className="ahq2-instrument-stats">
+      <div><small>TOP METRIC</small><strong>{top?top.label:"—"}</strong></div>
+      <div><small>CHANGE</small><strong className={top?.direction==="UP"?"ahq2-up":top?.direction==="DOWN"?"ahq2-down":""}>{top?pctMove(top):"—"}</strong></div>
+      <div><small>MOVEMENTS</small><strong>{events.length||"0"}</strong></div>
+    </div>
+    {top?<p className="ahq2-card-foot">{numberOrDash(top.strike,2)} {top.kind} · {nowIST(top.observedAt)} IST</p>:<p className="ahq2-card-foot">{connected?(error?short(error,72):last?"No qualifying change in this sample":"Two snapshots needed to compare"):"No option-chain Greeks are being inferred"}</p>}
+  </article>;
+}
+function MovementRow({event,selected,onSelect,onOpen}){
+  const statusName=event.metric==="iv"?(event.direction==="UP"?"IV rise":"IV fall"):event.metric==="oi"?"OI shift":event.metric==="ltp"?"Premium move":"Greek shift";
+  return <tr className={selected?"ahq2-selected":""} data-event-metric={event.metric}>
+    <td><button type="button" className="ahq2-symbol-link" onClick={()=>onOpen(event.symbol)} title={"Open "+event.symbol+" option chain"}>{event.symbol} ↗</button></td>
+    <td className="ahq2-num">{numberOrDash(event.strike,2)}</td>
+    <td><span className={"ahq2-kind "+(event.kind==="PE"?"put":"call")}>{event.kind}</span></td>
+    <td>{event.label}</td>
+    <td className="ahq2-num">{numericDisplay(event.previous)}</td>
+    <td className="ahq2-num">{numericDisplay(event.current)}</td>
+    <td className={event.direction==="UP"?"ahq2-up":"ahq2-down"}><strong>{pctMove(event)}</strong></td>
+    <td className="ahq2-num">{nowIST(event.observedAt)}</td>
+    <td><button type="button" className="ahq2-row-select" aria-pressed={selected} onClick={()=>onSelect(event.id)}>{selected?"Selected":"Inspect"}</button><span className="ahq2-sr-only"> {statusName}</span></td>
   </tr>;
 }
-function Card({label,description,kind,error,last,events,onOpen,children,checked}){
-  const top=events?.[0]||null;
-  const status = kind==="MCX"?"NOT CONNECTED":error?"NO DATA":last?"OBSERVING":"AWAITING BASELINE";
-  return <section className="ahq-flow-card rounded-xl border border-white/15 bg-[#102847] p-4 sm:p-5 flex flex-col min-h-[240px]" aria-label={label+" unusual options movements"} data-unusual-card={label}>
-    <div className="flex justify-between gap-3 items-start">
-      <div><h3 className="font-semibold text-white text-base tracking-wide">{label}</h3><p className="text-slate-200 text-xs mt-1">{description}</p></div>
-      <span className={"text-[10px] font-mono border px-2 py-1 rounded shrink-0 "+(error||kind==="MCX"?"border-red-900/60 text-red-300":top?"border-emerald-700/60 text-emerald-300":"border-white/20 text-slate-100")}>{status}</span>
-    </div>
-    <p className="mt-4 text-sm leading-relaxed text-white min-h-[48px]" role="status">
-      {top ? top.explanation :
-        kind==="MCX" ? "Upstox's standard option-chain endpoint excludes MCX. No crude or gold Greeks will be invented; an MCX contract-level V3 Greeks subscription must be integrated first." :
-        error ? error :
-        last ? "Observing changes across successive option-chain snapshots." :
-        "Waiting for two valid option-chain observations."}
-    </p>
-    {top&&<div className={"mt-3 rounded-lg border px-3 py-2 text-sm "+(top.direction==="UP"?"border-emerald-800/40 bg-emerald-950/20":"border-red-900/40 bg-red-950/20")}>
-      <span className="font-semibold text-white">{top.label} {top.direction==="UP"?"spike ↑":"drop ↓"}</span>
-      <span className="ml-2 font-mono text-white">{numericDisplay(top.previous)} → {numericDisplay(top.current)}</span>
-      <p className="text-[11px] mt-1 text-slate-200">{top.strike} {top.kind} · {nowIST(top.observedAt)} IST</p>
-    </div>}
-    {events?.length>0&&<div className="mt-3">{events.slice(0,3).map(e=><EventRow key={e.id} event={e} onOpen={onOpen}/>)}</div>}
-    {error&&kind!=="MCX"&&<p className="text-xs text-red-300 mt-3">{short(error,200)}</p>}
-    {kind==="MCX"&&<p className="text-xs text-slate-300 mt-3">This panel will not claim live monitoring without verified MCX instrument keys and Greek quotes.</p>}
-    {children}
-    <div className="mt-auto pt-4 flex justify-between gap-3 text-[10px] text-slate-300 font-mono">
-      <span>{last?("Expiry "+last.expiry):"No confirmed option snapshot"}</span>
-      <span>{last?("Observed "+nowIST(last.observedAt)+" IST"):"—"}</span>
-    </div>
-    {last&&last.timestampKind!=="EXCHANGE_REPORTED"&&<p className="text-[10px] text-slate-300 mt-1">Backend-snapshot comparison; per-contract exchange-tick time is unavailable.</p>}
-  </section>;
-}
+
 export default function UnusualOptionsMonitor({selectedTicker="NIFTY",stockOptions=[],onOpenChain}){
   const [auto,setAuto]=useState(true),[pulse,setPulse]=useState(0),[now,setNow]=useState(Date.now());
   const [status,setStatus]=useState({}),[alerts,setAlerts]=useState([]),[checked,setChecked]=useState({});
+  const [selectedEventId,setSelectedEventId]=useState("");
+  const [metricFilter,setMetricFilter]=useState("ALL");
   const snapshots=useRef(new Map()),scanCursor=useRef(0),scanBatch=useRef([]),scanPhase=useRef(0);
   const candidates=useMemo(()=>{
     const fromFeed=stockOptions.filter(x=>x&&typeof x.symbol==="string"&&/^[A-Z0-9._-]{1,40}$/.test(x.symbol)).map(x=>x.symbol);
@@ -95,7 +90,7 @@ export default function UnusualOptionsMonitor({selectedTicker="NIFTY",stockOptio
       const prev=snapshots.current.get(symbol);
       const movements=compareSnapshots(prev,snap);
       snapshots.current.set(symbol,snap);
-      setStatus(s=>({...s,[symbol]:{last:{...snap,options:undefined},error:null}}));
+      setStatus(s=>({...s,[symbol]:{last:{...snap,options:undefined},contracts:[...snap.options.values()],spotDiff:prev?.spot>0?snap.spot-prev.spot:null,error:null}}));
       setChecked(s=>({...s,[symbol]:"observed"}));
       if(movements.length) setAlerts(a=>{
         const ids=new Set(a.map(x=>x.id));
@@ -131,48 +126,116 @@ export default function UnusualOptionsMonitor({selectedTicker="NIFTY",stockOptio
     return()=>{active=false;clearTimeout(timer);controller.abort();};
   },[auto,pulse,selectedTicker,candidates,fetchOne]);
   useEffect(()=>{const id=setInterval(()=>setNow(Date.now()),PACE_MS);return()=>clearInterval(id);},[]);
+
   const fresh=alerts.filter(e=>now-e.observedAt<RECENT_MS);
-  const eventsFor=(symbol)=>fresh.filter(e=>e.symbol===symbol).sort((a,b)=>b.score-a.score);
-  const marketEvents=fresh.filter(e=>e.symbol!=="NIFTY"&&e.symbol!=="BANKNIFTY").sort((a,b)=>b.score-a.score);
+  const eventsFor=symbol=>fresh.filter(e=>e.symbol===symbol).sort((a,b)=>b.score-a.score);
+  const marketEvents=[...fresh].sort((a,b)=>b.score-a.score||b.observedAt-a.observedAt);
+  const visibleEvents=marketEvents.filter(e=>metricFilter==="ALL"||(metricFilter==="IV"&&e.metric==="iv")||(metricFilter==="GREEKS"&&["delta","gamma","theta","vega"].includes(e.metric))||(metricFilter==="OI_PRICE"&&["oi","ltp"].includes(e.metric)));
+  const inspected=marketEvents.find(e=>e.id===selectedEventId)||eventsFor(selectedTicker)[0]||marketEvents[0]||null;
+  const detailSymbol=inspected?.symbol||selectedTicker;
+  const detailSnapshot=status[detailSymbol]?.last||null;
+  const detailContract=inspected?status[detailSymbol]?.contracts?.find(c=>c.strike===inspected.strike&&c.kind===inspected.kind):status[detailSymbol]?.contracts?.[0];
+  const detailTitle=inspected?detailSymbol+" "+numberOrDash(inspected.strike,2)+" "+inspected.kind:detailSymbol;
+  const detailMetrics=[
+    ["DELTA",detailContract?.delta,4],["GAMMA",detailContract?.gamma,6],["THETA",detailContract?.theta,4],
+    ["VEGA",detailContract?.vega,4],["IV",detailContract?.iv,2],["OPEN INTEREST",detailContract?.oi,0],["OPTION LTP",detailContract?.ltp,2]
+  ];
+  const ivRises=fresh.filter(e=>e.metric==="iv"&&e.direction==="UP").length;
+  const ivFalls=fresh.filter(e=>e.metric==="iv"&&e.direction==="DOWN").length;
+  const greekShifts=fresh.filter(e=>["delta","gamma","theta","vega"].includes(e.metric)).length;
+  const topIv=[...marketEvents].filter(e=>e.metric==="iv").sort((a,b)=>(b.relative||0)-(a.relative||0))[0];
+  const topMovement=marketEvents[0]||null;
+  const bySymbol=marketEvents.reduce((m,e)=>(m[e.symbol]=(m[e.symbol]||0)+1,m),{});
+  const mostActive=Object.entries(bySymbol).sort((a,b)=>b[1]-a[1])[0];
   const activeMarket=isNseSession();
-  return <section className="mt-6 rounded-2xl bg-[#091c35] border border-white/15 p-4 md:p-6 text-white" aria-label="Unusual options movements scanner" data-testid="unusual-options-monitor" data-design="quickscan">
-    <header className="flex flex-wrap gap-4 justify-between items-start border-b border-white/10 pb-5">
-      <div><p className="text-xs tracking-widest font-mono text-slate-200">ALPHAHEDGEQUANT / OPTIONS INTELLIGENCE</p>
-      <h2 className="mt-2 text-2xl font-semibold tracking-tight">Unusual Options Flow</h2>
-      <p className="mt-2 text-sm text-slate-200 max-w-[760px]">Track large changes in option Greeks, implied volatility, premium and open interest. Colours indicate metric changes, not buy or sell signals.</p></div>
-      <div className="flex gap-2 flex-wrap">
-        <button type="button" aria-pressed={auto} onClick={()=>setAuto(v=>!v)} className={"rounded border px-3 py-2 text-xs font-mono "+(auto?"border-emerald-700 text-emerald-300":"border-white/20 text-slate-100")}>{auto?"AUTO ON · 15s":"AUTO OFF"}</button>
-        <button type="button" onClick={()=>setPulse(n=>n+1)} className="rounded border border-white/25 px-3 py-2 text-xs font-mono hover:bg-white/10">REFRESH NOW ↻</button>
+  const lastFetched=Math.max(0,...Object.values(status).map(s=>s?.last?.observedAt||0));
+  return <section className="ahq2-flow" data-testid="unusual-options-monitor" aria-label="Unusual options movements scanner">
+    <div className="ahq2-flow-header">
+      <div>
+        <p className="ahq2-eyebrow">ALPHAHEDGEQUANT / QUANT TERMINAL</p>
+        <h2>Unusual Options Flow</h2>
+        <p className="ahq2-subtitle">Large or sudden changes in option Greeks, IV, premium or open interest that may signal unusual activity.</p>
       </div>
-    </header>
-    <p className="text-xs mt-4 text-slate-200">{activeMarket?"NSE regular hours (holidays not verified).":"Outside regular NSE hours; manual refresh available."} Monitoring runs only while this tab is open. It requires two distinct responses and is not a persisted, exchange-certified tick feed.</p>
-    <div className="ahq-flow-cards grid grid-cols-1 gap-3 mt-4">
-      {CORE.map(item=><Card key={item.id} label={item.label} description={item.desc} error={status[item.id]?.error} last={status[item.id]?.last} events={eventsFor(item.id)} onOpen={openChain}/>)}
-      {COMMODITIES.map(item=><Card key={item.id} label={item.label} description={item.desc} kind="MCX" onOpen={openChain}/>)}
-      <div className="ahq-flow-coverage"><small>ALL NSE F&O · ROLLING SAMPLE</small><strong>{candidates.length}</strong><span>candidate symbols</span><div><b>{seenCount}</b> chains observed <b>{unsupportedCount}</b> unavailable</div><p>Partial NSE F&O coverage — not a market-wide ranking.</p></div>
+      <div className="ahq2-header-actions">
+        <button type="button" aria-pressed={auto} onClick={()=>setAuto(v=>!v)} className="ahq2-button">{auto?"◉ Auto Refresh · 15s":"○ Auto Refresh · Off"}</button>
+        <button type="button" onClick={()=>setPulse(v=>v+1)} className="ahq2-button ahq2-button-primary">↻ Refresh Now</button>
+      </div>
     </div>
-    <div className="mt-5 rounded-xl border border-white/15 bg-[#102847] p-4 sm:p-5" aria-label="NSE options unusual moves">
-      <div className="flex flex-wrap justify-between items-start gap-3">
-        <div><h3 className="font-semibold text-white">NSE F&O · Unusual Movers</h3>
-          <p className="text-xs text-slate-200 mt-1">Rolling, rate-limited sample of available NSE symbols. Only F&O-eligible instruments with a successful option-chain response can be scored.</p></div>
-        <div className="text-xs text-slate-100 font-mono">{seenCount} option chains fetched · {unsupportedCount} unavailable · {candidates.length} candidate symbols</div>
-      </div>
-      <p className="text-xs text-slate-200 mt-3 leading-relaxed">This does <strong>not</strong> continuously cover every NSE contract. A complete exchange-wide live ranking requires a dedicated subscribed WebSocket/contract-feed scanner. No comprehensive coverage is implied.</p>
-      <div className="mt-4 flex flex-wrap items-center gap-2 rounded-lg border border-white/10 bg-white/[0.03] px-3 py-3 text-xs">
-        <span className="text-slate-200">SELECTED TICKER</span>
-        <button type="button" onClick={()=>openChain(selectedTicker)} className="font-semibold text-white hover:underline focus-visible:outline-white">{selectedTicker} ↗</button>
-        <span className="text-slate-200">{status[selectedTicker]?.error ? "Feed: "+short(status[selectedTicker].error,140) : status[selectedTicker]?.last ? "Observation captured · "+nowIST(status[selectedTicker].last.observedAt)+" IST" : "Awaiting first observation"}</span>
-        {eventsFor(selectedTicker).length>0&&<span className="font-semibold text-emerald-400">{eventsFor(selectedTicker).length} recent metric movements</span>}
-      </div>
-      {marketEvents.length ? <div className="mt-4">
-        <p className="ahq-flow-explanation">{marketEvents[0].explanation}</p>
-        <div className="ahq-flow-table-scroll"><table className="ahq-flow-table" aria-label="Recently observed NSE options metric movements">
-          <thead><tr><th scope="col">SYMBOL</th><th scope="col">STRIKE / TYPE</th><th scope="col">METRIC</th><th scope="col">PREVIOUS</th><th scope="col">CURRENT</th><th scope="col">CHANGE</th><th scope="col">OBSERVED · IST</th></tr></thead>
-          <tbody>{marketEvents.slice(0,20).map(e=><MarketRow key={e.id} event={e} onOpen={openChain}/>)}</tbody>
-        </table></div>
-      </div> : <div className="ahq-flow-empty mt-5 rounded-lg border border-white/10 p-5 text-center text-slate-200 text-sm">No qualifying options movements observed in the sampled feed yet. This is not a market-wide “no signal” conclusion.</div>}
-      <div className="mt-4 text-xs text-slate-300">Click a ticker to open its option chain. Rankings are based on observed percent/absolute changes, not projected profits or order-book trade prints.</div>
+    <div className="ahq2-market-strip" aria-label="Observed market snapshot indicators">
+      <span className="ahq2-market-label"><i className={activeMarket?"ahq2-live":""}></i>{activeMarket?"NSE HOURS":"NSE SESSION CLOSED"}</span>
+      {CORE.map(item=><div key={item.id} className="ahq2-market-ticker"><b>{item.label}</b><strong>{numberOrDash(status[item.id]?.last?.spot,2)}</strong><small>last sampled spot</small></div>)}
+      <span className="ahq2-market-source">Observed quotes · not exchange tick tape</span>
     </div>
-    <p className="mt-4 text-[11px] leading-relaxed text-slate-300">Detection rules: IV ≥15% relative and ≥0.002 provider units; Delta ≥0.08; Gamma ≥40%; Theta/Vega ≥40%; option LTP ≥20% and ≥₹1; OI ≥12% and ≥100. Same-expiry, same-strike comparisons only, within 150 seconds. Metric units are preserved from Upstox. Alert timestamps are local observation times unless the upstream explicitly provides an exchange timestamp. Alerts expire after five minutes. Trading or institutional intent cannot be inferred from these readings alone.</p>
+    <div className="ahq2-instruments" aria-label="Instrument monitoring summary">
+      {CORE.map(item=><InstrumentCard key={item.id} item={item} state={status[item.id]} events={eventsFor(item.id)}/>)}
+      {COMMODITIES.map(item=><InstrumentCard key={item.id} item={item} state={null} events={[]}/>)}
+      <article className="ahq2-instrument ahq2-all" aria-label="All NSE F&O sampled coverage">
+        <div className="ahq2-instrument-head"><FlowGlyph type="ALL"/><div className="ahq2-instrument-title"><h3>ALL NSE F&O</h3><span className="ahq2-feed">{candidates.length} candidate symbols</span></div></div>
+        <div className="ahq2-all-count"><strong>{marketEvents.length}</strong><small>recent observed movements</small></div>
+        <div className="ahq2-instrument-stats">
+          <div><small>CHAINS</small><strong>{seenCount}</strong></div>
+          <div><small>UNAVAILABLE</small><strong>{unsupportedCount}</strong></div>
+          <div><small>SCANNER</small><strong>Sampled</strong></div>
+        </div>
+        <p className="ahq2-card-foot">Not a complete market-wide ranking</p>
+      </article>
+    </div>
+    <div className="ahq2-main-grid">
+      <div className="ahq2-panel ahq2-board" aria-label="NSE options unusual moves">
+        <div className="ahq2-panel-head">
+          <div className="ahq2-heading-icon"><FlowGlyph type="NIFTY"/><div><h3>NSE F&O Unusual Movers</h3><p>Rolling, rate-limited scan of available NSE F&O option chains.</p></div></div>
+          <span className="ahq2-panel-count">{seenCount} chains · {candidates.length} candidates</span>
+        </div>
+        <div className="ahq2-filters" aria-label="Movement metric filters">
+          {[["ALL","All Metrics"],["IV","IV"],["GREEKS","Greeks"],["OI_PRICE","Premium / OI"]].map(([key,label])=><button key={key} type="button" aria-pressed={metricFilter===key} onClick={()=>setMetricFilter(key)}>{label}</button>)}
+        </div>
+        {visibleEvents.length?<div className="ahq2-table-wrap">
+          <table className="ahq2-table" aria-label="Recent unusual NSE option metric changes">
+            <thead><tr><th>Symbol</th><th>Strike</th><th>Type</th><th>Metric</th><th>Prev</th><th>Current</th><th>Change</th><th>Time · IST</th><th>Details</th></tr></thead>
+            <tbody>{visibleEvents.slice(0,18).map(e=><MovementRow key={e.id} event={e} selected={inspected?.id===e.id} onSelect={setSelectedEventId} onOpen={openChain}/>)}</tbody>
+          </table>
+        </div>:<div className="ahq2-no-alerts" role="status">
+          <strong>{marketEvents.length?"No results for this metric filter":"No qualifying changes in the current sample"}</strong>
+          <p>{marketEvents.length?"Choose All Metrics to see other observations.":"Two distinct snapshots are required. No result does not mean there is no market-wide unusual activity."}</p>
+          {status[selectedTicker]?.error&&<span>Selected feed: {short(status[selectedTicker].error,160)}</span>}
+        </div>}
+        <div className="ahq2-board-foot">Click a ticker to open its chain, or Inspect to view Greeks below. Movements describe metrics—not buyer-initiated trades or directional trading signals.</div>
+      </div>
+      <aside className="ahq2-sidebar">
+        <div className="ahq2-panel ahq2-summary">
+          <div className="ahq2-side-title"><FlowGlyph type="ALL"/><h3>Movement Summary</h3><span>NSE Sample</span></div>
+          <div className="ahq2-summary-tiles">
+            <div><strong className="ahq2-up">{ivRises}</strong><small>IV Rises</small></div>
+            <div><strong className="ahq2-down">{ivFalls}</strong><small>IV Falls</small></div>
+            <div><strong>{greekShifts}</strong><small>Greek Shifts</small></div>
+            <div><strong className="ahq2-blue">{marketEvents.length}</strong><small>Total Alerts</small></div>
+          </div>
+        </div>
+        <div className="ahq2-panel ahq2-snapshot">
+          <div className="ahq2-side-title"><FlowGlyph type="NIFTY"/><h3>Flow Snapshot</h3></div>
+          <div className="ahq2-snapshot-line"><span>Largest metric shift</span><strong>{topMovement?topMovement.label+" "+pctMove(topMovement):"—"}</strong></div>
+          <div className="ahq2-snapshot-line"><span>Largest IV change</span><strong className={topIv?.direction==="UP"?"ahq2-up":topIv?.direction==="DOWN"?"ahq2-down":""}>{topIv?topIv.symbol+" · "+pctMove(topIv):"—"}</strong></div>
+          <div className="ahq2-snapshot-line"><span>Most flagged symbol</span><strong>{mostActive?mostActive[0]:"—"}</strong></div>
+          <div className="ahq2-snapshot-line"><span>Coverage</span><strong>{seenCount} observed / {unsupportedCount} unavailable</strong></div>
+        </div>
+      </aside>
+    </div>
+    <div className="ahq2-detail ahq2-panel" aria-label="Selected option contract Greeks">
+      <div className="ahq2-detail-title">
+        <strong>{detailTitle}</strong><span>{inspected?"UNUSUAL METRIC MOVE":"SNAPSHOT"}</span>
+        <small>{detailSnapshot?"Observed "+nowIST(detailSnapshot.observedAt)+" IST · Expiry "+detailSnapshot.expiry:"Awaiting verified contract data"}</small>
+      </div>
+      <div className="ahq2-detail-metrics">
+        {detailMetrics.map(([name,value,dec])=><div key={name}><small>{name}</small><strong>{numberOrDash(value,dec)}</strong></div>)}
+      </div>
+    </div>
+    <div className="ahq2-data-note">
+      <span>ⓘ NSE scanner covers a rolling sample; MCX options Greeks are not connected. Metric increases and decreases do not establish trade direction.</span>
+      <span>{lastFetched?"● Last observed: "+nowIST(lastFetched)+" IST":"● No verified snapshot yet"}</span>
+    </div>
+    <details className="ahq2-method">
+      <summary>Detection criteria and data limitations</summary>
+      <p>IV ≥15% relative and ≥0.002 provider units; Delta ≥0.08; Gamma ≥40%; Theta/Vega ≥40%; option LTP ≥20% and ≥₹1; OI ≥12% and ≥100. Comparisons use matching expiries and strikes within 150 seconds. Prices and Greek units are passed through from Upstox. Alert timestamps reflect local observation unless the provider supplies exchange timestamps. Alerts expire after five minutes. The scanner runs only while this tab is open; exchange holidays are not verified. No claims of institutionally initiated trades or long/short signals are made.</p>
+    </details>
   </section>;
 }
