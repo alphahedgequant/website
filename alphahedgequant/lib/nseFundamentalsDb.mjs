@@ -1,7 +1,9 @@
 // Shared Neon schema for the public NSE filings dataset.
 // The original filing rows are preserved in JSONB; typed keys support fast lookups.
 let schemaPromise;
-export function ensureNseFundamentalsSchema(sql) {\n  if (schemaPromise) return schemaPromise;\n  schemaPromise = (async () => {
+export function ensureNseFundamentalsSchema(sql) {
+  if (schemaPromise) return schemaPromise;
+  schemaPromise = (async () => {
   await sql`CREATE TABLE IF NOT EXISTS ahq_nse_fundamental_imports (
     import_id TEXT PRIMARY KEY,
     source_workbook TEXT NOT NULL,
