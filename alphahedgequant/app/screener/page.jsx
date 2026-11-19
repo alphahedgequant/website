@@ -415,6 +415,31 @@ export default function Markets() {
     try { setPresets(JSON.parse(localStorage.getItem("ahq_presets") || "[]")); } catch {}
   }, []);
 
+  // Filing-based financial summaries are independent of the live quote provider.
+  // Reporting basis is explicit; standalone values are never silently substituted.
+  useEffect(() => {
+    let alive = true;
+    if (market !== "NSE") {
+      setFinancialRows([]); setFinancialMeta(null); setFinancialStatus("idle");
+      return () => { alive = false; };
+    }
+    setFinancialStatus("loading");
+    fetch("/api/screener/fundamentals?view=summary&basis=" + basis, { cache: "no-store" })
+      .then(async response => {
+        const body = await response.json().catch(() => ({}));
+        if (!response.ok || body.ok !== true) throw new Error(body.error || "Financial dataset unavailable");
+        return body;
+      })
+      .then(body => {
+        if (!alive) return;
+        setFinancialRows(body.status === "ready" && Array.isArray(body.items) ? body.items : []);
+        setFinancialMeta(body.meta || null);
+        setFinancialStatus(body.status === "ready" ? "ready" : body.status === "not_imported" ? "not_imported" : "unavailable");
+      })
+      .catch(() => { if (alive) { setFinancialRows([]); setFinancialMeta(null); setFinancialStatus("unavailable"); } });
+    return () => { alive = false; };
+  }, [market, basis]);
+
   useEffect(() => {
     let alive = true;
     let busy = false;
@@ -443,14 +468,16 @@ export default function Markets() {
         const body = stocksResult.value;
         setRows(body.data);
         setQuoteCheckedAt(body.fetchedAt || null);
-        setStatus(body.stale === true ? "stale" : "live");
+        const hasValidPrice = body.data.some(r => typeof r.price === "number" && r.price > 0);
+        setStatus(body.stale === true ? "stale" : hasValidPrice ? "live" : "financial");
         setMarketError(null);
       } else {
         const err = stocksResult.status === "rejected" ? stocksResult.reason : null;
         setMarketError(err?.code === "UPSTREAM_TIMEOUT" || err?.status === 504 ? "The data request timed out." :
           err?.status === 429 ? "The market provider is rate-limiting requests." :
-          "The data service could not supply a confirmed stock list.");
-        setStatus("error");
+          "The live quote provider could not supply a confirmed stock list.");
+        if (market === "NSE" && financialStatus === "ready" && financialRows.length > 0) setStatus("financial");
+        else setStatus("error");
       }
     }
     load();
@@ -458,7 +485,7 @@ export default function Markets() {
     const onFocus = () => {if(!document.hidden)load();};
     window.addEventListener("focus",onFocus);
     return () => {alive=false;clearTimeout(wake);clearInterval(interval);window.removeEventListener("focus",onFocus);controller.abort();};
-  }, [market, refreshSeq]);
+  }, [market, refreshSeq, financialStatus, financialRows.length]);
 
   const filterDefs = useMemo(() => {
     const d = { descriptive: F.descriptive.map((x) => [...x]), fundamental: F.fundamental.map((x) => [...x]), technical: F.technical.map((x) => [...x]) };
