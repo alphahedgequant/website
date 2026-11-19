@@ -487,10 +487,61 @@ export default function Markets() {
     return () => {alive=false;clearTimeout(wake);clearInterval(interval);window.removeEventListener("focus",onFocus);controller.abort();};
   }, [market, refreshSeq, financialStatus, financialRows.length]);
 
+  const displayRows = useMemo(() => {
+    if (market !== "NSE") return rows.map(r => ({ ...r, sector: r.sector || "Unclassified", industry: r.industry || "Unclassified" }));
+    const bySymbol = new Map();
+    for (const f of financialRows) {
+      const financialsAvailable = (f.quarterlyCount || 0) + (f.annualCount || 0) + (f.balanceCount || 0) + (f.cashFlowCount || 0) > 0;
+      bySymbol.set(f.symbol, {
+        symbol: f.symbol, name: f.name || f.symbol, sector: "Unclassified", industry: "Unclassified", country: "India",
+        marketCap: null, pe: null, fwdPe: null, peg: null, ps: null, pb: null, evEbitda: null,
+        price: null, change: null, changePct: null, volume: null, open: null, high: null, low: null, prevClose: null,
+        dividend: null, beta: null, targetPrice: null, sma50: null, sma200: null, high52w: null, low52w: null,
+        roe: f.roeTTMPct, roa: f.roaTTMPct, debtEquity: f.debtEquity, grossMargin: null, operatingMargin: null,
+        netMargin: f.netProfitMarginTTMPct, revenueGrowth: f.revenueGrowthTTMPct, earningsGrowth: f.epsGrowthTTMPct,
+        netProfitGrowth: f.netProfitGrowthTTMPct, revenueTTM: f.revenueTTM, netProfitTTM: f.netProfitTTM,
+        epsTTM: f.epsBasicTTM, currentRatio: f.currentRatio, totalBorrowings: f.totalBorrowings,
+        cash: f.cash, totalAssets: f.totalAssets, cfoYtd: f.cfoYtd, cfiYtd: f.cfiYtd, cffYtd: f.cffYtd, capexYtd: f.capexYtd,
+        latestQuarterPeriod: f.latestQuarterPeriod, latestAnnualPeriod: f.latestAnnualPeriod,
+        latestBalancePeriod: f.latestBalancePeriod, latestCashFlowPeriod: f.latestCashFlowPeriod,
+        filingCount: f.filingCount, latestFilingAt: f.latestFilingAt, latestFilingUrl: f.latestFilingUrl,
+        latestFilingParsed: f.latestFilingParsed, latestQuarterFirstPublicAt: f.latestQuarterFirstPublicAt,
+        latestQuarterVersions: f.latestQuarterVersions, basis: f.basis, financialsAvailable, financials: f,
+        financialSource: f.source || "NSE filings workbook", priceSrc: "Unavailable"
+      });
+    }
+    for (const q of rows) {
+      const prev = bySymbol.get(q.symbol) || { symbol: q.symbol, name: q.name || q.symbol, country: "India", financialsAvailable: false };
+      const price = typeof q.price === "number" && q.price > 0 ? q.price : null;
+      const eps = prev.epsTTM;
+      const derivedPe = price && eps > 0 ? price / eps : null;
+      bySymbol.set(q.symbol, {
+        ...prev, ...q,
+        sector: q.sector || "Unclassified", industry: q.industry || "Unclassified",
+        classificationStatus: q.classificationStatus || "unclassified",
+        classificationProvider: q.classificationProvider || null,
+        // NSE financial ratios stay on the selected workbook basis; no Yahoo basis substitution.
+        roe: prev.financialsAvailable ? prev.roe : null,
+        roa: prev.financialsAvailable ? prev.roa : null,
+        debtEquity: prev.financialsAvailable ? prev.debtEquity : null,
+        netMargin: prev.financialsAvailable ? prev.netMargin : null,
+        revenueGrowth: prev.financialsAvailable ? prev.revenueGrowth : null,
+        earningsGrowth: prev.financialsAvailable ? prev.earningsGrowth : null,
+        netProfitGrowth: prev.financialsAvailable ? prev.netProfitGrowth : null,
+        currentRatio: prev.financialsAvailable ? prev.currentRatio : null,
+        revenueTTM: prev.revenueTTM ?? null, netProfitTTM: prev.netProfitTTM ?? null, epsTTM: prev.epsTTM ?? null,
+        totalBorrowings: prev.totalBorrowings ?? null, cash: prev.cash ?? null, totalAssets: prev.totalAssets ?? null,
+        cfoYtd: prev.cfoYtd ?? null, cfiYtd: prev.cfiYtd ?? null, cffYtd: prev.cffYtd ?? null, capexYtd: prev.capexYtd ?? null,
+        pe: q.pe ?? derivedPe, peSource: q.pe != null ? "Yahoo Finance" : derivedPe != null ? "AHQ derived · price / TTM EPS" : null
+      });
+    }
+    return [...bySymbol.values()];
+  }, [rows, financialRows, market]);
+
   const filterDefs = useMemo(() => {
     const d = { descriptive: F.descriptive.map((x) => [...x]), fundamental: F.fundamental.map((x) => [...x]), technical: F.technical.map((x) => [...x]) };
-    d.descriptive[0][2] = ["Any", ...new Set(rows.map((r) => r.sector).filter(Boolean))].sort((a, b) => (a === "Any" ? -1 : b === "Any" ? 1 : a.localeCompare(b)));
-    d.descriptive[1][2] = ["Any", ...new Set(rows.map((r) => r.industry).filter(Boolean))].sort((a, b) => (a === "Any" ? -1 : b === "Any" ? 1 : a.localeCompare(b)));
+    d.descriptive[0][2] = ["Any", ...new Set(displayRows.map((r) => r.sector).filter(Boolean))].sort((a, b) => (a === "Any" ? -1 : b === "Any" ? 1 : a.localeCompare(b)));
+    d.descriptive[1][2] = ["Any", ...new Set(displayRows.map((r) => r.industry).filter(Boolean))].sort((a, b) => (a === "Any" ? -1 : b === "Any" ? 1 : a.localeCompare(b)));
     const mc = d.descriptive.find((x) => x[0] === "marketCap");
     const pf = d.descriptive.find((x) => x[0] === "price");
     if (market === "US") {
@@ -501,7 +552,7 @@ export default function Markets() {
       pf[2] = ["Any", "Under ₹100", "₹100 to ₹500", "₹500 to ₹1000", "Over ₹1000"];
     }
     return d;
-  }, [rows, market]);
+  }, [displayRows, market]);
 
   const allDefs = useMemo(() => [...filterDefs.descriptive, ...filterDefs.fundamental, ...filterDefs.technical], [filterDefs]);
   const tabsToRender = filterTab === "all"
@@ -509,7 +560,7 @@ export default function Markets() {
     : filterDefs[filterTab];
 
   const filtered = useMemo(() => {
-    let out = rows.map((r) => ({ ...r, country: r.country || (market === "US" ? "USA" : "India") }));
+    let out = displayRows.map((r) => ({ ...r, country: r.country || (market === "US" ? "USA" : "India") }));
     if (tickerQ) out = out.filter((r) => r.symbol?.toLowerCase().includes(tickerQ.toLowerCase()) || r.name?.toLowerCase().includes(tickerQ.toLowerCase()));
     for (const [id, val] of Object.entries(active)) {
       if (!val || val === "Any") continue;
@@ -526,7 +577,7 @@ export default function Markets() {
         ? dir * String(a[col] ?? "").localeCompare(String(b[col] ?? ""))
         : dir * ((a[col] ?? -Infinity) - (b[col] ?? -Infinity))
     );
-  }, [rows, tickerQ, active, signal, sort, allDefs]);
+  }, [displayRows, tickerQ, active, signal, sort, allDefs]);
 
   const pages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
   const safePage = Math.min(page, pages - 1);
@@ -594,15 +645,15 @@ export default function Markets() {
   const searchResults = useMemo(() => {
     const q = searchQ.trim().toLowerCase();
     if (!q) return [];
-    return rows
+    return displayRows
       .filter((r) => r.symbol?.toLowerCase().includes(q) || r.name?.toLowerCase().includes(q) || r.sector?.toLowerCase().includes(q))
       .slice(0, 8);
-  }, [searchQ, rows]);
+  }, [searchQ, displayRows]);
 
   const goToStock = (sym) => {
     if (!sym) return;
     setSearchOpen(false); setSearchQ("");
-    router.push(`/stock/${encodeURIComponent(sym)}?market=${market}`);
+    router.push(`/stock/${encodeURIComponent(sym)}?market=${market}${market === "NSE" ? "&basis=" + basis : ""}`);
   };
 
   const onSearchKey = (e) => {
