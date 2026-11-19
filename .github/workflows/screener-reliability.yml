@@ -6,6 +6,7 @@ on:
       - "alphahedgequant/lib/config.js"
       - "alphahedgequant/app/api/market/**"
       - "alphahedgequant/tests/screenerRecovery.test.mjs"
+      - "alphahedgequant/app/admin/screener-import/ScreenerImportClient.jsx"
       - ".github/workflows/screener-reliability.yml"
   push:
     branches: [main]
@@ -14,6 +15,7 @@ on:
       - "alphahedgequant/lib/config.js"
       - "alphahedgequant/app/api/market/**"
       - "alphahedgequant/tests/screenerRecovery.test.mjs"
+      - "alphahedgequant/app/admin/screener-import/ScreenerImportClient.jsx"
       - ".github/workflows/screener-reliability.yml"
 permissions:
   contents: read

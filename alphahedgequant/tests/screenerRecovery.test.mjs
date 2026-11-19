@@ -43,3 +43,10 @@ test("same-origin gateway does not proxy arbitrary URLs or user tokens",()=>{
  assert.doesNotMatch(src,/Authorization:|UPSTOX_ACCESS_TOKEN/);
  assert.match(src,/errorCode:/);
 });
+
+test("NSE workbook importer accepts the prepared columnar gzip bundle contract",()=>{
+ const importer=read("app/admin/screener-import/ScreenerImportClient.jsx");
+ assert.ok(importer.includes("TABLES.every(table=>bundle[table]&&Array.isArray(bundle[table].rows)&&Array.isArray(bundle[table].columns))"));
+ assert.ok(importer.includes("bundle[table].rows.length!==expected[table]"));
+ assert.ok(importer.includes("function expandBatch(table,dataset,rows)"));
+});

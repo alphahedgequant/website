@@ -52,10 +52,10 @@ export default function ScreenerImportClient(){
     try{
       const bundle=await readBundle(file),meta=bundle?.meta||{},expected=meta.counts||{};
       if(meta.format!=="AHQ_NSE_FUNDAMENTALS_V1"||meta.sourceWorkbook!=="NSE_Filings_Fundamentals_20261119.xlsx"||
-        !/^nse-20261119-[a-f0-9]{12}$/.test(meta.importId)||!Array.isArray(bundle.coverage)||
-        !Array.isArray(bundle.summary)||!Array.isArray(bundle.financials)||!Array.isArray(bundle.filings))
+        !/^nse-20261119-[a-f0-9]{12}$/.test(meta.importId)||
+        !TABLES.every(table=>bundle[table]&&Array.isArray(bundle[table].rows)&&Array.isArray(bundle[table].columns)))
         throw new Error("This is not the prepared 19 November NSE fundamentals bundle.");
-      for(const table of TABLES)if(!Array.isArray(bundle[table]?.rows)||bundle[table].rows.length!==expected[table]||!Array.isArray(bundle[table]?.columns))throw new Error("Bundle count mismatch for "+table+". No data was uploaded.");
+      for(const table of TABLES)if(bundle[table].rows.length!==expected[table])throw new Error("Bundle count mismatch for "+table+". No data was uploaded.");
       const total=TABLES.reduce((n,k)=>n+bundle[k].rows.length,0);
       setProgress({done:0,total,table:"Starting staged import"});
       const begun=await post({action:"begin",meta});
