@@ -89,6 +89,7 @@ export async function fetchStock(symbol, market = "NSE", basis = "consolidated")
     pb: row?.pb ?? providerData?.fundamentals?.pb ?? derivedPb ?? null,
     ps: row?.ps ?? providerData?.fundamentals?.ps ?? derivedPs ?? null,
     eps: eps ?? null,
+    bookValue: bookValue ?? null,
     roe: summary?.roeTTMPct ?? null,
     roa: summary?.roaTTMPct ?? null,
     debtEquity: summary?.debtEquity ?? null,
