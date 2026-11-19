@@ -248,7 +248,7 @@ const VIEWS = {
   Snapshot: [["symbol","Ticker"],["name","Company"],["sector","Sector"],["marketCap","Market Cap"],["pe","P/E"],["pb","P/B"],["dividend","Dividend"],["roe","ROE"],["beta","Beta"],["price","Price"],["changePct","Change"]],
   Valuation: [["symbol","Ticker"],["marketCap","Market Cap"],["pe","P/E"],["fwdPe","Fwd P/E"],["peg","PEG"],["ps","P/S"],["pb","P/B"],["evEbitda","EV/EBITDA"],["price","Price"],["changePct","Change"]],
   Financial: [["symbol","Ticker"],["marketCap","Market Cap"],["roe","ROE"],["roa","ROA"],["debtEquity","Borrowings / Equity"],["netMargin","Net Profit M"],["revenueGrowth","Revenue Growth"],["earningsGrowth","EPS Growth"],["currentRatio","Current Ratio"],["dividend","Dividend"],["price","Price"],["changePct","Change"]],
-  Financials: [["symbol","Ticker"],["name","Company"],["sector","Sector"],["basis","Basis"],["latestQuarterPeriod","Latest Q"],["latestAnnualPeriod","Latest FY"],["revenueTTM","Revenue TTM"],["netProfitTTM","Net Profit TTM"],["epsTTM","EPS TTM"],["revenueGrowth","Revenue Growth"],["netProfitGrowth","Profit Growth"],["roe","ROE (derived)"],["roa","ROA (derived)"],["debtEquity","Borrowings / Equity"],["currentRatio","Current Ratio"],["totalBorrowings","Borrowings"],["cash","Cash"],["cfoYtd","CFO YTD"]],
+  Financials: [["symbol","Ticker"],["name","Company"],["sector","Sector"],["basis","Basis"],["latestQuarterPeriod","Latest Q"],["latestAnnualPeriod","Latest FY"],["revenueTTM","Revenue TTM"],["netProfitTTM","Net Profit TTM"],["epsTTM","EPS TTM"],["revenueGrowth","Revenue Growth"],["netProfitGrowth","Profit Growth"],["roe","ROE (derived)"],["roa","ROA (derived)"],["debtEquity","Borrowings / Equity"],["currentRatio","Current Ratio"],["totalBorrowings","Borrowings"],["cash","Cash"],["sharesOutstandingCrore","Shares (Cr)"],["bookValuePerShare","Book Value / Share"],["cfoYtd","CFO YTD"]],
   Filings: [["symbol","Ticker"],["name","Company"],["basis","Basis"],["sector","Provider Sector"],["industry","Provider Industry"],["classificationStatus","Classification"],["latestQuarterPeriod","Latest Quarter"],["latestAnnualPeriod","Latest FY"],["latestBalancePeriod","Latest Balance"],["latestCashFlowPeriod","Latest Cash Flow YTD"],["latestQuarterFirstPublicAt","First Public"],["latestQuarterVersions","Versions"],["filingCount","Filing Records"],["latestFilingAt","Latest Filing"],["latestFilingParsed","Parse Status"],["latestFilingUrl","NSE Source"]],
   Performance: [["symbol","Ticker"],["changePct","Change"],["volume","Volume"],["revenueGrowth","Sales TTM"],["earningsGrowth","EPS TTM"],["beta","Beta"],["targetPrice","Target"],["price","Price"]],
   Technical: [["symbol","Ticker"],["beta","Beta"],["sma50","SMA50"],["sma200","SMA200"],["high52w","52W High"],["low52w","52W Low"],["changePct","Change"],["price","Price"]],
@@ -631,10 +631,12 @@ export default function Markets() {
       case "name": return <span className="text-body/90">{v || "-"}</span>;
       case "sector": case "industry": case "country": return <span className="text-body/80">{v || "-"}</span>;
       case "basis": return <span className="text-xs font-mono uppercase text-muted">{v || "—"}</span>;
-      case "marketCap": return <span className="font-mono">{fmtCap(v, market)}</span>;
+      case "marketCap": return <span className="font-mono" title={r.marketCapSource || "Market capitalisation unavailable"}>{fmtCap(v, market)}</span>;
+      case "pe": case "pb": case "ps": return <span className="font-mono" title={r[col + "Source"] || "Provider valuation unavailable"}>{fmt(v)}</span>;
       case "revenueTTM": case "netProfitTTM": case "totalBorrowings": case "cash": case "totalAssets": case "cfoYtd": case "cfiYtd": case "cffYtd": case "capexYtd":
         return <span className="font-mono" title="₹ crore; reported or derived as labelled">{fmtCr(v)}</span>;
-      case "epsTTM": return <span className="font-mono">{v == null ? "—" : "₹" + fmt(v)}</span>;
+      case "epsTTM": case "bookValuePerShare": return <span className="font-mono">{v == null ? "—" : "₹" + fmt(v)}</span>;
+      case "sharesOutstandingCrore": return <span className="font-mono">{v == null ? "—" : fmt(v,3)}</span>;
       case "currentRatio": return <span className="font-mono">{v == null ? "—" : fmt(v,2)}</span>;
       case "latestQuarterPeriod": case "latestAnnualPeriod": case "latestBalancePeriod": case "latestCashFlowPeriod":
         return <span className="font-mono text-xs">{v || "—"}</span>;
