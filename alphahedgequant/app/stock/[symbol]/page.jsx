@@ -1,11 +1,12 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useParams, useSearchParams } from "next/navigation";
+import { useParams, useSearchParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import { fetchStock } from "@/lib/config";
 import StockResearchSections from "@/components/StockResearchSections";
 import StockDocuments from "@/components/StockDocuments";
+import StockFilingStatements from "@/components/StockFilingStatements";
 
 // ── formatting ───────────────────────────────────────────────
 const n2 = (v) => (v == null || isNaN(v) ? "—" : Number(v).toLocaleString("en-IN", { maximumFractionDigits: 2, minimumFractionDigits: 0 }));
@@ -43,7 +44,9 @@ const REC_MAP = {
 export default function StockDetail() {
   const { symbol } = useParams();
   const sp = useSearchParams();
+  const router = useRouter();
   const market = sp.get("market") === "US" ? "US" : "NSE";
+  const basis = sp.get("basis") === "standalone" ? "standalone" : "consolidated";
   const sym = decodeURIComponent(symbol || "").toUpperCase();
 
   const [data, setData] = useState(null);
@@ -54,17 +57,17 @@ export default function StockDetail() {
     const wake = setTimeout(() => alive && setStatus((s) => (s === "loading" ? "waking" : s)), 4500);
     (async () => {
       try {
-        const d = await fetchStock(sym, market);
+        const d = await fetchStock(sym, market, basis);
         if (!alive) return;
         if (!d) { setData(null); setStatus("notfound"); return; }
-        setData(d); setStatus("live");
+        setData(d); setStatus(d.price != null ? "live" : "financial");
       } catch { if (alive) setStatus("error"); }
     })();
     return () => { alive = false; clearTimeout(wake); };
-  }, [sym, market]);
+  }, [sym, market, basis]);
 
   if (status === "notfound") return <Shell><Empty sym={sym} market={market} /></Shell>;
-  if (status !== "live" || !data)
+  if ((status !== "live" && status !== "financial") || !data)
     return <Shell><div className="card p-10 text-center text-muted">{status === "waking" ? "Waking the data engine — first load can take up to a minute on the free tier." : status === "error" ? "Data engine unreachable — try again in a moment." : `Loading ${sym}…`}</div></Shell>;
 
   const f = data.fundamentals || {};
@@ -110,6 +113,14 @@ export default function StockDetail() {
             <div className={`font-mono text-sm mt-1 ${clsOf(data.changePct)}`}>{pct(data.changePct)}</div>
           </div>
         </div>
+        {market === "NSE" && <div className="flex flex-wrap items-center gap-3 mt-4">
+          <label className="text-xs text-muted font-mono">REPORTING BASIS</label>
+          <select value={basis} onChange={e => router.replace("/stock/"+encodeURIComponent(sym)+"?market=NSE&basis="+e.target.value)} className="rounded-lg border border-line bg-raised px-3 py-2 text-xs text-body">
+            <option value="consolidated">Consolidated</option>
+            <option value="standalone">Standalone</option>
+          </select>
+          {px == null && <span className="text-xs text-amber">Live quote unavailable · filing-based financials can still be viewed</span>}
+        </div>}
 
         {history.length > 4 && <PriceChart data={history} cur={c} up={(data.changePct ?? 0) >= 0} />}
 
@@ -131,6 +142,7 @@ export default function StockDetail() {
       </div>
 
       <StockResearchSections data={data} market={market} />
+      {market === "NSE" && <StockFilingStatements symbol={sym} basis={basis} history={data.financialHistory} />}
       <StockDocuments symbol={data.symbol || sym} market={market} documents={data.documents || []} />
 
       {rangePos != null && (
