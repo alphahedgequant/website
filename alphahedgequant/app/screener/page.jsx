@@ -675,6 +675,10 @@ export default function Markets() {
     else if (e.key === "Escape") setSearchOpen(false);
   };
 
+  const visibleViewTabs = market === "NSE"
+    ? [...Object.keys(VIEWS), ...VISUAL_VIEWS, ...SOON_VIEWS]
+    : [...Object.keys(VIEWS).filter(vw => vw !== "Financials" && vw !== "Filings"), ...VISUAL_VIEWS, ...SOON_VIEWS];
+
   return (
     <div className="max-w-shell mx-auto px-5 py-10">
       <div className="flex items-center justify-between flex-wrap gap-3 mb-3">
@@ -721,7 +725,7 @@ export default function Markets() {
             ))}
           </div>
         )}
-        {searchOpen && searchQ && searchResults.length === 0 && (status === "live" || status === "stale") && (
+        {searchOpen && searchQ && searchResults.length === 0 && (status === "live" || status === "stale" || status === "financial") && (
           <div className="search-pop absolute z-30 left-0 right-0 mt-2 px-4 py-3 text-sm text-muted">
             No {market === "US" ? "US" : "NSE"} stocks match “{searchQ}”.
           </div>
@@ -762,6 +766,20 @@ export default function Markets() {
           {quoteCheckedAt ? " Backend snapshot received: " + new Date(quoteCheckedAt).toLocaleString("en-IN",{timeZone:"Asia/Kolkata"})+" IST" : ""}
         </div>
       )}
+      {status === "financial" && (
+        <div role="status" className="card mb-4 p-4 text-sm border-amber/40 text-amber">
+          Historical financial statements remain available. Live quote fields are blank unless the provider returns a valid quote; no prices are estimated.
+        </div>
+      )}
+      {market === "NSE" && financialStatus === "ready" && financialMeta && (
+        <div className="card mb-4 px-4 py-3 text-xs leading-relaxed text-muted">
+          <strong className="text-body">NSE filings coverage:</strong> {Number(financialMeta.coverage_count || 0).toLocaleString("en-IN")} companies · {Number(financialMeta.financial_count || 0).toLocaleString("en-IN")} financial statement records · {Number(financialMeta.filing_count || 0).toLocaleString("en-IN")} filing-index records · <span className="text-amber">{basis === "consolidated" ? "Consolidated" : "Standalone"} basis</span>.
+          Sector and industry come only from provider classifications; missing mappings remain Unclassified. Cash-flow figures are YTD.
+        </div>
+      )}
+      {market === "NSE" && financialStatus === "not_imported" && (
+        <div className="card mb-4 px-4 py-3 text-xs text-muted">The full NSE filing dataset has not yet been published. The screener still shows the current provider universe; filing-based fields will appear after the owner import is completed.</div>
+      )}
       {market === "US" && (status === "live" || status === "stale") && (
         <p className="text-xs leading-relaxed text-muted mb-4" role="note">
           US equity quotes are indicative and delayed, not live exchange prices. Hover over a price to see its provider timestamp (UTC). Unavailable fundamentals are shown as dashes, not estimated values.
@@ -778,6 +796,13 @@ export default function Markets() {
             <option value="__save">+ Save current…</option>
           </select>
         </label>
+        {market === "NSE" && <label className="flex items-center gap-2">
+          <span className="text-muted">Basis</span>
+          <select value={basis} onChange={e => { setBasis(e.target.value); setPage(0); }} className="bg-ink border border-line rounded px-2 py-1.5 outline-none focus:border-amber/60">
+            <option value="consolidated">Consolidated</option>
+            <option value="standalone">Standalone</option>
+          </select>
+        </label>}
         <label className="flex items-center gap-2">
           <span className="text-muted">Order by</span>
           <select value={sort.col} onChange={(e) => setSort((s) => ({ ...s, col: e.target.value }))} className="bg-ink border border-line rounded px-2 py-1.5 outline-none focus:border-amber/60">
@@ -841,7 +866,7 @@ export default function Markets() {
 
       {/* ── VIEW TAB STRIP ───────────────────────────── */}
       <div className="card mt-2 flex overflow-x-auto">
-        {[...Object.keys(VIEWS), ...VISUAL_VIEWS, ...SOON_VIEWS].map((vw) => (
+        {visibleViewTabs.map((vw) => (
           <button key={vw} data-ahq-event={view===vw?undefined:"screener_view_selected"} onClick={() => { setView(vw); setPage(0); }}
             className={`px-4 py-2 text-sm whitespace-nowrap border-b-2 transition-colors ${view === vw ? "border-amber text-amber bg-raised/60" : "border-transparent text-muted hover:text-body"}`}>
             {vw}
@@ -857,7 +882,7 @@ export default function Markets() {
             <p className="font-mono text-xs text-muted">
               #{filtered.length === 0 ? 0 : safePage * PAGE_SIZE + 1} / <span className="text-body">{filtered.length}</span> Total
             </p>
-            <p className="text-xs text-muted/70">Stock and filter coverage depends on the connected provider.</p>
+            <p className="text-xs text-muted/70">{market === "NSE" ? "Current NSE equity master + historical filings; missing prices and fields stay blank." : "Stock and filter coverage depends on the connected provider."}</p>
             <div className="flex items-center gap-3"><p className="font-mono text-xs text-muted">Refresh check: 15s | Page {safePage + 1} / {pages}</p><button type="button" onClick={() => setRefreshSeq(n => n + 1)} className="text-xs text-amber hover:underline">Check now</button></div>
           </div>
 
@@ -887,10 +912,10 @@ export default function Markets() {
                 {pageRows.length === 0 && status === "error" && (
                   <tr><td colSpan={VIEWS[view].length + 1} className="px-3 py-10 text-center text-loss/90">Screener data is unavailable. Retry now, or check the market-data provider connection.</td></tr>
                 )}
-                {pageRows.length === 0 && (status === "live" || status === "stale") && (
+                {pageRows.length === 0 && (status === "live" || status === "stale" || status === "financial") && (
                   <tr><td colSpan={VIEWS[view].length + 1} className="px-3 py-10 text-center text-muted">No stocks match the current filters.</td></tr>
                 )}
-                {status !== "live" && status !== "stale" && status !== "error" && (
+                {status !== "live" && status !== "stale" && status !== "financial" && status !== "error" && (
                   <tr><td colSpan={VIEWS[view].length + 1} className="px-3 py-10 text-center text-muted">Loading screener…</td></tr>
                 )}
               </tbody>
@@ -923,7 +948,7 @@ export default function Markets() {
             <p className="font-mono text-xs text-muted"><span className="text-body">{filtered.length}</span> stocks · {view} view</p>
             {view !== "Maps" && <button data-ahq-event="screener_exported" onClick={exportCSV} className="text-sm text-[#5aa9f5] hover:underline">Export</button>}
           </div>
-          {status !== "live" && status !== "stale" ? (
+          {status !== "live" && status !== "stale" && status !== "financial" ? (
             <div className="card mt-2 p-10 text-center text-muted">{status === "error" ? "Market data unavailable. Retry to restore "+view.toLowerCase()+"." : "Loading "+view.toLowerCase()+"…"}</div>
           ) : view === "Charts" ? <ChartsView rows={filtered} market={market} onPick={goToStock} />
             : view === "Tickers" ? <TickersView rows={filtered} onPick={goToStock} />
