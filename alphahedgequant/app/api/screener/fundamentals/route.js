@@ -38,7 +38,7 @@ export async function GET(request){
         sql`SELECT statement,period_type,period_end::text AS period_end,first_public_at,n_versions,kind,data
           FROM ahq_nse_financial_records WHERE import_id=${meta.import_id} AND symbol=${symbol} AND basis=${basis}
           ORDER BY period_end DESC,statement LIMIT 500`,
-        sql`SELECT url,public_at,revision,parsed,data FROM ahq_nse_filing_index
+        sql`SELECT url,period_end::text AS period_end,public_at,revision,parsed,data FROM ahq_nse_filing_index
           WHERE import_id=${meta.import_id} AND symbol=${symbol} AND basis=${basis}
           ORDER BY public_at DESC NULLS LAST LIMIT 500`
       ]);
