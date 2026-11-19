@@ -373,6 +373,10 @@ export default function Markets() {
   const [rows, setRows] = useState([]);
   const [status, setStatus] = useState("loading");
   const [marketError, setMarketError] = useState(null);
+  const [financialRows, setFinancialRows] = useState([]);
+  const [financialStatus, setFinancialStatus] = useState("loading");
+  const [financialMeta, setFinancialMeta] = useState(null);
+  const [basis, setBasis] = useState("consolidated");
   const [refreshSeq, setRefreshSeq] = useState(0);
   const [quoteCheckedAt, setQuoteCheckedAt] = useState(null);
   const [indexCheckedAt, setIndexCheckedAt] = useState(null);
@@ -402,7 +406,8 @@ export default function Markets() {
   const switchMarket = (m) => {
     if (m === market) return;
     setMarket(m); setActive({}); setSignal("None (all stocks)");
-    setTickerQ(""); setPage(0); setRows([]); setIndices(null); setStatus("loading");
+    setTickerQ(""); setPage(0); setRows([]); setIndices(null); setStatus("loading"); setView("Overview");
+    setFinancialRows([]); setFinancialMeta(null); setFinancialStatus(m === "NSE" ? "loading" : "idle"); setBasis("consolidated");
     setMarketError(null); setQuoteCheckedAt(null); setIndexCheckedAt(null);
   };
 
