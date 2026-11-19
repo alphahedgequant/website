@@ -22,12 +22,15 @@ export async function GET(request){
     if(view==="meta")return reply({ok:true,status:"ready",meta});
     if(view==="summary"){
       const basis=String(q.get("basis")||"consolidated");
+      const symbol=String(q.get("symbol")||"").trim().toUpperCase();
       if(!validBasis(basis))return reply({ok:false,error:"Invalid reporting basis"},400);
-      const rows=await sql`SELECT data FROM ahq_nse_fundamental_summary
-        WHERE import_id=${meta.import_id} AND basis=${basis} ORDER BY symbol`;
+      if(symbol&&!validSymbol(symbol))return reply({ok:false,error:"Invalid symbol"},400);
+      const rows=symbol
+        ? await sql`SELECT data FROM ahq_nse_fundamental_summary WHERE import_id=${meta.import_id} AND basis=${basis} AND symbol=${symbol} LIMIT 1`
+        : await sql`SELECT data FROM ahq_nse_fundamental_summary WHERE import_id=${meta.import_id} AND basis=${basis} ORDER BY symbol`;
       return reply({ok:true,status:"ready",basis,meta,items:rows.map(r=>r.data)});
     }
-    if(view==="history"){
+        if(view==="history"){
       const symbol=String(q.get("symbol")||"").trim().toUpperCase(),basis=String(q.get("basis")||"consolidated");
       if(!validSymbol(symbol)||!validBasis(basis))return reply({ok:false,error:"Invalid symbol or reporting basis"},400);
       const [coverage,records,filings]=await Promise.all([
