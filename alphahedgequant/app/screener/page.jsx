@@ -617,13 +617,24 @@ export default function Markets() {
   const cell = (col, r) => {
     const v = r[col];
     switch (col) {
-      case "symbol": return <span className="inline-flex items-center gap-2"><Link href={`/stock/${encodeURIComponent(v)}?market=${market}`} className="font-mono text-[#5aa9f5] hover:underline cursor-pointer">{v}</Link>{market==="NSE"&&WORKBOOK_TICKERS.includes(v)&&<Link href={`/terminal?symbol=${encodeURIComponent(v)}&tab=COMPANY`} className="rounded border border-amber/50 px-1.5 py-0.5 text-[10px] text-amber hover:bg-amber/10" title="Open uploaded research and historical financial data">Research</Link>}</span>;
+      case "symbol": return <span className="inline-flex items-center gap-2"><Link href={"/stock/"+encodeURIComponent(v)+"?market="+market+(market==="NSE"?"&basis="+basis:"")} className="font-mono text-[#5aa9f5] hover:underline cursor-pointer">{v}</Link>{market==="NSE"&&WORKBOOK_TICKERS.includes(v)&&<Link href={"/terminal?symbol="+encodeURIComponent(v)+"&tab=COMPANY"} className="rounded border border-amber/50 px-1.5 py-0.5 text-[10px] text-amber hover:bg-amber/10" title="Open uploaded research and historical financial data">Research</Link>}</span>;
       case "name": return <span className="text-body/90">{v || "-"}</span>;
       case "sector": case "industry": case "country": return <span className="text-body/80">{v || "-"}</span>;
+      case "basis": return <span className="text-xs font-mono uppercase text-muted">{v || "—"}</span>;
       case "marketCap": return <span className="font-mono">{fmtCap(v, market)}</span>;
+      case "revenueTTM": case "netProfitTTM": case "totalBorrowings": case "cash": case "totalAssets": case "cfoYtd": case "cfiYtd": case "cffYtd": case "capexYtd":
+        return <span className="font-mono" title="₹ crore; reported or derived as labelled">{fmtCr(v)}</span>;
+      case "epsTTM": return <span className="font-mono">{v == null ? "—" : "₹" + fmt(v)}</span>;
+      case "currentRatio": return <span className="font-mono">{v == null ? "—" : fmt(v,2)}</span>;
+      case "latestQuarterPeriod": case "latestAnnualPeriod": case "latestBalancePeriod": case "latestCashFlowPeriod":
+        return <span className="font-mono text-xs">{v || "—"}</span>;
+      case "latestFilingAt": return <span className="font-mono text-xs">{v ? new Date(v).toLocaleString("en-IN") : "—"}</span>;
+      case "latestFilingParsed": return <span className="text-xs">{v === true ? "Parsed" : v === false ? "Index only" : "—"}</span>;
+      case "latestFilingUrl": return v && typeof v === "string" && v.startsWith("https://nsearchives.nseindia.in/") ? <a href={v} target="_blank" rel="noreferrer" className="text-[#5aa9f5] hover:underline text-xs">Open NSE filing ↗</a> : <span className="text-muted">—</span>;
+      case "classificationStatus": return <span className="text-xs">{v === "provider_verified" ? "Provider verified" : v === "partial" ? "Partial" : "Unclassified"}</span>;
       case "changePct": return <span className={`font-mono ${pctCls(v)}`}>{v == null ? "-" : fmt(v) + "%"}</span>;
       case "volume": return <span className="font-mono">{fmtVol(v)}</span>;
-      case "price": return <span className="font-mono text-gain" title={r.priceAsOf ? `Provider quote time (UTC): ${r.priceAsOf}${r.stale ? " · older quote" : ""}` : "Provider quote time unavailable"}>{typeof v === "number" && v > 0 ? MARKETS[market].cur+fmt(v) : "—"}</span>;
+      case "price": return <span className="font-mono text-gain" title={r.priceSrc ? "Source: "+r.priceSrc+(r.priceAsOf ? " · "+r.priceAsOf : "") : "Provider quote unavailable"}>{typeof v === "number" && v > 0 ? MARKETS[market].cur+fmt(v) : "—"}</span>;
       case "distSma50": case "distSma200": {
         const sma = col === "distSma50" ? r.sma50 : r.sma200;
         if (!sma || !r.price) return <span className="font-mono text-muted">-</span>;
