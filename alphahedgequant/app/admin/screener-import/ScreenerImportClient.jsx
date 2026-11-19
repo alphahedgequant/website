@@ -21,6 +21,21 @@ async function readBundle(file){
   }else text=new TextDecoder().decode(bytes);
   return JSON.parse(text);
 }
+function expandBatch(table,dataset,rows){
+  const columns=dataset.columns||[],dataColumns=dataset.dataColumns||[];
+  return rows.map(row=>{
+    const base=Object.fromEntries(columns.map((key,index)=>[key,row[index]??null]));
+    if(table==="coverage")return base;
+    if(table==="summary")return {symbol:base.symbol,basis:base.basis,data:base};
+    const data=Object.fromEntries(dataColumns.map((key,index)=>[key,row[columns.length+index]??null]));
+    if(table==="financials")return {
+      symbol:base.symbol,basis:base.basis,statement:base.statement,periodType:base.periodType,
+      periodEnd:base.periodEnd,firstPublicAt:base.firstPublicAt,nVersions:base.nVersions,kind:base.kind,data
+    };
+    return {symbol:base.symbol,basis:base.basis,periodEnd:base.periodEnd,publicAt:base.publicAt,
+      revision:base.revision,parsed:base.parsed,url:base.url,data};
+  });
+}
 export default function ScreenerImportClient(){
   const [file,setFile]=useState(null),[status,setStatus]=useState("Checking published dataset…");
   const [busy,setBusy]=useState(false),[error,setError]=useState(""),[progress,setProgress]=useState({done:0,total:0,table:""});
@@ -40,17 +55,17 @@ export default function ScreenerImportClient(){
         !/^nse-20261119-[a-f0-9]{12}$/.test(meta.importId)||!Array.isArray(bundle.coverage)||
         !Array.isArray(bundle.summary)||!Array.isArray(bundle.financials)||!Array.isArray(bundle.filings))
         throw new Error("This is not the prepared 19 November NSE fundamentals bundle.");
-      for(const table of TABLES)if(bundle[table].length!==expected[table])throw new Error("Bundle count mismatch for "+table+". No data was uploaded.");
-      const total=TABLES.reduce((n,k)=>n+bundle[k].length,0);
+      for(const table of TABLES)if(!Array.isArray(bundle[table]?.rows)||bundle[table].rows.length!==expected[table]||!Array.isArray(bundle[table]?.columns))throw new Error("Bundle count mismatch for "+table+". No data was uploaded.");
+      const total=TABLES.reduce((n,k)=>n+bundle[k].rows.length,0);
       setProgress({done:0,total,table:"Starting staged import"});
       const begun=await post({action:"begin",meta});
       if(begun.alreadyPublished){setStatus("This exact workbook version is already published.");setCurrent({source_workbook:meta.sourceWorkbook,source_sha256:meta.sourceSha256,coverage_count:expected.coverage,summary_count:expected.summary,financial_count:expected.financials,filing_count:expected.filings});return;}
       let done=0;
       for(const table of TABLES){
-        const rows=bundle[table];
+        const dataset=bundle[table],rows=dataset.rows;
         setProgress(p=>({...p,table:labels[table]}));
         for(let start=0;start<rows.length;start+=BATCH_SIZE){
-          const batch=rows.slice(start,start+BATCH_SIZE);
+          const batch=expandBatch(table,dataset,rows.slice(start,start+BATCH_SIZE));
           await post({action:"batch",importId:meta.importId,table,rows:batch});
           done+=batch.length;
           setProgress({done,total,table:labels[table]});
