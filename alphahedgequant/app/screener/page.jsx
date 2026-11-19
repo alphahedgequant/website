@@ -27,6 +27,7 @@ const fmtCap = (v, mkt) => {
   return cr.toFixed(0) + " Cr";
 };
 const fmtVol = (v) => (v ? Number(v).toLocaleString("en-IN") : "-");
+const fmtCr = (v) => (v == null || !Number.isFinite(Number(v)) ? "—" : "₹" + Number(v).toLocaleString("en-IN",{maximumFractionDigits:0}) + " Cr");
 const pctCls = (v) => ((v ?? 0) > 0 ? "tick-up" : (v ?? 0) < 0 ? "tick-down" : "text-muted");
 
 // ── filters (Finviz layout: label left, dropdown right) ─
@@ -170,6 +171,20 @@ const F = {
       if (v === "Negative") return r.earningsGrowth != null && r.earningsGrowth < 0;
       return true;
     }],
+    ["netProfitGrowth", "Net Profit Growth TTM", ["Any", "Positive", "Over 10%", "Over 25%", "Negative"], (r, v) => {
+      if (v === "Positive") return (r.netProfitGrowth ?? -1) > 0;
+      if (v === "Over 10%") return (r.netProfitGrowth ?? -1) > 10;
+      if (v === "Over 25%") return (r.netProfitGrowth ?? -1) > 25;
+      if (v === "Negative") return r.netProfitGrowth != null && r.netProfitGrowth < 0;
+      return true;
+    }],
+    ["currentRatio", "Current Ratio", ["Any", "Under 1", "Over 1", "Over 1.5", "Over 2"], (r, v) => {
+      if (v === "Under 1") return r.currentRatio != null && r.currentRatio < 1;
+      if (v === "Over 1") return r.currentRatio != null && r.currentRatio > 1;
+      if (v === "Over 1.5") return r.currentRatio != null && r.currentRatio > 1.5;
+      if (v === "Over 2") return r.currentRatio != null && r.currentRatio > 2;
+      return true;
+    }],
   ],
   technical: [
     ["change", "Change", ["Any", "Up", "Up >2%", "Up >5%", "Down", "Down >2%", "Down >5%"], (r, v) => {
@@ -232,7 +247,9 @@ const VIEWS = {
   Overview: [["symbol","Ticker"],["name","Company"],["sector","Sector"],["industry","Industry"],["country","Country"],["marketCap","Market Cap"],["pe","P/E"],["price","Price"],["changePct","Change"],["volume","Volume"]],
   Snapshot: [["symbol","Ticker"],["name","Company"],["sector","Sector"],["marketCap","Market Cap"],["pe","P/E"],["pb","P/B"],["dividend","Dividend"],["roe","ROE"],["beta","Beta"],["price","Price"],["changePct","Change"]],
   Valuation: [["symbol","Ticker"],["marketCap","Market Cap"],["pe","P/E"],["fwdPe","Fwd P/E"],["peg","PEG"],["ps","P/S"],["pb","P/B"],["evEbitda","EV/EBITDA"],["price","Price"],["changePct","Change"]],
-  Financial: [["symbol","Ticker"],["marketCap","Market Cap"],["roe","ROE"],["roa","ROA"],["debtEquity","LT D/E"],["grossMargin","Gross M"],["operatingMargin","Oper M"],["netMargin","Profit M"],["dividend","Dividend"],["price","Price"],["changePct","Change"]],
+  Financial: [["symbol","Ticker"],["marketCap","Market Cap"],["roe","ROE"],["roa","ROA"],["debtEquity","Borrowings / Equity"],["netMargin","Net Profit M"],["revenueGrowth","Revenue Growth"],["earningsGrowth","EPS Growth"],["currentRatio","Current Ratio"],["dividend","Dividend"],["price","Price"],["changePct","Change"]],
+  Financials: [["symbol","Ticker"],["name","Company"],["sector","Sector"],["latestQuarterPeriod","Latest Q"],["revenueTTM","Revenue TTM"],["netProfitTTM","Net Profit TTM"],["epsTTM","EPS TTM"],["revenueGrowth","Revenue Growth"],["netProfitGrowth","Profit Growth"],["roe","ROE"],["roa","ROA"],["debtEquity","Borrowings / Equity"],["currentRatio","Current Ratio"],["totalBorrowings","Borrowings"],["cash","Cash"],["cfoYtd","CFO YTD"]],
+  Filings: [["symbol","Ticker"],["name","Company"],["basis","Basis"],["latestQuarterPeriod","Latest Quarter"],["latestAnnualPeriod","Latest FY"],["latestBalancePeriod","Latest Balance"],["latestCashFlowPeriod","Latest Cash Flow YTD"],["filingCount","Filing Records"],["latestFilingAt","Latest Filing"],["latestFilingParsed","Parse Status"],["latestFilingUrl","NSE Source"]],
   Performance: [["symbol","Ticker"],["changePct","Change"],["volume","Volume"],["revenueGrowth","Sales TTM"],["earningsGrowth","EPS TTM"],["beta","Beta"],["targetPrice","Target"],["price","Price"]],
   Technical: [["symbol","Ticker"],["beta","Beta"],["sma50","SMA50"],["sma200","SMA200"],["high52w","52W High"],["low52w","52W Low"],["changePct","Change"],["price","Price"]],
   TA: [["symbol","Ticker"],["price","Price"],["sma50","SMA50"],["sma200","SMA200"],["distSma50","vs SMA50"],["distSma200","vs SMA200"],["beta","Beta"],["changePct","Change"]],
@@ -246,9 +263,9 @@ const SOON_COPY = {
   News: { line: "Headlines, filings and corporate actions per ticker.", note: "Connects to a news feed in the next data release." },
   ETF: { line: "ETF holdings, expense ratios and exposure breakdowns.", note: "Activates once ETF instruments join the universe." },
 };
-const ORDER_FIELDS = [["symbol","Ticker"],["name","Company"],["sector","Sector"],["marketCap","Market Cap"],["pe","P/E"],["price","Price"],["changePct","Change"],["volume","Volume"],["roe","ROE"],["dividend","Dividend"]];
+const ORDER_FIELDS = [["symbol","Ticker"],["name","Company"],["sector","Sector"],["marketCap","Market Cap"],["pe","P/E"],["price","Price"],["changePct","Change"],["volume","Volume"],["revenueTTM","Revenue TTM"],["netProfitTTM","Net Profit TTM"],["epsTTM","EPS TTM"],["roe","ROE"],["currentRatio","Current Ratio"],["dividend","Dividend"]];
 const PAGE_SIZE = 20;
-const PCT_COLS = ["roe","roa","grossMargin","operatingMargin","netMargin","revenueGrowth","earningsGrowth","dividend"];
+const PCT_COLS = ["roe","roa","grossMargin","operatingMargin","netMargin","revenueGrowth","earningsGrowth","netProfitGrowth","dividend"];
 
 // ── visual views (all driven by real row data) ───────────
 const heatColor = (p) => {
