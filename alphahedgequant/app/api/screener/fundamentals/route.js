@@ -4,7 +4,7 @@ export const runtime="nodejs";
 export const dynamic="force-dynamic";
 const validSymbol=s=>/^[A-Z0-9&_.-]{1,40}$/.test(s);
 const validBasis=s=>s==="consolidated"||s==="standalone";
-const headers={"Cache-Control":"public, s-maxage=300, stale-while-revalidate=600"};
+const headers={"Cache-Control":"public, s-maxage=60, stale-while-revalidate=120"};
 const reply=(body,status=200)=>Response.json(body,{status,headers});
 export async function GET(request){
   if(!process.env.NEON_DATABASE_URL)return reply({ok:true,status:"not_configured",items:[]});
