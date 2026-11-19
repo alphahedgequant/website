@@ -22,7 +22,7 @@ test("failures never turn a market-data 503 into confirmed live prices or no mat
  const s=read("app/screener/page.jsx");
  assert.match(s,/stocksResult\.value\?\.success === true/);
  assert.match(s,/stocksResult\.value\.data\.length > 0/);
- assert.match(s,/setStatus\(body\.stale === true \? "stale" : "live"\)/);
+ assert.match(s,/setStatus\(body\.stale === true \? "stale" : hasValidPrice \? "live" : "financial"\)/);
  assert.match(s,/setStatus\("error"\)/);
  assert.match(s,/role="alert"/);
  assert.match(s,/Retry now/);
