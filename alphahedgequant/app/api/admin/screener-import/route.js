@@ -9,9 +9,17 @@ const validSymbol=s=>typeof s==="string"&&/^[A-Z0-9&_.-]{1,40}$/.test(s);
 const validDate=s=>typeof s==="string"&&/^20\d\d-\d\d-\d\d$/.test(s)&&Number.isFinite(Date.parse(s));
 const validBasis=s=>s==="consolidated"||s==="standalone";
 const maxBatch=1000;
+const ownerSessions=new Map();
+async function authorizedOwner(userId){
+  const until=ownerSessions.get(userId)||0;
+  if(until>Date.now())return true;
+  const allowed=await isInsightsOwner();
+  if(allowed)ownerSessions.set(userId,Date.now()+5*60*1000);
+  return allowed;
+}
 export async function POST(request){
   const {userId}=await auth();
-  if(!userId||!await isInsightsOwner())return reply({ok:false,error:"Owner access required"},403);
+  if(!userId||!await authorizedOwner(userId))return reply({ok:false,error:"Owner access required"},403);
   if(!process.env.NEON_DATABASE_URL)return reply({ok:false,error:"Research database is not configured"},503);
   const text=await request.text();
   if(text.length>3_500_000)return reply({ok:false,error:"Batch too large; send fewer rows"},413);
