@@ -640,7 +640,8 @@ export default function Markets() {
       case "currentRatio": return <span className="font-mono">{v == null ? "—" : fmt(v,2)}</span>;
       case "latestQuarterPeriod": case "latestAnnualPeriod": case "latestBalancePeriod": case "latestCashFlowPeriod":
         return <span className="font-mono text-xs">{v || "—"}</span>;
-      case "latestFilingAt": return <span className="font-mono text-xs">{v ? new Date(v).toLocaleString("en-IN") : "—"}</span>;
+      case "latestQuarterFirstPublicAt": return <span className="font-mono text-xs">{v ? String(v).replace("T"," ").slice(0,19) : "—"}</span>;
+      case "latestFilingAt": return <span className="font-mono text-xs">{v ? String(v).replace("T"," ").slice(0,19) : "—"}</span>;
       case "latestFilingParsed": return <span className="text-xs">{v === true ? "Parsed" : v === false ? "Index only" : "—"}</span>;
       case "latestFilingUrl": return v && typeof v === "string" && v.startsWith("https://nsearchives.nseindia.in/") ? <a href={v} target="_blank" rel="noreferrer" className="text-[#5aa9f5] hover:underline text-xs">Open NSE filing ↗</a> : <span className="text-muted">—</span>;
       case "classificationStatus": return <span className="text-xs">{v === "provider_verified" ? "Provider verified" : v === "partial" ? "Partial" : "Unclassified"}</span>;
