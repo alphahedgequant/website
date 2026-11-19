@@ -1,4 +1,5 @@
-import {neon} from "@neondatabase/serverless";\nimport {auth} from "@clerk/nextjs/server";
+import {neon} from "@neondatabase/serverless";
+import {auth} from "@clerk/nextjs/server";
 import {isInsightsOwner} from "@/lib/insightsOwnerAccess.mjs";
 import {ensureNseFundamentalsSchema} from "@/lib/nseFundamentalsDb.mjs";
 export const runtime="nodejs";
@@ -9,7 +10,8 @@ const validDate=s=>typeof s==="string"&&/^20\d\d-\d\d-\d\d$/.test(s)&&Number.isF
 const validBasis=s=>s==="consolidated"||s==="standalone";
 const maxBatch=1000;
 export async function POST(request){
-  const {userId}=await auth();\n  if(!userId||!await isInsightsOwner())return reply({ok:false,error:"Owner access required"},403);
+  const {userId}=await auth();
+  if(!userId||!await isInsightsOwner())return reply({ok:false,error:"Owner access required"},403);
   if(!process.env.NEON_DATABASE_URL)return reply({ok:false,error:"Research database is not configured"},503);
   const text=await request.text();
   if(text.length>3_500_000)return reply({ok:false,error:"Batch too large; send fewer rows"},413);
