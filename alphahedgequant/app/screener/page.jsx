@@ -501,6 +501,7 @@ export default function Markets() {
         netMargin: f.netProfitMarginTTMPct, revenueGrowth: f.revenueGrowthTTMPct, earningsGrowth: f.epsGrowthTTMPct,
         netProfitGrowth: f.netProfitGrowthTTMPct, revenueTTM: f.revenueTTM, netProfitTTM: f.netProfitTTM,
         epsTTM: f.epsBasicTTM, currentRatio: f.currentRatio, totalBorrowings: f.totalBorrowings,
+        sharesOutstandingCrore: f.sharesOutstandingCrore, bookValuePerShare: f.bookValuePerShare, debtEquityMethod: f.debtEquityMethod,
         cash: f.cash, totalAssets: f.totalAssets, cfoYtd: f.cfoYtd, cfiYtd: f.cfiYtd, cffYtd: f.cffYtd, capexYtd: f.capexYtd,
         latestQuarterPeriod: f.latestQuarterPeriod, latestAnnualPeriod: f.latestAnnualPeriod,
         latestBalancePeriod: f.latestBalancePeriod, latestCashFlowPeriod: f.latestCashFlowPeriod,
@@ -515,6 +516,10 @@ export default function Markets() {
       const price = typeof q.price === "number" && q.price > 0 ? q.price : null;
       const eps = prev.epsTTM;
       const derivedPe = price && eps > 0 ? price / eps : null;
+      const derivedMarketCap = price && prev.sharesOutstandingCrore > 0 ? price * prev.sharesOutstandingCrore * 1e7 : null;
+      const derivedPb = price && prev.bookValuePerShare > 0 ? price / prev.bookValuePerShare : null;
+      const finalMarketCap = q.marketCap ?? derivedMarketCap;
+      const derivedPs = finalMarketCap != null && prev.revenueTTM > 0 ? (finalMarketCap / 1e7) / prev.revenueTTM : null;
       bySymbol.set(q.symbol, {
         ...prev, ...q,
         sector: q.sector || "Unclassified", industry: q.industry || "Unclassified",
@@ -532,7 +537,12 @@ export default function Markets() {
         revenueTTM: prev.revenueTTM ?? null, netProfitTTM: prev.netProfitTTM ?? null, epsTTM: prev.epsTTM ?? null,
         totalBorrowings: prev.totalBorrowings ?? null, cash: prev.cash ?? null, totalAssets: prev.totalAssets ?? null,
         cfoYtd: prev.cfoYtd ?? null, cfiYtd: prev.cfiYtd ?? null, cffYtd: prev.cffYtd ?? null, capexYtd: prev.capexYtd ?? null,
-        pe: q.pe ?? derivedPe, peSource: q.pe != null ? "Yahoo Finance" : derivedPe != null ? "AHQ derived · price / TTM EPS" : null
+        sharesOutstandingCrore: prev.sharesOutstandingCrore ?? null, bookValuePerShare: prev.bookValuePerShare ?? null,
+        debtEquityMethod: prev.debtEquityMethod ?? null,
+        marketCap: finalMarketCap, marketCapSource: q.marketCap != null ? "Yahoo Finance" : derivedMarketCap != null ? "AHQ derived · price × latest reported shares" : null,
+        pe: q.pe ?? derivedPe, peSource: q.pe != null ? "Yahoo Finance" : derivedPe != null ? "AHQ derived · price / TTM EPS" : null,
+        pb: q.pb ?? derivedPb, pbSource: q.pb != null ? "Yahoo Finance" : derivedPb != null ? "AHQ derived · price / latest book value per share" : null,
+        ps: q.ps ?? derivedPs, psSource: q.ps != null ? "Yahoo Finance" : derivedPs != null ? "AHQ derived · market cap / TTM revenue" : null
       });
     }
     return [...bySymbol.values()];
