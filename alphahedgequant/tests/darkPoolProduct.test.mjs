@@ -44,5 +44,6 @@ test("Tracker attributes FINRA and SEC sources", () => {
 
   assert.match(page, /developer\.finra\.org/);
   assert.match(page, /sec\.gov\/foia\/frequently-requested-documents\/alternative-trading-system-ats-list/);
+  assert.match(page, /sec\\.gov\\/divisions\\/marketreg\\/form-ats-n-filings/);
   assert.match(page, /FINRA's applicable Equity Data terms/);
 });
