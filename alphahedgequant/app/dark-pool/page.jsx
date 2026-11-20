@@ -276,7 +276,7 @@ export default function DarkPoolPage() {
           <p className="mt-3 max-w-3xl text-sm leading-7 text-muted">
             FINRA's weekly dataset includes security identifiers, ATS/OTC participant identifiers, reported weekly share quantities, trade counts, tier, reporting week, initial publication date and update dates. SEC records provide the public ATS register and Form ATS-N disclosures for NMS-stock ATSs.
           </p>
-          <div className="mt-7 grid gap-3 md:grid-cols-2">
+          <div className="mt-7 grid gap-3 md:grid-cols-3">
             <a href="https://developer.finra.org/docs/api-explorer/query_api-equity-weekly_summary" target="_blank" rel="noreferrer" className="group rounded-xl border border-line bg-surface p-5 transition-colors hover:border-amber/45">
               <p className="font-mono text-[10px] tracking-[.16em] text-amber">PRIMARY ACTIVITY SOURCE</p>
               <h3 className="mt-2 text-lg font-semibold text-body group-hover:text-amber">FINRA OTC / ATS Weekly Summary ↗</h3>
@@ -286,6 +286,11 @@ export default function DarkPoolPage() {
               <p className="font-mono text-[10px] tracking-[.16em] text-amber">VENUE REFERENCE SOURCE</p>
               <h3 className="mt-2 text-lg font-semibold text-body group-hover:text-amber">SEC Alternative Trading System List ↗</h3>
               <p className="mt-2 text-sm leading-6 text-muted">Public ATS names, business names, locations and cessation notices; updated by the SEC periodically.</p>
+            </a>
+            <a href="https://www.sec.gov/divisions/marketreg/form-ats-n-filings.htm" target="_blank" rel="noreferrer" className="group rounded-xl border border-line bg-surface p-5 transition-colors hover:border-amber/45">
+              <p className="font-mono text-[10px] tracking-[.16em] text-amber">OPERATING DISCLOSURES</p>
+              <h3 className="mt-2 text-lg font-semibold text-body group-hover:text-amber">SEC Form ATS-N Filings ↗</h3>
+              <p className="mt-2 text-sm leading-6 text-muted">Public disclosures for ATSs trading NMS stocks, used to add operating and affiliation context to venue profiles.</p>
             </a>
           </div>
           <p className="mt-5 text-xs leading-6 text-muted">
