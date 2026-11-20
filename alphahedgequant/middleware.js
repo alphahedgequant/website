@@ -17,6 +17,8 @@ const isPublicRoute = createRouteMatcher([
   "/api/tournaments/cache",
   // Public, read-only IPO calendar and listing intelligence for visitors and search engines.
   "/ipo(.*)",
+  // Public, source-attributed historical FINRA/SEC market-structure research product.
+  "/dark-pool(.*)",
   // Open educational library only. Do not expose authenticated research tools or APIs.
   "/library(.*)",
   // All six Quant Learning modules are free; interview and mental maths routes remain protected.

@@ -12,6 +12,7 @@ const products = [
   { href: "/backtest", label: "AI Backtesting", description: "Test and evaluate ideas", glyph: "↗" },
   { href: "/copilot", label: "AI Copilot", description: "Natural-language strategy research", glyph: "✳" },
   { href: "/options", label: "Options Analytics", description: "Option-chain intelligence", glyph: "◈" },
+  { href: "/dark-pool", label: "Dark Pool & ECN Tracker", description: "Weekly FINRA/SEC historical intelligence", glyph: "◉" },
   { href: "/tracker", label: "Trust Tracker", description: "Analyst calls and accountability", glyph: "◎" },
 ];
 const research = [

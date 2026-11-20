@@ -2,16 +2,16 @@ import {RESEARCH_LIBRARY,LIBRARY_PUBLISHED} from "../lib/publicResearchLibrary.m
 import {PUBLIC_RESEARCH_SERIES,RESEARCH_PREVIEWS,PREVIEW_RELEASE_DATE} from "../lib/publicResearchPreviews.mjs";
 import {COMPETITIONS,VERIFIED_AS_OF} from "../lib/competitionEvents.mjs";
 import {VERIFIED_IPO_REFERENCES,IPO_REFERENCE_AS_OF} from "../lib/ipoVerifiedEvents.mjs";
-// Only public, crawlable pages belong in the sitemap. Product routes
-// currently require Clerk login, so listing them would point crawlers at
-// an authentication redirect instead of indexable content.
+// Only public, crawlable pages belong in the sitemap. Authenticated
+// workspaces are intentionally excluded; public product and research pages
+// are listed so search engines can discover their open-access content.
 export default function sitemap() {
   const base = "https://www.alphahedgequant.com";
-  const routes = ["", "/about", "/ipo", "/tracker", "/library", "/learn", "/competitions", "/privacy", "/terms", "/disclaimer"];
+  const routes = ["", "/about", "/ipo", "/tracker", "/dark-pool", "/library", "/learn", "/competitions", "/privacy", "/terms", "/disclaimer"];
   const index=routes.map(route => ({
     url: base + route,
     changeFrequency: route === "" ? "weekly" : "monthly",
-    priority: route === "" ? 1 : route === "/library" || route === "/learn" ? 0.8 : route === "/about" || route === "/ipo" || route === "/tracker" ? 0.7 : 0.3,
+    priority: route === "" ? 1 : route === "/library" || route === "/learn" ? 0.8 : route === "/about" || route === "/ipo" || route === "/tracker" || route === "/dark-pool" ? 0.7 : 0.3,
   }));
   const notes=RESEARCH_LIBRARY.map(note=>({
     url: base + "/library/" + note.slug,
