@@ -74,6 +74,10 @@ const faqs = [
     a: "No. ATS reports describe activity reported by alternative trading systems. Non-ATS OTC reports are a separate reporting category. The tracker will keep those categories separate and will not label every off-exchange share as a dark-pool execution.",
   },
   {
+    q: "Does ECN mean every reported ATS or OTC venue?",
+    a: "No. ECN is familiar market language, but the source records identify ATS and non-ATS OTC reporting categories and specific participants where available. A participant will not be relabelled as an ECN unless an official record supports that classification.",
+  },
+  {
     q: "Can the data reveal whether institutions were buying or selling?",
     a: "No. Weekly aggregate share and trade counts do not identify the buyer, seller, beneficial owner, trade direction or investment intent. The tracker will not infer those details.",
   },
