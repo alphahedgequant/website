@@ -7,7 +7,7 @@ import {VERIFIED_IPO_REFERENCES,IPO_REFERENCE_AS_OF} from "../lib/ipoVerifiedEve
 // an authentication redirect instead of indexable content.
 export default function sitemap() {
   const base = "https://www.alphahedgequant.com";
-  const routes = ["", "/about", "/ipo", "/tracker", "/library", "/learn", "/competitions", "/privacy", "/terms", "/disclaimer"];
+  const routes = ["", "/about", "/ipo", "/tracker", "/dark-pool", "/library", "/learn", "/competitions", "/privacy", "/terms", "/disclaimer"];
   const index=routes.map(route => ({
     url: base + route,
     changeFrequency: route === "" ? "weekly" : "monthly",
