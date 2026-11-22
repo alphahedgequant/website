@@ -29,8 +29,8 @@ jobs:
       group: annual-report-${{ github.event_name }}-${{ github.run_id }}
       cancel-in-progress: false
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
         with:
           python-version: '3.12'
       - name: Verify curated audited financial snapshot arithmetic
@@ -67,7 +67,7 @@ jobs:
             --endpoint "$INGEST_URL"
       - name: Preserve review-only output
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: report-review-${{ github.run_id }}
           path: ${{ runner.temp }}/annual-report-review.json
