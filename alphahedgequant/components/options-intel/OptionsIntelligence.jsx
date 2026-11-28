@@ -4,7 +4,9 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import "./optionsIntel.css";
 import "./marketGate.css";
-import { Starfield, Horizon } from "./MarketGate";
+import { Orbit } from "./MarketGate";
+import { StoryTab, RangeMap } from "./Story";
+import { buildStory } from "@/lib/optionsSignals.mjs";
 import { summarize, contractsFromSnapshot, tagExpiries, isSession, istParts, fmtCr, yearsToExpiry } from "@/lib/optionsIntel.mjs";
 import { PRESETS } from "@/lib/optionsWorkspace.mjs";
 import {
@@ -16,19 +18,22 @@ import { WorkspaceTab, AppearancePanel, CommandPalette } from "./Workspace";
 import { Panel, Empty, Metric, CatChart, n2, ist, istDT, tone } from "./ui";
 
 export const INTEL_TABS = [
-  { id: "overview", label: "OVERVIEW" }, { id: "gamma", label: "GAMMA LAB" }, { id: "delta", label: "DELTA LAB" },
-  { id: "flow", label: "OPTIONS FLOW" }, { id: "vol", label: "VOLATILITY LAB" }, { id: "grid", label: "STRIKE GRID" },
-  { id: "replay", label: "HISTORICAL REPLAY" }, { id: "fno", label: "F&O STOCKS" }, { id: "widgets", label: "QUICK WIDGETS" },
-  { id: "workspace", label: "MY WORKSPACE" },
+  { id: "story", label: "Today's Story", desc: <><b>Start here.</b> What the option chain is saying right now, in plain words — ranked by what deserves your attention, with the numbers behind every line.</> },
+  { id: "levels", label: "Levels & Range", desc: <><b>Where is the market boxed in?</b> Support and resistance from open interest, gamma walls, the regime line, max pain and the range options are pricing.</> },
+  { id: "positioning", label: "Who's Positioning", desc: <><b>Who is adding and who is leaving?</b> Fresh open interest, build-ups and unwinds, call-vs-put imbalances, quote pressure and day-trading churn.</> },
+  { id: "decay", label: "Decay & Volatility", desc: <><b>Is premium melting faster than usual?</b> Straddle decay against time alone, implied vs realised volatility, skew and the volatility curve.</> },
+  { id: "expiry", label: "Expiry & Gamma Blasts", desc: <><b>Can a small move explode premiums?</b> Gamma-blast watch, how hedging shifts when the index moves, and how gamma changes into expiry.</> },
+  { id: "grid", label: "Full Chain", desc: <>Every strike across the loaded expiries — OI, change, IV, Greeks and exposure — for when you want the raw numbers.</> },
+  { id: "replay", label: "Replay", desc: <>Rewind today's session minute by minute; every panel follows the same moment.</> },
+  { id: "fno", label: "Stocks", desc: <>The same reading for individual stocks with options.</> },
+  { id: "workspace", label: "My Workspace", desc: <>Build your own screen from any panel. Saved to your account; share the layout with a link.</> },
 ];
 const LAYOUTS = {
-  overview: { cols: 2, panes: [["market-strip", 2], ["key-levels", 2], ["gex-strike", 1], ["pin-pressure", 1], ["oi-leaders", 1], ["unusual-volume", 1], ["atm-iv-rv", 1], ["since-last-visit", 1]] },
-  gamma: { cols: 2, panes: [["gex-strike", 2], ["gex-profile", 1], ["pin-pressure", 1], ["hhi", 1], ["hedge-ladder", 1], ["gamma-decay", 2]] },
-  delta: { cols: 2, panes: [["dex-strike", 2], ["dex-flow", 2], ["charm", 1], ["vanna", 1], ["hedge-ladder", 2]] },
-  flow: { cols: 2, panes: [["oi-change", 2], ["oi-rotation", 1], ["builds-unwinds", 1], ["aggressor", 1], ["unusual-volume", 1], ["futures-buildup", 1], ["oi-tape", 1]] },
-  vol: { cols: 2, panes: [["iv-smile", 1], ["term-structure", 1], ["iv-surface", 2], ["straddle-decay", 1], ["atm-iv-rv", 1]] },
+  levels: { cols: 2, panes: [["range-map", 2], ["key-levels", 2], ["gex-strike", 2], ["pin-pressure", 1], ["gex-profile", 1], ["oi-leaders", 1], ["hhi", 1]] },
+  positioning: { cols: 2, panes: [["oi-change", 2], ["builds-unwinds", 1], ["imbalance", 1], ["dex-flow", 2], ["oi-rotation", 1], ["unusual-volume", 1], ["aggressor", 1], ["futures-buildup", 1], ["oi-tape", 2]] },
+  decay: { cols: 2, panes: [["decay-watch", 1], ["atm-iv-rv", 1], ["iv-smile", 1], ["term-structure", 1], ["iv-surface", 2]] },
+  expiry: { cols: 2, panes: [["gamma-blast", 2], ["gamma-decay", 2], ["hedge-ladder", 1], ["charm", 1], ["dex-strike", 1], ["vanna", 1]] },
   grid: { cols: 1, panes: [["chain-grid", 1]] },
-  widgets: { cols: 3, panes: [["builds-unwinds", 1], ["unusual-volume", 1], ["straddle-decay", 1], ["futures-buildup", 1], ["pin-pressure", 1], ["atm-iv-rv", 1]] },
 };
 
 /** Builds the shared analytics context for one underlying (main view or a comparison pane). */
@@ -212,7 +217,7 @@ function FnoStocks({ ctx, onSymbol, market = "IN" }) {
   );
 }
 
-export default function OptionsIntelligence({ symbol, onSymbol, otherTabs = [], renderOther, initialTab = "overview", tab: controlledTab, onTab, market = "IN", onMarket }) {
+export default function OptionsIntelligence({ symbol, onSymbol, otherTabs = [], renderOther, initialTab = "story", tab: controlledTab, onTab, market = "IN", onMarket }) {
   const [tabState, setTabState] = useState(initialTab);
   const tab = controlledTab ?? tabState;
   const setTab = onTab ?? setTabState;
@@ -256,7 +261,7 @@ export default function OptionsIntelligence({ symbol, onSymbol, otherTabs = [], 
     return () => clearTimeout(t);
   }, [strip, lastVisitPrev]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  const goTab = useCallback(id => setTab(id === "unusual" ? "desk-unusual" : id), [setTab]);
+  const goTab = useCallback(id => setTab(id === "unusual" ? "desk-unusual" : id === "gamma" ? "levels" : id), [setTab]);
   const fullCtx = useMemo(() => ({ ...ctx, strip, plan: store.plan, selectedStrike, selectStrike: setSelectedStrike, goTab, setSymbol: onSymbol, lastVisitPrev, day: ctx.day }),
     [ctx, strip, store.plan, selectedStrike, goTab, onSymbol, lastVisitPrev]);
   baseRef.current = { plan: store.plan, strip, selectStrike: setSelectedStrike, goTab, setSymbol: onSymbol, lastVisitPrev, selectedStrike };
@@ -283,7 +288,10 @@ export default function OptionsIntelligence({ symbol, onSymbol, otherTabs = [], 
   const prefs = { theme: "terminal", palette: "classic", text: "m", heat: 0.75, pin: "#5ba6db", ...store.prefs };
   const rootCls = `oi-root theme-${prefs.theme} pal-${prefs.palette} text-${prefs.text}`;
   const sessionOpen = isSession(market);
-  const intelTabs = INTEL_TABS.map(t => (t.id === "fno" && market === "US" ? { ...t, label: "US STOCKS" } : t));
+  const intelTabs = INTEL_TABS.map(t => (t.id === "fno" && market === "US" ? { ...t, label: "US Stocks" } : t));
+  const hotCount = useMemo(() => (ctx.parsed && ctx.summary ? buildStory({ parsed: ctx.parsed, summary: ctx.summary, snaps: ctx.snaps, nowMs: ctx.nowMs, market, symbol }).signals.filter(x => x.kind === "hot").length : 0),
+    [ctx.parsed, ctx.summary, ctx.snaps, ctx.nowMs, market, symbol]);
+  const activeDesc = intelTabs.find(t => t.id === tab)?.desc;
   const isIntel = intelTabs.some(t => t.id === tab);
   const front = tags[0];
 
@@ -292,8 +300,7 @@ export default function OptionsIntelligence({ symbol, onSymbol, otherTabs = [], 
   return (
     <div className={rootCls} style={{ "--oi-heat": prefs.heat, "--oi-pin": prefs.pin }} data-options-intel>
       <div className="oi-hero">
-        <Starfield density={0.00012} />
-        <Horizon compact />
+        <Orbit size={300} />
         <div className="oi-row" style={{ justifyContent: "space-between", alignItems: "flex-end", gap: 14 }}>
           <div>
             <div className="oi-kicker">ALPHAHEDGEQUANT / OPTIONS ANALYTICS / {market === "US" ? "UNITED STATES" : "INDIA"}</div>
@@ -356,13 +363,15 @@ export default function OptionsIntelligence({ symbol, onSymbol, otherTabs = [], 
       )}
 
       <nav className="oi-tabs" role="tablist" aria-label="Options analytics">
-        {intelTabs.map(t => <button key={t.id} role="tab" aria-selected={tab === t.id} onClick={() => setTab(t.id)}>{t.label}</button>)}
+        {intelTabs.map(t => <button key={t.id} role="tab" aria-selected={tab === t.id} onClick={() => setTab(t.id)}>{t.label}{t.id === "story" && hotCount > 0 && <span className="oi-badge" title="Readings that need attention">{hotCount}</span>}</button>)}
         {otherTabs.length > 0 && <><span className="oi-sep" /><span className="oi-group">OTHER TOOLS</span></>}
         {otherTabs.map(t => <button key={t.id} role="tab" aria-selected={tab === t.id} onClick={() => setTab(t.id)}>{t.label}</button>)}
       </nav>
 
+      {activeDesc && <div className="oi-tabdesc">{activeDesc}</div>}
       <div className="oi-body">
         {isIntel && <ContractDetail ctx={fullCtx} />}
+        {tab === "story" && <StoryTab ctx={fullCtx} />}
         {LAYOUTS[tab] && <Layout id={tab} ctx={fullCtx} />}
         {tab === "replay" && <ReplayTab ctx={fullCtx} replay={replay} setReplay={setReplay} series={series} loading={seriesLoading} />}
         {tab === "fno" && <FnoStocks ctx={fullCtx} onSymbol={onSymbol} market={market} />}

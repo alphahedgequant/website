@@ -4,6 +4,8 @@ on:
     paths:
       - "alphahedgequant/lib/optionsIntel.mjs"
       - "alphahedgequant/lib/optionsWorkspace.mjs"
+      - "alphahedgequant/lib/optionsSignals.mjs"
+      - "alphahedgequant/components/Nav.jsx"
       - "alphahedgequant/components/options-intel/**"
       - "alphahedgequant/app/options/**"
       - "alphahedgequant/app/terminal/**"
@@ -40,7 +42,7 @@ jobs:
         run: npm ci --ignore-scripts --no-audit --no-fund
       - name: Greeks, GEX/DEX, levels, flow, replay snapshots and layout-only workspaces
         working-directory: alphahedgequant
-        run: node --test tests/optionsIntel.test.mjs tests/optionsWorkspace.test.mjs
+        run: node --test tests/optionsIntel.test.mjs tests/optionsWorkspace.test.mjs tests/optionsSignals.test.mjs
       - name: Build entire website
         working-directory: alphahedgequant
         env:

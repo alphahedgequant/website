@@ -114,15 +114,65 @@ export function charmOver(S, K, T, sigma, type, horizonYears, r = MODEL_RATE) {
   return a && b ? b.delta - a.delta : null;
 }
 
+/** Implied volatility from an option price (bisection, r = MODEL_RATE, no dividends).
+ *  Returns null when the price is outside no-arbitrage bounds or inputs are unusable. */
+export function impliedVol(price, S, K, T, type, r = MODEL_RATE) {
+  if (!(price > 0 && S > 0 && K > 0 && T > 0)) return null;
+  const disc = Math.exp(-r * T);
+  const lower = type === "CE" ? Math.max(0, S - K * disc) : Math.max(0, K * disc - S);
+  const upper = type === "CE" ? S : K * disc;
+  if (price <= lower + 1e-9 || price >= upper) return null;
+  let lo = 0.005, hi = 5;
+  const f = v => bsGreeks(S, K, T, v, type, r).price - price;
+  if (f(lo) > 0 || f(hi) < 0) return null;
+  for (let i = 0; i < 80; i++) { const mid = (lo + hi) / 2; if (f(mid) > 0) hi = mid; else lo = mid; if (hi - lo < 1e-6) break; }
+  return (lo + hi) / 2;
+}
+/** Quote used for AHQ's implied volatility: bid/ask mid when the spread is sane, else LTP. */
+export function quoteForIv(q) {
+  const bid = num(q.bid_price), ask = num(q.ask_price), ltp = num(q.ltp);
+  if (bid > 0 && ask > 0 && ask >= bid && (ask - bid) <= Math.max(0.5, 0.25 * ask)) return { price: (bid + ask) / 2, basis: "mid" };
+  if (ltp > 0) return { price: ltp, basis: "LTP" };
+  return null;
+}
+
 // ---------- normalisation ----------
-/** Chain payload (backend /api/option-chain) → flat contract list + data-quality report. */
-export function contractsFromChain(payload) {
+/** Spot level implied by put–call parity near the money: S* = C − P + K·e^(−rT), median over strikes
+ *  within ±1% that have sane two-sided quotes. The option market prices off this forward-consistent level,
+ *  which can differ from the quoted index (carry, dividends, stale spot). Returns null when not estimable. */
+export function parityImpliedSpot(rows, S, T, r = MODEL_RATE) {
+  if (!(S > 0 && T > 0)) return null;
+  const est = [];
+  for (const row of rows || []) {
+    const K = num(row.strike_price);
+    if (!(K > 0) || Math.abs(K - S) / S > 0.01 || !row.call || !row.put) continue;
+    const c = quoteForIv(row.call), p = quoteForIv(row.put);
+    if (c?.basis !== "mid" || p?.basis !== "mid") continue;
+    est.push(c.price - p.price + K * Math.exp(-r * T));
+  }
+  if (!est.length) return null;
+  est.sort((a, b) => a - b);
+  const m = est[Math.floor(est.length / 2)];
+  return Math.abs(m - S) / S <= 0.03 ? m : null;
+}
+
+/** Chain payload (backend /api/option-chain) → flat contract list + data-quality report.
+ *  AHQ IV is solved from each quote (bid/ask mid, LTP fallback) against the parity-implied spot with AHQ's
+ *  time convention, so model prices reproduce market prices. Provider IV is kept as an observed field and is
+ *  only used when a quote cannot be inverted. Each contract carries `basis` = implied spot − quoted spot. */
+export function contractsFromChain(payload, { nowMs } = {}) {
   const data = payload?.data ?? payload;
+  const asOf = nowMs ?? (Date.parse(data?.received_at) || Date.now());
+  const spot = num(data?.spot_price);
   const expiry = data?.expiry || null;
   const lotSize = num(data?.lot_size);
   const market = data?.market === "US" ? "US" : "IN";
+  const T0 = yearsToExpiry(expiry, asOf, market);
+  const implied = parityImpliedSpot(data?.strikes, spot, T0);
+  const basis = implied != null ? implied - spot : 0;
   const out = [];
-  const quality = { contracts: 0, usable: 0, missingIv: 0, missingOi: 0, invalidIv: 0 };
+  const quality = { contracts: 0, usable: 0, missingIv: 0, missingOi: 0, invalidIv: 0, solvedIv: 0, providerIvFallback: 0,
+    impliedSpot: implied, basis };
   for (const row of data?.strikes || []) {
     const K = num(row.strike_price);
     if (!(K > 0)) continue;
@@ -131,10 +181,15 @@ export function contractsFromChain(payload) {
       quality.contracts++;
       const ivPct = num(q.iv);
       const oi = num(q.oi);
-      let iv = null;
-      if (ivPct == null) quality.missingIv++;
-      else if (ivPct <= 0.5 || ivPct > 300) quality.invalidIv++;
-      else iv = ivPct / 100;
+      const providerIv = ivPct != null && ivPct > 0.5 && ivPct <= 300 ? ivPct / 100 : null;
+      const quote = quoteForIv(q);
+      const Tq = yearsToExpiry(row.expiry || expiry, asOf, market);
+      const solved = quote && spot > 0 && Tq ? impliedVol(quote.price, spot + basis, K, Tq, type) : null;
+      let iv = null, ivSource = null;
+      if (solved != null && solved > 0.01 && solved < 3) { iv = solved; ivSource = "AHQ (" + quote.basis + ")"; quality.solvedIv++; }
+      else if (providerIv != null) { iv = providerIv; ivSource = "provider"; quality.providerIvFallback++; }
+      else if (ivPct == null) quality.missingIv++;
+      else quality.invalidIv++;
       if (oi == null) quality.missingOi++;
       if (iv != null && oi != null) quality.usable++;
       out.push({
@@ -142,15 +197,24 @@ export function contractsFromChain(payload) {
         oi, oiChg: num(q.oi_change), vol: num(q.volume), ltp: num(q.ltp),
         bid: num(q.bid_price) > 0 ? num(q.bid_price) : null,
         ask: num(q.ask_price) > 0 ? num(q.ask_price) : null,
-        iv, lot: num(q.lot_size) ?? lotSize, key: q.instrument_key || `${expiry}:${K}:${type}`, market,
+        bidQty: num(q.bid_qty), askQty: num(q.ask_qty),
+        iv, ivSource, providerIv, basis, lot: num(q.lot_size) ?? lotSize, key: q.instrument_key || `${expiry}:${K}:${type}`, market,
       });
     }
   }
-  return { contracts: out, quality, spot: num(data?.spot_price), expiry, lotSize, receivedAt: data?.received_at || null, market };
+  return { contracts: out, quality, spot, expiry, lotSize, receivedAt: data?.received_at || null, market, basis };
+}
+
+/** Greeks for a contract at a quoted-spot level S (applies the contract's parity basis). */
+export function greeksFor(c, S, nowMs = Date.now(), { ivShift = 0, r = MODEL_RATE, T: Tover } = {}) {
+  if (c?.iv == null || !(S > 0)) return null;
+  const T = Tover ?? yearsToExpiry(c.expiry, nowMs, c.market);
+  if (T == null) return null;
+  return bsGreeks(S + (c.basis || 0), c.strike, T, Math.max(0.005, c.iv + ivShift), c.type, r);
 }
 
 // ---------- compact snapshots for replay (IndexedDB) ----------
-const F = ["oi", "ltp", "iv", "vol", "bid", "ask", "oiChg"];
+const F = ["oi", "ltp", "iv", "vol", "bid", "ask", "oiChg", "bidQty", "askQty"]; // appended fields stay backward compatible
 export function snapshotFromChain(parsed, observedAt = Date.now()) {
   const byStrike = new Map();
   for (const c of parsed.contracts) {
@@ -160,7 +224,7 @@ export function snapshotFromChain(parsed, observedAt = Date.now()) {
   }
   return {
     t: parsed.receivedAt ? Date.parse(parsed.receivedAt) : observedAt, obs: observedAt,
-    S: parsed.spot, expiry: parsed.expiry, lot: parsed.lotSize, rows: [...byStrike.values()],
+    S: parsed.spot, B: parsed.basis || 0, expiry: parsed.expiry, lot: parsed.lotSize, market: parsed.market || "IN", rows: [...byStrike.values()],
   };
 }
 export function contractsFromSnapshot(snap) {
@@ -169,12 +233,12 @@ export function contractsFromSnapshot(snap) {
     for (const [type, v] of [["CE", c], ["PE", p]]) {
       if (!v) continue;
       const o = Object.fromEntries(F.map((f, i) => [f, v[i]]));
-      out.push({ expiry: snap.expiry, strike: K, type, oi: o.oi, oiChg: o.oiChg, vol: o.vol, ltp: o.ltp,
-        bid: o.bid, ask: o.ask, iv: o.iv == null ? null : o.iv / 100, lot: snap.lot, key: `${snap.expiry}:${K}:${type}` });
+      out.push({ expiry: snap.expiry, strike: K, type, oi: o.oi, oiChg: o.oiChg ?? null, vol: o.vol, ltp: o.ltp,
+        bid: o.bid, ask: o.ask, bidQty: o.bidQty ?? null, askQty: o.askQty ?? null, market: snap.market || "IN", basis: snap.B || 0, iv: o.iv == null ? null : o.iv / 100, lot: snap.lot, key: `${snap.expiry}:${K}:${type}` });
     }
   }
   return { contracts: out, spot: snap?.S ?? null, expiry: snap?.expiry ?? null, lotSize: snap?.lot ?? null,
-    receivedAt: snap?.t ? new Date(snap.t).toISOString() : null, quality: null };
+    receivedAt: snap?.t ? new Date(snap.t).toISOString() : null, quality: null, market: snap?.market || "IN", basis: snap?.B || 0 };
 }
 
 // ---------- exposures ----------
@@ -185,7 +249,7 @@ export function contractExposure(c, opts) {
   const T = yearsToExpiry(c.expiry, opts.nowMs ?? Date.now(), c.market);
   if (T == null) return null;
   const sigma = Math.max(0.005, c.iv + (opts.ivShift || 0));
-  const g = bsGreeks(S, c.strike, T, sigma, c.type, opts.r ?? MODEL_RATE);
+  const g = bsGreeks(S + (c.basis || 0), c.strike, T, sigma, c.type, opts.r ?? MODEL_RATE);
   if (!g) return null;
   const sign = c.type === "CE" ? 1 : -1;
   return {
@@ -367,8 +431,8 @@ export function charmByStrike(contracts, opts) {
     if (c.iv == null || c.oi == null) continue;
     const T = yearsToExpiry(c.expiry, now, c.market);
     if (T == null) continue;
-    const oneDay = charmOver(S, c.strike, T, c.iv, c.type, 1 / 365);
-    const toExp = charmOver(S, c.strike, T, c.iv, c.type, T);
+    const oneDay = charmOver(S + (c.basis || 0), c.strike, T, c.iv, c.type, 1 / 365);
+    const toExp = charmOver(S + (c.basis || 0), c.strike, T, c.iv, c.type, T);
     if (oneDay == null) continue;
     if (!map.has(c.strike)) map.set(c.strike, { strike: c.strike, callDay: 0, putDay: 0, callToExpiry: 0, putToExpiry: 0 });
     const r = map.get(c.strike), side = c.type === "CE" ? "call" : "put";
@@ -438,7 +502,7 @@ export function skew25(contracts, S, nowMs = Date.now()) {
   for (const c of contracts) {
     if (c.iv == null) continue;
     const T = yearsToExpiry(c.expiry, nowMs, c.market);
-    const g = bsGreeks(S, c.strike, T, c.iv, c.type);
+    const g = greeksFor(c, S, nowMs, { T });
     if (!g) continue;
     if (c.type === "CE" && (!c25 || Math.abs(g.delta - 0.25) < Math.abs(c25.d - 0.25))) c25 = { d: g.delta, iv: c.iv * 100, strike: c.strike };
     if (c.type === "PE" && (!p25 || Math.abs(g.delta + 0.25) < Math.abs(p25.d + 0.25))) p25 = { d: g.delta, iv: c.iv * 100, strike: c.strike };

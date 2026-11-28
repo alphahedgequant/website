@@ -13,6 +13,7 @@ import {
   MODEL, OBSERVED, ESTIMATED, BROWSER, UP, DOWN, TEXT, INFO, ACCENT, PIN,
 } from "./ui";
 import { loadSymbolHistory } from "./useOptionsData";
+import { GammaBlastView, DecayWatchView, ImbalanceView, RangeMap, StoryTab, useStory } from "./Story";
 
 const GEX_METHOD = [
   "GEX = Γ × OI × S² × 1% (₹ change in delta-notional for a 1% underlying move). OI is in units (Upstox quantity).",
@@ -589,7 +590,18 @@ export function ContractDetail({ ctx }) {
 }
 
 // ---------------- registry for tabs, widgets and workspace panes ----------------
+function RangeMapView({ ctx, span }) {
+  const story = useStory(ctx);
+  return <Panel title="Range map" span={span} detail="The levels that matter around spot, on one line">{story.levels ? <RangeMap levels={story.levels} market={ctx.market} onPick={ctx.selectStrike} /> : noChain(ctx) || <Empty title="NO LEVELS" />}</Panel>;
+}
+function StoryView({ ctx }) { return <StoryTab ctx={ctx} />; }
+
 export const VIEWS = {
+  story: { title: "Today's story", C: StoryView },
+  "range-map": { title: "Range map", C: RangeMapView },
+  "gamma-blast": { title: "Gamma blast watch", C: GammaBlastView },
+  "decay-watch": { title: "Decay vs normal", C: DecayWatchView },
+  imbalance: { title: "Imbalances", C: ImbalanceView },
   "overview-cards": { title: "Key levels", C: KeyLevels },
   "key-levels": { title: "Key levels", C: KeyLevels },
   "market-strip": { title: "Market strip", C: MarketStripView },

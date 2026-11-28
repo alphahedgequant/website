@@ -7,43 +7,34 @@ import "./marketGate.css";
 
 const reducedMotion = () => typeof window !== "undefined" && window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
 
-export function Starfield({ density = 0.00018, className = "mg-stars" }) {
-  const ref = useRef(null);
-  useEffect(() => {
-    const canvas = ref.current; if (!canvas) return;
-    const ctx = canvas.getContext("2d");
-    let raf = 0, stars = [], w = 0, h = 0, dpr = 1;
-    const resize = () => {
-      dpr = Math.min(2, window.devicePixelRatio || 1);
-      w = canvas.clientWidth; h = canvas.clientHeight;
-      canvas.width = w * dpr; canvas.height = h * dpr; ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-      stars = Array.from({ length: Math.max(40, Math.round(w * h * density)) }, () => ({
-        x: Math.random() * w, y: Math.random() * h, r: Math.random() * 1.1 + 0.2,
-        a: Math.random() * 0.6 + 0.2, s: Math.random() * 0.8 + 0.2, p: Math.random() * Math.PI * 2,
-        g: Math.random() < 0.12,
-      }));
-    };
-    const draw = t => {
-      ctx.clearRect(0, 0, w, h);
-      for (const s of stars) {
-        const tw = reducedMotion() ? 1 : 0.65 + 0.35 * Math.sin(t / 1000 * s.s + s.p);
-        ctx.globalAlpha = s.a * tw;
-        ctx.fillStyle = s.g ? "#7ef0b6" : "#e9eef6";
-        ctx.beginPath(); ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2); ctx.fill();
-      }
-      ctx.globalAlpha = 1;
-      if (!reducedMotion() && !document.hidden) raf = requestAnimationFrame(draw);
-    };
-    resize(); raf = requestAnimationFrame(draw);
-    const onVis = () => { if (!document.hidden) { cancelAnimationFrame(raf); raf = requestAnimationFrame(draw); } };
-    window.addEventListener("resize", resize); document.addEventListener("visibilitychange", onVis);
-    return () => { cancelAnimationFrame(raf); window.removeEventListener("resize", resize); document.removeEventListener("visibilitychange", onVis); };
-  }, [density]);
-  return <canvas ref={ref} className={className} aria-hidden="true" />;
-}
-
-export function Horizon({ compact = false }) {
-  return <div className={"mg-horizon" + (compact ? " is-compact" : "")} aria-hidden="true"><span className="mg-arc" /><span className="mg-comet" /></div>;
+/** AHQ α orbit: the homepage sphere, with orbits carrying live-signal "satellites". Pure SVG + CSS. */
+export function Orbit({ size = 360, className = "" }) {
+  return (
+    <div className={"ahq-orbit " + className} style={{ width: size, height: size }} aria-hidden="true">
+      <svg viewBox="0 0 400 400" width="100%" height="100%">
+        <defs>
+          <radialGradient id="orbSphere" cx="38%" cy="32%" r="70%">
+            <stop offset="0" stopColor="#4a4636" /><stop offset=".35" stopColor="#1c1d1f" /><stop offset=".8" stopColor="#0a0b0d" /><stop offset="1" stopColor="#050608" />
+          </radialGradient>
+          <radialGradient id="orbGlow" cx="50%" cy="50%" r="50%"><stop offset=".55" stopColor="#2dd482" stopOpacity="0" /><stop offset=".72" stopColor="#2dd482" stopOpacity=".16" /><stop offset="1" stopColor="#2dd482" stopOpacity="0" /></radialGradient>
+          <linearGradient id="orbAlpha" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stopColor="#eacd78" /><stop offset="1" stopColor="#a8873a" /></linearGradient>
+        </defs>
+        <circle cx="200" cy="200" r="196" fill="url(#orbGlow)" className="orb-breathe" />
+        <circle cx="200" cy="200" r="132" fill="url(#orbSphere)" stroke="rgba(227,190,79,.18)" />
+        <text x="200" y="236" textAnchor="middle" className="orb-alpha" fill="url(#orbAlpha)">α</text>
+        {[["o1", -18, 182, 60, 22], ["o2", 28, 176, 74, 34], ["o3", -62, 168, 50, 48]].map(([id, tilt, rx, ry, dur]) => (
+          <g key={id} transform={`rotate(${tilt} 200 200)`}>
+            <ellipse cx="200" cy="200" rx={rx} ry={ry} className="orb-path" />
+            <g className="orb-spin" style={{ animationDuration: dur + "s" }}>
+              <g transform={`translate(200 200) scale(${rx / 100} ${ry / 100})`}>
+                <circle cx="100" cy="0" r={3.2 / (rx / 100)} className="orb-sat" />
+              </g>
+            </g>
+          </g>
+        ))}
+      </svg>
+    </div>
+  );
 }
 
 function useLevels() {
@@ -80,12 +71,16 @@ export default function MarketGate({ onPick }) {
   };
   return (
     <section className={"mg-root" + (chosen ? " is-leaving" : "")} aria-labelledby="mg-title">
-      <Starfield />
-      <Horizon />
+      <div className="mg-grid-bg" aria-hidden="true" />
       <div className="mg-inner">
-        <div className="mg-kicker"><span className="mg-alpha">α</span> AlphaHedgeQuant <i /> Options Analytics</div>
-        <h1 id="mg-title" className="mg-title">Read every option chain.<br /><span>Start with a market.</span></h1>
-        <p className="mg-sub">Gamma, delta, open interest and volatility — strike by strike, expiry by expiry, for the market you choose.</p>
+        <div className="mg-hero">
+          <div className="mg-copy">
+            <div className="mg-kicker"><span className="mg-alpha">α</span> AlphaHedgeQuant <i /> Options Analytics</div>
+            <h1 id="mg-title" className="mg-title">Everyone sees the chain.<br /><span>We tell you what it means.</span></h1>
+            <p className="mg-sub">Plain-language readings of open interest, gamma, decay and imbalances — what changed, why it matters, and the numbers behind it. Pick a market to begin.</p>
+          </div>
+          <Orbit size={340} className="mg-orbit" />
+        </div>
         <div className="mg-cards" role="list">
           {MARKETS.map((m, i) => (
             <button key={m.id} type="button" role="listitem" className={"mg-card" + (chosen === m.id ? " is-chosen" : chosen ? " is-dim" : "")}

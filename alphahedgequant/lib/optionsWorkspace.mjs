@@ -2,12 +2,13 @@
 // A workspace NEVER contains market data, credentials, account details or private saved data.
 
 export const VIEW_IDS = [
+  "story", "range-map", "gamma-blast", "decay-watch", "imbalance",
   "overview-cards", "market-strip", "gex-strike", "gex-profile", "key-levels", "pin-pressure", "hhi", "hedge-ladder",
   "gamma-decay", "dex-strike", "dex-flow", "charm", "vanna", "oi-change", "oi-rotation", "builds-unwinds",
   "aggressor", "unusual-volume", "futures-buildup", "iv-smile", "term-structure", "iv-surface", "straddle-decay",
   "atm-iv-rv", "chain-grid", "oi-tape", "since-last-visit",
 ];
-export const PLAN_PRO_VIEWS = new Set(["pin-pressure", "hhi", "hedge-ladder", "gamma-decay", "dex-strike", "dex-flow",
+export const PLAN_PRO_VIEWS = new Set(["gamma-blast", "pin-pressure", "hhi", "hedge-ladder", "gamma-decay", "dex-strike", "dex-flow",
   "charm", "vanna", "aggressor", "unusual-volume", "straddle-decay", "iv-surface"]);
 
 const SYMBOL = /^[A-Z0-9&._-]{1,40}$/;
@@ -69,17 +70,16 @@ export function decodeLayout(code) {
 
 export const PRESETS = [
   { id: "preset-expiry", name: "Expiry day", cols: 3, panes: [
-    { view: "key-levels" }, { view: "pin-pressure" }, { view: "straddle-decay" },
-    { view: "gex-strike", span: 2 }, { view: "gamma-decay" }, { view: "builds-unwinds", span: 2 }, { view: "atm-iv-rv" }] },
-  { id: "preset-scalp", name: "Scalping", cols: 3, panes: [
-    { view: "key-levels" }, { view: "hedge-ladder" }, { view: "aggressor" },
-    { view: "oi-rotation", span: 2 }, { view: "builds-unwinds" }, { view: "oi-tape", span: 3 }] },
-  { id: "preset-swing", name: "Swing", cols: 2, panes: [
-    { view: "gex-profile" }, { view: "term-structure" }, { view: "iv-smile" }, { view: "dex-strike" }, { view: "oi-change", span: 2 }] },
+    { view: "range-map", span: 2 }, { view: "gamma-blast" }, { view: "decay-watch" }, { view: "pin-pressure" }, { view: "builds-unwinds" },
+    { view: "gex-strike", span: 2 }, { view: "imbalance" }] },
+  { id: "preset-scalp", name: "Intraday scalping", cols: 3, panes: [
+    { view: "range-map", span: 3 }, { view: "builds-unwinds" }, { view: "imbalance" }, { view: "aggressor" }, { view: "oi-rotation", span: 2 }, { view: "oi-tape" }] },
+  { id: "preset-swing", name: "Swing positioning", cols: 2, panes: [
+    { view: "range-map", span: 2 }, { view: "oi-change", span: 2 }, { view: "term-structure" }, { view: "iv-smile" }, { view: "dex-strike" }, { view: "gex-profile" }] },
   { id: "preset-review", name: "Post-market review", cols: 2, panes: [
-    { view: "since-last-visit" }, { view: "key-levels" }, { view: "oi-rotation" }, { view: "dex-flow" }, { view: "atm-iv-rv" }, { view: "hhi" }] },
+    { view: "story", span: 2 }, { view: "since-last-visit" }, { view: "oi-rotation" }, { view: "decay-watch" }, { view: "hhi" }] },
   { id: "preset-compare", name: "Compare NIFTY vs BANKNIFTY", cols: 2, panes: [
+    { view: "range-map", symbol: "NIFTY" }, { view: "range-map", symbol: "BANKNIFTY" },
     { view: "key-levels", symbol: "NIFTY" }, { view: "key-levels", symbol: "BANKNIFTY" },
-    { view: "gex-strike", symbol: "NIFTY" }, { view: "gex-strike", symbol: "BANKNIFTY" },
-    { view: "straddle-decay", symbol: "NIFTY" }, { view: "straddle-decay", symbol: "BANKNIFTY" }] },
+    { view: "gex-strike", symbol: "NIFTY" }, { view: "gex-strike", symbol: "BANKNIFTY" }] },
 ];

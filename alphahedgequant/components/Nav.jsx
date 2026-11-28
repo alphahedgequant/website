@@ -11,7 +11,7 @@ const products = [
   { href: "/models", label: "Quant Models", description: "Systematic strategies & signals", glyph: "∑" },
   { href: "/backtest", label: "AI Backtesting", description: "Test and evaluate ideas", glyph: "↗" },
   { href: "/copilot", label: "AI Copilot", description: "Natural-language strategy research", glyph: "✳" },
-  { href: "/options", label: "Options Analytics", description: "Option-chain intelligence", glyph: "◈" },
+  { href: "/options", label: "Options Analytics", description: "What the option chain is saying, in plain words", glyph: "◈" },
   { href: "/dark-pool", label: "Dark Pool & ECN Tracker", description: "Weekly FINRA/SEC historical intelligence", glyph: "◉" },
   { href: "/tracker", label: "Trust Tracker", description: "Analyst calls and accountability", glyph: "◎" },
 ];
@@ -98,6 +98,7 @@ export default function Nav() {
               </div>
             ))}
             <Link href="/terminal" className={`whitespace-nowrap rounded-md border border-amber/40 bg-amber/10 px-3 py-2 text-[13px] font-semibold transition-colors hover:border-amber hover:bg-amber/20 ${path.startsWith("/terminal")?"text-amber":"text-body"}`}>▦ Quant Terminal</Link>
+            <Link href="/options" className={`whitespace-nowrap text-[13px] xl:text-sm transition-colors hover:text-body ${path.startsWith("/options")?"text-amber":"text-muted"}`}><span className="xl:hidden">Options</span><span className="hidden xl:inline">Options Analytics</span></Link>
             {[
               {href:"/ipo",label:"IPO Intelligence"},
               {href:"/learn",label:"Learn, Interviews & Mental Math 🧩"},
@@ -105,7 +106,7 @@ export default function Nav() {
               
               {href:"/about",label:"About"}
             ].map(item=><Link key={item.href} href={item.href}
-              className={`whitespace-nowrap text-[13px] xl:text-sm transition-colors hover:text-body ${item.href==="/competitions"?"hidden xl:inline":""} ${path===item.href || path.startsWith(item.href+"/") ? "text-amber" : "text-muted"}`}>
+              className={`whitespace-nowrap text-[13px] xl:text-sm transition-colors hover:text-body ${item.href==="/competitions"?"hidden xl:inline":item.href==="/about"?"hidden 2xl:inline":""} ${path===item.href || path.startsWith(item.href+"/") ? "text-amber" : "text-muted"}`}>
               {item.label}
             </Link>)}
           </nav>
@@ -145,6 +146,7 @@ export default function Nav() {
           <div className="my-4 border-t border-line" />
           <p className="mb-2 font-mono text-[11px] uppercase tracking-widest text-amber">Featured</p>
           {[
+            {href:"/options",label:"Options Analytics"},
             {href:"/ipo",label:"IPO Intelligence"},
             {href:"/learn",label:"Learn, Interviews & Mental Math 🧩"},
             {href:"/competitions",label:"Competitions"},

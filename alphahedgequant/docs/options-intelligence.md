@@ -22,6 +22,31 @@ in production against live data), **blocked**, **planned**.
 | Cloud workspaces | `app/api/options/workspace/route.js` | Clerk user + Neon table `ahq_options_workspace` (auto-created). |
 | Tests | `tests/optionsIntel.test.mjs`, `tests/optionsWorkspace.test.mjs`, `tests/fixtures/` | CI: `.github/workflows/options-intelligence.yml`. |
 
+## Story-first page (Nov 2026 revision)
+
+The page opens on **Today's Story** (`lib/optionsSignals.mjs`): a one-sentence read, a range map
+(spot, priced range, OI walls, gamma walls, regime line, max pain, pin) and ranked plain-language readings.
+Each reading carries its evidence numbers and its rule ("How we read this"), and is labelled observed /
+modelled / common interpretation. Readings only appear when their inputs exist — e.g. "gamma blast in
+progress" needs an observed premium burst in this browser's snapshots; "decay vs normal" needs ≥20 minutes
+of snapshots; IV-vs-RV needs realised-volatility history.
+
+Tabs are questions: Today's Story · Levels & Range · Who's Positioning · Decay & Volatility ·
+Expiry & Gamma Blasts · Full Chain · Replay · Stocks · My Workspace (then the original desk tools).
+
+### Implied volatility and the parity spot (revised)
+
+Provider IVs on 28 Nov implied ≈3.9 days to expiry versus 3.0 calendar days, so re-pricing with them did not
+reproduce market prices (ATM straddle 260 vs 302). AHQ now:
+1. estimates the spot level the option market prices off from ATM put–call parity
+   (S* = C − P + K·e^(−rT), median over strikes within ±1% with two-sided quotes) — on 28 Nov 25,570.7 vs the
+   published close 25,607.2 (NSE's close is a 30-minute average; options quote the 15:30 market);
+2. solves each contract's IV from its bid/ask mid (LTP fallback) against S* with AHQ's time convention;
+3. computes every Greek at S* (each contract stores `basis` = S* − quoted spot); exposures stay scaled by the
+   quoted spot. Provider IV remains visible as an observed field and is used only when a quote can't be inverted.
+Result on the fixture: call and put IV agree within 0.3 vol pts at every strike near the money, and the model
+reproduces the market straddle (302.05) exactly. Net GEX +₹18,562 Cr, flip ≈ 25,481, walls 25,800 / 25,500.
+
 ## Calculation rules (also shown in each panel's "Method & assumptions")
 
 * **Greeks:** Black–Scholes on spot, r = 6.5%, q = 0, calendar time (ACT/365) to 15:30 IST on expiry,
