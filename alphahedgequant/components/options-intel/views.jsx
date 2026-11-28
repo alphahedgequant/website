@@ -36,7 +36,7 @@ export function useExposure(ctx, opts = {}) {
 function noChain(ctx) {
   if (ctx.parsed?.contracts?.length) return null;
   if (ctx.status === "notConnected") return <Empty title="US OPTIONS FEED NOT CONNECTED">This view activates as soon as a US options data provider is connected. Nothing is estimated or simulated in the meantime; US index levels and VIX in the strip above are live.</Empty>;
-  return <Empty title={ctx.status === "loading" ? "LOADING CHAIN…" : "NO VERIFIED OPTION CHAIN"}>{ctx.error || "Analytics are withheld until the provider returns a chain."}</Empty>;
+  return <Empty title={ctx.status === "loading" ? "LOADING CHAIN…" : ctx.status === "waking" ? "WAKING THE DATA SERVICE…" : ctx.status === "expired" ? "UPSTOX SESSION EXPIRED" : "NO VERIFIED OPTION CHAIN"}>{ctx.error || "Analytics are withheld until the provider returns a chain."}</Empty>;
 }
 const qualityLine = ctx => {
   const q = ctx.parsed?.quality;

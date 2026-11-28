@@ -148,7 +148,7 @@ export function StoryTab({ ctx }) {
   const [topic, setTopic] = useState("all");
   const [primer, setPrimer] = useState(false);
   if (ctx.status === "notConnected") return <Empty title="US OPTIONS FEED NOT CONNECTED">Today's story for US markets appears as soon as a US options data provider is connected. US index levels and VIX above are live.</Empty>;
-  if (!ctx.parsed?.contracts?.length || !story.headline) return <Empty title={ctx.status === "loading" ? "READING TODAY'S OPTIONS DATA…" : "NO VERIFIED OPTION CHAIN"}>{ctx.error || "The story is written only from a verified chain."}</Empty>;
+  if (!ctx.parsed?.contracts?.length || !story.headline) return <Empty title={ctx.status === "loading" ? "READING TODAY'S OPTIONS DATA…" : ctx.status === "waking" ? "WAKING THE DATA SERVICE…" : ctx.status === "expired" ? "UPSTOX SESSION EXPIRED" : "NO VERIFIED OPTION CHAIN"}>{ctx.error || "The story is written only from a verified chain."}</Empty>;
   const shown = story.signals.filter(s => topic === "all" || s.topic === topic);
   const counts = Object.fromEntries(TOPICS.map(([k]) => [k, k === "all" ? story.signals.length : story.signals.filter(s => s.topic === k).length]));
   const hot = story.signals.filter(s => s.kind === "hot").length, watch = story.signals.filter(s => s.kind === "watch").length;
