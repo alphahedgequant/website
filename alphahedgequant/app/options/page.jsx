@@ -3,6 +3,13 @@ import { useState, useEffect, useMemo, useRef, useCallback } from "react";
 import OptionIVAnalytics from "@/components/OptionIVAnalytics";
 import OptionOIProfile from "@/components/OptionOIProfile";
 import UnusualOptionsMonitor from "@/components/UnusualOptionsMonitor";
+import OptionsIntelligence from "@/components/options-intel/OptionsIntelligence";
+
+const DESK_TABS = [
+  { id: "desk-chain", label: "OPTION CHAIN", tab: "chain" },
+  { id: "desk-builder", label: "STRATEGY BUILDER", tab: "builder" },
+  { id: "desk-unusual", label: "UNUSUAL MOVEMENTS", tab: "unusual" },
+];
 import {
   XAxis, YAxis, CartesianGrid, Tooltip,
   ResponsiveContainer, ReferenceLine, Area, AreaChart,
@@ -43,7 +50,11 @@ function legPayoffAtExpiry(leg, spotAtExpiry) {
 }
 
 export default function OptionsPage({initialUnderlying=null,embedded=false}) {
-  const [tab, setTab] = useState("chain");
+  // Spec analytics open first; the existing desk tools follow as "Other tools" tabs.
+  const [section, setSection] = useState("overview");
+  const deskTab = DESK_TABS.find(t => t.id === section)?.tab || null;
+  const tab = deskTab || "chain";
+  const setTab = useCallback(t => setSection(DESK_TABS.find(d => d.tab === t)?.id || "desk-chain"), []);
   const [underlying, setUnderlying] = useState(() => /^[A-Z0-9&_.-]{1,40}$/i.test(initialUnderlying||"")?String(initialUnderlying).toUpperCase():"NIFTY");
   const [expiry, setExpiry] = useState("");
   const [stockQuery, setStockQuery] = useState("");
@@ -150,8 +161,9 @@ export default function OptionsPage({initialUnderlying=null,embedded=false}) {
     if(/^[A-Z0-9&._-]{1,40}$/.test(next)&&next!==underlying)chooseUnderlying(next);
     // Trigger only when parent ticker changes; choosing a chain locally stays possible.
   },[initialUnderlying,chooseUnderlying]);
-  useEffect(() => { loadChain(underlying, ""); }, [underlying, loadChain]);
-  useEffect(() => { if (expiry && expiry !== "(demo)") loadChain(underlying, expiry); }, [expiry, underlying, loadChain]);
+  const deskOpen = !!deskTab;
+  useEffect(() => { if (deskOpen) loadChain(underlying, ""); }, [underlying, loadChain, deskOpen]);
+  useEffect(() => { if (deskOpen && expiry && expiry !== "(demo)") loadChain(underlying, expiry); }, [expiry, underlying, loadChain, deskOpen]);
 
   useEffect(()=>{
     const check=()=>setSessionOpen(isRegularNseSession());
@@ -159,13 +171,13 @@ export default function OptionsPage({initialUnderlying=null,embedded=false}) {
   },[]);
   useEffect(() => {
     if (timerRef.current) clearInterval(timerRef.current);
-    if (tab !== "unusual" && autoRefresh && sessionOpen && status === "live") {
+    if (deskOpen && tab !== "unusual" && autoRefresh && sessionOpen && status === "live") {
       timerRef.current = setInterval(() => {
         if (!document.hidden) loadChain(underlying, expiry, true);
       }, 5000);
     }
     return () => timerRef.current && clearInterval(timerRef.current);
-  }, [autoRefresh, sessionOpen, status, underlying, expiry, loadChain, tab]);
+  }, [autoRefresh, sessionOpen, status, underlying, expiry, loadChain, tab, deskOpen]);
 
   const { atmStrike, maxOI } = useMemo(() => {
     if (!chain?.length) return { atmStrike: null, maxOI: 1 };
@@ -185,17 +197,22 @@ export default function OptionsPage({initialUnderlying=null,embedded=false}) {
     setTab("builder");
   };
 
+  const deskTabs = DESK_TABS.map(t => t.tab === "builder" && legs.length ? { ...t, label: `STRATEGY BUILDER (${legs.length})` } : t);
   return (
     <div className={embedded?"qt-embedded-tool max-w-shell mx-auto px-5 py-8":"max-w-shell mx-auto px-5 py-10"}>
+      <h1 className="sr-only">Options Analytics — {underlying}</h1>
+      <OptionsIntelligence symbol={underlying} onSymbol={chooseUnderlying} tab={section} onTab={setSection}
+        otherTabs={deskTabs} renderOther={() => deskTab && renderDesk()} />
+    </div>
+  );
+
+  function renderDesk() {
+  return (
+    <div>
       <p className="eyebrow mb-3">[ AHQ : DERIVATIVES — OPTION CHAIN &amp; STRATEGY BUILDER ]</p>
       <div className="flex flex-wrap items-end justify-between gap-3">
         <div>
-          <h1 className="font-display text-3xl font-medium tracking-tight">Options Desk</h1>
-        </div>
-        <div className="flex gap-1.5">
-          <button onClick={() => setTab("chain")} className={`font-mono text-xs px-3 py-1.5 rounded border transition-colors ${tab === "chain" ? "border-amber text-amber" : "border-line text-muted hover:text-body"}`}>OPTION CHAIN</button>
-          <button onClick={() => {window.dispatchEvent(new CustomEvent("ahq:analytics",{detail:{name:"strategy_builder_opened"}}));setTab("builder");}} className={`font-mono text-xs px-3 py-1.5 rounded border transition-colors ${tab === "builder" ? "border-amber text-amber" : "border-line text-muted hover:text-body"}`}>STRATEGY BUILDER{legs.length ? ` (${legs.length})` : ""}</button>
-          <button type="button" onClick={() => setTab("unusual")} aria-pressed={tab==="unusual"} className={`font-mono text-xs px-3 py-1.5 rounded border transition-colors ${tab === "unusual" ? "border-white text-body bg-raised" : "border-line text-muted hover:text-body"}`}>UNUSUAL MOVEMENTS</button>
+          <h2 className="font-display text-3xl font-medium tracking-tight">Options Desk</h2>
         </div>
       </div>
 
@@ -289,6 +306,7 @@ export default function OptionsPage({initialUnderlying=null,embedded=false}) {
         </>}
     </div>
   );
+  }
 }
 
 function OptionChainTable({ chain, spot, atmStrike, maxOI, status, onAdd }) {
