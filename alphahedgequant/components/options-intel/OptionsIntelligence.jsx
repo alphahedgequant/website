@@ -60,7 +60,7 @@ function useStrip(levels, current) {
         try {
           const r = await fetch(`/api/market/option-chain/${ix.id}`, { cache: "no-store" });
           const j = await r.json();
-          if (!r.ok || !j.success) { out.push({ ...ix, status: "unavailable", note: r.status === 404 ? "Not in backend instrument master" : "Provider error" }); continue; }
+          if (!r.ok || !j.success) { out.push({ ...ix, status: "unavailable", note: r.status === 404 ? "Not in backend instrument master" : r.status === 401 ? "Upstox session expired" : "Provider error" }); continue; }
           const { contractsFromChain } = await import("@/lib/optionsIntel.mjs");
           const p = contractsFromChain(j);
           const s = summarize(p, { nowMs: Date.now() });
