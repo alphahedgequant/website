@@ -108,9 +108,9 @@ export function GexProfile({ ctx, span }) {
 
 export function PinPressure({ ctx, span }) {
   const s = ctx.summary;
-  if (noChain(ctx) || !s) return <Panel title="Pin pressure" span={span}>{noChain(ctx) || <Empty title="NO CANDIDATES" />}</Panel>;
+  if (noChain(ctx) || !s) return <Panel title="Pin magnet" span={span}>{noChain(ctx) || <Empty title="NO CANDIDATES" />}</Panel>;
   return (
-    <Panel title="Pin pressure & conviction" badges={MODEL} span={span} detail="Which strike holds the pressure? 0–100 score, not a probability">
+    <Panel title="Pin magnet" badges={MODEL} span={span} detail="Which strike is the index being pulled toward? 0–100 magnet score — not a probability">
       {!s.pins.length ? <Empty title="NO CANDIDATE STRIKE">No strike with exposure within ±3% of spot.</Empty> :
         s.pins.slice(0, 6).map(p => (
           <div key={p.strike} className="oi-score" onClick={() => { ctx.selectStrike(p.strike); ctx.goTab?.("gamma"); }} style={{ cursor: "pointer" }}
@@ -299,7 +299,7 @@ export function BuildsUnwinds({ ctx, span }) {
   const T = (list, title) => <div><p className="oi-note">{title}</p><table className="oi-table"><thead><tr><th>Contract</th><th>Δ OI</th><th>Δ LTP</th><th>Reading</th></tr></thead>
     <tbody>{list.map(x => <tr key={x.strike + x.type} onClick={() => ctx.selectStrike(x.strike)}><td>{n2(x.strike, 0)} {x.type}</td><td className={tone(x.dOi)}>{fmtQty(x.dOi)}</td><td className={tone(x.dPx)}>{n2(x.dPx)}</td><td>{x.class}</td></tr>)}</tbody></table></div>;
   return (
-    <Panel title="OI — top builds & unwinds" badges={BROWSER} span={span} detail="What built in the lookback window? Price + OI reading, ambiguous when moves are small"
+    <Panel title="Fresh money vs exits" badges={BROWSER} span={span} detail="Where open interest was added or cut in the chosen window, and how price moved with it (small moves read as unclear)"
       tools={<select value={lb} onChange={e => setLb(Number(e.target.value))} aria-label="Lookback">{[5, 10, 15, 30, 45, 60].map(m => <option key={m} value={m}>{m} min</option>)}</select>}>
       {!pair ? <Empty title="NEEDS TWO SNAPSHOTS">Keep this page open during market hours; a snapshot is stored each minute.</Empty>
         : <><p className="oi-note">{ist(pair.prev.t)} → {ist(pair.cur.t)} IST</p><div className="oi-grid" style={{ "--cols": 2 }}>{T(adds, "Largest additions")}{T(cuts, "Largest reductions")}</div></>}
@@ -343,9 +343,9 @@ export function AggressorView({ ctx, span }) {
 export function UnusualVolume({ ctx, span }) {
   const rows = useMemo(() => (ctx.parsed?.contracts || []).filter(c => c.vol > 0).map(c => ({ ...c, turnover: c.ltp != null ? c.vol * c.ltp : null, volOi: c.oi > 0 ? c.vol / c.oi : null }))
     .sort((a, b) => (b.turnover || 0) - (a.turnover || 0)).slice(0, 12), [ctx.parsed]);
-  if (noChain(ctx)) return <Panel title="Unusual volume" span={span}>{noChain(ctx)}</Panel>;
+  if (noChain(ctx)) return <Panel title="Turnover leaders" span={span}>{noChain(ctx)}</Panel>;
   return (
-    <Panel title="Unusual volume" span={span} detail="Where is volume running hot? Ranked by rupee turnover"
+    <Panel title="Turnover leaders" span={span} detail="Contracts trading the most money today, and how heavy trading is against open interest"
       footer={<>Time-of-day RVOL needs a stored intraday baseline for each contract, which is not connected yet, so no RVOL is shown. The scheduled daily archive in <button className="oi-accent" onClick={() => ctx.goTab?.("unusual")}>Unusual Movements</button> compares against the previous 10–15 sessions.</>}>
       <div className="oi-scroll" style={{ maxHeight: 300 }}><table className="oi-table"><thead><tr><th>Contract</th><th>Volume</th><th>₹ Turnover</th><th>Vol/OI</th><th>LTP</th></tr></thead>
         <tbody>{rows.map(c => <tr key={c.key} onClick={() => ctx.selectStrike(c.strike)}><td>{n2(c.strike, 0)} {c.type} <small className="oi-muted">{c.expiry}</small></td><td>{fmtQty(c.vol)}</td><td>{fmtCr(c.turnover)}</td><td>{c.volOi == null ? "—" : c.volOi.toFixed(2)}</td><td>{n2(c.ltp)}</td></tr>)}</tbody></table></div>
@@ -365,8 +365,8 @@ export function FuturesBuildup({ ctx, span }) {
 export function OiTapeView({ ctx, span }) {
   const tape = useMemo(() => oiTape(ctx.snaps, 300), [ctx.snaps]);
   return (
-    <Panel title="OI tick tape" badges={BROWSER} span={span} detail="Chronological OI changes between snapshots, with source and ingestion timestamps">
-      {!tape.length ? <Empty title="TAPE EMPTY">No OI change has been observed between stored snapshots yet.</Empty> :
+    <Panel title="OI change log" badges={BROWSER} span={span} detail="Chronological OI changes between snapshots, with source and ingestion timestamps">
+      {!tape.length ? <Empty title="NO CHANGES LOGGED YET">No OI change has been observed between stored snapshots yet.</Empty> :
         <div className="oi-scroll" style={{ maxHeight: 320 }}><table className="oi-table"><thead><tr><th>Source time</th><th>Ingested</th><th>Contract</th><th>Δ OI</th><th>Δ LTP</th></tr></thead>
           <tbody>{tape.map((r, i) => <tr key={i} onClick={() => ctx.selectStrike(r.strike)}><td>{ist(r.sourceTs)}</td><td className="oi-muted">{ist(r.ingestTs)}</td><td>{n2(r.strike, 0)} {r.type}</td><td className={tone(r.dOi)}>{fmtQty(r.dOi)}</td><td className={tone(r.dPx)}>{n2(r.dPx)}</td></tr>)}</tbody></table></div>}
     </Panel>
@@ -466,7 +466,7 @@ export function StraddleDecay({ ctx, span }) {
   const decayPct = path.length > 1 ? (path.at(-1).total / path[0].total - 1) * 100 : null;
   const avgHist = hist?.length ? hist.reduce((s, h) => s + h.decayPct, 0) / hist.length : null;
   return (
-    <Panel title="Straddle — decay clock" span={span} badges={BROWSER} detail="Is the ATM straddle melting faster than usual?">
+    <Panel title="Premium melt: today vs normal" span={span} badges={BROWSER} detail="How fast the at-the-money straddle is losing value — against time alone and against past sessions">
       <div className="oi-metrics">
         <Metric label="ATM STRADDLE NOW" value={now?.total != null ? n2(now.total) : "—"} detail={now ? `${n2(now.strike, 0)} · call ${now.callBasis || "—"} / put ${now.putBasis || "—"}` : ""} />
         <Metric label="CHANGE THIS SESSION" value={decayPct == null ? "—" : pct(decayPct)} cls={tone(decayPct)} detail={path.length ? `${path[0].time} → ${path.at(-1).time}` : "Needs snapshots"} />
@@ -607,7 +607,7 @@ export const VIEWS = {
   "market-strip": { title: "Market strip", C: MarketStripView },
   "gex-strike": { title: "GEX by strike", C: GexByStrike },
   "gex-profile": { title: "Net GEX profile", C: GexProfile },
-  "pin-pressure": { title: "Pin pressure", C: PinPressure },
+  "pin-pressure": { title: "Pin magnet", C: PinPressure },
   hhi: { title: "HHI concentration", C: HhiView },
   "hedge-ladder": { title: "Hedge ladder", C: HedgeLadderView },
   "gamma-decay": { title: "Gamma decay", C: GammaDecayView },
@@ -617,17 +617,17 @@ export const VIEWS = {
   vanna: { title: "Vanna", C: VannaView },
   "oi-change": { title: "OI change", C: OiChange },
   "oi-rotation": { title: "OI rotation", C: OiRotationView },
-  "builds-unwinds": { title: "OI builds & unwinds", C: BuildsUnwinds },
+  "builds-unwinds": { title: "Fresh money vs exits", C: BuildsUnwinds },
   aggressor: { title: "Aggressor balance", C: AggressorView },
-  "unusual-volume": { title: "Unusual volume", C: UnusualVolume },
+  "unusual-volume": { title: "Turnover leaders", C: UnusualVolume },
   "futures-buildup": { title: "Futures buildup", C: FuturesBuildup },
   "iv-smile": { title: "IV smile", C: IvSmile },
   "term-structure": { title: "Term structure", C: TermStructure },
   "iv-surface": { title: "IV surface", C: IvSurface },
-  "straddle-decay": { title: "Straddle decay clock", C: StraddleDecay },
+  "straddle-decay": { title: "Premium melt vs normal", C: StraddleDecay },
   "atm-iv-rv": { title: "ATM IV & RV", C: AtmIvRv },
   "chain-grid": { title: "Every-strike grid", C: ChainGrid },
-  "oi-tape": { title: "OI tape", C: OiTapeView },
+  "oi-tape": { title: "OI change log", C: OiTapeView },
   "since-last-visit": { title: "Since last visit", C: SinceLastVisit },
 };
 

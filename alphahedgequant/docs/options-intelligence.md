@@ -116,9 +116,9 @@ reproduces the market straddle (302.05) exactly. Net GEX +₹18,562 Cr, flip ≈
 
 | Widget | Tier | Status |
 |---|---|---|
-| OI — Top builds & unwinds | BASIC | Implemented (browser snapshots, 5–60 min lookback) |
+| Fresh money vs exits | BASIC | Implemented (browser snapshots, 5–60 min lookback) |
 | Unusual volume | PRO | Turnover/vol-OI ranking implemented; **time-of-day RVOL blocked** (no intraday baseline store). Links to the existing daily archive. |
-| Straddle — decay clock | PRO | Implemented; comparable-session comparison uses stored sessions |
+| Premium melt vs normal | PRO | Implemented; comparable-session comparison uses stored sessions |
 | OI — Index futures buildup | BASIC | **Blocked**: gateway has no futures quote/OI endpoint |
 | Pin — pressure | PRO | Implemented |
 | IV — ATM IV, straddle & RV | BASIC | Implemented; index RV blocked (see #17) |

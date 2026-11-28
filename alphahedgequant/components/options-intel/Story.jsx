@@ -148,7 +148,7 @@ export function StoryTab({ ctx }) {
   const [topic, setTopic] = useState("all");
   const [primer, setPrimer] = useState(false);
   if (ctx.status === "notConnected") return <Empty title="US OPTIONS FEED NOT CONNECTED">Today's story for US markets appears as soon as a US options data provider is connected. US index levels and VIX above are live.</Empty>;
-  if (!ctx.parsed?.contracts?.length || !story.headline) return <Empty title={ctx.status === "loading" ? "READING THE CHAIN…" : "NO VERIFIED OPTION CHAIN"}>{ctx.error || "The story is written only from a verified chain."}</Empty>;
+  if (!ctx.parsed?.contracts?.length || !story.headline) return <Empty title={ctx.status === "loading" ? "READING TODAY'S OPTIONS DATA…" : "NO VERIFIED OPTION CHAIN"}>{ctx.error || "The story is written only from a verified chain."}</Empty>;
   const shown = story.signals.filter(s => topic === "all" || s.topic === topic);
   const counts = Object.fromEntries(TOPICS.map(([k]) => [k, k === "all" ? story.signals.length : story.signals.filter(s => s.topic === k).length]));
   const hot = story.signals.filter(s => s.kind === "hot").length, watch = story.signals.filter(s => s.kind === "watch").length;
@@ -193,7 +193,7 @@ export function GammaBlastView({ ctx, span }) {
   return (
     <Panel title="Gamma blast watch" span={span} detail={live ? "EXPIRY WINDOW — small index moves can multiply cheap OTM premiums" : `${days?.toFixed(1)} days to expiry — blast risk builds as expiry nears`}
       badges={live ? <span className="oi-tag zero">LIVE WINDOW</span> : null}>
-      <p className="oi-note" style={{ marginTop: 0 }}>Observed bursts (this browser's minute snapshots, last ~15 min):</p>
+      <p className="oi-note" style={{ marginTop: 0 }}>Observed premium spikes (this browser's minute snapshots, last ~15 min):</p>
       {bursts.length ? <table className="oi-table"><thead><tr><th>Contract</th><th>Premium</th><th>Change</th><th>Window</th></tr></thead>
         <tbody>{bursts.map(b => <tr key={b.strike + b.type} onClick={() => ctx.selectStrike(b.strike)}><td>{n2(b.strike, 0)} {b.type}</td><td>{n2(b.ltp - b.dPx)} → {n2(b.ltp)}</td><td className="oi-up">{pct(b.gainPct, 0)}</td><td>{b.minutes} min</td></tr>)}</tbody></table>
         : <p className="oi-muted" style={{ fontSize: 12 }}>None right now. A burst is flagged when an option's premium rises ≥80% within ~15 minutes from ≥1.</p>}
