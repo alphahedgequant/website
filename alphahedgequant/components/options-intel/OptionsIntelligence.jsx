@@ -217,7 +217,7 @@ function FnoStocks({ ctx, onSymbol, market = "IN" }) {
   );
 }
 
-export default function OptionsIntelligence({ symbol, onSymbol, otherTabs = [], renderOther, initialTab = "story", tab: controlledTab, onTab, market = "IN", onMarket }) {
+export default function OptionsIntelligence({ symbol, onSymbol, otherTabs = [], renderOther, initialTab = "story", tab: controlledTab, onTab, market = "IN", onMarket, hotkey = true }) {
   const [tabState, setTabState] = useState(initialTab);
   const tab = controlledTab ?? tabState;
   const setTab = onTab ?? setTabState;
@@ -266,11 +266,13 @@ export default function OptionsIntelligence({ symbol, onSymbol, otherTabs = [], 
     [ctx, strip, store.plan, selectedStrike, goTab, onSymbol, lastVisitPrev]);
   baseRef.current = { plan: store.plan, strip, selectStrike: setSelectedStrike, goTab, setSymbol: onSymbol, lastVisitPrev, selectedStrike };
 
+  // Inside the Quant Terminal the terminal owns ⌘/Ctrl K, so the embedded copy turns its hotkey off.
   useEffect(() => {
+    if (!hotkey) return undefined;
     const onKey = e => { if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "k") { e.preventDefault(); setPalette(p => !p); } };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, []);
+  }, [hotkey]);
 
   const tags = useMemo(() => tagExpiries(ctx.expiries, Date.now(), market), [ctx.expiries, market]);
   const shownTags = tags.filter(t => kind === "all" || (kind === "0dte" && t.zeroDte) || (kind === "weekly" && t.weekly) || (kind === "monthly" && t.monthly));
@@ -310,7 +312,7 @@ export default function OptionsIntelligence({ symbol, onSymbol, otherTabs = [], 
             {onMarket && <div className="oi-seg oi-country" role="group" aria-label="Market">
               {[["IN", "India"], ["US", "United States"]].map(([id, l]) => <button key={id} type="button" aria-pressed={market === id} onClick={() => market !== id && onMarket(id)}>{l}</button>)}
             </div>}
-            <button className="oi-chip" onClick={() => setPalette(true)} title="Quick switcher">⌘/Ctrl K</button>
+            <button className="oi-chip" onClick={() => setPalette(true)} title="Quick switcher">{hotkey ? "⌘/Ctrl K" : "Quick switch"}</button>
           </div>
         </div>
         <div className="oi-seg" role="group" aria-label="Underlying" style={{ marginTop: 14 }}>

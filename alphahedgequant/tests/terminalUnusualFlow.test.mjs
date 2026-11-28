@@ -3,6 +3,9 @@ import assert from "node:assert/strict";
 import {readFileSync} from "node:fs";
 import {rankOptionActivity} from "../lib/unusualOptionsActivity.mjs";
 const read=p=>readFileSync(new URL("../"+p,import.meta.url),"utf8");
+const shellSrc=()=>read("components/terminal/TerminalShell.jsx");
+const panesSrc=()=>read("components/terminal/panes.jsx");
+const commandsSrc=()=>read("components/terminal/commands.js");
 test("volume/open-interest activity ranks actual available strikes, not invented flow prints",()=>{
  const chain={strikes:[
   {strike_price:100,call:{volume:600,oi:200,oi_change:80,ltp:7},put:{volume:300,oi:1000,oi_change:-20,ltp:5}},
@@ -35,31 +38,31 @@ test("flow screen explicitly separates observed option changes from buyer-initia
  assert.match(box,/NSE cash stocks without active F&O contracts/);
 });
 test("terminal links the 12-window floor and full FLOW monitor without changing global navigation",()=>{
- const page=read("app/terminal/page.jsx");
+ const panes=panesSrc(),shell=shellSrc();
  const floor=read("app/terminal/TerminalTradingFloor.jsx");
  const route=read("app/api/terminal/route.js");
- assert.match(page,/UnusualOptionsMonitor/);
- assert.match(page,/activeTab==="FLOW"/);
- assert.match(page,/onOpenFlow/);
- assert.match(page,/fnoTickers/);
- assert.match(page,/setOptionSymbol/);
+ assert.match(panes,/UnusualOptionsMonitor/);
+ assert.match(panes,/case "FLOW": return <FlowPane/);
+ assert.match(panes,/onOpenFlow=\{\(\) => onOpen\?\.\("FLOW"\)\}/);
+ assert.match(panes,/useFno\(\)/);
+ assert.match(panes,/setOptionSymbol=\{setOptionSymbol\}/);
  assert.match(route,/terminal\/fno-universe/);
  assert.match(floor,/id:"flow",title:"Unusual Options Flow/);
  assert.match(floor,/UnusualOptionsFlowBox/);
  assert.match(floor,/DEFAULT_WINDOWS.length/);
  assert.match(floor,/onOpenOptions/);
- assert.doesNotMatch(page,/<header[^>]*site-header/);
+ assert.doesNotMatch(shell,/<header[^>]*site-header/);
 });
 test("terminal retains all NSE cash equity search and avoids quote race",()=>{
- const page=read("app/terminal/page.jsx");
+ const data=read("components/terminal/useTerminalData.js");
  const route=read("app/api/terminal/route.js");
- assert.match(page,/view=search/);
- assert.match(page,/view=quote/);
- assert.match(page,/view=history/);
- assert.match(page,/prior\?\.symbol===s&&prior\.inflight/);
- assert.match(page,/quoteTask\.current/);
- assert.match(page,/historyTask\.current/);
- assert.match(page,/controller\.signal\.aborted/);
+ assert.match(data,/view=search/);
+ assert.match(data,/view=quote/);
+ assert.match(data,/view=history/);
+ // One request per URL at a time; a stale response never overwrites a newer ticker.
+ assert.match(data,/inflight/);
+ assert.match(data,/current\.current === url/);
+ assert.match(data,/AbortController/);
  assert.match(route,/MARKET_DATA_API_URL/);
 });
 test("terminal is true black across trading floor, FLOW and research with white text",()=>{
@@ -86,9 +89,10 @@ test("terminal is true black across trading floor, FLOW and research with white 
 });
 
 test("terminal displays an actionable brokerage reauthorization link only on a quote error",()=>{
- const page=read("app/terminal/page.jsx");
+ const page=shellSrc();
  const css=read("app/terminal/terminal.css");
- assert.match(page,/quoteError&&<div className="qt-provider-alert" role="alert">/);
+ assert.match(page,/quoteError&&<div className="qt-provider-alert[^"]*" role="alert">/);
+ assert.match(page,/q\.error && !q\.data \? q\.error : ""/);
  assert.match(page,/zerohedgequant-backend\.onrender\.com\/auth\/login/);
  assert.match(page,/Quotes and options analytics are not confirmed live/);
  assert.match(css,/\.qt-provider-alert/);
