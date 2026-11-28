@@ -9,9 +9,9 @@ import MarketGate from "@/components/options-intel/MarketGate";
 const MARKET_DEFAULT = { IN: "NIFTY", US: "SPX" };
 
 const DESK_TABS = [
-  { id: "desk-chain", label: "OPTION CHAIN", tab: "chain" },
-  { id: "desk-builder", label: "STRATEGY BUILDER", tab: "builder" },
-  { id: "desk-unusual", label: "UNUSUAL MOVEMENTS", tab: "unusual" },
+  { id: "desk-chain", label: "Option Chain", tab: "chain" },
+  { id: "desk-builder", label: "Strategy Builder", tab: "builder" },
+  { id: "desk-unusual", label: "Unusual Movements", tab: "unusual" },
 ];
 import {
   XAxis, YAxis, CartesianGrid, Tooltip,
@@ -54,7 +54,7 @@ function legPayoffAtExpiry(leg, spotAtExpiry) {
 
 export default function OptionsPage({initialUnderlying=null,embedded=false}) {
   // Spec analytics open first; the existing desk tools follow as "Other tools" tabs.
-  const [section, setSection] = useState("overview");
+  const [section, setSection] = useState("story");
   // Country first: the gate opens on every visit unless the URL already names a market
   // (?market=in|us) or the page is embedded in the Quant Terminal (NSE only).
   const [market, setMarket] = useState(initialUnderlying || embedded ? "IN" : null);
@@ -64,7 +64,7 @@ export default function OptionsPage({initialUnderlying=null,embedded=false}) {
     if (q && ["IN", "US"].includes(q.toUpperCase())) { const m = q.toUpperCase(); setMarket(m); setUnderlying(MARKET_DEFAULT[m]); }
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
   const enterMarket = useCallback(m => {
-    setMarket(m); setSection("overview"); setUnderlying(MARKET_DEFAULT[m]); setLegs([]);
+    setMarket(m); setSection("story"); setUnderlying(MARKET_DEFAULT[m]); setLegs([]);
     try { const u = new URL(window.location.href); u.searchParams.set("market", m.toLowerCase()); window.history.replaceState(window.history.state, "", u.pathname + u.search + u.hash); } catch {}
     window.dispatchEvent(new CustomEvent("ahq:analytics", { detail: { name: "options_market_selected", market: m } }));
   }, []);
@@ -213,7 +213,7 @@ export default function OptionsPage({initialUnderlying=null,embedded=false}) {
     setTab("builder");
   };
 
-  const deskTabs = DESK_TABS.map(t => t.tab === "builder" && legs.length ? { ...t, label: `STRATEGY BUILDER (${legs.length})` } : t);
+  const deskTabs = DESK_TABS.map(t => t.tab === "builder" && legs.length ? { ...t, label: `Strategy Builder (${legs.length})` } : t);
   if (!market) return (
     <div className="max-w-shell mx-auto px-3 sm:px-5 py-6"><MarketGate onPick={enterMarket} /></div>
   );

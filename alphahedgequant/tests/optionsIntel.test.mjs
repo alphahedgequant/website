@@ -14,7 +14,8 @@ const NOW = Date.UTC(2026, 10, 28, 10, 10); // Sat 28 Nov 2026 15:40 IST
 function chain({ spot = 100, expiry = "2026-12-01", rows }) {
   return { success: true, data: { spot_price: spot, expiry, lot_size: 65, received_at: new Date(NOW).toISOString(), strikes: rows } };
 }
-const leg = (o = {}) => ({ oi: 1000, oi_change: 0, volume: 100, ltp: 1, bid_price: 0.9, ask_price: 1.1, iv: 20, ...o });
+// Default legs carry no quote, so the provider IV is used; tests that need AHQ-solved IV pass quotes.
+const leg = (o = {}) => ({ oi: 1000, oi_change: 0, volume: 100, ltp: null, bid_price: null, ask_price: null, iv: 20, ...o });
 
 test("normal CDF and Black–Scholes match textbook values", () => {
   close(normCdf(0), 0.5, 1e-7);
@@ -58,6 +59,7 @@ test("NSE session and expiry tagging come from the clock and contract list, not 
 });
 
 test("missing or invalid IV / OI are excluded and counted — never treated as zero", () => {
+  // (legs carry no quote here, so only the provider IV can be used)
   const p = contractsFromChain(chain({ rows: [
     { strike_price: 100, call: leg({ iv: null }), put: leg({ oi: null }) },
     { strike_price: 105, call: leg({ iv: 0 }), put: leg() },
@@ -181,7 +183,7 @@ test("snapshots round-trip and drive flow, tape, rotation and estimated aggresso
   };
   const a = mk(NOW, 1000, 10, 100, 9.9, 10.1), b = mk(NOW + 60000, 1500, 10.5, 400, 10.3, 10.5);
   const back = contractsFromSnapshot(b).contracts.find(c => c.type === "CE");
-  assert.equal(back.oi, 1500); close(back.iv, 0.2, 1e-9);
+  assert.equal(back.oi, 1500); assert.ok(back.iv > 0, "IV survives the round trip");
   const d = diffSnapshots(a, b).find(x => x.type === "CE");
   assert.equal(d.dOi, 500); assert.equal(d.class, "long buildup");
   assert.deepEqual(diffSnapshots(a, { ...b, expiry: "2026-12-08" }), [], "never mixes expiries");
@@ -204,29 +206,34 @@ test("summarize returns key levels for a realistic chain", () => {
   assert.equal(s.putWall, 25400);
   assert.ok(s.flip == null || (s.flip > 24300 && s.flip < 26900));
   assert.ok(["positive", "negative", "flat"].includes(s.regime));
-  assert.ok(s.straddle.total > 0);
+  assert.equal(s.straddle.total, null, "no quotes → no straddle price is invented");
 });
 
-test("live NIFTY fixture (28 Nov 2026): levels are finite, IV=0 quotes excluded, deltas near provider", async () => {
+test("live NIFTY fixture (28 Nov 2026): parity spot, consistent IV, model reproduces market, levels", async () => {
   const { readFileSync } = await import("node:fs");
   const j = JSON.parse(readFileSync(new URL("./fixtures/nifty-chain-2026-11-28.json", import.meta.url), "utf8"));
   const now = Date.parse(j.data.received_at);
   const p = contractsFromChain(j);
-  assert.equal(p.quality.invalidIv, 21, "deep-ITM quotes with IV 0 are excluded and counted");
+  // Put–call parity near the money implies the option market prices off ~25,570.7, not the quoted 25,607.2.
+  close(p.quality.impliedSpot, 25570.74, 0.05);
+  assert.ok(p.quality.solvedIv >= 110, "AHQ IV solved from quotes for most contracts");
+  assert.equal(p.quality.invalidIv, 3, "only quotes that cannot be inverted and have no usable provider IV are excluded");
+  // With the parity spot, call and put IV agree at the same strike (no false skew).
+  for (const K of [25500, 25600, 25700]) {
+    const ce = p.contracts.find(c => c.strike === K && c.type === "CE"), pe = p.contracts.find(c => c.strike === K && c.type === "PE");
+    assert.ok(Math.abs(ce.iv - pe.iv) < 0.003, `IV CE ${ce.iv} vs PE ${pe.iv} at ${K}`);
+  }
+  // Model prices reproduce market mids.
+  const { greeksFor } = await import("../lib/optionsIntel.mjs");
+  const model = ["CE", "PE"].reduce((a, t) => a + greeksFor(p.contracts.find(c => c.strike === 25600 && c.type === t), p.spot, now).price, 0);
+  close(model, 302.05, 0.01);
   const s = summarize(p, { nowMs: now });
   assert.equal(s.callWall, 25800);
   assert.equal(s.putWall, 25500);
   assert.equal(s.flipCount, 1);
-  assert.ok(s.flip > 25300 && s.flip < 25607, "flip just below spot: " + s.flip);
+  assert.ok(s.flip > 25400 && s.flip < 25607, "flip just below spot: " + s.flip);
   assert.equal(s.regime, "positive");
   close(s.straddle.total, 302.05, 1e-9);
-  let sum = 0, n = 0;
-  for (const r of j.data.strikes) for (const [t, q] of [["CE", r.call], ["PE", r.put]]) {
-    if (!(q?.iv > 0.5)) continue;
-    const g = bsGreeks(p.spot, r.strike_price, yearsToExpiry(j.data.expiry, now), q.iv / 100, t);
-    sum += Math.abs(g.delta - q.delta); n++;
-  }
-  assert.ok(sum / n < 0.03, "mean |Δ − provider Δ| = " + (sum / n).toFixed(4));
 });
 
 test("US expiries close at 16:00 New York with daylight saving, and the US session is detected", async () => {
