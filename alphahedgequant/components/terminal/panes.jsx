@@ -177,7 +177,7 @@ export function ChartPane({ ticker }) {
 export function FinancialsPane({ ticker, onTicker, onOpen }) {
   const c = useCompany(ticker);
   const co = c.data?.data;
-  const rows = (arr, kind) => (arr || []).map((r, i) => ({ label: r.label || `${kind} ${i + 1}`, revenue: r.revenue, profit: r.profit, margin: r.revenue ? r.profit / r.revenue * 100 : null }));
+  const rows = (arr, kind) => (arr || []).map((r, i) => ({ label: r.label || `${kind} ${i + 1} (unlabeled)`, revenue: r.revenue, profit: r.profit, margin: r.revenue ? r.profit / r.revenue * 100 : null }));
   const Tbl = ({ title, data }) => <Sec title={title}>{!data.length ? <Unavailable title="Not provided" /> :
     <table className="tm-table"><thead><tr><th>Period</th><th>Revenue</th><th>Net profit</th><th>Net margin</th></tr></thead>
       <tbody>{data.map(r => <tr key={r.label}><td>{r.label}</td><td>₹{compactIN(r.revenue)}</td><td className={tone(r.profit)}>₹{compactIN(r.profit)}</td><td>{r.margin == null ? "—" : r.margin.toFixed(1) + "%"}</td></tr>)}</tbody></table>}</Sec>;
@@ -186,7 +186,7 @@ export function FinancialsPane({ ticker, onTicker, onOpen }) {
       {c.status === "loading" ? <Loading what="financials" /> : !co ? <Unavailable title="No company summary">{c.error}</Unavailable> : <>
         <Tbl title="Quarterly" data={rows(co.quarterly, "Quarter")} />
         <Tbl title="Annual" data={rows(co.annual, "Year")} />
-        <Src>{c.data.provider}. Period labels are shown as the provider sends them; unlabeled annual rows are listed newest first.</Src>
+        <Src>{c.data.provider}. Rows are shown in the provider's order with its period labels. The provider sends annual periods without labels, so they are numbered, not dated.</Src>
       </>}
       <Sec title="Audited statements, filings & research">
         <div className="tm-embed qt-integrated-app"><TerminalIntelligence key={ticker} symbol={ticker} tab="COMPANY" onChoose={s => onTicker?.(s)} onForecast={() => onOpen?.("FCST")} /></div>
