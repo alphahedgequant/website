@@ -3,10 +3,12 @@
 // Spec tabs come first; the existing Options Desk tools follow as "Other tools" tabs.
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import "./optionsIntel.css";
-import { summarize, contractsFromSnapshot, tagExpiries, isNseSession, istParts, fmtCr, yearsToExpiry } from "@/lib/optionsIntel.mjs";
+import "./marketGate.css";
+import { Starfield, Horizon } from "./MarketGate";
+import { summarize, contractsFromSnapshot, tagExpiries, isSession, istParts, fmtCr, yearsToExpiry } from "@/lib/optionsIntel.mjs";
 import { PRESETS } from "@/lib/optionsWorkspace.mjs";
 import {
-  INDEX_UNIVERSE, useChain, useMultiExpiry, useSnapshotRecorder, useRealizedVol, useIndexLevels, useWorkspaceStore,
+  INDEX_UNIVERSE, US_UNIVERSE, chainUrl, useChain, useMultiExpiry, useSnapshotRecorder, useRealizedVol, useIndexLevels, useWorkspaceStore,
   loadSeries, listSeriesDays, listExpiriesForDay, loadSymbolHistory,
 } from "./useOptionsData";
 import { View, ContractDetail, KeyLevels, GexByStrike, OiChange, IvSmile } from "./views";
@@ -30,19 +32,19 @@ const LAYOUTS = {
 };
 
 /** Builds the shared analytics context for one underlying (main view or a comparison pane). */
-export function useIntelContext({ symbol, expiry, record = true, base = {}, replaySnap = null, replaySnaps = null }) {
-  const chain = useChain(symbol, expiry);
+export function useIntelContext({ symbol, expiry, record = true, base = {}, replaySnap = null, replaySnaps = null, market = "IN" }) {
+  const chain = useChain(symbol, expiry, { market });
   const effExpiry = expiry || chain.parsed?.expiry || "";
-  const recorder = useSnapshotRecorder(record ? symbol : null, effExpiry, record ? chain.parsed : null);
+  const recorder = useSnapshotRecorder(record ? symbol : null, effExpiry, record ? chain.parsed : null, market);
   const [multiOn, setMultiOn] = useState(false);
   const expiries = chain.raw?.expiries || [];
-  const multi = useMultiExpiry(symbol, expiries, { count: 6, enabled: multiOn && !replaySnap });
-  const rv = useRealizedVol(symbol);
+  const multi = useMultiExpiry(symbol, expiries, { count: 6, enabled: multiOn && !replaySnap, market });
+  const rv = useRealizedVol(symbol, market);
   const parsed = useMemo(() => (replaySnap ? contractsFromSnapshot(replaySnap) : chain.parsed), [replaySnap, chain.parsed]);
   const nowMs = replaySnap ? replaySnap.t : chain.fetchedAt || Date.now();
   const summary = useMemo(() => (parsed ? summarize(parsed, { nowMs }) : null), [parsed, nowMs]);
   return {
-    ...base, symbol, expiry: parsed?.expiry || effExpiry, expiries, parsed, summary, nowMs,
+    ...base, market, symbol, expiry: parsed?.expiry || effExpiry, expiries, parsed, summary, nowMs,
     status: replaySnap ? "replay" : chain.status, error: chain.error, reload: chain.reload,
     snaps: replaySnaps || recorder.snaps, day: recorder.day, isReplay: !!replaySnap,
     multi: replaySnap ? { status: "error", chains: [], failed: [] } : multi, requestMulti: () => setMultiOn(true), rv,
@@ -50,17 +52,19 @@ export function useIntelContext({ symbol, expiry, record = true, base = {}, repl
 }
 
 /** Market strip: front-expiry net GEX for every supported index. */
-function useStrip(levels, current) {
-  const [rows, setRows] = useState(INDEX_UNIVERSE.map(i => ({ ...i, status: "loading" })));
+function useStrip(levels, current, market) {
+  const universe = market === "US" ? US_UNIVERSE : INDEX_UNIVERSE;
+  const [rows, setRows] = useState(universe.map(i => ({ ...i, status: "loading" })));
   useEffect(() => {
     let live = true;
+    setRows(universe.map(i => ({ ...i, status: "loading" })));
     const load = async () => {
       const out = [];
-      for (const ix of INDEX_UNIVERSE) {
+      for (const ix of universe) {
         try {
-          const r = await fetch(`/api/market/option-chain/${ix.id}`, { cache: "no-store" });
+          const r = await fetch(chainUrl(market, ix.id), { cache: "no-store" });
           const j = await r.json();
-          if (!r.ok || !j.success) { out.push({ ...ix, status: "unavailable", note: r.status === 404 ? "Not in backend instrument master" : r.status === 401 ? "Upstox session expired" : "Provider error" }); continue; }
+          if (!r.ok || !j.success) { out.push({ ...ix, status: "unavailable", note: j?.code === "US_OPTIONS_NOT_CONNECTED" ? "Options feed not connected" : r.status === 404 ? "Not in backend instrument master" : r.status === 401 ? "Upstox session expired" : "Provider error" }); continue; }
           const { contractsFromChain } = await import("@/lib/optionsIntel.mjs");
           const p = contractsFromChain(j);
           const s = summarize(p, { nowMs: Date.now() });
@@ -70,15 +74,15 @@ function useStrip(levels, current) {
       if (live) setRows(out);
     };
     load();
-    const t = setInterval(() => { if (!document.hidden && isNseSession()) load(); }, 120000);
+    const t = setInterval(() => { if (!document.hidden && isSession(market)) load(); }, 120000);
     return () => { live = false; clearInterval(t); };
-  }, []);
+  }, [market]); // eslint-disable-line react-hooks/exhaustive-deps
   return useMemo(() => rows.map(r => {
     const lv = r.indexKey ? levels?.data?.[r.indexKey] : null;
     const cur = current?.symbol === r.id && current.summary && !current.isReplay ? current : null;
-    return { ...r, change: lv && lv.prevClose ? lv.change : null, changePct: lv?.changePct ?? null,
-      netGex: cur && cur.expiry === r.expiry ? cur.summary.totals.netGex : r.netGex, spot: cur?.summary?.spot ?? r.spot };
-  }), [rows, levels, current]);
+    return { ...r, change: lv && (lv.prevClose || market === "US") ? lv.change : null, changePct: lv?.changePct ?? null, level: lv?.value ?? null,
+      netGex: cur && cur.expiry === r.expiry ? cur.summary.totals.netGex : r.netGex, spot: cur?.summary?.spot ?? r.spot ?? lv?.value ?? null };
+  }), [rows, levels, current, market]);
 }
 
 function OiLeaders({ ctx }) {
@@ -159,15 +163,15 @@ function DayWiseGamma({ ctx }) {
   );
 }
 
-function FnoStocks({ ctx, onSymbol }) {
+function FnoStocks({ ctx, onSymbol, market = "IN" }) {
   const [list, setList] = useState({ status: "loading", items: [] });
   const [q, setQ] = useState("");
   const [scan, setScan] = useState({ status: "idle", rows: [] });
   useEffect(() => {
-    fetch("/api/terminal?view=fno", { cache: "no-store" }).then(r => r.json())
-      .then(j => setList(j?.success && Array.isArray(j.data) ? { status: "ready", items: j.data } : { status: "error", items: [] }))
+    fetch(market === "US" ? "/api/market/us-screener" : "/api/terminal?view=fno", { cache: "no-store" }).then(r => r.json())
+      .then(j => setList(j?.success && Array.isArray(j.data) ? { status: "ready", items: j.data.map(x => ({ symbol: x.symbol, name: x.name })) } : { status: "error", items: [] }))
       .catch(() => setList({ status: "error", items: [] }));
-  }, []);
+  }, [market]);
   const filtered = useMemo(() => { const t = q.trim().toLowerCase(); return list.items.filter(x => !t || String(x.symbol).toLowerCase().includes(t) || String(x.name || "").toLowerCase().includes(t)).slice(0, 60); }, [q, list.items]);
   const runScan = async () => {
     const pick = filtered.slice(0, 10).map(x => x.symbol);
@@ -176,7 +180,7 @@ function FnoStocks({ ctx, onSymbol }) {
     const rows = [];
     for (const sym of pick) {
       try {
-        const r = await fetch(`/api/market/option-chain/${encodeURIComponent(sym)}`, { cache: "no-store" });
+        const r = await fetch(chainUrl(market, sym), { cache: "no-store" });
         const j = await r.json();
         if (!r.ok || !j.success) { rows.push({ symbol: sym, error: j?.error || "No chain" }); continue; }
         const p = contractsFromChain(j), s = summarize(p, { nowMs: Date.now() });
@@ -189,7 +193,7 @@ function FnoStocks({ ctx, onSymbol }) {
   };
   return (
     <div className="oi-grid" style={{ "--cols": 2 }}>
-      <Panel title="F&O stock screener" detail={list.status === "ready" ? `${list.items.length} F&O-eligible symbols (exchange/provider list)` : list.status === "loading" ? "Loading F&O universe…" : "F&O universe unavailable"}
+      <Panel title={market === "US" ? "US stock screener" : "F&O stock screener"} detail={list.status === "ready" ? `${list.items.length} ${market === "US" ? "US symbols (AHQ US screener)" : "F&O-eligible symbols (exchange/provider list)"}` : list.status === "loading" ? "Loading F&O universe…" : "F&O universe unavailable"}
         tools={<button className="oi-btn" disabled={!filtered.length || scan.status === "loading"} onClick={runScan}>Scan top 10 shown</button>}>
         <input value={q} onChange={e => setQ(e.target.value)} placeholder="Search symbol or company" style={{ width: "100%", marginBottom: 8 }} />
         <div className="oi-scroll" style={{ maxHeight: 360 }}><table className="oi-table"><thead><tr><th>Symbol</th><th>Name</th><th></th></tr></thead>
@@ -208,7 +212,7 @@ function FnoStocks({ ctx, onSymbol }) {
   );
 }
 
-export default function OptionsIntelligence({ symbol, onSymbol, otherTabs = [], renderOther, initialTab = "overview", tab: controlledTab, onTab }) {
+export default function OptionsIntelligence({ symbol, onSymbol, otherTabs = [], renderOther, initialTab = "overview", tab: controlledTab, onTab, market = "IN", onMarket }) {
   const [tabState, setTabState] = useState(initialTab);
   const tab = controlledTab ?? tabState;
   const setTab = onTab ?? setTabState;
@@ -222,9 +226,10 @@ export default function OptionsIntelligence({ symbol, onSymbol, otherTabs = [], 
   const [store, saveStore] = useWorkspaceStore();
   const [mounted, setMounted] = useState(false);
   useEffect(() => { setMounted(true); }, []);
-  const levels = useIndexLevels();
+  const levels = useIndexLevels(market);
+  const universe = market === "US" ? US_UNIVERSE : INDEX_UNIVERSE;
 
-  useEffect(() => { setExpiry(""); setSelectedStrike(null); setReplay({ active: false, day: "", expiry: "", idx: null }); }, [symbol]);
+  useEffect(() => { setExpiry(""); setSelectedStrike(null); setReplay({ active: false, day: "", expiry: "", idx: null }); }, [symbol, market]);
   useEffect(() => {
     if (!replay.day || !replay.expiry) { setSeries([]); return; }
     let live = true; setSeriesLoading(true);
@@ -235,8 +240,8 @@ export default function OptionsIntelligence({ symbol, onSymbol, otherTabs = [], 
   const replaySnaps = replaySnap ? series.filter(s => s.t <= replaySnap.t) : null;
 
   const baseRef = useRef({});
-  const ctx = useIntelContext({ symbol, expiry: replaySnap ? replaySnap.expiry : expiry, base: baseRef.current, replaySnap, replaySnaps });
-  const strip = useStrip(levels, ctx);
+  const ctx = useIntelContext({ symbol, expiry: replaySnap ? replaySnap.expiry : expiry, base: baseRef.current, replaySnap, replaySnaps, market });
+  const strip = useStrip(levels, ctx, market);
 
   // since-last-visit: freeze the stored marker on first load, then write the new one.
   const [lastVisitPrev, setLastVisitPrev] = useState(null);
@@ -262,37 +267,48 @@ export default function OptionsIntelligence({ symbol, onSymbol, otherTabs = [], 
     return () => window.removeEventListener("keydown", onKey);
   }, []);
 
-  const tags = useMemo(() => tagExpiries(ctx.expiries, Date.now()), [ctx.expiries]);
+  const tags = useMemo(() => tagExpiries(ctx.expiries, Date.now(), market), [ctx.expiries, market]);
   const shownTags = tags.filter(t => kind === "all" || (kind === "0dte" && t.zeroDte) || (kind === "weekly" && t.weekly) || (kind === "monthly" && t.monthly));
   const commands = useMemo(() => [
     ...[...INTEL_TABS, ...otherTabs].map(t => ({ id: "tab-" + t.id, label: t.label, group: "View", run: () => setTab(t.id) })),
-    ...INDEX_UNIVERSE.map(i => ({ id: "ix-" + i.id, label: i.label, group: "Index", run: () => onSymbol(i.id) })),
+    ...universe.map(i => ({ id: "ix-" + i.id, label: i.label, group: "Index", run: () => onSymbol(i.id) })),
+    ...(onMarket ? [{ id: "mk-IN", label: "Switch to India", group: "Market", run: () => onMarket("IN") }, { id: "mk-US", label: "Switch to United States", group: "Market", run: () => onMarket("US") }] : []),
     ...tags.slice(0, 12).map(t => ({ id: "ex-" + t.expiry, label: `Expiry ${t.expiry}${t.zeroDte ? " · 0DTE" : t.monthly ? " · monthly" : " · weekly"}`, group: "Expiry", run: () => setExpiry(t.expiry) })),
     ...[...PRESETS, ...(store.workspaces || [])].map(w => ({ id: "ws-" + w.id, label: w.name, group: "Workspace", run: () => setTab("workspace") })),
     { id: "act-refresh", label: "Refresh chain now", group: "Action", run: () => ctx.reload?.() },
     { id: "act-live", label: "Exit replay (go live)", group: "Action", run: () => setReplay({ active: false, day: "", expiry: "", idx: null }) },
     { id: "act-0dte", label: "Show 0DTE expiries", group: "Action", run: () => setKind("0dte") },
-  ], [otherTabs, tags, store.workspaces, onSymbol, ctx.reload]);
+  ], [otherTabs, tags, store.workspaces, onSymbol, ctx.reload, universe, onMarket]);
 
   const prefs = { theme: "terminal", palette: "classic", text: "m", heat: 0.75, pin: "#5ba6db", ...store.prefs };
   const rootCls = `oi-root theme-${prefs.theme} pal-${prefs.palette} text-${prefs.text}`;
-  const sessionOpen = isNseSession();
-  const isIntel = INTEL_TABS.some(t => t.id === tab);
+  const sessionOpen = isSession(market);
+  const intelTabs = INTEL_TABS.map(t => (t.id === "fno" && market === "US" ? { ...t, label: "US STOCKS" } : t));
+  const isIntel = intelTabs.some(t => t.id === tab);
   const front = tags[0];
 
   // Everything below depends on the browser clock and live data: render it after hydration only.
   if (!mounted) return <div className={rootCls} data-options-intel-loading><div className="oi-head"><div><div className="oi-kicker">ALPHAHEDGEQUANT / OPTIONS ANALYTICS</div><div className="oi-title">{symbol} · Options Intelligence</div></div></div><div className="oi-empty">Loading options analytics…</div></div>;
   return (
     <div className={rootCls} style={{ "--oi-heat": prefs.heat, "--oi-pin": prefs.pin }} data-options-intel>
-      <div className="oi-head">
-        <div>
-          <div className="oi-kicker">ALPHAHEDGEQUANT / OPTIONS ANALYTICS</div>
-          <div className="oi-title">{symbol} · Options Intelligence</div>
+      <div className="oi-hero">
+        <Starfield density={0.00012} />
+        <Horizon compact />
+        <div className="oi-row" style={{ justifyContent: "space-between", alignItems: "flex-end", gap: 14 }}>
+          <div>
+            <div className="oi-kicker">ALPHAHEDGEQUANT / OPTIONS ANALYTICS / {market === "US" ? "UNITED STATES" : "INDIA"}</div>
+            <div className="oi-title">{symbol} · <span>Options Intelligence</span></div>
+          </div>
+          <div className="oi-row" style={{ gap: 8 }}>
+            {onMarket && <div className="oi-seg oi-country" role="group" aria-label="Market">
+              {[["IN", "India"], ["US", "United States"]].map(([id, l]) => <button key={id} type="button" aria-pressed={market === id} onClick={() => market !== id && onMarket(id)}>{l}</button>)}
+            </div>}
+            <button className="oi-chip" onClick={() => setPalette(true)} title="Quick switcher">⌘/Ctrl K</button>
+          </div>
         </div>
-        <div className="oi-controls">
-          {INDEX_UNIVERSE.map(i => <button key={i.id} className={"oi-chip" + (strip.find(s => s.id === i.id)?.status === "unavailable" ? " is-off" : "")} aria-pressed={symbol === i.id} onClick={() => onSymbol(i.id)}
+        <div className="oi-seg" role="group" aria-label="Underlying" style={{ marginTop: 14 }}>
+          {universe.map(i => <button key={i.id} type="button" className={strip.find(s => s.id === i.id)?.status === "unavailable" && market === "IN" ? "is-off" : ""} aria-pressed={symbol === i.id} onClick={() => onSymbol(i.id)}
             title={strip.find(s => s.id === i.id)?.note || ""}>{i.label}</button>)}
-          <button className="oi-chip" onClick={() => setPalette(true)} title="Quick switcher">⌘/Ctrl K</button>
         </div>
       </div>
 
@@ -302,14 +318,17 @@ export default function OptionsIntelligence({ symbol, onSymbol, otherTabs = [], 
           <small className={tone(s.change)}>{s.change == null ? (s.status === "unavailable" ? s.note : "Move unavailable") : `${s.change > 0 ? "+" : ""}${n2(s.change)}`}</small>
           <small>Net GEX {s.netGex == null ? "—" : <span className={tone(s.netGex)}>₹ {fmtCr(s.netGex)}</span>} · {s.asOf ? ist(s.asOf) : "—"}</small>
         </div>)}
-        <div><small>INDIA VIX</small><b>—</b><small>Not available from current gateway</small></div>
+        {market === "US"
+          ? ["DOW JONES", "VIX"].filter(k => levels.data?.[k]).map(k => { const v = levels.data[k]; return <div key={k}><small>{k}</small><b>{n2(v.value)}</b>
+              <small className={tone(v.change)}>{v.change > 0 ? "+" : ""}{n2(v.change)} ({v.changePct > 0 ? "+" : ""}{Number(v.changePct).toFixed(2)}%)</small><small>Delayed · {v.priceAsOf ? istDT(Date.parse(v.priceAsOf)) + " IST" : ""}</small></div>; })
+          : <div><small>INDIA VIX</small><b>—</b><small>Not available from current gateway</small></div>}
       </div>
 
       <div className="oi-status oi-mono">
         <span><i className={"dot " + (ctx.isReplay ? "replay" : ctx.status === "live" ? "live" : ctx.status === "loading" ? "" : "bad")} />
-          {ctx.isReplay ? `REPLAY ${istDT(ctx.nowMs)} IST` : ctx.status === "live" ? "Upstox chain received" : ctx.status === "loading" ? "Loading…" : ctx.status === "expired" ? "Upstox session expired" : ctx.status === "notListed" ? "Not in backend instrument master" : "No verified chain"}</span>
+          {ctx.isReplay ? `REPLAY ${istDT(ctx.nowMs)} IST` : ctx.status === "live" ? (market === "US" ? "US chain received" : "Upstox chain received") : ctx.status === "loading" ? "Loading…" : ctx.status === "expired" ? "Upstox session expired" : ctx.status === "notListed" ? "Not in backend instrument master" : ctx.status === "notConnected" ? "US options feed not connected yet — index levels are live; chain analytics activate when a provider is added" : "No verified chain"}</span>
         {ctx.parsed?.receivedAt && <span>Source {ist(Date.parse(ctx.parsed.receivedAt))} IST</span>}
-        <span>{sessionOpen ? "NSE session open · refresh 15 s" : "Outside NSE session · polling paused (exchange holidays not detected)"}</span>
+        <span>{market === "US" ? (sessionOpen ? "US session open (09:30–16:00 ET) · refresh 15 s" : "Outside US session · polling paused (exchange holidays not detected)") : (sessionOpen ? "NSE session open · refresh 15 s" : "Outside NSE session · polling paused (exchange holidays not detected)")}</span>
         {ctx.status === "expired" && <a className="oi-accent" href="https://zerohedgequant-backend.onrender.com/auth/login" target="_blank" rel="noreferrer">Reconnect Upstox ↗</a>}
         <span>Plan {String(store.plan).toUpperCase()} · workspace {store.cloud}</span>
         {!ctx.isReplay && <button className="oi-accent" onClick={() => ctx.reload?.()}>Refresh</button>}
@@ -337,7 +356,7 @@ export default function OptionsIntelligence({ symbol, onSymbol, otherTabs = [], 
       )}
 
       <nav className="oi-tabs" role="tablist" aria-label="Options analytics">
-        {INTEL_TABS.map(t => <button key={t.id} role="tab" aria-selected={tab === t.id} onClick={() => setTab(t.id)}>{t.label}</button>)}
+        {intelTabs.map(t => <button key={t.id} role="tab" aria-selected={tab === t.id} onClick={() => setTab(t.id)}>{t.label}</button>)}
         {otherTabs.length > 0 && <><span className="oi-sep" /><span className="oi-group">OTHER TOOLS</span></>}
         {otherTabs.map(t => <button key={t.id} role="tab" aria-selected={tab === t.id} onClick={() => setTab(t.id)}>{t.label}</button>)}
       </nav>
@@ -346,7 +365,7 @@ export default function OptionsIntelligence({ symbol, onSymbol, otherTabs = [], 
         {isIntel && <ContractDetail ctx={fullCtx} />}
         {LAYOUTS[tab] && <Layout id={tab} ctx={fullCtx} />}
         {tab === "replay" && <ReplayTab ctx={fullCtx} replay={replay} setReplay={setReplay} series={series} loading={seriesLoading} />}
-        {tab === "fno" && <FnoStocks ctx={fullCtx} onSymbol={onSymbol} />}
+        {tab === "fno" && <FnoStocks ctx={fullCtx} onSymbol={onSymbol} market={market} />}
         {tab === "workspace" && <>
           <WorkspaceTab ctx={fullCtx} store={store} saveStore={saveStore} useIntelContext={useIntelContext} />
           <div style={{ marginTop: 10 }}><AppearancePanel prefs={store.prefs} onChange={p => saveStore({ prefs: p })} /></div>

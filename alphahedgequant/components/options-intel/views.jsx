@@ -34,6 +34,7 @@ export function useExposure(ctx, opts = {}) {
 }
 function noChain(ctx) {
   if (ctx.parsed?.contracts?.length) return null;
+  if (ctx.status === "notConnected") return <Empty title="US OPTIONS FEED NOT CONNECTED">This view activates as soon as a US options data provider is connected. Nothing is estimated or simulated in the meantime; US index levels and VIX in the strip above are live.</Empty>;
   return <Empty title={ctx.status === "loading" ? "LOADING CHAIN…" : "NO VERIFIED OPTION CHAIN"}>{ctx.error || "Analytics are withheld until the provider returns a chain."}</Empty>;
 }
 const qualityLine = ctx => {
@@ -548,9 +549,9 @@ export function MarketStripView({ ctx, span }) {
   return (
     <Panel title="Market strip" span={span} detail="Index level, move and front-expiry net GEX">
       <table className="oi-table"><thead><tr><th>Index</th><th>Level</th><th>Move</th><th>Net GEX (front)</th><th>Flip</th><th>As of</th></tr></thead>
-        <tbody>{(ctx.strip || []).map(s => <tr key={s.id} onClick={() => ctx.setSymbol?.(s.id)}><td>{s.label}</td><td>{s.spot ? n2(s.spot) : "—"}</td><td className={tone(s.change)}>{s.change == null ? "—" : n2(s.change)}</td>
+        <tbody>{(ctx.strip || []).map(s => <tr key={s.id} onClick={() => ctx.setSymbol?.(s.id)}><td>{s.label}</td><td>{s.spot ? n2(s.spot) : s.level ? n2(s.level) : "—"}</td><td className={tone(s.change)}>{s.change == null ? "—" : n2(s.change)}</td>
           <td className={tone(s.netGex)}>{s.netGex == null ? s.note || "—" : "₹ " + fmtCr(s.netGex)}</td><td>{s.flip ? n2(s.flip, 0) : "—"}</td><td className="oi-muted">{s.asOf ? ist(s.asOf) : "—"}</td></tr>)}</tbody></table>
-      <p className="oi-note">India VIX is not available from the current gateway and is not shown.</p>
+      <p className="oi-note">{ctx.market === "US" ? "US index levels are delayed (Yahoo). Net GEX appears once the US options feed is connected." : "India VIX is not available from the current gateway and is not shown."}</p>
     </Panel>
   );
 }

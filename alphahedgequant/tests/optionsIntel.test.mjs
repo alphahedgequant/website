@@ -228,3 +228,16 @@ test("live NIFTY fixture (28 Nov 2026): levels are finite, IV=0 quotes excluded,
   }
   assert.ok(sum / n < 0.03, "mean |Δ − provider Δ| = " + (sum / n).toFixed(4));
 });
+
+test("US expiries close at 16:00 New York with daylight saving, and the US session is detected", async () => {
+  const { expiryCloseMs: close, isUsSession, isSession } = await import("../lib/optionsIntel.mjs");
+  assert.equal(new Date(close("2026-12-18", "US")).toISOString(), "2026-12-18T21:00:00.000Z", "EST");
+  assert.equal(new Date(close("2026-07-17", "US")).toISOString(), "2026-07-17T20:00:00.000Z", "EDT");
+  assert.equal(new Date(close("2026-12-18")).toISOString(), "2026-12-18T10:00:00.000Z", "India default unchanged");
+  assert.equal(isUsSession(Date.UTC(2026, 10, 27, 15, 0)), true, "Fri 10:00 New York");
+  assert.equal(isUsSession(Date.UTC(2026, 10, 27, 22, 0)), false, "after the close");
+  assert.equal(isSession("IN", Date.UTC(2026, 10, 27, 5, 0)), true);
+  const p = contractsFromChain({ success: true, data: { market: "US", spot_price: 100, expiry: "2026-12-18", strikes: [{ strike_price: 100, call: leg() }] } });
+  assert.equal(p.market, "US");
+  assert.equal(p.contracts[0].market, "US");
+});

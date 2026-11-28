@@ -2,7 +2,9 @@
 // Data hooks for Options Intelligence. All market data comes from the existing same-origin
 // gateway (/api/market/option-chain/:symbol → Render → Upstox). Nothing here fabricates values.
 import { useCallback, useEffect, useRef, useState } from "react";
-import { contractsFromChain, snapshotFromChain, isNseSession, istParts, realizedVolFromBars } from "@/lib/optionsIntel.mjs";
+import { contractsFromChain, snapshotFromChain, isSession, istParts, realizedVolFromBars } from "@/lib/optionsIntel.mjs";
+import { US_UNIVERSE } from "@/lib/usOptionsProvider.mjs";
+export { US_UNIVERSE };
 
 export const INDEX_UNIVERSE = [
   { id: "NIFTY", label: "NIFTY 50", indexKey: "NIFTY50" },
@@ -12,8 +14,11 @@ export const INDEX_UNIVERSE = [
   { id: "SENSEX", label: "SENSEX (BSE)" },
 ];
 
-async function fetchChain(symbol, expiry, signal) {
-  const url = `/api/market/option-chain/${encodeURIComponent(symbol)}${expiry ? `?expiry=${encodeURIComponent(expiry)}` : ""}`;
+export const chainUrl = (market, symbol, expiry) =>
+  `${market === "US" ? "/api/options/us-chain/" : "/api/market/option-chain/"}${encodeURIComponent(symbol)}${expiry ? `?expiry=${encodeURIComponent(expiry)}` : ""}`;
+
+async function fetchChain(symbol, expiry, signal, market = "IN") {
+  const url = chainUrl(market, symbol, expiry);
   const r = await fetch(url, { cache: "no-store", signal });
   let j = null;
   try { j = await r.json(); } catch { throw new Error(`Market-data gateway returned a non-JSON response (HTTP ${r.status}).`); }
@@ -21,13 +26,15 @@ async function fetchChain(symbol, expiry, signal) {
     const e = new Error("Upstox session expired at the backend. Reconnect Upstox to restore option data."); e.code = "AUTH"; throw e;
   }
   if (!r.ok || !j?.success || !j?.data?.strikes?.length) {
-    const e = new Error(j?.error || `No verified option chain (HTTP ${r.status}).`); e.code = r.status === 404 ? "NOT_LISTED" : "UNAVAILABLE"; throw e;
+    const e = new Error(j?.error || `No verified option chain (HTTP ${r.status}).`);
+    e.code = j?.code === "US_OPTIONS_NOT_CONNECTED" ? "NOT_CONNECTED" : r.status === 404 ? "NOT_LISTED" : "UNAVAILABLE"; throw e;
   }
+  if (market === "US") j.data.market = "US";
   return j;
 }
 
 /** Live chain for one symbol/expiry. Polls only during the regular NSE session. */
-export function useChain(symbol, expiry, { pollMs = 15000, enabled = true } = {}) {
+export function useChain(symbol, expiry, { pollMs = 15000, enabled = true, market = "IN" } = {}) {
   const [state, setState] = useState({ status: "loading", parsed: null, raw: null, error: "", fetchedAt: null });
   const reqRef = useRef(0);
   const load = useCallback(async (soft = false) => {
@@ -35,26 +42,26 @@ export function useChain(symbol, expiry, { pollMs = 15000, enabled = true } = {}
     const id = ++reqRef.current;
     if (!soft) setState(s => ({ ...s, status: "loading", error: "" }));
     try {
-      const j = await fetchChain(symbol, expiry);
+      const j = await fetchChain(symbol, expiry, undefined, market);
       if (id !== reqRef.current) return;
       setState({ status: "live", parsed: contractsFromChain(j), raw: j.data, error: "", fetchedAt: Date.now() });
     } catch (e) {
       if (id !== reqRef.current) return;
-      setState(s => ({ ...s, status: e.code === "AUTH" ? "expired" : e.code === "NOT_LISTED" ? "notListed" : "error",
+      setState(s => ({ ...s, status: e.code === "AUTH" ? "expired" : e.code === "NOT_LISTED" ? "notListed" : e.code === "NOT_CONNECTED" ? "notConnected" : "error",
         error: e.message, parsed: soft ? s.parsed : null, raw: soft ? s.raw : null }));
     }
-  }, [symbol, expiry, enabled]);
+  }, [symbol, expiry, enabled, market]);
   useEffect(() => { load(false); }, [load]);
   useEffect(() => {
     if (!enabled) return;
-    const t = setInterval(() => { if (!document.hidden && isNseSession()) load(true); }, pollMs);
+    const t = setInterval(() => { if (!document.hidden && isSession(market)) load(true); }, pollMs);
     return () => clearInterval(t);
-  }, [load, pollMs, enabled]);
+  }, [load, pollMs, enabled, market]);
   return { ...state, reload: () => load(true) };
 }
 
 /** Several expiries for the surface / term structure / every-strike grid. Loaded on demand. */
-export function useMultiExpiry(symbol, expiries, { count = 6, enabled = false } = {}) {
+export function useMultiExpiry(symbol, expiries, { count = 6, enabled = false, market = "IN" } = {}) {
   const [state, setState] = useState({ status: "idle", chains: [], failed: [], fetchedAt: null });
   const key = (expiries || []).slice(0, count).join(",");
   const load = useCallback(async () => {
@@ -64,15 +71,15 @@ export function useMultiExpiry(symbol, expiries, { count = 6, enabled = false } 
     const chains = [], failed = [];
     // Sequential in pairs to respect upstream rate limits.
     for (let i = 0; i < list.length; i += 2) {
-      const part = await Promise.allSettled(list.slice(i, i + 2).map(e => fetchChain(symbol, e)));
+      const part = await Promise.allSettled(list.slice(i, i + 2).map(e => fetchChain(symbol, e, undefined, market)));
       part.forEach((p, k) => p.status === "fulfilled" ? chains.push(contractsFromChain(p.value)) : failed.push(list[i + k]));
     }
     setState({ status: chains.length ? "ready" : "error", chains, failed, fetchedAt: Date.now() });
-  }, [symbol, key, enabled]);
+  }, [symbol, key, enabled, market]);
   useEffect(() => { load(); }, [load]);
   useEffect(() => {
     if (!enabled) return;
-    const t = setInterval(() => { if (!document.hidden && isNseSession()) load(); }, 60000);
+    const t = setInterval(() => { if (!document.hidden && isSession(market)) load(); }, 60000);
     return () => clearInterval(t);
   }, [load, enabled]);
   return { ...state, reload: load };
@@ -154,7 +161,7 @@ async function pruneOld(keepDays = 10) {
 }
 
 /** Records at most one snapshot per minute per symbol/expiry while the page is open in-session. */
-export function useSnapshotRecorder(symbol, expiry, parsed) {
+export function useSnapshotRecorder(symbol, expiry, parsed, market = "IN") {
   const [snaps, setSnaps] = useState([]);
   const [day, setDay] = useState(() => istParts().day);
   const lastMinute = useRef(null);
@@ -167,7 +174,7 @@ export function useSnapshotRecorder(symbol, expiry, parsed) {
     return () => { live = false; };
   }, [symbol, expiry]);
   useEffect(() => {
-    if (!parsed?.contracts?.length || parsed.expiry !== expiry || !isNseSession()) return;
+    if (!parsed?.contracts?.length || parsed.expiry !== expiry || !isSession(market)) return;
     const snap = snapshotFromChain(parsed, Date.now());
     const minute = Math.floor(snap.t / 60000);
     if (lastMinute.current === `${symbol}|${expiry}|${minute}`) return;
@@ -181,10 +188,11 @@ export function useSnapshotRecorder(symbol, expiry, parsed) {
 }
 
 /** Realised volatility from the existing 5-minute history endpoint (stocks; indices may be unavailable). */
-export function useRealizedVol(symbol) {
+export function useRealizedVol(symbol, market = "IN") {
   const [rv, setRv] = useState({ status: "loading" });
   useEffect(() => {
     let live = true;
+    if (market === "US") { setRv({ status: "unavailable", error: "US daily history not connected" }); return; }
     setRv({ status: "loading" });
     fetch(`/api/terminal?view=history&symbol=${encodeURIComponent(symbol)}`, { cache: "no-store" })
       .then(r => r.json().then(j => ({ ok: r.ok, j })))
@@ -195,22 +203,23 @@ export function useRealizedVol(symbol) {
       })
       .catch(() => live && setRv({ status: "unavailable", error: "History request failed" }));
     return () => { live = false; };
-  }, [symbol]);
+  }, [symbol, market]);
   return rv;
 }
 
-/** Index levels and moves from the existing indices endpoint. */
-export function useIndexLevels() {
+/** Index levels and moves from the existing indices endpoints (India: /indices, US: /us-indices). */
+export function useIndexLevels(market = "IN") {
   const [state, setState] = useState({ data: null, fetchedAt: null, stale: null });
   useEffect(() => {
     let live = true;
-    const load = () => fetch("/api/market/indices", { cache: "no-store" }).then(r => r.json())
+    setState({ data: null, fetchedAt: null, stale: null });
+    const load = () => fetch(market === "US" ? "/api/market/us-indices" : "/api/market/indices", { cache: "no-store" }).then(r => r.json())
       .then(j => live && j?.success && setState({ data: j.data, fetchedAt: j.fetchedAt || new Date().toISOString(), stale: !!j.stale }))
       .catch(() => {});
     load();
     const t = setInterval(() => { if (!document.hidden) load(); }, 60000);
     return () => { live = false; clearInterval(t); };
-  }, []);
+  }, [market]);
   return state;
 }
 
