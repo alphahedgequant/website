@@ -21,13 +21,18 @@ async function fetchChain(symbol, expiry, signal, market = "IN") {
   const url = chainUrl(market, symbol, expiry);
   const r = await fetch(url, { cache: "no-store", signal });
   let j = null;
-  try { j = await r.json(); } catch { throw new Error(`Market-data gateway returned a non-JSON response (HTTP ${r.status}).`); }
-  if (r.status === 401 || /token|unauthori[sz]ed/i.test(String(j?.error || ""))) {
+  try { j = await r.json(); } catch {
+    const e = new Error(r.status >= 500 ? "The market-data service is waking up — retrying automatically." : `Market-data gateway returned a non-JSON response (HTTP ${r.status}).`);
+    e.code = r.status >= 500 ? "WAKING" : "UNAVAILABLE"; throw e;
+  }
+  if (r.status === 401 || j?.code === "UPSTOX_AUTH_EXPIRED" || /token|unauthori[sz]ed/i.test(String(j?.error || ""))) {
     const e = new Error("Upstox session expired at the backend. Reconnect Upstox to restore option data."); e.code = "AUTH"; throw e;
   }
   if (!r.ok || !j?.success || !j?.data?.strikes?.length) {
     const e = new Error(j?.error || `No verified option chain (HTTP ${r.status}).`);
-    e.code = j?.code === "US_OPTIONS_NOT_CONNECTED" ? "NOT_CONNECTED" : r.status === 404 ? "NOT_LISTED" : "UNAVAILABLE"; throw e;
+    e.code = j?.code === "US_OPTIONS_NOT_CONNECTED" ? "NOT_CONNECTED" : r.status === 404 ? "NOT_LISTED" : [502, 503, 504].includes(r.status) ? "WAKING" : "UNAVAILABLE";
+    if (e.code === "WAKING") e.message = "The market-data service is waking up — retrying automatically.";
+    throw e;
   }
   if (market === "US") j.data.market = "US";
   return j;
@@ -37,6 +42,7 @@ async function fetchChain(symbol, expiry, signal, market = "IN") {
 export function useChain(symbol, expiry, { pollMs = 15000, enabled = true, market = "IN" } = {}) {
   const [state, setState] = useState({ status: "loading", parsed: null, raw: null, error: "", fetchedAt: null });
   const reqRef = useRef(0);
+  const retryRef = useRef({ n: 0, t: null });
   const load = useCallback(async (soft = false) => {
     if (!symbol || !enabled) return;
     const id = ++reqRef.current;
@@ -44,14 +50,23 @@ export function useChain(symbol, expiry, { pollMs = 15000, enabled = true, marke
     try {
       const j = await fetchChain(symbol, expiry, undefined, market);
       if (id !== reqRef.current) return;
+      retryRef.current.n = 0;
       setState({ status: "live", parsed: contractsFromChain(j), raw: j.data, error: "", fetchedAt: Date.now() });
     } catch (e) {
       if (id !== reqRef.current) return;
+      // Render cold starts answer 502/503/504 for the first ~30 s: retry with backoff, even outside the session.
+      if ((e.code === "WAKING" || e.name === "TypeError") && retryRef.current.n < 4) {
+        const wait = [4000, 9000, 18000, 30000][retryRef.current.n++];
+        clearTimeout(retryRef.current.t);
+        retryRef.current.t = setTimeout(() => load(true), wait);
+        setState(s => ({ ...s, status: s.parsed ? s.status : "waking", error: e.message }));
+        return;
+      }
       setState(s => ({ ...s, status: e.code === "AUTH" ? "expired" : e.code === "NOT_LISTED" ? "notListed" : e.code === "NOT_CONNECTED" ? "notConnected" : "error",
         error: e.message, parsed: soft ? s.parsed : null, raw: soft ? s.raw : null }));
     }
   }, [symbol, expiry, enabled, market]);
-  useEffect(() => { load(false); }, [load]);
+  useEffect(() => { retryRef.current.n = 0; load(false); return () => clearTimeout(retryRef.current.t); }, [load]);
   useEffect(() => {
     if (!enabled) return;
     const t = setInterval(() => { if (!document.hidden && isSession(market)) load(true); }, pollMs);
