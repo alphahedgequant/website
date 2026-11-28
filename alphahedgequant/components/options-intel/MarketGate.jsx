@@ -1,6 +1,6 @@
 "use client";
 // Options Analytics entry: choose a country, then open that market's analytics.
-// Motion: twinkling starfield, a green horizon arc with a travelling light, and a chosen-card
+// Motion: AHQ alpha-orbit, live market pulses and a chosen-card
 // expansion. All motion is skipped when the visitor prefers reduced motion.
 import { useEffect, useRef, useState } from "react";
 import "./marketGate.css";
