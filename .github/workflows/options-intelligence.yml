@@ -1,0 +1,48 @@
+name: Options Intelligence
+on:
+  pull_request:
+    paths:
+      - "alphahedgequant/lib/optionsIntel.mjs"
+      - "alphahedgequant/lib/optionsWorkspace.mjs"
+      - "alphahedgequant/components/options-intel/**"
+      - "alphahedgequant/app/options/**"
+      - "alphahedgequant/app/terminal/**"
+      - "alphahedgequant/app/api/options/**"
+      - "alphahedgequant/tests/optionsIntel.test.mjs"
+      - "alphahedgequant/tests/optionsWorkspace.test.mjs"
+      - "alphahedgequant/tests/fixtures/**"
+      - ".github/workflows/options-intelligence.yml"
+  push:
+    branches: [main]
+    paths:
+      - "alphahedgequant/lib/optionsIntel.mjs"
+      - "alphahedgequant/lib/optionsWorkspace.mjs"
+      - "alphahedgequant/components/options-intel/**"
+      - "alphahedgequant/app/options/**"
+      - "alphahedgequant/app/api/options/**"
+permissions:
+  contents: read
+jobs:
+  validate:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 14
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: alphahedgequant/package-lock.json
+      - name: Install audited pinned dependencies
+        working-directory: alphahedgequant
+        run: npm ci --ignore-scripts --no-audit --no-fund
+      - name: Greeks, GEX/DEX, levels, flow, replay snapshots and layout-only workspaces
+        working-directory: alphahedgequant
+        run: node --test tests/optionsIntel.test.mjs tests/optionsWorkspace.test.mjs
+      - name: Build entire website
+        working-directory: alphahedgequant
+        env:
+          NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY: "pk_test_ZXhhbXBsZS5jbGVyay5hY2NvdW50cy5kZXYk"
+        run: npm run build
