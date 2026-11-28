@@ -33,14 +33,33 @@ export function normCdf(x) {
 const num = v => (v === null || v === undefined || v === "" || !Number.isFinite(Number(v)) ? null : Number(v));
 
 // ---------- calendar ----------
-/** Expiry "YYYY-MM-DD" → epoch ms of 15:30 IST (10:00 UTC) that day. */
-export function expiryCloseMs(expiry) {
+/** Minutes New York is behind UTC on a given UTC instant (300 EST, 240 EDT). */
+export function nyOffsetMinutes(ms) {
+  const parts = Object.fromEntries(new Intl.DateTimeFormat("en-US", { timeZone: "America/New_York", hourCycle: "h23",
+    year: "numeric", month: "2-digit", day: "2-digit", hour: "2-digit", minute: "2-digit" }).formatToParts(new Date(ms)).map(p => [p.type, p.value]));
+  const asUtc = Date.UTC(+parts.year, +parts.month - 1, +parts.day, +parts.hour, +parts.minute);
+  return Math.round((ms - asUtc) / 60000);
+}
+/** Expiry "YYYY-MM-DD" → epoch ms of the session close that day:
+ *  India 15:30 IST (10:00 UTC); United States 16:00 New York time (DST-aware). */
+export function expiryCloseMs(expiry, market = "IN") {
   const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(String(expiry || ""));
   if (!m) return null;
+  if (market === "US") {
+    const guess = Date.UTC(+m[1], +m[2] - 1, +m[3], 21, 0, 0);
+    return Date.UTC(+m[1], +m[2] - 1, +m[3], 16, 0, 0) + nyOffsetMinutes(guess) * 60000;
+  }
   return Date.UTC(+m[1], +m[2] - 1, +m[3], 10, 0, 0);
 }
-export function yearsToExpiry(expiry, nowMs = Date.now()) {
-  const close = expiryCloseMs(expiry);
+/** Regular US equity-options session 09:30–16:00 New York, Mon–Fri. Exchange holidays not detected. */
+export function isUsSession(ms = Date.now()) {
+  const local = new Date(ms - nyOffsetMinutes(ms) * 60000);
+  const wd = local.getUTCDay(), mins = local.getUTCHours() * 60 + local.getUTCMinutes();
+  return wd >= 1 && wd <= 5 && mins >= 570 && mins < 960;
+}
+export const isSession = (market, ms = Date.now()) => (market === "US" ? isUsSession(ms) : isNseSession(ms));
+export function yearsToExpiry(expiry, nowMs = Date.now(), market = "IN") {
+  const close = expiryCloseMs(expiry, market);
   if (close == null) return null;
   return Math.max(MIN_T_YEARS, (close - nowMs) / YEAR_MS);
 }
@@ -56,9 +75,9 @@ export function isNseSession(ms = Date.now()) {
   return p.weekday >= 1 && p.weekday <= 5 && p.minutes >= 555 && p.minutes < 930;
 }
 /** Tag each listed expiry as 0DTE / weekly / monthly using the provider's contract list (no hardcoded weekday). */
-export function tagExpiries(expiries, nowMs = Date.now()) {
-  const today = istParts(nowMs).day;
-  const list = [...new Set((expiries || []).filter(e => expiryCloseMs(e) != null))].sort();
+export function tagExpiries(expiries, nowMs = Date.now(), market = "IN") {
+  const today = market === "US" ? new Date(nowMs - nyOffsetMinutes(nowMs) * 60000).toISOString().slice(0, 10) : istParts(nowMs).day;
+  const list = [...new Set((expiries || []).filter(e => expiryCloseMs(e, market) != null))].sort();
   const lastInMonth = new Map();
   for (const e of list) lastInMonth.set(e.slice(0, 7), e);
   return list.map(e => ({
@@ -66,7 +85,7 @@ export function tagExpiries(expiries, nowMs = Date.now()) {
     zeroDte: e === today,
     monthly: lastInMonth.get(e.slice(0, 7)) === e,
     weekly: lastInMonth.get(e.slice(0, 7)) !== e,
-    days: Math.max(0, Math.round((expiryCloseMs(e) - nowMs) / 864e5 * 10) / 10),
+    days: Math.max(0, Math.round((expiryCloseMs(e, market) - nowMs) / 864e5 * 10) / 10),
   }));
 }
 
@@ -101,6 +120,7 @@ export function contractsFromChain(payload) {
   const data = payload?.data ?? payload;
   const expiry = data?.expiry || null;
   const lotSize = num(data?.lot_size);
+  const market = data?.market === "US" ? "US" : "IN";
   const out = [];
   const quality = { contracts: 0, usable: 0, missingIv: 0, missingOi: 0, invalidIv: 0 };
   for (const row of data?.strikes || []) {
@@ -122,11 +142,11 @@ export function contractsFromChain(payload) {
         oi, oiChg: num(q.oi_change), vol: num(q.volume), ltp: num(q.ltp),
         bid: num(q.bid_price) > 0 ? num(q.bid_price) : null,
         ask: num(q.ask_price) > 0 ? num(q.ask_price) : null,
-        iv, lot: num(q.lot_size) ?? lotSize, key: q.instrument_key || `${expiry}:${K}:${type}`,
+        iv, lot: num(q.lot_size) ?? lotSize, key: q.instrument_key || `${expiry}:${K}:${type}`, market,
       });
     }
   }
-  return { contracts: out, quality, spot: num(data?.spot_price), expiry, lotSize, receivedAt: data?.received_at || null };
+  return { contracts: out, quality, spot: num(data?.spot_price), expiry, lotSize, receivedAt: data?.received_at || null, market };
 }
 
 // ---------- compact snapshots for replay (IndexedDB) ----------
@@ -162,7 +182,7 @@ export function contractsFromSnapshot(snap) {
 export function contractExposure(c, opts) {
   const S = opts.spot;
   if (c.iv == null || c.oi == null || !(S > 0)) return null;
-  const T = yearsToExpiry(c.expiry, opts.nowMs ?? Date.now());
+  const T = yearsToExpiry(c.expiry, opts.nowMs ?? Date.now(), c.market);
   if (T == null) return null;
   const sigma = Math.max(0.005, c.iv + (opts.ivShift || 0));
   const g = bsGreeks(S, c.strike, T, sigma, c.type, opts.r ?? MODEL_RATE);
@@ -328,7 +348,7 @@ export function hedgeLadder(contracts, opts, moves = [-2, -1, -0.5, 0.5, 1, 2]) 
 /** Gamma under time horizons and IV shocks, other inputs held constant. */
 export function gammaDecay(contracts, opts) {
   const now = opts.nowMs ?? Date.now();
-  const front = contracts.map(c => expiryCloseMs(c.expiry)).filter(Boolean).sort((a, b) => a - b)[0];
+  const front = contracts.map(c => expiryCloseMs(c.expiry, c.market)).filter(Boolean).sort((a, b) => a - b)[0];
   const horizons = [
     ["Now", 0], ["+30 min", 30], ["+1 hour", 60], ["+2 hours", 120],
     ["Front expiry close", front ? Math.max(0, (front - now) / 60000 - 5) : null],
@@ -345,7 +365,7 @@ export function charmByStrike(contracts, opts) {
   const map = new Map();
   for (const c of contracts) {
     if (c.iv == null || c.oi == null) continue;
-    const T = yearsToExpiry(c.expiry, now);
+    const T = yearsToExpiry(c.expiry, now, c.market);
     if (T == null) continue;
     const oneDay = charmOver(S, c.strike, T, c.iv, c.type, 1 / 365);
     const toExp = charmOver(S, c.strike, T, c.iv, c.type, T);
@@ -417,7 +437,7 @@ export function skew25(contracts, S, nowMs = Date.now()) {
   let c25 = null, p25 = null;
   for (const c of contracts) {
     if (c.iv == null) continue;
-    const T = yearsToExpiry(c.expiry, nowMs);
+    const T = yearsToExpiry(c.expiry, nowMs, c.market);
     const g = bsGreeks(S, c.strike, T, c.iv, c.type);
     if (!g) continue;
     if (c.type === "CE" && (!c25 || Math.abs(g.delta - 0.25) < Math.abs(c25.d - 0.25))) c25 = { d: g.delta, iv: c.iv * 100, strike: c.strike };

@@ -6,7 +6,7 @@ import { Panel } from "./ui";
 
 /** Pane with its own underlying (used for index comparison). */
 function OverridePane({ pane, ctx, useIntelContext }) {
-  const sub = useIntelContext({ symbol: pane.symbol, expiry: pane.expiry || "", record: false, base: ctx });
+  const sub = useIntelContext({ symbol: pane.symbol, expiry: pane.expiry || "", record: false, base: ctx, market: ctx.market });
   return <View id={pane.view} ctx={sub} span={pane.span} />;
 }
 
@@ -93,7 +93,7 @@ export function WorkspaceTab({ ctx, store, saveStore, useIntelContext }) {
               <button onClick={() => setPane(i, { span: p.span === 2 ? 1 : 2 })} title="Resize">{p.span === 2 ? "Narrow" : "Wide"}</button>
               <select value={p.view} onChange={e => setPane(i, { view: e.target.value })} aria-label="Pane view" style={{ fontSize: 10, padding: "1px 4px" }}>{VIEW_IDS.map(id => <option key={id} value={id}>{VIEWS[id]?.title || id}</option>)}</select>
               <select value={p.symbol || ""} onChange={e => setPane(i, { symbol: e.target.value || undefined })} aria-label="Pane underlying" style={{ fontSize: 10, padding: "1px 4px" }}>
-                <option value="">Follow {ctx.symbol}</option>{["NIFTY", "BANKNIFTY", "FINNIFTY", "MIDCPNIFTY", "SENSEX"].map(s => <option key={s} value={s}>{s}</option>)}
+                <option value="">Follow {ctx.symbol}</option>{(ctx.market === "US" ? ["SPX", "NDX", "SPY", "QQQ", "IWM"] : ["NIFTY", "BANKNIFTY", "FINNIFTY", "MIDCPNIFTY", "SENSEX"]).map(s => <option key={s} value={s}>{s}</option>)}
               </select>
               <button onClick={() => update({ panes: ws.panes.filter((_, k) => k !== i) })} title="Remove pane">Remove</button>
             </div>

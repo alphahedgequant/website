@@ -4,6 +4,9 @@ import OptionIVAnalytics from "@/components/OptionIVAnalytics";
 import OptionOIProfile from "@/components/OptionOIProfile";
 import UnusualOptionsMonitor from "@/components/UnusualOptionsMonitor";
 import OptionsIntelligence from "@/components/options-intel/OptionsIntelligence";
+import MarketGate from "@/components/options-intel/MarketGate";
+
+const MARKET_DEFAULT = { IN: "NIFTY", US: "SPX" };
 
 const DESK_TABS = [
   { id: "desk-chain", label: "OPTION CHAIN", tab: "chain" },
@@ -52,6 +55,19 @@ function legPayoffAtExpiry(leg, spotAtExpiry) {
 export default function OptionsPage({initialUnderlying=null,embedded=false}) {
   // Spec analytics open first; the existing desk tools follow as "Other tools" tabs.
   const [section, setSection] = useState("overview");
+  // Country first: the gate opens on every visit unless the URL already names a market
+  // (?market=in|us) or the page is embedded in the Quant Terminal (NSE only).
+  const [market, setMarket] = useState(initialUnderlying || embedded ? "IN" : null);
+  useEffect(() => {
+    if (market) return;
+    const q = new URLSearchParams(window.location.search).get("market");
+    if (q && ["IN", "US"].includes(q.toUpperCase())) { const m = q.toUpperCase(); setMarket(m); setUnderlying(MARKET_DEFAULT[m]); }
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+  const enterMarket = useCallback(m => {
+    setMarket(m); setSection("overview"); setUnderlying(MARKET_DEFAULT[m]); setLegs([]);
+    try { const u = new URL(window.location.href); u.searchParams.set("market", m.toLowerCase()); window.history.replaceState(window.history.state, "", u.pathname + u.search + u.hash); } catch {}
+    window.dispatchEvent(new CustomEvent("ahq:analytics", { detail: { name: "options_market_selected", market: m } }));
+  }, []);
   const deskTab = DESK_TABS.find(t => t.id === section)?.tab || null;
   const tab = deskTab || "chain";
   const setTab = useCallback(t => setSection(DESK_TABS.find(d => d.tab === t)?.id || "desk-chain"), []);
@@ -198,11 +214,14 @@ export default function OptionsPage({initialUnderlying=null,embedded=false}) {
   };
 
   const deskTabs = DESK_TABS.map(t => t.tab === "builder" && legs.length ? { ...t, label: `STRATEGY BUILDER (${legs.length})` } : t);
+  if (!market) return (
+    <div className="max-w-shell mx-auto px-3 sm:px-5 py-6"><MarketGate onPick={enterMarket} /></div>
+  );
   return (
     <div className={embedded?"qt-embedded-tool max-w-shell mx-auto px-5 py-8":"max-w-shell mx-auto px-5 py-10"}>
-      <h1 className="sr-only">Options Analytics — {underlying}</h1>
-      <OptionsIntelligence symbol={underlying} onSymbol={chooseUnderlying} tab={section} onTab={setSection}
-        otherTabs={deskTabs} renderOther={() => deskTab && renderDesk()} />
+      <h1 className="sr-only">Options Analytics — {market === "US" ? "United States" : "India"} — {underlying}</h1>
+      <OptionsIntelligence key={market} market={market} onMarket={embedded ? undefined : enterMarket} symbol={underlying} onSymbol={chooseUnderlying} tab={section} onTab={setSection}
+        otherTabs={market === "IN" ? deskTabs : []} renderOther={() => market === "IN" && deskTab && renderDesk()} />
     </div>
   );
 
