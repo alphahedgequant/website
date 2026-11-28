@@ -3,7 +3,8 @@ import assert from "node:assert/strict";
 import {readFileSync} from "node:fs";
 const root=new URL("../",import.meta.url);
 const floor=readFileSync(new URL("app/terminal/TerminalTradingFloor.jsx",root),"utf8");
-const route=readFileSync(new URL("app/terminal/page.jsx",root),"utf8");
+const route=readFileSync(new URL("components/terminal/panes.jsx",root),"utf8");
+const commands=readFileSync(new URL("components/terminal/commands.js",root),"utf8");
 const css=readFileSync(new URL("app/terminal/terminal-floor.css",root),"utf8");
 test("all twelve trading-floor panels exist, with unusual options activity added",()=>{
   const ids=[...floor.matchAll(/\{id:"([a-z-]+)",title:/g)].map(m=>m[1]);
@@ -19,7 +20,8 @@ test("existing watchlist and screener data connect to the market floor",()=>{
 });
 test("RVOL and session-aligned curve reuse original 5-minute baseline",()=>{
   for(const key of ["vol={vol}","rvol={rvol}","lookback={lookback}","setLookback={setLookback}","VolumeLineChart={VolumeLineChart}"])assert(floor.includes(key),key);
-  for(const key of ["vol={vol}","rvol={rvol}","lookback={lookback}","setLookback={setLookback}","VolumeLineChart={LineChart}"])assert(route.includes(key),key);
+  for(const key of ["vol={vol}","rvol={rvol}","lookback={lookback}","setLookback={setLookback}","VolumeLineChart={FloorLineChart}"])assert(route.includes(key),key);
+  assert.match(route,/volumeVsNormal\(h\.bars, \{ lookback, cumulative: isCumulative \}\)/);
   assert.match(floor,/Baseline withheld until sufficient complete history/);
   assert.match(floor,/historical mean and median withheld/i);
 });
@@ -35,11 +37,12 @@ test("no disconnected broker execution or synthetic prints appear as functional 
   assert(!/\bfetch\([^)]*(?:\/api\/orders|\/api\/trade\/execute)/.test(floor));
   assert.match(floor,/NO SIMULATED TRADES/);
 });
-test("classic research and company intelligence stay available",()=>{
-  assert.match(route,/useState\("FLOOR"\)/);
-  assert.match(route,/workspace==="FLOOR" \? <TerminalTradingFloor/);
-  assert.match(route,/className="qt-main-grid"/);
-  assert.match(route,/TerminalIntelligence key=\{symbol\}/);
+test("trading floor and company intelligence stay available in the terminal",()=>{
+  assert.match(commands,/code: "FLOOR"/);
+  assert.match(commands,/id: "floor", name: "Floor"/);
+  assert.match(route,/case "FLOOR": return <FloorPane/);
+  assert.match(route,/<TradingFloor symbol=\{ticker\}/);
+  assert.match(route,/TerminalIntelligence key=\{ticker/);
 });
 test("desktop windows can be moved and resized and mobile safely stacks",()=>{
   assert.match(floor,/setPointerCapture/);

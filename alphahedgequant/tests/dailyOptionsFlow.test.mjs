@@ -88,7 +88,7 @@ test("private collection route is CRON_SECRET protected; public route is read-on
  assert.doesNotMatch(cron,/Math\.random\(|demoRows|sampleData/);
 });
 test("live NSE options FLOW keeps its sampled monitor and adds durable historical archive",()=>{
- const terminal=read("app/terminal/page.jsx");
+ const terminal=read("components/terminal/panes.jsx");
  const ui=read("components/DailyOptionsFlowArchive.jsx");
  const css=read("app/terminal/terminal.css");
  assert.match(terminal,/DailyOptionsFlowArchive/);

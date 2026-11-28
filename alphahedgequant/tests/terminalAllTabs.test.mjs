@@ -3,23 +3,24 @@ import assert from "node:assert/strict";
 import {readFileSync} from "node:fs";
 import {computeTerminalRisk} from "../lib/terminalRisk.mjs";
 const read=p=>readFileSync(new URL("../"+p,import.meta.url),"utf8");
-test("each of ten terminal tabs has an actual workspace or provider-dependent tool",()=>{
- const page=read("app/terminal/page.jsx");
- for(const tab of ["MARKET","OPTIONS","FLOW","COMPANY","FORECAST","NETWORK","PEERS","SCANNERS","ANALYTICS","RISK"])
-  assert.ok(page.includes('"'+tab+'"'),"missing tab "+tab);
- for(const [tab,component] of [
-  ["OPTIONS","OptionsDesk"],["FLOW","UnusualOptionsMonitor"],
-  ["SCANNERS","SignalScanner"],["ANALYTICS","OptionAnalytics"],
-  ["RISK","RiskMonitor"]])
-  assert.ok(page.includes('activeTab==="'+tab+'"')&&page.includes(component),"Tab missing component "+tab);
- assert.match(page,/TerminalIntelligence key=\{symbol\} symbol=\{symbol\} tab=\{activeTab\}/);
- assert.match(page,/workspace==="FLOOR" \? <TerminalTradingFloor/);
- assert.match(page,/role="tablist"/);
- assert.match(page,/aria-selected=\{activeTab===x\}/);
- assert.match(page,/role="tabpanel"/);
- assert.match(page,/selectTab\(x\)/);
- assert.match(page,/TERMINAL_TABS\.includes\(tab\?\.toUpperCase\(\)\)/);
- assert.doesNotMatch(page,/activeTab!=="FLOW"&&<Link href/);
+const shellSrc=()=>read("components/terminal/TerminalShell.jsx");
+const panesSrc=()=>read("components/terminal/panes.jsx");
+const commandsSrc=()=>read("components/terminal/commands.js");
+test("every former terminal tab is reachable as a command pane backed by a real workspace",()=>{
+ const shell=shellSrc(),panes=panesSrc(),commands=commandsSrc(),page=read("app/terminal/page.jsx");
+ assert.match(page,/<TerminalShell \/>/);
+ // Legacy ?tab= links keep working for all ten old tabs.
+ for(const tab of ["market","options","analytics","flow","scanners","risk","company","forecast","network","peers"])
+  assert.match(shell,new RegExp(tab+': \\["[a-z]+", "[A-Z0-9]+"\\]'),"legacy tab "+tab);
+ for(const [code,component] of [["OMON","OptionsDesk"],["FLOW","UnusualOptionsMonitor"],["SCAN","SignalScanner"],["OPX","OptionsIntel"],["RISK","RiskMonitor"],["FLOOR","TradingFloor"],["DES","OverviewPane"],["GP","ChartPane"],["L2","DepthPane"],["VOL","VolumePane"]]){
+  assert.ok(commands.includes('code: "'+code+'"'),"command "+code);
+  assert.ok(panes.includes('case "'+code+'"')&&panes.includes(component),"pane for "+code);
+ }
+ for(const tab of ["COMPANY","FORECAST","NETWORK","PEERS"])assert.ok(panes.includes('"'+tab+'"'),"research tab "+tab);
+ assert.match(panes,/<TerminalIntelligence key=\{ticker \+ tab\} symbol=\{ticker\} tab=\{tab\}/);
+ assert.match(shell,/role="tablist"/);
+ assert.match(shell,/aria-selected=\{pi === tile\.active\}/);
+ assert.match(shell,/LEGACY_TAB\[String\(p\.get\("tab"\) \|\| ""\)\.toLowerCase\(\)\]/);
 });
 test("option desk and scanner use real F&O and scanner endpoints and accept in-terminal ticker navigation",()=>{
  const options=read("app/options/page.jsx");
@@ -38,11 +39,11 @@ test("option desk and scanner use real F&O and scanner endpoints and accept in-t
  assert.doesNotMatch(gateway,/const ALLOWED = \[\s*\]/);
 });
 test("risk panel contains configurable measured VaR and strategy backtester",()=>{
- const page=read("app/terminal/page.jsx");
+ const panes=panesSrc();
  const risk=read("components/TerminalOperationalTabs.jsx");
  const backtest=read("app/backtest/page.jsx");
- assert.match(page,/RiskMonitor symbol=\{symbol\} candles=\{hist\}/);
- assert.match(page,/StrategyBacktester initialSymbol=\{symbol\} embedded/);
+ assert.match(panes,/<RiskMonitor symbol=\{ticker\} candles=\{h\.data\?\.data \|\| \[\]\}/);
+ assert.match(panes,/<Backtester key=\{ticker\} initialSymbol=\{ticker\} embedded \/>/);
  assert.match(risk,/VaR confidence level/);
  assert.match(risk,/Risk lookback intervals/);
  assert.match(risk,/expectedShortfallPct/);

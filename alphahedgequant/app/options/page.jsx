@@ -220,7 +220,7 @@ export default function OptionsPage({initialUnderlying=null,embedded=false}) {
   return (
     <div className={embedded?"qt-embedded-tool max-w-shell mx-auto px-5 py-8":"max-w-shell mx-auto px-5 py-10"}>
       <h1 className="sr-only">Options Analytics — {market === "US" ? "United States" : "India"} — {underlying}</h1>
-      <OptionsIntelligence key={market} market={market} onMarket={embedded ? undefined : enterMarket} symbol={underlying} onSymbol={chooseUnderlying} tab={section} onTab={setSection}
+      <OptionsIntelligence key={market} hotkey={!embedded} market={market} onMarket={embedded ? undefined : enterMarket} symbol={underlying} onSymbol={chooseUnderlying} tab={section} onTab={setSection}
         otherTabs={market === "IN" ? deskTabs : []} renderOther={() => market === "IN" && deskTab && renderDesk()} />
     </div>
   );

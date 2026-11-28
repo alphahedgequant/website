@@ -25,7 +25,7 @@ test("all client events are fixed-name, validated and do not record stock or use
 test("production UI action attributes all map to server-approved event names",()=>{
   const pages=[
     "components/IpoScreen.jsx","app/screener/page.jsx","components/AcademyProtected.jsx",
-    "components/InterviewArena.jsx","app/terminal/page.jsx",
+    "components/InterviewArena.jsx","components/terminal/TerminalShell.jsx",
     "app/backtest/page.jsx","app/options/page.jsx","app/research/page.jsx"
   ];
   const seen=new Set();
